@@ -27,6 +27,18 @@ available:
 The current code provides `NowcastNetAdapter` as the integration boundary. Do not commit the old
 zip, external datasets, or checkpoints directly to git.
 
+## GPU Training Environment
+
+The target server has two RTX 4090 GPUs with 24 GB VRAM each and NVIDIA driver `570.133.07`.
+This is enough to test modern radar nowcasting models after the data pipeline is stable. Use the
+GPUs first for controlled experiments:
+
+- Run persistence and threshold baselines on CPU.
+- Create a separate training environment with CUDA-enabled PyTorch.
+- Run a small ConvLSTM or U-Net nowcasting baseline on one GPU first.
+- Use both GPUs only after data loading, checkpointing, and evaluation are repeatable.
+- Reserve NowcastNet-style training for gridded Taiwan radar tensors with event-based splits.
+
 ## Recommended Roadmap
 
 1. Stabilize WRA/CWA/NCDR ingestion and validation.

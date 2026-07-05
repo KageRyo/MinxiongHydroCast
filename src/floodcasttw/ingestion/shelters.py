@@ -10,7 +10,15 @@ from docx import Document
 
 from floodcasttw.io.csv_utils import write_csv
 
-FIELDNAMES = ["鄉鎮市", "避難所名稱", "避難所地址", "避難所聯絡人", "收容人數", "來源檔案", "抽取時間"]
+FIELDNAMES = [
+    "鄉鎮市",
+    "避難所名稱",
+    "避難所地址",
+    "避難所聯絡人",
+    "收容人數",
+    "來源檔案",
+    "抽取時間",
+]
 TITLE_MARKERS = ("清冊", "測試用", "避難收容處所")
 
 
@@ -25,7 +33,11 @@ def clean_capacity(value: str) -> str:
     return digits or "0"
 
 
-def parse_shelter_line(line: str, source: str, extracted_at: str | None = None) -> dict[str, str] | None:
+def parse_shelter_line(
+    line: str,
+    source: str,
+    extracted_at: str | None = None,
+) -> dict[str, str] | None:
     text = line.strip()
     if not text or any(marker in text for marker in TITLE_MARKERS):
         return None
@@ -72,7 +84,11 @@ def extract_from_docx(docx_path: Path) -> list[dict[str, str]]:
 
     for table in document.tables:
         for row in table.rows:
-            record = parse_table_row([cell.text for cell in row.cells], docx_path.name, extracted_at)
+            record = parse_table_row(
+                [cell.text for cell in row.cells],
+                docx_path.name,
+                extracted_at,
+            )
             if record:
                 records.append(record)
 

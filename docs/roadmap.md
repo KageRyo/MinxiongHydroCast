@@ -5,11 +5,11 @@ milestone small enough to become GitHub issues.
 
 ## Milestone 1: Stabilize Live Data Ingestion
 
-- [ ] Implement live WRA rain gauge parsing in `src/floodcasttw/ingestion/hydrological_data.py`.
-- [ ] Implement live WRA flood-sensor parsing with explicit station, time, water level, and status fields.
-- [ ] Add source metadata to every live capture: URL, fetch time, mode, row count, and failure reason.
-- [ ] Save raw captures or screenshots locally under ignored `data/raw/` for parser debugging.
-- [ ] Keep `demo` and `live` modes separate in every ingestion command.
+- [x] Implement live WRA rain gauge parsing in `src/floodcasttw/ingestion/hydrological_data.py`.
+- [x] Implement live WRA flood-sensor parsing with explicit station, time, water level, and status fields.
+- [x] Add source metadata to every live capture: URL, fetch time, mode, row count, and failure reason.
+- [x] Save raw captures or screenshots locally under ignored `data/raw/` for parser debugging.
+- [x] Keep `demo` and `live` modes separate in every ingestion command.
 
 ## Milestone 2: Validate and Normalize Data
 

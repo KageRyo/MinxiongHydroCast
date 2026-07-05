@@ -20,13 +20,16 @@ Required fields:
 
 Required fields:
 
-- `測站`
-- `時間`
-- `1H雨量`
-- `累積雨量`
-- `狀態`
+- `排序`
+- `行政區`
+- `雨量站`
+- `水情時間`
+- `1小時累積雨量`
+- `24小時累積雨量`
+- `資料產出時間`
 - `抓取時間`
 - `資料模式`
+- `資料來源`
 
 Future live data should add station IDs and WGS84 coordinates.
 
@@ -34,11 +37,17 @@ Future live data should add station IDs and WGS84 coordinates.
 
 Required fields:
 
-- `測站`
-- `水位`
-- `狀態`
+- `排序`
+- `縣市`
+- `鄉鎮`
+- `感測器名稱`
+- `地址`
+- `水情時間`
+- `目前感測值`
+- `資料產出時間`
 - `抓取時間`
 - `資料模式`
+- `資料來源`
 
 Future live data should add sensor IDs, WGS84 coordinates, and water-level units.
 

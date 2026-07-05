@@ -14,7 +14,16 @@ from floodcasttw.io.csv_utils import write_csv
 
 DEFAULT_COUNTY_VALUE = "10010"
 DEFAULT_OUTPUT = Path("data/processed/rainfall_alerts.csv")
-FIELDNAMES = ["地區", "警戒", "影響村落", "1h雨量", "3h雨量", "6h雨量", "抓取時間", "資料模式"]
+FIELDNAMES = [
+    "地區",
+    "警戒",
+    "影響村落",
+    "1h雨量",
+    "3h雨量",
+    "6h雨量",
+    "抓取時間",
+    "資料模式",
+]
 
 SAMPLE_DATA = [
     {
@@ -110,7 +119,10 @@ def scrape_with_playwright(
                     affected = affected_el.inner_text().replace("影響範圍:", "").strip()
 
                 for table in parent.locator("table").all():
-                    tokens = [part.strip() for part in table.inner_text().replace("\n", " ").split()]
+                    tokens = [
+                        part.strip()
+                        for part in table.inner_text().replace("\n", " ").split()
+                    ]
                     for index, token in enumerate(tokens):
                         upper = token.upper()
                         if upper == "1H":

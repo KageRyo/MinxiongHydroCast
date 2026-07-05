@@ -53,6 +53,18 @@ floodcasttw-rainfall-alerts --mode demo
 floodcasttw-rainfall-alerts --mode live --county 10010
 ```
 
+Run rain gauge and flood-sensor ingestion:
+
+```bash
+# Demo data
+floodcasttw-hydrology --mode demo
+
+# Live WRA monitor pages for Chiayi County
+floodcasttw-hydrology --mode live --county 10010 \
+  --debug-dir data/raw/debug \
+  --summary-output data/processed/hydrology_run_summary.json
+```
+
 Parse a local shelter DOCX file:
 
 ```bash

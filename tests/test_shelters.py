@@ -17,4 +17,7 @@ def test_parse_shelter_line_keeps_address_tokens_together():
 
 
 def test_parse_shelter_line_skips_heading():
-    assert parse_shelter_line("嘉義縣避難收容處所清冊（測試用）", "sample.docx") is None
+    assert (
+        parse_shelter_line("嘉義縣避難收容處所清冊（測試用）", "sample.docx")
+        is None
+    )
