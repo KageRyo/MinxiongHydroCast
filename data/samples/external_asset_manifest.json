@@ -1,0 +1,33 @@
+{
+  "assets": [
+    {
+      "name": "nowcastnet_code",
+      "kind": "code",
+      "path": "data/external/nowcastnet/code/nowcasting/models/nowcastnet.py",
+      "required": true,
+      "description": "External NowcastNet implementation entry file.",
+      "exists": false
+    },
+    {
+      "name": "nowcastnet_checkpoint",
+      "kind": "checkpoint",
+      "path": "data/external/checkpoints/nowcastnet_tw.pt",
+      "required": true,
+      "description": "Model checkpoint stored outside git.",
+      "exists": false
+    },
+    {
+      "name": "taiwan_radar_dataset",
+      "kind": "dataset",
+      "path": "data/external/radar/taiwan",
+      "required": true,
+      "description": "Gridded Taiwan radar tensors stored outside git.",
+      "exists": false
+    }
+  ],
+  "missing_required": [
+    "nowcastnet_code",
+    "nowcastnet_checkpoint",
+    "taiwan_radar_dataset"
+  ]
+}

@@ -37,11 +37,11 @@ milestone small enough to become GitHub issues.
 
 ## Milestone 5: Prepare SOTA Migration
 
-- [ ] Confirm radar data format, cadence, projection, and licensing.
-- [ ] Decide where external checkpoints and datasets live outside git.
-- [ ] Map Taiwan radar tensors into the `NowcastNetAdapter` input contract.
-- [ ] Run a small inference-only smoke test before training.
-- [ ] Compare NowcastNet-style output against the persistence baseline.
+- [ ] Confirm source radar data native format, cadence, projection, and licensing.
+- [x] Decide where external checkpoints and datasets live outside git.
+- [x] Define the provisional Taiwan radar tensor contract for `NowcastNetAdapter`.
+- [x] Run a small inference-only smoke test before training.
+- [x] Compare the adapter tensor contract against the persistence baseline.
 
 ## Milestone 6: Operationalize
 

@@ -27,6 +27,9 @@ available:
 The current code provides `NowcastNetAdapter` as the integration boundary. Do not commit the old
 zip, external datasets, or checkpoints directly to git.
 
+See [nowcastnet_migration.md](nowcastnet_migration.md) for the radar tensor contract and smoke
+test workflow.
+
 ## GPU Training Environment
 
 The target server has two RTX 4090 GPUs with 24 GB VRAM each and NVIDIA driver `570.133.07`.

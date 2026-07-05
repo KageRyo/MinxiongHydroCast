@@ -89,6 +89,16 @@ floodcasttw-evaluate-baselines \
   --output data/processed/baseline_evaluation.json
 ```
 
+Check NowcastNet migration prerequisites:
+
+```bash
+floodcasttw-nowcastnet-smoke \
+  --code-dir data/external/nowcastnet/code \
+  --checkpoint data/external/checkpoints/nowcastnet_tw.pt \
+  --radar-dataset data/external/radar/taiwan \
+  --output data/processed/nowcastnet_smoke.json
+```
+
 ## Project Layout
 
 ```text
@@ -128,3 +138,4 @@ event splits, checkpoints, and licensing are clear. See [docs/model_strategy.md]
 
 Spatial alignment is documented in [docs/spatial_alignment.md](docs/spatial_alignment.md).
 Baseline evaluation results are documented in [docs/baseline_results.md](docs/baseline_results.md).
+NowcastNet migration is documented in [docs/nowcastnet_migration.md](docs/nowcastnet_migration.md).

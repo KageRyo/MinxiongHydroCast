@@ -1,0 +1,10 @@
+{
+  "input_length": 9,
+  "prediction_length": 20,
+  "height": 512,
+  "width": 512,
+  "channels": 1,
+  "cadence_minutes": 6,
+  "units": "mm_per_hour",
+  "crs": "EPSG:4326"
+}
