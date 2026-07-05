@@ -47,5 +47,5 @@ milestone small enough to become GitHub issues.
 
 - [ ] Add scheduled jobs only after ingestion and validation are stable.
 - [ ] Emit structured logs and run summaries for every pipeline execution.
-- [ ] Add CI for tests and linting.
+- [x] Add CI for tests and linting.
 - [ ] Add GitHub issues for each unchecked roadmap item.

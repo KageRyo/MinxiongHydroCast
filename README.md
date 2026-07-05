@@ -1,5 +1,6 @@
 # FloodCastTW
 
+[![CI](https://github.com/KageRyo/FloodCastTW/actions/workflows/ci.yml/badge.svg)](https://github.com/KageRyo/FloodCastTW/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Style: Ruff](https://img.shields.io/badge/style-ruff-46a6ff)](https://docs.astral.sh/ruff/)
