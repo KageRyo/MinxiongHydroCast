@@ -8,6 +8,7 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Add CI for compile, lint, and tests.
 - [x] Add NowcastNet adapter smoke test and external asset manifest.
 - [x] Emit structured run summaries for every command-line pipeline.
+- [x] Add radar source manifest checks before tensor conversion.
 - [ ] Confirm source radar data format, cadence, projection, and licensing.
 - [ ] Define train/validation/test split rules by weather event.
 

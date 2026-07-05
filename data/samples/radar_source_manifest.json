@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "selected_source": "cwa_open_data_radar_candidate",
+  "sources": [
+    {
+      "name": "cwa_open_data_radar_candidate",
+      "status": "candidate",
+      "provider": "Central Weather Administration, Taiwan",
+      "source_url": "https://opendata.cwa.gov.tw/dataset/observation",
+      "documentation_url": "https://opendata.cwa.gov.tw/dist/opendata-swagger.html",
+      "license": "needs_review",
+      "license_url": "",
+      "access_method": "needs_review",
+      "native_format": "",
+      "cadence_minutes": null,
+      "crs": "",
+      "grid": "",
+      "units": "",
+      "spatial_coverage": "Taiwan",
+      "temporal_coverage": "",
+      "local_path": "data/external/radar/cwa_open_data",
+      "notes": "Candidate only. Confirm whether public CWA open data includes radar mosaic or QPE grids suitable for model training."
+    }
+  ],
+  "review_notes": [
+    "Do not train on this source until native format, cadence, projection, grid, units, and license are confirmed.",
+    "Keep downloaded radar files under data/external/ or another ignored path."
+  ]
+}

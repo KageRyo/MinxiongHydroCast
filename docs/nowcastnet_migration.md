@@ -17,6 +17,7 @@ Provisional adapter tensor spec:
 - CRS: `EPSG:4326`
 
 The sample spec lives at `data/samples/radar_tensor_spec.json`.
+Radar source candidates are tracked in `data/samples/radar_source_manifest.json`.
 
 ## External Assets
 

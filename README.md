@@ -100,6 +100,14 @@ floodcasttw-nowcastnet-smoke \
   --output data/processed/nowcastnet_smoke.json
 ```
 
+Check whether a radar data source is ready for tensor conversion:
+
+```bash
+floodcasttw-radar-source-check \
+  --manifest data/samples/radar_source_manifest.json \
+  --output data/processed/radar_source_check.json
+```
+
 Every command-line pipeline writes a JSON run summary under
 `data/processed/run_summaries/` and appends a compact JSONL event to
 `data/processed/run_logs.jsonl` by default. Override these with `--summary-output` and
@@ -146,3 +154,4 @@ event splits, checkpoints, and licensing are clear. See [docs/model_strategy.md]
 Spatial alignment is documented in [docs/spatial_alignment.md](docs/spatial_alignment.md).
 Baseline evaluation results are documented in [docs/baseline_results.md](docs/baseline_results.md).
 NowcastNet migration is documented in [docs/nowcastnet_migration.md](docs/nowcastnet_migration.md).
+Radar source review is documented in [docs/radar_data_sources.md](docs/radar_data_sources.md).

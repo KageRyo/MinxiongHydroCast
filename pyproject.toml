@@ -39,6 +39,7 @@ floodcasttw-rainfall-alerts = "floodcasttw.ingestion.rainfall_alerts:main"
 floodcasttw-hydrology = "floodcasttw.ingestion.hydrological_data:main"
 floodcasttw-locations = "floodcasttw.pipelines.location_reference:main"
 floodcasttw-nowcastnet-smoke = "floodcasttw.pipelines.nowcastnet_smoke:main"
+floodcasttw-radar-source-check = "floodcasttw.ingestion.radar_sources:main"
 floodcasttw-shelters = "floodcasttw.ingestion.shelters:main"
 
 [tool.setuptools.packages.find]
