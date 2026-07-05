@@ -1,7 +1,7 @@
 # Roadmap
 
 This roadmap turns FloodCastTW into a usable flood-risk data and nowcasting platform. Keep each
-milestone small enough to become GitHub issues.
+milestone small enough to track in [tasks.md](tasks.md).
 
 ## Milestone 1: Stabilize Live Data Ingestion
 
@@ -46,6 +46,6 @@ milestone small enough to become GitHub issues.
 ## Milestone 6: Operationalize
 
 - [ ] Add scheduled jobs only after ingestion and validation are stable.
-- [ ] Emit structured logs and run summaries for every pipeline execution.
+- [x] Emit structured logs and run summaries for every pipeline execution.
 - [x] Add CI for tests and linting.
-- [ ] Add GitHub issues for each unchecked roadmap item.
+- [x] Maintain a repo task list for unchecked roadmap items.

@@ -11,9 +11,17 @@ from playwright.sync_api import sync_playwright
 
 from floodcasttw.config import get_settings
 from floodcasttw.io.csv_utils import write_csv
+from floodcasttw.io.run_summary import (
+    DEFAULT_RUN_LOG_PATH,
+    build_run_summary,
+    default_run_summary_path,
+    record_run,
+    start_run,
+)
 
 DEFAULT_COUNTY_VALUE = "10010"
 DEFAULT_OUTPUT = Path("data/processed/rainfall_alerts.csv")
+PIPELINE_NAME = "rainfall_alerts"
 FIELDNAMES = [
     "地區",
     "警戒",
@@ -172,12 +180,71 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--headed", action="store_true")
     parser.add_argument("--timeout", type=int, default=45_000)
+    parser.add_argument(
+        "--summary-output",
+        type=Path,
+        default=default_run_summary_path(PIPELINE_NAME),
+    )
+    parser.add_argument("--log-output", type=Path, default=DEFAULT_RUN_LOG_PATH)
     args = parser.parse_args()
 
+    started_at, start_timer = start_run()
     try:
-        run(args.output, args.mode, args.county, args.headed, args.timeout)
+        count = run(args.output, args.mode, args.county, args.headed, args.timeout)
+        summary = build_run_summary(
+            pipeline=PIPELINE_NAME,
+            status="ok",
+            started_at=started_at,
+            start_timer=start_timer,
+            mode=args.mode,
+            inputs={"county": args.county},
+            outputs={"rainfall_alerts": str(args.output)},
+            row_counts={"rainfall_alerts": count},
+            metadata={"headed": args.headed, "timeout_ms": args.timeout},
+        )
+        record_run(
+            summary_output=args.summary_output,
+            log_output=args.log_output,
+            summary=summary,
+        )
     except PlaywrightTimeout as exc:
+        summary = build_run_summary(
+            pipeline=PIPELINE_NAME,
+            status="error",
+            failure_reason=f"Browser timeout: {exc}",
+            started_at=started_at,
+            start_timer=start_timer,
+            mode=args.mode,
+            inputs={"county": args.county},
+            outputs={"rainfall_alerts": str(args.output)},
+            row_counts={"rainfall_alerts": 0},
+            metadata={"headed": args.headed, "timeout_ms": args.timeout},
+        )
+        record_run(
+            summary_output=args.summary_output,
+            log_output=args.log_output,
+            summary=summary,
+        )
         raise SystemExit(f"[ERROR] Browser timeout. Try --mode demo first. {exc}") from exc
+    except Exception as exc:
+        summary = build_run_summary(
+            pipeline=PIPELINE_NAME,
+            status="error",
+            failure_reason=str(exc),
+            started_at=started_at,
+            start_timer=start_timer,
+            mode=args.mode,
+            inputs={"county": args.county},
+            outputs={"rainfall_alerts": str(args.output)},
+            row_counts={"rainfall_alerts": 0},
+            metadata={"headed": args.headed, "timeout_ms": args.timeout},
+        )
+        record_run(
+            summary_output=args.summary_output,
+            log_output=args.log_output,
+            summary=summary,
+        )
+        raise
 
 
 if __name__ == "__main__":

@@ -9,7 +9,15 @@ from pathlib import Path
 from docx import Document
 
 from floodcasttw.io.csv_utils import write_csv
+from floodcasttw.io.run_summary import (
+    DEFAULT_RUN_LOG_PATH,
+    build_run_summary,
+    default_run_summary_path,
+    record_run,
+    start_run,
+)
 
+PIPELINE_NAME = "shelters"
 FIELDNAMES = [
     "鄉鎮市",
     "避難所名稱",
@@ -104,11 +112,50 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Extract shelter records from a DOCX file.")
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, default=Path("data/processed/shelters.csv"))
+    parser.add_argument(
+        "--summary-output",
+        type=Path,
+        default=default_run_summary_path(PIPELINE_NAME),
+    )
+    parser.add_argument("--log-output", type=Path, default=DEFAULT_RUN_LOG_PATH)
     args = parser.parse_args()
 
-    records = extract_from_docx(args.input)
-    count = write_csv(records, args.output, FIELDNAMES)
-    print(f"[OK] Extracted {count} shelter records to {args.output}")
+    started_at, start_timer = start_run()
+    try:
+        records = extract_from_docx(args.input)
+        count = write_csv(records, args.output, FIELDNAMES)
+        summary = build_run_summary(
+            pipeline=PIPELINE_NAME,
+            status="ok",
+            started_at=started_at,
+            start_timer=start_timer,
+            inputs={"docx": str(args.input)},
+            outputs={"shelters": str(args.output)},
+            row_counts={"shelters": count},
+        )
+        record_run(
+            summary_output=args.summary_output,
+            log_output=args.log_output,
+            summary=summary,
+        )
+        print(f"[OK] Extracted {count} shelter records to {args.output}")
+    except Exception as exc:
+        summary = build_run_summary(
+            pipeline=PIPELINE_NAME,
+            status="error",
+            failure_reason=str(exc),
+            started_at=started_at,
+            start_timer=start_timer,
+            inputs={"docx": str(args.input)},
+            outputs={"shelters": str(args.output)},
+            row_counts={"shelters": 0},
+        )
+        record_run(
+            summary_output=args.summary_output,
+            log_output=args.log_output,
+            summary=summary,
+        )
+        raise
 
 
 if __name__ == "__main__":

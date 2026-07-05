@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import re
 from pathlib import Path
 
@@ -12,6 +11,13 @@ from playwright.sync_api import sync_playwright
 
 from floodcasttw.config import get_settings
 from floodcasttw.io.csv_utils import write_csv
+from floodcasttw.io.run_summary import (
+    DEFAULT_RUN_LOG_PATH,
+    build_run_summary,
+    default_run_summary_path,
+    record_run,
+    start_run,
+)
 from floodcasttw.validation.normalization import (
     normalize_datetime,
     normalize_rainfall_mm,
@@ -27,6 +33,7 @@ from floodcasttw.validation.schemas import (
 DEFAULT_COUNTY_VALUE = "10010"
 RAIN_PATH = "/monitor/rain#"
 FLOOD_SENSOR_PATH = "/monitor/floodSensor#"
+PIPELINE_NAME = "hydrology"
 
 RAIN_FIELDNAMES = [
     "排序",
@@ -242,18 +249,57 @@ def save_debug_capture(page, debug_dir: Path | None, label: str) -> None:
     page.screenshot(path=str(debug_dir / f"{label}.png"), full_page=True)
 
 
-def write_run_summary(summary_output: Path | None, payload: dict[str, object]) -> None:
-    if summary_output is None:
-        return
-    summary_output.parent.mkdir(parents=True, exist_ok=True)
-    summary_output.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-
-
 def report_payload(report: ValidationReport) -> dict[str, object]:
     return {"ok": report.ok, "row_count": report.row_count, "errors": report.errors}
+
+
+def build_hydrology_summary(
+    *,
+    status: str,
+    failure_reason: str,
+    mode: str,
+    county: str,
+    output_rain: Path,
+    output_flood: Path,
+    rain_count: int,
+    flood_count: int,
+    started_at: str,
+    start_timer: float,
+    debug_dir: Path | None = None,
+    rain_report: ValidationReport | None = None,
+    flood_report: ValidationReport | None = None,
+) -> dict[str, object]:
+    settings = get_settings()
+    validation = {}
+    if rain_report and flood_report:
+        validation = {
+            "rain": report_payload(rain_report),
+            "flood_sensor": report_payload(flood_report),
+        }
+    return build_run_summary(
+        pipeline=PIPELINE_NAME,
+        status=status,
+        failure_reason=failure_reason,
+        started_at=started_at,
+        start_timer=start_timer,
+        mode=mode,
+        inputs={"county": county},
+        outputs={
+            "rain": str(output_rain),
+            "flood_sensor": str(output_flood),
+        },
+        row_counts={"rain": rain_count, "flood_sensor": flood_count},
+        validation=validation,
+        metadata={
+            "sources": {
+                "rain": f"{settings.wra_base_url}{RAIN_PATH}" if mode == "live" else "demo",
+                "flood_sensor": (
+                    f"{settings.wra_base_url}{FLOOD_SENSOR_PATH}" if mode == "live" else "demo"
+                ),
+            },
+            "debug_dir": str(debug_dir) if debug_dir else "",
+        },
+    )
 
 
 def validate_hydrology_records(
@@ -361,8 +407,12 @@ def run_live(
     timeout: int,
     debug_dir: Path | None,
     summary_output: Path | None,
+    log_output: Path | None = None,
+    started_at: str | None = None,
+    start_timer: float | None = None,
 ) -> tuple[int, int]:
-    settings = get_settings()
+    if started_at is None or start_timer is None:
+        started_at, start_timer = start_run()
     rain, flood = scrape_live(
         county=county,
         headless=not headed,
@@ -371,64 +421,42 @@ def run_live(
     )
     rain_report, flood_report = validate_hydrology_records(rain, flood, allow_demo=False)
     if not rain_report.ok or not flood_report.ok:
-        write_run_summary(
-            summary_output,
-            {
-                "status": "error",
-                "failure_reason": "validation failed",
-                "mode": "live",
-                "county": county,
-                "completed_at": now_taipei_iso(),
-                "sources": {
-                    "rain": f"{settings.wra_base_url}{RAIN_PATH}",
-                    "flood_sensor": f"{settings.wra_base_url}{FLOOD_SENSOR_PATH}",
-                },
-                "outputs": {
-                    "rain": str(output_rain),
-                    "flood_sensor": str(output_flood),
-                },
-                "row_counts": {
-                    "rain": rain_report.row_count,
-                    "flood_sensor": flood_report.row_count,
-                },
-                "validation": {
-                    "rain": report_payload(rain_report),
-                    "flood_sensor": report_payload(flood_report),
-                },
-                "debug_dir": str(debug_dir) if debug_dir else "",
-            },
+        summary = build_hydrology_summary(
+            status="error",
+            failure_reason="validation failed",
+            mode="live",
+            county=county,
+            output_rain=output_rain,
+            output_flood=output_flood,
+            rain_count=rain_report.row_count,
+            flood_count=flood_report.row_count,
+            started_at=started_at,
+            start_timer=start_timer,
+            debug_dir=debug_dir,
+            rain_report=rain_report,
+            flood_report=flood_report,
         )
+        record_run(summary_output=summary_output, log_output=log_output, summary=summary)
         raise_if_invalid(rain_report, flood_report)
 
     rain_count = write_csv(rain, output_rain, RAIN_FIELDNAMES)
     flood_count = write_csv(flood, output_flood, FLOOD_FIELDNAMES)
-    write_run_summary(
-        summary_output,
-        {
-            "status": "ok",
-            "failure_reason": "",
-            "mode": "live",
-            "county": county,
-            "completed_at": now_taipei_iso(),
-            "sources": {
-                "rain": f"{settings.wra_base_url}{RAIN_PATH}",
-                "flood_sensor": f"{settings.wra_base_url}{FLOOD_SENSOR_PATH}",
-            },
-            "outputs": {
-                "rain": str(output_rain),
-                "flood_sensor": str(output_flood),
-            },
-            "row_counts": {
-                "rain": rain_count,
-                "flood_sensor": flood_count,
-            },
-            "validation": {
-                "rain": report_payload(rain_report),
-                "flood_sensor": report_payload(flood_report),
-            },
-            "debug_dir": str(debug_dir) if debug_dir else "",
-        },
+    summary = build_hydrology_summary(
+        status="ok",
+        failure_reason="",
+        mode="live",
+        county=county,
+        output_rain=output_rain,
+        output_flood=output_flood,
+        rain_count=rain_count,
+        flood_count=flood_count,
+        started_at=started_at,
+        start_timer=start_timer,
+        debug_dir=debug_dir,
+        rain_report=rain_report,
+        flood_report=flood_report,
     )
+    record_run(summary_output=summary_output, log_output=log_output, summary=summary)
     print(f"[OK] Wrote {rain_count} live rain monitor records to {output_rain}")
     print(f"[OK] Wrote {flood_count} live flood sensor records to {output_flood}")
     return rain_count, flood_count
@@ -447,40 +475,34 @@ def main() -> None:
     parser.add_argument("--headed", action="store_true")
     parser.add_argument("--timeout", type=int, default=45_000)
     parser.add_argument("--debug-dir", type=Path, default=None)
-    parser.add_argument("--summary-output", type=Path, default=None)
+    parser.add_argument(
+        "--summary-output",
+        type=Path,
+        default=default_run_summary_path(PIPELINE_NAME),
+    )
+    parser.add_argument("--log-output", type=Path, default=DEFAULT_RUN_LOG_PATH)
     args = parser.parse_args()
 
+    started_at, start_timer = start_run()
     try:
         if args.mode == "demo":
             rain_count, flood_count = run_demo(args.output_rain, args.output_flood)
-            write_run_summary(
-                args.summary_output,
-                {
-                    "status": "ok",
-                    "failure_reason": "",
-                    "mode": "demo",
-                    "county": args.county,
-                    "completed_at": now_taipei_iso(),
-                    "sources": {"rain": "demo", "flood_sensor": "demo"},
-                    "outputs": {
-                        "rain": str(args.output_rain),
-                        "flood_sensor": str(args.output_flood),
-                    },
-                    "row_counts": {"rain": rain_count, "flood_sensor": flood_count},
-                    "validation": {
-                        "rain": {
-                            "ok": True,
-                            "row_count": rain_count,
-                            "errors": [],
-                        },
-                        "flood_sensor": {
-                            "ok": True,
-                            "row_count": flood_count,
-                            "errors": [],
-                        },
-                    },
-                    "debug_dir": "",
-                },
+            summary = build_hydrology_summary(
+                status="ok",
+                failure_reason="",
+                mode="demo",
+                county=args.county,
+                output_rain=args.output_rain,
+                output_flood=args.output_flood,
+                rain_count=rain_count,
+                flood_count=flood_count,
+                started_at=started_at,
+                start_timer=start_timer,
+            )
+            record_run(
+                summary_output=args.summary_output,
+                log_output=args.log_output,
+                summary=summary,
             )
         else:
             run_live(
@@ -491,23 +513,25 @@ def main() -> None:
                 timeout=args.timeout,
                 debug_dir=args.debug_dir,
                 summary_output=args.summary_output,
+                log_output=args.log_output,
+                started_at=started_at,
+                start_timer=start_timer,
             )
     except PlaywrightTimeout as exc:
-        write_run_summary(
-            args.summary_output,
-            {
-                "status": "error",
-                "failure_reason": f"Browser timeout: {exc}",
-                "mode": args.mode,
-                "county": args.county,
-                "completed_at": now_taipei_iso(),
-                "sources": {},
-                "outputs": {},
-                "row_counts": {"rain": 0, "flood_sensor": 0},
-                "validation": {},
-                "debug_dir": str(args.debug_dir) if args.debug_dir else "",
-            },
+        summary = build_hydrology_summary(
+            status="error",
+            failure_reason=f"Browser timeout: {exc}",
+            mode=args.mode,
+            county=args.county,
+            output_rain=args.output_rain,
+            output_flood=args.output_flood,
+            rain_count=0,
+            flood_count=0,
+            started_at=started_at,
+            start_timer=start_timer,
+            debug_dir=args.debug_dir,
         )
+        record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)
         raise SystemExit(f"[ERROR] Browser timeout. Try --mode demo first. {exc}") from exc
 
 

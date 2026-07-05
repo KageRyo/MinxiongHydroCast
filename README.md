@@ -100,6 +100,12 @@ floodcasttw-nowcastnet-smoke \
   --output data/processed/nowcastnet_smoke.json
 ```
 
+Every command-line pipeline writes a JSON run summary under
+`data/processed/run_summaries/` and appends a compact JSONL event to
+`data/processed/run_logs.jsonl` by default. Override these with `--summary-output` and
+`--log-output`, or pass `--summary-output /tmp/example.json --log-output /tmp/runs.jsonl`
+for throwaway checks.
+
 ## Project Layout
 
 ```text
