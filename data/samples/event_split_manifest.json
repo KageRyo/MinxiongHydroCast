@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "split_strategy": "event_based",
+  "target": "radar_nowcasting_and_flood_risk",
+  "events": [
+    {
+      "event_id": "demo_typhoon_train_2024",
+      "name": "Demo typhoon training event",
+      "event_type": "typhoon",
+      "region": "Taiwan",
+      "start_time": "2024-07-23T00:00:00+08:00",
+      "end_time": "2024-07-26T23:59:00+08:00",
+      "source": "demo",
+      "notes": "Demo-safe placeholder; replace with confirmed historical event metadata."
+    },
+    {
+      "event_id": "demo_meiyu_train_2024",
+      "name": "Demo Mei-yu training event",
+      "event_type": "meiyu_front",
+      "region": "Chiayi County",
+      "start_time": "2024-06-01T00:00:00+08:00",
+      "end_time": "2024-06-03T23:59:00+08:00",
+      "source": "demo",
+      "notes": "Demo-safe placeholder; replace with confirmed historical event metadata."
+    },
+    {
+      "event_id": "demo_convective_validation_2025",
+      "name": "Demo convective validation event",
+      "event_type": "afternoon_convection",
+      "region": "Chiayi County",
+      "start_time": "2025-07-10T12:00:00+08:00",
+      "end_time": "2025-07-10T20:00:00+08:00",
+      "source": "demo",
+      "notes": "Demo-safe placeholder; replace with confirmed historical event metadata."
+    },
+    {
+      "event_id": "demo_extreme_test_2025",
+      "name": "Demo extreme rainfall test event",
+      "event_type": "extreme_rainfall",
+      "region": "Minxiong, Chiayi County",
+      "start_time": "2025-08-12T00:00:00+08:00",
+      "end_time": "2025-08-13T23:59:00+08:00",
+      "source": "demo",
+      "notes": "Demo-safe placeholder; replace with confirmed historical event metadata."
+    }
+  ],
+  "splits": {
+    "train": [
+      "demo_typhoon_train_2024",
+      "demo_meiyu_train_2024"
+    ],
+    "validation": [
+      "demo_convective_validation_2025"
+    ],
+    "test": [
+      "demo_extreme_test_2025"
+    ]
+  },
+  "notes": [
+    "Do not random-split radar frames from the same storm across train, validation, and test.",
+    "Replace demo events with confirmed historical events before reporting model performance.",
+    "Keep Minxiong evaluation events isolated from training when measuring local performance."
+  ]
+}

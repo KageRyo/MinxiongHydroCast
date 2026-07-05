@@ -28,7 +28,8 @@ The current code provides `NowcastNetAdapter` as the integration boundary. Do no
 zip, external datasets, or checkpoints directly to git.
 
 See [nowcastnet_migration.md](nowcastnet_migration.md) for the radar tensor contract and smoke
-test workflow.
+test workflow. See [event_splits.md](event_splits.md) for event-based train/validation/test
+rules.
 
 ## GPU Training Environment
 
@@ -46,9 +47,10 @@ GPUs first for controlled experiments:
 
 1. Stabilize WRA/CWA/NCDR ingestion and validation.
 2. Build a grid-alignment pipeline for radar, gauges, sensors, shelters, and flood-risk areas.
-3. Run persistence and threshold baselines.
-4. Add LightGBM for local flood-risk classification.
-5. Migrate NowcastNet only after radar data and checkpoint strategy are clear.
+3. Define event-based train/validation/test splits.
+4. Run persistence and threshold baselines.
+5. Add LightGBM for local flood-risk classification.
+6. Migrate NowcastNet only after radar data and checkpoint strategy are clear.
 
 For Minxiong, train or calibrate locally on top of a wider Chiayi/Taiwan dataset. A Minxiong-only
 deep model will likely overfit because extreme events are sparse.

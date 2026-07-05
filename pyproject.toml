@@ -34,6 +34,7 @@ model = [
 
 [project.scripts]
 floodcasttw-demo = "floodcasttw.pipelines.demo:main"
+floodcasttw-event-split-check = "floodcasttw.models.event_splits:main"
 floodcasttw-evaluate-baselines = "floodcasttw.pipelines.baseline_evaluation:main"
 floodcasttw-rainfall-alerts = "floodcasttw.ingestion.rainfall_alerts:main"
 floodcasttw-hydrology = "floodcasttw.ingestion.hydrological_data:main"

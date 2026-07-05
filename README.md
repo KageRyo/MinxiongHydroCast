@@ -108,6 +108,14 @@ floodcasttw-radar-source-check \
   --output data/processed/radar_source_check.json
 ```
 
+Check event-based train/validation/test splits:
+
+```bash
+floodcasttw-event-split-check \
+  --manifest data/samples/event_split_manifest.json \
+  --output data/processed/event_split_check.json
+```
+
 Every command-line pipeline writes a JSON run summary under
 `data/processed/run_summaries/` and appends a compact JSONL event to
 `data/processed/run_logs.jsonl` by default. Override these with `--summary-output` and
@@ -155,3 +163,4 @@ Spatial alignment is documented in [docs/spatial_alignment.md](docs/spatial_alig
 Baseline evaluation results are documented in [docs/baseline_results.md](docs/baseline_results.md).
 NowcastNet migration is documented in [docs/nowcastnet_migration.md](docs/nowcastnet_migration.md).
 Radar source review is documented in [docs/radar_data_sources.md](docs/radar_data_sources.md).
+Event split rules are documented in [docs/event_splits.md](docs/event_splits.md).
