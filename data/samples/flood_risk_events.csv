@@ -1,0 +1,6 @@
+event_id,rain_1h_mm,rain_3h_mm,rain_6h_mm,warning_1h_mm,warning_3h_mm,warning_6h_mm,observed_event
+demo_normal,10,20,30,50,100,150,false
+demo_watch,40,60,80,50,100,150,false
+demo_warning_hit,55,90,100,50,100,150,true
+demo_miss,30,95,149,50,100,150,true
+demo_false_alarm,70,80,90,50,100,150,false

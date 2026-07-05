@@ -29,11 +29,11 @@ milestone small enough to become GitHub issues.
 
 ## Milestone 4: Establish Baseline Models
 
-- [ ] Evaluate `PersistenceNowcaster` on gridded rainfall or radar-like tensors.
-- [ ] Evaluate `RainfallThresholdRiskScorer` against historical warnings or flood events.
-- [ ] Add metrics: RMSE for rainfall, and CSI/POD/FAR for event prediction.
-- [ ] Create a repeatable evaluation script under `src/floodcasttw/models/` or `pipelines/`.
-- [ ] Publish baseline results before adding deep-learning models.
+- [x] Evaluate `PersistenceNowcaster` on gridded rainfall or radar-like tensors.
+- [x] Evaluate `RainfallThresholdRiskScorer` against historical warnings or flood events.
+- [x] Add metrics: RMSE for rainfall, and CSI/POD/FAR for event prediction.
+- [x] Create a repeatable evaluation script under `src/floodcasttw/models/` or `pipelines/`.
+- [x] Publish baseline results before adding deep-learning models.
 
 ## Milestone 5: Prepare SOTA Migration
 

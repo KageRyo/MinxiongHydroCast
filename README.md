@@ -81,6 +81,14 @@ floodcasttw-locations \
   --output data/processed/location_reference.csv
 ```
 
+Evaluate baseline models:
+
+```bash
+floodcasttw-evaluate-baselines \
+  --events data/samples/flood_risk_events.csv \
+  --output data/processed/baseline_evaluation.json
+```
+
 ## Project Layout
 
 ```text
@@ -119,3 +127,4 @@ The best next SOTA candidate is NowcastNet, but it should be migrated only after
 event splits, checkpoints, and licensing are clear. See [docs/model_strategy.md](docs/model_strategy.md).
 
 Spatial alignment is documented in [docs/spatial_alignment.md](docs/spatial_alignment.md).
+Baseline evaluation results are documented in [docs/baseline_results.md](docs/baseline_results.md).
