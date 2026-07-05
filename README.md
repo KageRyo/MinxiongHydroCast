@@ -116,6 +116,14 @@ floodcasttw-event-split-check \
   --output data/processed/event_split_check.json
 ```
 
+Convert the tiny radar-like fixture into the model tensor archive format:
+
+```bash
+floodcasttw-radar-tensor-convert \
+  --input data/samples/radar_pixels.csv \
+  --output data/processed/radar_tensor_sample.npz
+```
+
 Every command-line pipeline writes a JSON run summary under
 `data/processed/run_summaries/` and appends a compact JSONL event to
 `data/processed/run_logs.jsonl` by default. Override these with `--summary-output` and
@@ -164,3 +172,4 @@ Baseline evaluation results are documented in [docs/baseline_results.md](docs/ba
 NowcastNet migration is documented in [docs/nowcastnet_migration.md](docs/nowcastnet_migration.md).
 Radar source review is documented in [docs/radar_data_sources.md](docs/radar_data_sources.md).
 Event split rules are documented in [docs/event_splits.md](docs/event_splits.md).
+Radar tensor conversion is documented in [docs/radar_tensor_conversion.md](docs/radar_tensor_conversion.md).

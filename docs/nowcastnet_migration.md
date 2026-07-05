@@ -18,6 +18,7 @@ Provisional adapter tensor spec:
 
 The sample spec lives at `data/samples/radar_tensor_spec.json`.
 Radar source candidates are tracked in `data/samples/radar_source_manifest.json`.
+The tiny conversion fixture lives at `data/samples/radar_pixels.csv`.
 
 ## External Assets
 
