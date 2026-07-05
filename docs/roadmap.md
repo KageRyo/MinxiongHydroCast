@@ -13,11 +13,11 @@ milestone small enough to become GitHub issues.
 
 ## Milestone 2: Validate and Normalize Data
 
-- [ ] Define schema checks for rainfall alerts, rain gauges, flood sensors, shelters, and pumping stations.
-- [ ] Reject production runs containing `資料模式=demo`.
-- [ ] Normalize timestamps to ISO 8601 with timezone.
-- [ ] Convert rainfall and water-level fields to numeric values plus units.
-- [ ] Add tests for parser edge cases and validation failures.
+- [x] Define schema checks for rainfall alerts, rain gauges, flood sensors, shelters, and pumping stations.
+- [x] Reject production runs containing `資料模式=demo`.
+- [x] Normalize timestamps to ISO 8601 with timezone.
+- [x] Convert rainfall and water-level fields to numeric values plus units.
+- [x] Add tests for parser edge cases and validation failures.
 
 ## Milestone 3: Build Spatial Alignment
 

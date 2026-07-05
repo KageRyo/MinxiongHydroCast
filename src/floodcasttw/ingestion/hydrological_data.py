@@ -13,6 +13,17 @@ from playwright.sync_api import sync_playwright
 
 from floodcasttw.config import get_settings
 from floodcasttw.io.csv_utils import write_csv
+from floodcasttw.validation.normalization import (
+    normalize_datetime,
+    normalize_rainfall_mm,
+    normalize_water_level,
+    now_taipei_iso,
+)
+from floodcasttw.validation.quality import ValidationReport, validate_records
+from floodcasttw.validation.schemas import (
+    FLOOD_SENSOR_REQUIRED_FIELDS,
+    RAIN_GAUGE_REQUIRED_FIELDS,
+)
 
 DEFAULT_COUNTY_VALUE = "10010"
 RAIN_PATH = "/monitor/rain#"
@@ -23,9 +34,13 @@ RAIN_FIELDNAMES = [
     "行政區",
     "雨量站",
     "水情時間",
+    "水情時間ISO",
     "1小時累積雨量",
+    "1小時累積雨量mm",
     "24小時累積雨量",
+    "24小時累積雨量mm",
     "資料產出時間",
+    "資料產出時間ISO",
     "抓取時間",
     "資料模式",
     "資料來源",
@@ -37,12 +52,32 @@ FLOOD_FIELDNAMES = [
     "感測器名稱",
     "地址",
     "水情時間",
+    "水情時間ISO",
     "目前感測值",
+    "目前感測值數值",
+    "目前感測值單位",
     "資料產出時間",
+    "資料產出時間ISO",
     "抓取時間",
     "資料模式",
     "資料來源",
 ]
+
+RAIN_NON_EMPTY_FIELDS = {
+    "行政區",
+    "雨量站",
+    "水情時間ISO",
+    "資料模式",
+    "資料來源",
+}
+FLOOD_NON_EMPTY_FIELDS = {
+    "縣市",
+    "鄉鎮",
+    "感測器名稱",
+    "水情時間ISO",
+    "資料模式",
+    "資料來源",
+}
 
 SAMPLE_RAIN = [
     {
@@ -86,11 +121,19 @@ SAMPLE_FLOOD = [
 
 
 def demo_records() -> tuple[list[dict[str, str]], list[dict[str, str]]]:
-    now = datetime.now().isoformat(timespec="seconds")
+    now = now_taipei_iso()
+    production_time = "2026-07-05 09:42"
     rain = [
         {
             **record,
-            "資料產出時間": "demo",
+            "水情時間ISO": normalize_datetime(
+                record["水情時間"],
+                production_time=production_time,
+            ),
+            "1小時累積雨量mm": normalize_rainfall_mm(record["1小時累積雨量"]),
+            "24小時累積雨量mm": normalize_rainfall_mm(record["24小時累積雨量"]),
+            "資料產出時間": production_time,
+            "資料產出時間ISO": normalize_datetime(production_time),
             "抓取時間": now,
             "資料模式": "demo",
             "資料來源": "demo",
@@ -100,7 +143,14 @@ def demo_records() -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     flood = [
         {
             **record,
-            "資料產出時間": "demo",
+            "水情時間ISO": normalize_datetime(
+                record["水情時間"],
+                production_time=production_time,
+            ),
+            "目前感測值數值": normalize_water_level(record["目前感測值"])[0],
+            "目前感測值單位": normalize_water_level(record["目前感測值"])[1],
+            "資料產出時間": production_time,
+            "資料產出時間ISO": normalize_datetime(production_time),
             "抓取時間": now,
             "資料模式": "demo",
             "資料來源": "demo",
@@ -124,6 +174,7 @@ def parse_rain_rows(
     source_url: str,
 ) -> list[dict[str, str]]:
     records: list[dict[str, str]] = []
+    production_time_iso = normalize_datetime(production_time)
     for row in rows:
         if len(row) < 6 or row[0] == "排序" or "無資料" in row:
             continue
@@ -133,9 +184,13 @@ def parse_rain_rows(
                 "行政區": row[1],
                 "雨量站": row[2],
                 "水情時間": row[3],
+                "水情時間ISO": normalize_datetime(row[3], production_time=production_time),
                 "1小時累積雨量": row[4],
+                "1小時累積雨量mm": normalize_rainfall_mm(row[4]),
                 "24小時累積雨量": row[5],
+                "24小時累積雨量mm": normalize_rainfall_mm(row[5]),
                 "資料產出時間": production_time,
+                "資料產出時間ISO": production_time_iso,
                 "抓取時間": fetched_at,
                 "資料模式": mode,
                 "資料來源": source_url,
@@ -153,9 +208,11 @@ def parse_flood_rows(
     source_url: str,
 ) -> list[dict[str, str]]:
     records: list[dict[str, str]] = []
+    production_time_iso = normalize_datetime(production_time)
     for row in rows:
         if len(row) < 7 or row[0] == "排序" or "無資料" in row:
             continue
+        water_level_value, water_level_unit = normalize_water_level(row[6])
         records.append(
             {
                 "排序": row[0],
@@ -164,8 +221,12 @@ def parse_flood_rows(
                 "感測器名稱": row[3],
                 "地址": row[4],
                 "水情時間": row[5],
+                "水情時間ISO": normalize_datetime(row[5], production_time=production_time),
                 "目前感測值": row[6],
+                "目前感測值數值": water_level_value,
+                "目前感測值單位": water_level_unit,
                 "資料產出時間": production_time,
+                "資料產出時間ISO": production_time_iso,
                 "抓取時間": fetched_at,
                 "資料模式": mode,
                 "資料來源": source_url,
@@ -192,6 +253,37 @@ def write_run_summary(summary_output: Path | None, payload: dict[str, object]) -
     )
 
 
+def report_payload(report: ValidationReport) -> dict[str, object]:
+    return {"ok": report.ok, "row_count": report.row_count, "errors": report.errors}
+
+
+def validate_hydrology_records(
+    rain: list[dict[str, str]],
+    flood: list[dict[str, str]],
+    *,
+    allow_demo: bool,
+) -> tuple[ValidationReport, ValidationReport]:
+    rain_report = validate_records(
+        rain,
+        required_fields=RAIN_GAUGE_REQUIRED_FIELDS,
+        required_non_empty=RAIN_NON_EMPTY_FIELDS,
+        allow_demo=allow_demo,
+    )
+    flood_report = validate_records(
+        flood,
+        required_fields=FLOOD_SENSOR_REQUIRED_FIELDS,
+        required_non_empty=FLOOD_NON_EMPTY_FIELDS,
+        allow_demo=allow_demo,
+    )
+    return rain_report, flood_report
+
+
+def raise_if_invalid(*reports: ValidationReport) -> None:
+    errors = [error for report in reports for error in report.errors]
+    if errors:
+        raise ValueError("; ".join(errors))
+
+
 def table_rows(page) -> list[list[str]]:
     rows: list[list[str]] = []
     for row in page.locator("table tr").all():
@@ -211,7 +303,7 @@ def scrape_live(
     settings = get_settings()
     rain_url = f"{settings.wra_base_url}{RAIN_PATH}"
     flood_url = f"{settings.wra_base_url}{FLOOD_SENSOR_PATH}"
-    fetched_at = datetime.now().isoformat(timespec="seconds")
+    fetched_at = now_taipei_iso()
 
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=headless)
@@ -252,6 +344,8 @@ def scrape_live(
 
 def run_demo(output_rain: Path, output_flood: Path) -> tuple[int, int]:
     rain, flood = demo_records()
+    rain_report, flood_report = validate_hydrology_records(rain, flood, allow_demo=True)
+    raise_if_invalid(rain_report, flood_report)
     rain_count = write_csv(rain, output_rain, RAIN_FIELDNAMES)
     flood_count = write_csv(flood, output_flood, FLOOD_FIELDNAMES)
     print(f"[OK] Wrote {rain_count} rain monitor demo records to {output_rain}")
@@ -276,6 +370,37 @@ def run_live(
         timeout=timeout,
         debug_dir=debug_dir,
     )
+    rain_report, flood_report = validate_hydrology_records(rain, flood, allow_demo=False)
+    if not rain_report.ok or not flood_report.ok:
+        write_run_summary(
+            summary_output,
+            {
+                "status": "error",
+                "failure_reason": "validation failed",
+                "mode": "live",
+                "county": county,
+                "completed_at": now_taipei_iso(),
+                "sources": {
+                    "rain": f"{settings.wra_base_url}{RAIN_PATH}",
+                    "flood_sensor": f"{settings.wra_base_url}{FLOOD_SENSOR_PATH}",
+                },
+                "outputs": {
+                    "rain": str(output_rain),
+                    "flood_sensor": str(output_flood),
+                },
+                "row_counts": {
+                    "rain": rain_report.row_count,
+                    "flood_sensor": flood_report.row_count,
+                },
+                "validation": {
+                    "rain": report_payload(rain_report),
+                    "flood_sensor": report_payload(flood_report),
+                },
+                "debug_dir": str(debug_dir) if debug_dir else "",
+            },
+        )
+        raise_if_invalid(rain_report, flood_report)
+
     rain_count = write_csv(rain, output_rain, RAIN_FIELDNAMES)
     flood_count = write_csv(flood, output_flood, FLOOD_FIELDNAMES)
     write_run_summary(
@@ -285,7 +410,7 @@ def run_live(
             "failure_reason": "",
             "mode": "live",
             "county": county,
-            "completed_at": datetime.now().isoformat(timespec="seconds"),
+            "completed_at": now_taipei_iso(),
             "sources": {
                 "rain": f"{settings.wra_base_url}{RAIN_PATH}",
                 "flood_sensor": f"{settings.wra_base_url}{FLOOD_SENSOR_PATH}",
@@ -297,6 +422,10 @@ def run_live(
             "row_counts": {
                 "rain": rain_count,
                 "flood_sensor": flood_count,
+            },
+            "validation": {
+                "rain": report_payload(rain_report),
+                "flood_sensor": report_payload(flood_report),
             },
             "debug_dir": str(debug_dir) if debug_dir else "",
         },
@@ -332,13 +461,25 @@ def main() -> None:
                     "failure_reason": "",
                     "mode": "demo",
                     "county": args.county,
-                    "completed_at": datetime.now().isoformat(timespec="seconds"),
+                    "completed_at": now_taipei_iso(),
                     "sources": {"rain": "demo", "flood_sensor": "demo"},
                     "outputs": {
                         "rain": str(args.output_rain),
                         "flood_sensor": str(args.output_flood),
                     },
                     "row_counts": {"rain": rain_count, "flood_sensor": flood_count},
+                    "validation": {
+                        "rain": {
+                            "ok": True,
+                            "row_count": rain_count,
+                            "errors": [],
+                        },
+                        "flood_sensor": {
+                            "ok": True,
+                            "row_count": flood_count,
+                            "errors": [],
+                        },
+                    },
                     "debug_dir": "",
                 },
             )
@@ -360,10 +501,11 @@ def main() -> None:
                 "failure_reason": f"Browser timeout: {exc}",
                 "mode": args.mode,
                 "county": args.county,
-                "completed_at": datetime.now().isoformat(timespec="seconds"),
+                "completed_at": now_taipei_iso(),
                 "sources": {},
                 "outputs": {},
                 "row_counts": {"rain": 0, "flood_sensor": 0},
+                "validation": {},
                 "debug_dir": str(args.debug_dir) if args.debug_dir else "",
             },
         )

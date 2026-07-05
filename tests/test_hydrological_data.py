@@ -31,9 +31,13 @@ def test_parse_rain_rows_skips_header_and_maps_fields():
             "行政區": "嘉義縣番路鄉",
             "雨量站": "小公田(2)",
             "水情時間": "07-05 09:20",
+            "水情時間ISO": "2026-07-05T09:20:00+08:00",
             "1小時累積雨量": "0",
+            "1小時累積雨量mm": "0",
             "24小時累積雨量": "0",
+            "24小時累積雨量mm": "0",
             "資料產出時間": "2026-07-05 09:37",
+            "資料產出時間ISO": "2026-07-05T09:37:00+08:00",
             "抓取時間": "2026-07-05T09:40:00",
             "資料模式": "live",
             "資料來源": "https://example.test/rain",
@@ -90,4 +94,7 @@ def test_parse_flood_rows_maps_sensor_fields():
 
     assert records[0]["感測器名稱"] == "埤麻腳社區"
     assert records[0]["目前感測值"] == "0 公分"
+    assert records[0]["目前感測值數值"] == "0"
+    assert records[0]["目前感測值單位"] == "cm"
+    assert records[0]["水情時間ISO"] == "2026-07-05T09:20:00+08:00"
     assert records[0]["資料模式"] == "live"
