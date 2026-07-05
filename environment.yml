@@ -1,0 +1,12 @@
+name: floodcasttw
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - -e .[dev]
+variables:
+  FLOODCASTTW_DATA_DIR: data
+  FLOODCASTTW_LOG_LEVEL: INFO

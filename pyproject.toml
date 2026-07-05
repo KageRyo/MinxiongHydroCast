@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "floodcasttw"
+version = "0.1.0"
+description = "Taiwan flood-risk data pipeline and nowcasting baseline toolkit."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+  { name = "KageRyo" }
+]
+dependencies = [
+  "beautifulsoup4>=4.12",
+  "lxml>=5.0",
+  "numpy>=1.26",
+  "pandas>=2.2",
+  "playwright>=1.48",
+  "python-docx>=1.1",
+  "requests>=2.31",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.6",
+]
+model = [
+  "scikit-learn>=1.5",
+  "torch>=2.2",
+]
+
+[project.scripts]
+floodcasttw-demo = "floodcasttw.pipelines.demo:main"
+floodcasttw-rainfall-alerts = "floodcasttw.ingestion.rainfall_alerts:main"
+floodcasttw-hydrology-demo = "floodcasttw.ingestion.hydrological_data:main"
+floodcasttw-shelters = "floodcasttw.ingestion.shelters:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

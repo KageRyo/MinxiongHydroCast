@@ -1,0 +1,172 @@
+"""WRA rainfall alert scraper for county-level alert thresholds."""
+
+from __future__ import annotations
+
+import argparse
+from datetime import datetime
+from pathlib import Path
+
+from playwright.sync_api import TimeoutError as PlaywrightTimeout
+from playwright.sync_api import sync_playwright
+
+from floodcasttw.config import get_settings
+from floodcasttw.io.csv_utils import write_csv
+
+DEFAULT_COUNTY_VALUE = "10010"
+DEFAULT_OUTPUT = Path("data/processed/rainfall_alerts.csv")
+FIELDNAMES = ["地區", "警戒", "影響村落", "1h雨量", "3h雨量", "6h雨量", "抓取時間", "資料模式"]
+
+SAMPLE_DATA = [
+    {
+        "地區": "嘉義 民雄鄉",
+        "警戒": "未達警戒",
+        "影響村落": "民雄鄉-雙福村,福樂村,大崎村,秀林村,金興村,北斗村",
+        "1h雨量": "1H 0 50 60",
+        "3h雨量": "3H 0 100 110",
+        "6h雨量": "6H 0 130 150",
+    },
+    {
+        "地區": "沙坑 竹崎鄉",
+        "警戒": "未達警戒",
+        "影響村落": "竹崎鄉-灣橋村,沙坑村,獅埜村,龍山村",
+        "1h雨量": "1H 0 70 80",
+        "3h雨量": "3H 0 135 145",
+        "6h雨量": "6H 0 180 200",
+    },
+]
+
+
+def demo_records() -> list[dict[str, str]]:
+    now = datetime.now().isoformat(timespec="seconds")
+    return [{**record, "抓取時間": now, "資料模式": "demo"} for record in SAMPLE_DATA]
+
+
+def scrape_with_playwright(
+    county_value: str = DEFAULT_COUNTY_VALUE,
+    headless: bool = True,
+    timeout: int = 45_000,
+) -> list[dict[str, str]]:
+    settings = get_settings()
+    url = f"{settings.wra_base_url}/service/alertQuery#"
+    records: list[dict[str, str]] = []
+
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(
+            headless=headless,
+            args=["--disable-blink-features=AutomationControlled"],
+        )
+        context = browser.new_context(
+            user_agent=(
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            ),
+            viewport={"width": 1920, "height": 1080},
+        )
+        page = context.new_page()
+        page.goto(url, wait_until="domcontentloaded", timeout=timeout)
+        page.wait_for_timeout(2500)
+
+        selected = False
+        for selector in (
+            "#ra_city",
+            "#city",
+            "select[id*='city']",
+            "select[id*='county']",
+            "select[name*='city']",
+        ):
+            try:
+                page.wait_for_selector(selector, timeout=4000)
+                page.select_option(selector, value=county_value)
+                selected = True
+                break
+            except Exception:
+                continue
+
+        if not selected:
+            print("[WARN] County selector not found; attempting to parse visible page content.")
+
+        page.wait_for_timeout(3000)
+        now = datetime.now().isoformat(timespec="seconds")
+
+        for header in page.locator("h4").all()[:120]:
+            try:
+                location = header.inner_text().strip().replace("[", "").replace("]", "")
+                if not location or len(location) < 2:
+                    continue
+
+                parent = header.locator("xpath=ancestor::div[1]")
+                status = "未知"
+                affected = ""
+                rain_1h = ""
+                rain_3h = ""
+                rain_6h = ""
+
+                status_el = parent.locator("text=/未達警戒|警戒中|發布|解除/").first
+                if status_el.count() > 0:
+                    status = status_el.inner_text().strip()[:20]
+
+                affected_el = parent.locator("text=/影響範圍/").first
+                if affected_el.count() > 0:
+                    affected = affected_el.inner_text().replace("影響範圍:", "").strip()
+
+                for table in parent.locator("table").all():
+                    tokens = [part.strip() for part in table.inner_text().replace("\n", " ").split()]
+                    for index, token in enumerate(tokens):
+                        upper = token.upper()
+                        if upper == "1H":
+                            rain_1h = " ".join(tokens[index : index + 4])
+                        elif upper == "3H":
+                            rain_3h = " ".join(tokens[index : index + 4])
+                        elif upper == "6H":
+                            rain_6h = " ".join(tokens[index : index + 4])
+
+                records.append(
+                    {
+                        "地區": location,
+                        "警戒": status,
+                        "影響村落": affected,
+                        "1h雨量": rain_1h,
+                        "3h雨量": rain_3h,
+                        "6h雨量": rain_6h,
+                        "抓取時間": now,
+                        "資料模式": "live",
+                    }
+                )
+            except Exception as exc:
+                print(f"[DEBUG] Skipped alert card: {exc}")
+
+        browser.close()
+
+    return records
+
+
+def run(output: Path, mode: str, county: str, headed: bool, timeout: int) -> int:
+    if mode == "demo":
+        records = demo_records()
+    else:
+        records = scrape_with_playwright(county_value=county, headless=not headed, timeout=timeout)
+        if not records:
+            raise RuntimeError("No rainfall alert records were extracted from the live page.")
+
+    count = write_csv(records, output, FIELDNAMES)
+    print(f"[OK] Wrote {count} rainfall alert records to {output}")
+    return count
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Collect WRA rainfall alert data.")
+    parser.add_argument("--mode", choices=["demo", "live"], default="demo")
+    parser.add_argument("--county", default=DEFAULT_COUNTY_VALUE, help="10010 = Chiayi County")
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--headed", action="store_true")
+    parser.add_argument("--timeout", type=int, default=45_000)
+    args = parser.parse_args()
+
+    try:
+        run(args.output, args.mode, args.county, args.headed, args.timeout)
+    except PlaywrightTimeout as exc:
+        raise SystemExit(f"[ERROR] Browser timeout. Try --mode demo first. {exc}") from exc
+
+
+if __name__ == "__main__":
+    main()

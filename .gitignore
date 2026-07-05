@@ -216,3 +216,37 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# FloodCastTW local configuration and generated data
+env.local
+*.env
+!.env.example
+!env.example
+
+data/raw/**
+!data/raw/.gitkeep
+data/interim/**
+!data/interim/.gitkeep
+data/processed/**
+!data/processed/.gitkeep
+data/external/**
+!data/external/.gitkeep
+
+# Do not commit source exports, live captures, model weights, or archives.
+*.docx
+*.xls
+*.xlsx
+*.zip
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.npy
+*.npz
+*.parquet
+*.sqlite
+*.sqlite3
+*.db
+
+# Local notebooks are allowed for exploration but should be reviewed before adding.
+notebooks/.ipynb_checkpoints/

@@ -1,2 +1,96 @@
 # FloodCastTW
-Taiwan Flood Risk Data and Nowcasting
+
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Style: Ruff](https://img.shields.io/badge/style-ruff-46a6ff)](https://docs.astral.sh/ruff/)
+[![Data](https://img.shields.io/badge/data-demo%20safe-orange)](data/README.md)
+
+Taiwan flood-risk data pipeline and nowcasting baseline toolkit.
+
+FloodCastTW starts from Chiayi/Minxiong flood-risk use cases and is designed to grow into a
+Taiwan-wide rainfall nowcasting and flood-risk platform. The current scope is data ingestion,
+validation, baseline modeling, and a clean boundary for future SOTA model integration.
+
+## What This Repo Does
+
+- Collect WRA rainfall alert thresholds for Chiayi County.
+- Produce explicit demo data for rain gauges and flood sensors while live parsers are developed.
+- Parse shelter DOCX files into structured CSV without committing source documents.
+- Keep raw, interim, processed, and sample data separate.
+- Provide baseline models before deep-learning training is justified.
+- Prepare a `NowcastNetAdapter` boundary for future SOTA migration.
+
+## Quick Start
+
+```bash
+conda env create -f environment.yml
+conda activate floodcasttw
+python -m playwright install chromium
+```
+
+Or with pip:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+python -m playwright install chromium
+```
+
+Run the local demo pipeline:
+
+```bash
+python scripts/run_demo.py
+```
+
+Run rainfall alerts:
+
+```bash
+# Demo data
+floodcasttw-rainfall-alerts --mode demo
+
+# Live WRA page for Chiayi County, county=10010
+floodcasttw-rainfall-alerts --mode live --county 10010
+```
+
+Parse a local shelter DOCX file:
+
+```bash
+floodcasttw-shelters --input data/raw/shelters.docx --output data/processed/shelters.csv
+```
+
+## Project Layout
+
+```text
+FloodCastTW/
+├── data/
+│   ├── raw/          # ignored source captures
+│   ├── interim/      # ignored cleaned intermediates
+│   ├── processed/    # ignored validated outputs
+│   ├── external/     # ignored radar/model/checkpoint assets
+│   └── samples/      # tracked demo-safe samples
+├── docs/
+├── scripts/
+├── src/floodcasttw/
+│   ├── ingestion/
+│   ├── io/
+│   ├── models/
+│   ├── pipelines/
+│   └── validation/
+└── tests/
+```
+
+## Data Safety
+
+Do not commit credentials, cookies, private URLs, official source exports, model weights, or files
+containing contact details. Use `env.example` as the template for local configuration.
+
+## Model Direction
+
+Start with the included baselines:
+
+- `PersistenceNowcaster` for radar/rainfall nowcasting.
+- `RainfallThresholdRiskScorer` for local threshold-based flood-risk scoring.
+
+The best next SOTA candidate is NowcastNet, but it should be migrated only after Taiwan radar grids,
+event splits, checkpoints, and licensing are clear. See [docs/model_strategy.md](docs/model_strategy.md).
