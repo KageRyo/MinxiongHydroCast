@@ -12,3 +12,5 @@ model-ready datasets, and files containing contact details or credentials must s
 - `samples/`: tiny demo CSV files safe for tests and documentation.
 
 Each generated folder is ignored by `.gitignore` except for `.gitkeep`.
+
+Tracked samples include hydrology rows, location references, and starter WGS84 grid specs.

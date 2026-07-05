@@ -17,6 +17,7 @@ validation, baseline modeling, and a clean boundary for future SOTA model integr
 - Produce explicit demo data for rain gauges and flood sensors while live parsers are developed.
 - Parse shelter DOCX files into structured CSV without committing source documents.
 - Keep raw, interim, processed, and sample data separate.
+- Build stable location references for gauges, sensors, shelters, pumping stations, and risk areas.
 - Provide baseline models before deep-learning training is justified.
 - Prepare a `NowcastNetAdapter` boundary for future SOTA migration.
 
@@ -71,6 +72,15 @@ Parse a local shelter DOCX file:
 floodcasttw-shelters --input data/raw/shelters.docx --output data/processed/shelters.csv
 ```
 
+Build a location reference table:
+
+```bash
+floodcasttw-locations \
+  --rain data/processed/rain_monitor.csv \
+  --flood data/processed/flood_sensors.csv \
+  --output data/processed/location_reference.csv
+```
+
 ## Project Layout
 
 ```text
@@ -88,6 +98,7 @@ FloodCastTW/
 │   ├── io/
 │   ├── models/
 │   ├── pipelines/
+│   ├── spatial/
 │   └── validation/
 └── tests/
 ```
@@ -106,3 +117,5 @@ Start with the included baselines:
 
 The best next SOTA candidate is NowcastNet, but it should be migrated only after Taiwan radar grids,
 event splits, checkpoints, and licensing are clear. See [docs/model_strategy.md](docs/model_strategy.md).
+
+Spatial alignment is documented in [docs/spatial_alignment.md](docs/spatial_alignment.md).

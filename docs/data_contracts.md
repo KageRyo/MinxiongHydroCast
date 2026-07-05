@@ -73,3 +73,39 @@ Required fields:
 
 Shelter source files often include contact information. Keep real exports in `data/raw/` and do
 not commit them without a privacy review.
+
+## Location Reference
+
+Required fields:
+
+- `location_id`
+- `source_type`
+- `source_name`
+- `county`
+- `township`
+- `village`
+- `address`
+- `latitude`
+- `longitude`
+- `crs`
+- `coordinate_source`
+- `admin_unit_key`
+
+Use generated location IDs only until official station or sensor IDs are available.
+
+## Grid Specs
+
+Required fields:
+
+- `name`
+- `crs`
+- `west`
+- `south`
+- `east`
+- `north`
+- `resolution_degrees`
+- `rows`
+- `cols`
+- `description`
+
+Grid cells should be referenced by stable cell IDs from `GridSpec.cell_id()`.

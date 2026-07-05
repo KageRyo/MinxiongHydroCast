@@ -67,3 +67,18 @@ PUMPING_STATION_REQUIRED_FIELDS = {
     "流入排水名稱",
     "數量",
 }
+
+LOCATION_REFERENCE_REQUIRED_FIELDS = {
+    "location_id",
+    "source_type",
+    "source_name",
+    "county",
+    "township",
+    "village",
+    "address",
+    "latitude",
+    "longitude",
+    "crs",
+    "coordinate_source",
+    "admin_unit_key",
+}

@@ -36,6 +36,7 @@ model = [
 floodcasttw-demo = "floodcasttw.pipelines.demo:main"
 floodcasttw-rainfall-alerts = "floodcasttw.ingestion.rainfall_alerts:main"
 floodcasttw-hydrology = "floodcasttw.ingestion.hydrological_data:main"
+floodcasttw-locations = "floodcasttw.pipelines.location_reference:main"
 floodcasttw-shelters = "floodcasttw.ingestion.shelters:main"
 
 [tool.setuptools.packages.find]

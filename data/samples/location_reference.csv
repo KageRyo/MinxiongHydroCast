@@ -1,0 +1,4 @@
+location_id,source_type,source_name,county,township,village,address,latitude,longitude,crs,coordinate_source,admin_unit_key
+rain_gauge_demo_minxiong,rain_gauge,民雄,嘉義縣,民雄鄉,,,,,,,"嘉義縣|民雄鄉"
+flood_sensor_demo_minxiong,flood_sensor,CYC098民雄鄉中樂村民雄,嘉義縣,民雄鄉,,保安宮騎虎王廟旁,,,,,"嘉義縣|民雄鄉"
+pumping_station_demo_xichang,pumping_station,西昌抽水站,,民雄鄉,,西昌抽水站,23.452000,120.282000,WGS84,TWD97_TM2_121,民雄鄉

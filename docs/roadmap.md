@@ -21,11 +21,11 @@ milestone small enough to become GitHub issues.
 
 ## Milestone 3: Build Spatial Alignment
 
-- [ ] Standardize coordinates to WGS84 and keep original coordinate columns when available.
-- [ ] Add station and sensor location tables with stable IDs.
-- [ ] Align gauges, flood sensors, pumping stations, shelters, and flood-risk areas to township/village units.
-- [ ] Design a grid format for radar rainfall and model outputs.
-- [ ] Document assumptions for Minxiong, Chiayi County, and Taiwan-wide scaling.
+- [x] Standardize coordinates to WGS84 and keep original coordinate columns when available.
+- [x] Add station and sensor location tables with stable IDs.
+- [x] Align gauges, flood sensors, pumping stations, shelters, and flood-risk areas to township/village units.
+- [x] Design a grid format for radar rainfall and model outputs.
+- [x] Document assumptions for Minxiong, Chiayi County, and Taiwan-wide scaling.
 
 ## Milestone 4: Establish Baseline Models
 

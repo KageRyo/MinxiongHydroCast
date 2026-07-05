@@ -1,0 +1,3 @@
+name,crs,west,south,east,north,resolution_degrees,rows,cols,description
+chiayi_county_wgs84_0p01,EPSG:4326,120.10,23.20,120.95,23.65,0.01,45,85,Chiayi County working grid for aligned hydrology and model output
+minxiong_wgs84_0p005,EPSG:4326,120.38,23.48,120.52,23.62,0.005,29,29,Minxiong pilot grid for local calibration
