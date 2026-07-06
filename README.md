@@ -124,6 +124,14 @@ floodcasttw-radar-tensor-convert \
   --output data/processed/radar_tensor_sample.npz
 ```
 
+Evaluate the tensor archive with the persistence baseline:
+
+```bash
+floodcasttw-tensor-baseline-evaluate \
+  --archive data/processed/radar_tensor_sample.npz \
+  --output data/processed/tensor_baseline_evaluation.json
+```
+
 Every command-line pipeline writes a JSON run summary under
 `data/processed/run_summaries/` and appends a compact JSONL event to
 `data/processed/run_logs.jsonl` by default. Override these with `--summary-output` and

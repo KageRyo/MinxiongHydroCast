@@ -38,6 +38,7 @@ This is enough to test modern radar nowcasting models after the data pipeline is
 GPUs first for controlled experiments:
 
 - Run persistence and threshold baselines on CPU.
+- Evaluate tensor archives with `floodcasttw-tensor-baseline-evaluate` before deep learning.
 - Create a separate training environment with CUDA-enabled PyTorch.
 - Run a small ConvLSTM or U-Net nowcasting baseline on one GPU first.
 - Use both GPUs only after data loading, checkpointing, and evaluation are repeatable.
@@ -48,9 +49,10 @@ GPUs first for controlled experiments:
 1. Stabilize WRA/CWA/NCDR ingestion and validation.
 2. Build a grid-alignment pipeline for radar, gauges, sensors, shelters, and flood-risk areas.
 3. Define event-based train/validation/test splits.
-4. Run persistence and threshold baselines.
-5. Add LightGBM for local flood-risk classification.
-6. Migrate NowcastNet only after radar data and checkpoint strategy are clear.
+4. Convert radar-like inputs into stable tensor archives.
+5. Run persistence and threshold baselines.
+6. Add LightGBM for local flood-risk classification.
+7. Migrate NowcastNet only after radar data and checkpoint strategy are clear.
 
 For Minxiong, train or calibrate locally on top of a wider Chiayi/Taiwan dataset. A Minxiong-only
 deep model will likely overfit because extreme events are sparse.

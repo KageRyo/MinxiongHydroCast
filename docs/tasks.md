@@ -13,13 +13,13 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Add a tiny tracked radar-like fixture for model contract tests.
 - [x] Add a dry-run radar tensor conversion skeleton.
 - [x] Verify the persistence baseline accepts converted tensor fixtures.
+- [x] Add a tensor archive baseline evaluation command.
 - [ ] Confirm source radar data format, cadence, projection, and licensing.
 - [ ] Populate event split manifest with confirmed historical radar events.
 
 ## Next
 
 - [ ] Build a production radar tensor converter once the source format is confirmed.
-- [ ] Add a tensor archive baseline evaluation command.
 - [ ] Wire NowcastNet inference only after code, checkpoint, and license are reviewed.
 - [ ] Use one RTX 4090 for the first training run; move to two GPUs after data loading,
       checkpointing, and recovery are repeatable.

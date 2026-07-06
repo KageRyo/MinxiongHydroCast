@@ -23,6 +23,28 @@ floodcasttw-evaluate-baselines \
 - POD: `0.5`
 - FAR: `0.0`
 
+## Tensor Archive Baseline
+
+Run after creating `data/processed/radar_tensor_sample.npz` with
+`floodcasttw-radar-tensor-convert`:
+
+```bash
+floodcasttw-tensor-baseline-evaluate \
+  --archive data/processed/radar_tensor_sample.npz \
+  --output data/processed/tensor_baseline_evaluation.json
+```
+
+The tensor archive path evaluates the same persistence idea on the model I/O contract used by
+future SOTA adapters:
+
+- Input shape: `3 x 2 x 2 x 1`
+- Target shape: `2 x 2 x 2 x 1`
+- Event threshold: `10.0 mm`
+- RMSE: `2.95804 mm`
+- CSI: `0.5`
+- POD: `0.5`
+- FAR: `0.0`
+
 ## Threshold Flood Risk
 
 - Model: `RainfallThresholdRiskScorer`

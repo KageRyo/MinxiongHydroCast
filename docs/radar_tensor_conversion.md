@@ -35,6 +35,19 @@ The output `.npz` archive contains:
 
 The command writes the standard run summary and JSONL run log.
 
+## Evaluate
+
+Run the persistence baseline against the generated archive:
+
+```bash
+floodcasttw-tensor-baseline-evaluate \
+  --archive data/processed/radar_tensor_sample.npz \
+  --output data/processed/tensor_baseline_evaluation.json
+```
+
+This reports RMSE plus CSI/POD/FAR at the selected event threshold. Use it as the baseline before
+testing ConvLSTM, U-Net, or NowcastNet-style models on the same tensor contract.
+
 ## Production Path
 
 After the radar source manifest is confirmed, replace the CSV fixture reader with a source-specific

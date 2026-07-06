@@ -43,6 +43,7 @@ floodcasttw-nowcastnet-smoke = "floodcasttw.pipelines.nowcastnet_smoke:main"
 floodcasttw-radar-source-check = "floodcasttw.ingestion.radar_sources:main"
 floodcasttw-radar-tensor-convert = "floodcasttw.pipelines.radar_tensor_conversion:main"
 floodcasttw-shelters = "floodcasttw.ingestion.shelters:main"
+floodcasttw-tensor-baseline-evaluate = "floodcasttw.pipelines.tensor_baseline_evaluation:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
