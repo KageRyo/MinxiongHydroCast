@@ -120,6 +120,7 @@ Convert the tiny radar-like fixture into the model tensor archive format:
 
 ```bash
 floodcasttw-radar-tensor-convert \
+  --source-format csv_pixel_grid \
   --input data/samples/radar_pixels.csv \
   --output data/processed/radar_tensor_sample.npz
 ```
@@ -181,3 +182,4 @@ NowcastNet migration is documented in [docs/nowcastnet_migration.md](docs/nowcas
 Radar source review is documented in [docs/radar_data_sources.md](docs/radar_data_sources.md).
 Event split rules are documented in [docs/event_splits.md](docs/event_splits.md).
 Radar tensor conversion is documented in [docs/radar_tensor_conversion.md](docs/radar_tensor_conversion.md).
+Radar source adapters are documented in [docs/radar_source_adapters.md](docs/radar_source_adapters.md).

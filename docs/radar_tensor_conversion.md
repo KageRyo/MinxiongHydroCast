@@ -22,6 +22,7 @@ The sample has five `2 x 2` frames. With `input_length=3` and `prediction_length
 
 ```bash
 floodcasttw-radar-tensor-convert \
+  --source-format csv_pixel_grid \
   --input data/samples/radar_pixels.csv \
   --output data/processed/radar_tensor_sample.npz
 ```
@@ -34,6 +35,7 @@ The output `.npz` archive contains:
 - `metadata`: JSON-encoded event/source metadata
 
 The command writes the standard run summary and JSONL run log.
+Source adapters are documented in [radar_source_adapters.md](radar_source_adapters.md).
 
 ## Evaluate
 

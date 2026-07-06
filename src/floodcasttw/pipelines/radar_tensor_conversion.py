@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import csv
 import json
 from pathlib import Path
 
@@ -17,72 +16,17 @@ from floodcasttw.io.run_summary import (
     start_run,
 )
 from floodcasttw.models.radar_tensor import RadarTensorSpec, validate_radar_tensor
+from floodcasttw.pipelines.radar_source_adapters import (
+    CSV_PIXEL_GRID,
+    CsvPixelGridAdapter,
+    VALUE_FIELD,
+    get_radar_source_adapter,
+    read_csv_pixel_records,
+)
 
 PIPELINE_NAME = "radar_tensor_conversion"
 DEFAULT_INPUT = Path("data/samples/radar_pixels.csv")
-VALUE_FIELD = "mm_per_hour"
-REQUIRED_FIELDS = {"event_id", "frame_index", "y", "x", VALUE_FIELD}
-
-
-def read_pixel_records(path: Path) -> list[dict[str, str]]:
-    with path.open(newline="", encoding="utf-8-sig") as handle:
-        reader = csv.DictReader(handle)
-        missing = REQUIRED_FIELDS - set(reader.fieldnames or [])
-        if missing:
-            raise ValueError(f"missing radar pixel fields: {', '.join(sorted(missing))}")
-        return list(reader)
-
-
-def select_event_id(records: list[dict[str, str]], event_id: str | None) -> str:
-    event_ids = sorted({record["event_id"] for record in records})
-    if not event_ids:
-        raise ValueError("radar pixel CSV has no records")
-    if event_id:
-        if event_id not in event_ids:
-            raise ValueError(f"event_id not found in radar pixel CSV: {event_id}")
-        return event_id
-    if len(event_ids) != 1:
-        raise ValueError("radar pixel CSV has multiple events; pass --event-id")
-    return event_ids[0]
-
-
-def infer_size(records: list[dict[str, str]], field: str) -> int:
-    return max(int(record[field]) for record in records) + 1
-
-
-def build_sequence(
-    records: list[dict[str, str]],
-    *,
-    event_id: str,
-    spec: RadarTensorSpec,
-) -> np.ndarray:
-    sequence = np.full(
-        (spec.total_length, spec.height, spec.width, spec.channels),
-        np.nan,
-        dtype=np.float32,
-    )
-    if spec.channels != 1:
-        raise ValueError("CSV radar pixel conversion currently supports one channel")
-
-    for record in records:
-        if record["event_id"] != event_id:
-            continue
-        frame_index = int(record["frame_index"])
-        y = int(record["y"])
-        x = int(record["x"])
-        if not (0 <= frame_index < spec.total_length):
-            raise ValueError(f"frame_index out of bounds for {event_id}: {frame_index}")
-        if not (0 <= y < spec.height and 0 <= x < spec.width):
-            raise ValueError(f"grid coordinate out of bounds for {event_id}: y={y}, x={x}")
-        if not np.isnan(sequence[frame_index, y, x, 0]):
-            raise ValueError(f"duplicate pixel for {event_id}: frame={frame_index}, y={y}, x={x}")
-        sequence[frame_index, y, x, 0] = float(record[VALUE_FIELD])
-
-    missing = np.argwhere(np.isnan(sequence))
-    if missing.size:
-        first = missing[0].tolist()
-        raise ValueError(f"missing radar pixel for {event_id}: index={first}")
-    return sequence
+read_pixel_records = read_csv_pixel_records
 
 
 def convert_records(
@@ -97,30 +41,54 @@ def convert_records(
     units: str = VALUE_FIELD,
     crs: str = "EPSG:4326",
 ) -> tuple[np.ndarray, np.ndarray, RadarTensorSpec, dict[str, object]]:
-    selected_event_id = select_event_id(records, event_id)
-    selected = [record for record in records if record["event_id"] == selected_event_id]
-    spec = RadarTensorSpec(
+    batch = CsvPixelGridAdapter().build_batch_from_records(
+        records,
+        event_id=event_id,
         input_length=input_length,
         prediction_length=prediction_length,
-        height=height or infer_size(selected, "y"),
-        width=width or infer_size(selected, "x"),
-        channels=1,
+        height=height,
+        width=width,
         cadence_minutes=cadence_minutes,
         units=units,
         crs=crs,
     )
-    sequence = build_sequence(selected, event_id=selected_event_id, spec=spec)
-    input_tensor = sequence[: spec.input_length]
-    target_tensor = sequence[spec.input_length :]
-    validate_radar_tensor(input_tensor, spec, kind="input")
-    validate_radar_tensor(target_tensor, spec, kind="target")
-    metadata = {
-        "event_id": selected_event_id,
-        "source_format": "csv_pixel_grid",
-        "value_field": VALUE_FIELD,
-        "frame_count": spec.total_length,
-    }
-    return input_tensor, target_tensor, spec, metadata
+    input_tensor = batch.sequence[: batch.spec.input_length]
+    target_tensor = batch.sequence[batch.spec.input_length :]
+    validate_radar_tensor(input_tensor, batch.spec, kind="input")
+    validate_radar_tensor(target_tensor, batch.spec, kind="target")
+    return input_tensor, target_tensor, batch.spec, batch.metadata
+
+
+def convert_source(
+    *,
+    input_path: Path,
+    source_format: str,
+    event_id: str | None,
+    input_length: int,
+    prediction_length: int,
+    height: int | None = None,
+    width: int | None = None,
+    cadence_minutes: int = 6,
+    units: str = VALUE_FIELD,
+    crs: str = "EPSG:4326",
+) -> tuple[np.ndarray, np.ndarray, RadarTensorSpec, dict[str, object], int]:
+    adapter = get_radar_source_adapter(source_format)
+    batch = adapter.load_sequence(
+        input_path=input_path,
+        event_id=event_id,
+        input_length=input_length,
+        prediction_length=prediction_length,
+        height=height,
+        width=width,
+        cadence_minutes=cadence_minutes,
+        units=units,
+        crs=crs,
+    )
+    input_tensor = batch.sequence[: batch.spec.input_length]
+    target_tensor = batch.sequence[batch.spec.input_length :]
+    validate_radar_tensor(input_tensor, batch.spec, kind="input")
+    validate_radar_tensor(target_tensor, batch.spec, kind="target")
+    return input_tensor, target_tensor, batch.spec, batch.metadata, batch.source_record_count
 
 
 def write_tensor_archive(
@@ -154,6 +122,7 @@ def load_tensor_archive(path: Path) -> dict[str, object]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Convert radar-like CSV pixels to tensor archive.")
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
+    parser.add_argument("--source-format", choices=[CSV_PIXEL_GRID], default=CSV_PIXEL_GRID)
     parser.add_argument(
         "--output",
         type=Path,
@@ -176,9 +145,9 @@ def main() -> None:
     args = parser.parse_args()
 
     started_at, start_timer = start_run()
-    records = read_pixel_records(args.input)
-    input_tensor, target_tensor, spec, metadata = convert_records(
-        records,
+    input_tensor, target_tensor, spec, metadata, record_count = convert_source(
+        input_path=args.input,
+        source_format=args.source_format,
         event_id=args.event_id,
         input_length=args.input_length,
         prediction_length=args.prediction_length,
@@ -202,9 +171,10 @@ def main() -> None:
         start_timer=start_timer,
         inputs={"radar_pixels": str(args.input)},
         outputs={"tensor_archive": str(args.output)},
-        row_counts={"pixels": len(records), "frames": spec.total_length},
+        row_counts={"source_records": record_count, "frames": spec.total_length},
         metadata={
             "event_id": metadata["event_id"],
+            "source_format": args.source_format,
             "input_shape": list(input_tensor.shape),
             "target_shape": list(target_tensor.shape),
             "spec": spec.to_dict(),
