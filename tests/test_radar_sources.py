@@ -60,5 +60,12 @@ def test_sample_manifest_requires_review():
     result = manifest.check()
 
     assert result["status"] == "needs_review"
-    assert result["selected_source"] == "cwa_open_data_radar_candidate"
+    assert result["selected_source"] == "cwa_qpesums_radar_echo_grid"
     assert result["errors"]
+
+    selected = manifest.selected()
+    assert selected is not None
+    assert selected.data_id == "O-A0059-001"
+    assert selected.cadence_minutes == 10
+    assert selected.units == "dBZ"
+    assert "Confirm CRS/EPSG from a downloaded sample file." in selected.known_gaps

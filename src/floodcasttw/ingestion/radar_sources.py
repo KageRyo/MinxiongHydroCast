@@ -37,6 +37,8 @@ CONFIRMATION_FIELDS = (
 class RadarSource:
     name: str
     status: str
+    data_id: str = ""
+    data_name: str = ""
     provider: str = ""
     source_url: str = ""
     documentation_url: str = ""
@@ -51,6 +53,9 @@ class RadarSource:
     spatial_coverage: str = ""
     temporal_coverage: str = ""
     local_path: Path | None = None
+    field_description: str = ""
+    reviewed_at: str = ""
+    known_gaps: tuple[str, ...] = ()
     notes: str = ""
 
     @classmethod
@@ -60,6 +65,8 @@ class RadarSource:
         return cls(
             name=str(payload.get("name", "")),
             status=str(payload.get("status", "candidate")),
+            data_id=str(payload.get("data_id", "")),
+            data_name=str(payload.get("data_name", "")),
             provider=str(payload.get("provider", "")),
             source_url=str(payload.get("source_url", "")),
             documentation_url=str(payload.get("documentation_url", "")),
@@ -74,6 +81,9 @@ class RadarSource:
             spatial_coverage=str(payload.get("spatial_coverage", "")),
             temporal_coverage=str(payload.get("temporal_coverage", "")),
             local_path=Path(local_path) if local_path else None,
+            field_description=str(payload.get("field_description", "")),
+            reviewed_at=str(payload.get("reviewed_at", "")),
+            known_gaps=tuple(str(gap) for gap in payload.get("known_gaps", [])),
             notes=str(payload.get("notes", "")),
         )
 
@@ -98,6 +108,8 @@ class RadarSource:
         payload: dict[str, object] = {
             "name": self.name,
             "status": self.status,
+            "data_id": self.data_id,
+            "data_name": self.data_name,
             "provider": self.provider,
             "source_url": self.source_url,
             "documentation_url": self.documentation_url,
@@ -112,6 +124,9 @@ class RadarSource:
             "spatial_coverage": self.spatial_coverage,
             "temporal_coverage": self.temporal_coverage,
             "local_path": str(self.local_path) if self.local_path else "",
+            "field_description": self.field_description,
+            "reviewed_at": self.reviewed_at,
+            "known_gaps": list(self.known_gaps),
             "notes": self.notes,
         }
         if include_exists:
@@ -153,7 +168,10 @@ class RadarSourceManifest:
             errors.append(f"selected source not found: {self.selected_source}")
         if selected and not selected.is_confirmed():
             missing = ", ".join(selected.missing_confirmation_fields())
-            errors.append(f"selected source is not confirmed: missing {missing}")
+            reason = f"status={selected.status}"
+            if missing:
+                reason = f"{reason}; missing {missing}"
+            errors.append(f"selected source is not confirmed: {reason}")
         status = "ok" if not errors else "needs_review"
         return {
             "schema_version": self.schema_version,

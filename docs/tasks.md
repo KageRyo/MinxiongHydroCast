@@ -15,11 +15,15 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Add a radar source adapter interface for tensor conversion.
 - [x] Verify the persistence baseline accepts converted tensor fixtures.
 - [x] Add a tensor archive baseline evaluation command.
-- [ ] Confirm source radar data format, cadence, projection, and licensing.
+- [x] Identify official CWA radar/QPE candidate data IDs and license URL.
+- [ ] Download CWA `O-A0059-001` and `O-B0045-001` sample files with a local API key.
+- [ ] Confirm CWA radar/QPE CRS, grid origin, shape, nodata encoding, timestamps, and units.
 - [ ] Populate event split manifest with confirmed historical radar events.
 
 ## Next
 
+- [ ] Implement a CWA file API downloader that reads `CWA_API_KEY` from local environment only.
+- [ ] Add schema inspection tests for CWA `O-A0059-001` and `O-B0045-001` sample captures.
 - [ ] Build a production radar tensor converter once the source format is confirmed.
 - [ ] Add a production radar source adapter once native format is confirmed.
 - [ ] Wire NowcastNet inference only after code, checkpoint, and license are reviewed.

@@ -21,6 +21,7 @@ validation, baseline modeling, and a clean boundary for future SOTA model integr
 - Build stable location references for gauges, sensors, shelters, pumping stations, and risk areas.
 - Provide baseline models before deep-learning training is justified.
 - Prepare a `NowcastNetAdapter` boundary for future SOTA migration.
+- Track official CWA radar/QPE candidate sources without committing raw downloads or API keys.
 
 ## Quick Start
 
@@ -107,6 +108,10 @@ floodcasttw-radar-source-check \
   --manifest data/samples/radar_source_manifest.json \
   --output data/processed/radar_source_check.json
 ```
+
+The current CWA candidates are `O-A0059-001` for QPESUMS radar echo grids and `O-B0045-001` for
+past-1-hour QPESUMS rainfall estimates. Downloads require a local `CWA_API_KEY`; keep real keys in
+local env files only and keep downloaded files under ignored `data/external/` paths.
 
 Check event-based train/validation/test splits:
 

@@ -55,3 +55,8 @@ testing ConvLSTM, U-Net, or NowcastNet-style models on the same tensor contract.
 After the radar source manifest is confirmed, replace the CSV fixture reader with a source-specific
 reader for the native archive format. Keep the tensor archive contract stable so baselines,
 NowcastNet adapters, and future training code can share the same I/O.
+
+For CWA, validate `O-A0059-001` first. The production converter should derive the tensor spec from
+downloaded metadata and fail if any file disagrees on cadence, grid shape, extent, units, or
+timestamp ordering. Keep `O-B0045-001` available as a rainfall-estimate grid candidate for
+flood-risk features or secondary targets.

@@ -37,7 +37,9 @@ milestone small enough to track in [tasks.md](tasks.md).
 
 ## Milestone 5: Prepare SOTA Migration
 
-- [ ] Confirm source radar data native format, cadence, projection, and licensing.
+- [x] Identify official CWA radar/QPE candidate data IDs, cadence, formats, and license URL.
+- [ ] Confirm CWA radar/QPE projection, grid origin, shape, timestamps, and nodata encoding from
+      downloaded sample files.
 - [x] Decide where external checkpoints and datasets live outside git.
 - [x] Define the provisional Taiwan radar tensor contract for `NowcastNetAdapter`.
 - [x] Run a small inference-only smoke test before training.

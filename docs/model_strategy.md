@@ -31,6 +31,23 @@ See [nowcastnet_migration.md](nowcastnet_migration.md) for the radar tensor cont
 test workflow. See [event_splits.md](event_splits.md) for event-based train/validation/test
 rules.
 
+## Best CWA Data To Try First
+
+Use CWA `O-A0059-001` (`雷達資料-雷達整合回波資料`) as the first radar tensor source after a
+sample download confirms the schema. Official CWA metadata says it is a QPESUMS radar integrated
+echo grid, updates every 10 minutes, uses JSON/XML, has 1.25 km resolution, and carries `dBZ`
+units. That makes it the best first fit for radar nowcasting models.
+
+Use CWA `O-B0045-001` (`降雨估計資料-QPESUMS過去1小時定量降雨估計格點資料`) as the first
+rainfall-estimate grid candidate for flood-risk features. It should be validated alongside rain
+gauge observations before using it as a target.
+
+The recommended model order after CWA sample validation is:
+
+1. Persistence baseline on `O-A0059-001`.
+2. Small ConvLSTM or U-Net nowcaster on one RTX 4090.
+3. NowcastNet-style migration only after event splits, checkpointing, and evaluation are stable.
+
 ## GPU Training Environment
 
 The target server has two RTX 4090 GPUs with 24 GB VRAM each and NVIDIA driver `570.133.07`.
