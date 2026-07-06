@@ -33,5 +33,5 @@ Add a new adapter only after the radar source manifest is confirmed. A productio
 - preserve event/source metadata in the tensor archive
 - fail loudly on missing frames, duplicate pixels, or incompatible grids
 
-Do not read `CWA_API_KEY` inside the adapter. Downloading belongs in a separate ingestion command;
-the adapter should consume already downloaded local files.
+Do not read `CWA_API_KEY` inside the adapter. Downloading belongs in
+`floodcasttw-cwa-download`; the adapter should consume already downloaded local files.

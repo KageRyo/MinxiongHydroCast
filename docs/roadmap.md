@@ -38,6 +38,7 @@ milestone small enough to track in [tasks.md](tasks.md).
 ## Milestone 5: Prepare SOTA Migration
 
 - [x] Identify official CWA radar/QPE candidate data IDs, cadence, formats, and license URL.
+- [x] Add a CWA file API downloader with dry-run support and key redaction.
 - [ ] Confirm CWA radar/QPE projection, grid origin, shape, timestamps, and nodata encoding from
       downloaded sample files.
 - [x] Decide where external checkpoints and datasets live outside git.

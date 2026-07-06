@@ -48,7 +48,31 @@ Expected file API pattern:
 https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0059-001?Authorization=${CWA_API_KEY}&downloadType=WEB&format=JSON
 ```
 
+This matches CWA's OpenAPI and front-end download helper: `Authorization` is a query parameter,
+not a header. No public demo key is stored in this repository. If an official demo site exposes a
+public sample key, use it only for a local one-off smoke test and never commit it.
+
 Downloaded files belong under ignored paths such as `data/external/radar/cwa_o_a0059_001/`.
+
+## Download Command
+
+Dry-run URL and output-path handling without a key:
+
+```bash
+floodcasttw-cwa-download --dry-run --data-id O-A0059-001
+```
+
+Download a live sample after setting a local key:
+
+```bash
+export CWA_API_KEY  # set this locally first
+floodcasttw-cwa-download \
+  --data-id O-A0059-001 \
+  --output-dir data/external/radar
+```
+
+The command redacts `Authorization` in run summaries and logs. It fails if the output file already
+exists unless `--overwrite` is passed.
 
 ## Manifest
 

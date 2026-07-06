@@ -113,6 +113,24 @@ The current CWA candidates are `O-A0059-001` for QPESUMS radar echo grids and `O
 past-1-hour QPESUMS rainfall estimates. Downloads require a local `CWA_API_KEY`; keep real keys in
 local env files only and keep downloaded files under ignored `data/external/` paths.
 
+Dry-run a CWA file API download without a key or network fetch:
+
+```bash
+floodcasttw-cwa-download --dry-run --data-id O-A0059-001
+```
+
+Download a local sample after setting `CWA_API_KEY`:
+
+```bash
+export CWA_API_KEY  # set this locally first
+floodcasttw-cwa-download \
+  --data-id O-A0059-001 \
+  --output-dir data/external/radar
+```
+
+The downloader follows CWA's documented file API pattern by sending `Authorization`, `downloadType`,
+and `format` as query parameters. It redacts the key from run summaries and logs.
+
 Check event-based train/validation/test splits:
 
 ```bash
