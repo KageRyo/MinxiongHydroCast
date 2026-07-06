@@ -76,8 +76,14 @@ def test_dry_run_returns_redacted_url_without_writing_file(tmp_path: Path):
 def test_download_cwa_file_writes_response_and_redacts_url(tmp_path: Path):
     calls = []
 
-    def fake_get(url: str, *, params: dict[str, str], timeout: int) -> FakeResponse:
-        calls.append((url, params, timeout))
+    def fake_get(
+        url: str,
+        *,
+        params: dict[str, str],
+        timeout: int,
+        verify: bool,
+    ) -> FakeResponse:
+        calls.append((url, params, timeout, verify))
         return FakeResponse(
             b'{"success": true}',
             url=f"{url}?Authorization={params['Authorization']}&downloadType=WEB&format=JSON",
@@ -104,6 +110,7 @@ def test_download_cwa_file_writes_response_and_redacts_url(tmp_path: Path):
             "https://example.test/fileapi/v1/opendataapi/O-A0059-001",
             {"Authorization": "real-key", "downloadType": "WEB", "format": "JSON"},
             60,
+            True,
         )
     ]
 
@@ -130,3 +137,37 @@ def test_download_does_not_overwrite_without_flag(tmp_path: Path):
         assert "output already exists" in str(exc)
     else:
         raise AssertionError("expected existing output to fail")
+
+
+def test_download_redacts_authorization_from_request_errors(tmp_path: Path):
+    def fake_get(
+        url: str,
+        *,
+        params: dict[str, str],
+        timeout: int,
+        verify: bool,
+    ) -> FakeResponse:
+        raise RuntimeError(
+            f"failed URL {url}?Authorization={params['Authorization']}&format=JSON"
+        )
+
+    request = CwaDownloadRequest(
+        data_id="O-A0059-001",
+        base_url="https://example.test/fileapi/v1/opendataapi",
+    )
+
+    try:
+        download_cwa_file(
+            request,
+            authorization="real-key",
+            output_path=tmp_path / "sample.json",
+            http_get=fake_get,
+            verify_tls=False,
+        )
+    except RuntimeError as exc:
+        message = str(exc)
+        assert "real-key" not in message
+        assert "Authorization=REDACTED" in message
+        assert "RuntimeError" in message
+    else:
+        raise AssertionError("expected request error to fail")

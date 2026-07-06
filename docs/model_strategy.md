@@ -33,14 +33,15 @@ rules.
 
 ## Best CWA Data To Try First
 
-Use CWA `O-A0059-001` (`雷達資料-雷達整合回波資料`) as the first radar tensor source after a
-sample download confirms the schema. Official CWA metadata says it is a QPESUMS radar integrated
-echo grid, updates every 10 minutes, uses JSON/XML, has 1.25 km resolution, and carries `dBZ`
-units. That makes it the best first fit for radar nowcasting models.
+Use CWA `O-A0059-001` (`雷達資料-雷達整合回波資料`) as the first radar tensor source. A live
+sample confirmed a `921 x 881` TWD67 lon/lat grid, 0.0125 degree resolution, 10-minute cadence,
+west-to-east then south-to-north ordering, and `dBZ` units. That makes it the best first fit for
+radar nowcasting models.
 
 Use CWA `O-B0045-001` (`降雨估計資料-QPESUMS過去1小時定量降雨估計格點資料`) as the first
-rainfall-estimate grid candidate for flood-risk features. It should be validated alongside rain
-gauge observations before using it as a target.
+rainfall-estimate grid candidate for flood-risk features. A live sample confirmed a `441 x 561`
+TWD67 lon/lat grid and `mm` units. It should still be validated alongside rain gauge observations
+before using it as a target.
 
 The recommended model order after CWA sample validation is:
 

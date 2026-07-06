@@ -17,7 +17,7 @@ The best first radar tensor candidate is:
 
 | Data ID | Name | Cadence | Format | Confirmed Metadata |
 | --- | --- | --- | --- | --- |
-| `O-A0059-001` | `雷達資料-雷達整合回波資料` | 10 min | JSON, XML, historyAPI | QPESUMS radar integrated echo grid, 1.25 km resolution, `dBZ` units |
+| `O-A0059-001` | `雷達資料-雷達整合回波資料` | 10 min | JSON, XML, historyAPI | QPESUMS radar integrated echo grid, `dBZ` units |
 
 The best rainfall-estimate candidate for flood-risk features is:
 
@@ -74,6 +74,28 @@ floodcasttw-cwa-download \
 The command redacts `Authorization` in run summaries and logs. It fails if the output file already
 exists unless `--overwrite` is passed.
 
+Python TLS verification may reject the current CWA endpoint certificate with `Missing Subject Key
+Identifier`. For local sampling only, pass `--insecure-tls`; the command still redacts the key from
+its own errors and summaries.
+
+## Sample-Verified Grid Schemas
+
+Live JSON samples were downloaded and inspected on 2026-07-06.
+
+| Data ID | Data Time | CRS | Origin | Resolution | Dimensions | Count | Units | Nodata |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `O-A0059-001` | `2026-07-06T19:30:00+08:00` | `TWD67` | `115.0E, 18.0N` | `0.0125 deg` | `921 x 881` | `811401` | `dBZ` | `-99`, `-999` |
+| `O-B0045-001` | `2026-07-06T19:20:00+08:00` | `TWD67 lon/lat grid` | `118.0E, 20.0N` | `0.0125 deg` | `441 x 561` | `247401` | `mm` | `-1` |
+
+Both products store comma-separated scientific-notation floats. Values are ordered from west to
+east first, then south to north. Inspect local samples with:
+
+```bash
+floodcasttw-cwa-grid-inspect \
+  data/external/radar/cwa_o_a0059_001/O-A0059-001.json \
+  data/external/radar/cwa_o_b0045_001/O-B0045-001.json
+```
+
 ## Manifest
 
 The sample manifest is `data/samples/radar_source_manifest.json`. It records:
@@ -88,7 +110,8 @@ The sample manifest is `data/samples/radar_source_manifest.json`. It records:
 - local ignored storage path
 - known gaps from source review
 
-The selected source is intentionally still marked `candidate`; it is not ready for training.
+The selected source is intentionally marked `sample_verified`; it is parseable, but it is not ready
+for training until history retention and multi-frame event collection are reviewed.
 
 ## Check Command
 

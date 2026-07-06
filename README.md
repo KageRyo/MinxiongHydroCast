@@ -131,6 +131,14 @@ floodcasttw-cwa-download \
 The downloader follows CWA's documented file API pattern by sending `Authorization`, `downloadType`,
 and `format` as query parameters. It redacts the key from run summaries and logs.
 
+Inspect downloaded CWA grid samples:
+
+```bash
+floodcasttw-cwa-grid-inspect \
+  data/external/radar/cwa_o_a0059_001/O-A0059-001.json \
+  data/external/radar/cwa_o_b0045_001/O-B0045-001.json
+```
+
 Check event-based train/validation/test splits:
 
 ```bash

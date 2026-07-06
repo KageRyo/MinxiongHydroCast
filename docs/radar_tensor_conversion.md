@@ -56,7 +56,12 @@ After the radar source manifest is confirmed, replace the CSV fixture reader wit
 reader for the native archive format. Keep the tensor archive contract stable so baselines,
 NowcastNet adapters, and future training code can share the same I/O.
 
-For CWA, validate `O-A0059-001` first. The production converter should derive the tensor spec from
-downloaded metadata and fail if any file disagrees on cadence, grid shape, extent, units, or
-timestamp ordering. Keep `O-B0045-001` available as a rainfall-estimate grid candidate for
-flood-risk features or secondary targets.
+For CWA, use `O-A0059-001` first. A sample downloaded on 2026-07-06 confirmed a `921 x 881`
+TWD67 lon/lat grid with 0.0125 degree resolution, lower-left origin `115.0E, 18.0N`, west-to-east
+then south-to-north value ordering, `dBZ` units, and nodata values `-99` and `-999`. The production
+converter should fail if any frame disagrees on cadence, grid shape, extent, units, nodata encoding,
+or timestamp ordering.
+
+Keep `O-B0045-001` available as a rainfall-estimate grid candidate for flood-risk features or
+secondary targets. Its sample confirmed a `441 x 561` TWD67 lon/lat grid, lower-left origin
+`118.0E, 20.0N`, `mm` units, and nodata `-1`.

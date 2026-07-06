@@ -11,6 +11,8 @@ from typing import Protocol
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import requests
+from urllib3.exceptions import InsecureRequestWarning
+from urllib3 import disable_warnings
 
 from floodcasttw.config import get_settings
 from floodcasttw.io.run_summary import (
@@ -37,7 +39,14 @@ class HttpResponse(Protocol):
 
 
 class HttpGet(Protocol):
-    def __call__(self, url: str, *, params: dict[str, str], timeout: int) -> HttpResponse: ...
+    def __call__(
+        self,
+        url: str,
+        *,
+        params: dict[str, str],
+        timeout: int,
+        verify: bool,
+    ) -> HttpResponse: ...
 
 
 @dataclass(frozen=True)
@@ -132,6 +141,7 @@ def download_cwa_file(
     timeout: int = 60,
     http_get: HttpGet = requests.get,
     overwrite: bool = False,
+    verify_tls: bool = True,
 ) -> DownloadResult:
     request.validate()
     if not authorization:
@@ -139,12 +149,21 @@ def download_cwa_file(
     if output_path.exists() and not overwrite:
         raise FileExistsError(f"output already exists: {output_path}")
 
-    response = http_get(
-        request.endpoint,
-        params=request.params(authorization=authorization),
-        timeout=timeout,
-    )
-    response.raise_for_status()
+    if not verify_tls:
+        disable_warnings(InsecureRequestWarning)
+
+    try:
+        response = http_get(
+            request.endpoint,
+            params=request.params(authorization=authorization),
+            timeout=timeout,
+            verify=verify_tls,
+        )
+        response.raise_for_status()
+    except Exception as exc:
+        raise RuntimeError(
+            f"CWA request failed for {request.redacted_url()}: {type(exc).__name__}"
+        ) from exc
     if looks_like_cwa_auth_error(response.content):
         raise RuntimeError("CWA rejected the Authorization key")
     if not response.content:
@@ -184,6 +203,7 @@ def build_download_summary(
     key_present: bool,
     timeout: int,
     overwrite: bool,
+    verify_tls: bool,
 ) -> dict[str, object]:
     return build_run_summary(
         pipeline=PIPELINE_NAME,
@@ -202,6 +222,7 @@ def build_download_summary(
             "api_key_present": key_present,
             "timeout_seconds": timeout,
             "overwrite": overwrite,
+            "verify_tls": verify_tls,
         },
     )
 
@@ -216,6 +237,11 @@ def main() -> None:
     parser.add_argument("--timeout", type=int, default=60)
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--insecure-tls",
+        action="store_true",
+        help="Disable TLS certificate verification for local CWA sampling only.",
+    )
     parser.add_argument("--api-key-env", default="CWA_API_KEY")
     parser.add_argument(
         "--summary-output",
@@ -244,6 +270,7 @@ def main() -> None:
                 output_path=output_path,
                 timeout=args.timeout,
                 overwrite=args.overwrite,
+                verify_tls=not args.insecure_tls,
             )
         summary = build_download_summary(
             status="ok",
@@ -257,6 +284,7 @@ def main() -> None:
             key_present=bool(authorization),
             timeout=args.timeout,
             overwrite=args.overwrite,
+            verify_tls=not args.insecure_tls,
         )
         record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)
         action = "Dry run for" if args.dry_run else "Downloaded"
@@ -274,6 +302,7 @@ def main() -> None:
             key_present=bool(authorization),
             timeout=args.timeout,
             overwrite=args.overwrite,
+            verify_tls=not args.insecure_tls,
         )
         record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)
         raise SystemExit(f"[ERROR] {exc}") from exc

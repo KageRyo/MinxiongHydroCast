@@ -4,7 +4,7 @@
   "sources": [
     {
       "name": "cwa_qpesums_radar_echo_grid",
-      "status": "candidate",
+      "status": "sample_verified",
       "data_id": "O-A0059-001",
       "data_name": "雷達資料-雷達整合回波資料",
       "provider": "Central Weather Administration, Taiwan",
@@ -15,24 +15,22 @@
       "access_method": "CWA file API with Authorization key: https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0059-001?Authorization=${CWA_API_KEY}&downloadType=WEB&format=JSON",
       "native_format": "JSON or XML; historyAPI listed in CWA metadata",
       "cadence_minutes": 10,
-      "crs": "needs_review",
-      "grid": "QPESUMS radar integrated echo grid; metadata says 1.25 km resolution, 0.0125 resolution, and dimensions nx*ny",
+      "crs": "TWD67",
+      "grid": "921 x 881 TWD67 lon/lat grid; 0.0125 degree resolution; lower-left origin at 115.0E, 18.0N; values ordered west-to-east then south-to-north; nodata=-99, outside/quality-removed=-999",
       "units": "dBZ",
       "spatial_coverage": "Taiwan",
       "temporal_coverage": "Current file API plus CWA historyAPI; historical range needs review",
       "local_path": "data/external/radar/cwa_o_a0059_001",
-      "field_description": "經緯度、解析度(0.0125、時間、維度(nx*ny)、單位(dBZ)",
+      "field_description": "Comma-separated scientific-notation floats. DateTime, StartPointLongitude, StartPointLatitude, GridResolution, GridDimensionX, GridDimensionY, Reflectivity=dBZ.",
       "reviewed_at": "2026-07-06",
       "known_gaps": [
-        "Confirm CRS/EPSG from a downloaded sample file.",
-        "Confirm grid origin, extent, nx/ny ordering, missing-value encoding, and timestamp timezone.",
         "Confirm historyAPI availability and retention before training event splits."
       ],
-      "notes": "Primary radar tensor candidate. Do not mark confirmed until a real CWA file API sample has been downloaded with a local CWA_API_KEY and parsed."
+      "notes": "Primary radar tensor candidate. A live JSON sample downloaded on 2026-07-06 parsed successfully with 811401 values matching 921*881."
     },
     {
       "name": "cwa_qpesums_hourly_qpe_grid",
-      "status": "candidate",
+      "status": "sample_verified",
       "data_id": "O-B0045-001",
       "data_name": "降雨估計資料-QPESUMS過去1小時定量降雨估計格點資料",
       "provider": "Central Weather Administration, Taiwan",
@@ -43,19 +41,19 @@
       "access_method": "CWA file API with Authorization key: https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-B0045-001?Authorization=${CWA_API_KEY}&downloadType=WEB&format=JSON",
       "native_format": "JSON or XML",
       "cadence_minutes": 10,
-      "crs": "needs_review",
-      "grid": "QPESUMS past-1-hour radar precipitation estimate grid; shape and extent need review",
-      "units": "needs_review",
+      "crs": "TWD67 lon/lat grid",
+      "grid": "441 x 561 TWD67 lon/lat grid; 0.0125 degree resolution; lower-left origin at 118.0E, 20.0N; values ordered longitude-increasing then latitude-increasing; nodata=-1",
+      "units": "mm",
       "spatial_coverage": "Taiwan",
       "temporal_coverage": "Current file API; historical range needs review",
       "local_path": "data/external/radar/cwa_o_b0045_001",
-      "field_description": "過去1小時雷達降水估計格點資料",
+      "field_description": "Comma-separated scientific-notation floats. DateTime, StartPointLongitude, StartPointLatitude, GridResolution, GridDimensionX, GridDimensionY, Precipitation=mm.",
       "reviewed_at": "2026-07-06",
       "known_gaps": [
-        "Confirm rainfall units and accumulation semantics from a downloaded sample file.",
-        "Confirm CRS, grid origin, extent, nx/ny ordering, missing-value encoding, and timestamp timezone."
+        "Confirm historyAPI availability and retention before training event splits.",
+        "Use gauge validation before treating radar-estimated precipitation as ground truth."
       ],
-      "notes": "Best candidate for flood-risk labels or rainfall accumulation features after sample inspection."
+      "notes": "Best candidate for flood-risk labels or rainfall accumulation features. A live JSON sample downloaded on 2026-07-06 parsed successfully with 247401 values matching 441*561."
     },
     {
       "name": "cwa_radar_image_products",
@@ -113,7 +111,8 @@
   ],
   "review_notes": [
     "Official CWA observation dataset list was reviewed on 2026-07-06 through /webapi/formatType, /webapi/datasetPage/o, /webapi/datasetList/o, and /webapi/datasetMetadata/{dataid}.",
-    "The selected radar candidate is intentionally not confirmed because CRS, exact grid origin/extent, nodata, timestamp semantics, and history retention still require a downloaded sample file.",
+    "CWA O-A0059-001 and O-B0045-001 JSON samples were downloaded and schema-inspected on 2026-07-06.",
+    "The selected radar candidate is intentionally not confirmed because history retention and multi-frame event collection still require review.",
     "Keep CWA_API_KEY blank in git. Store real keys only in local env files and keep downloaded radar/QPE files under ignored data/external/ paths."
   ]
 }

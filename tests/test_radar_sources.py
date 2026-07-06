@@ -66,6 +66,10 @@ def test_sample_manifest_requires_review():
     selected = manifest.selected()
     assert selected is not None
     assert selected.data_id == "O-A0059-001"
+    assert selected.status == "sample_verified"
     assert selected.cadence_minutes == 10
     assert selected.units == "dBZ"
-    assert "Confirm CRS/EPSG from a downloaded sample file." in selected.known_gaps
+    assert selected.crs == "TWD67"
+    assert "Confirm historyAPI availability and retention before training event splits." in (
+        selected.known_gaps
+    )
