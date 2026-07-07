@@ -96,6 +96,35 @@ floodcasttw-cwa-grid-inspect \
   data/external/radar/cwa_o_b0045_001/O-B0045-001.json
 ```
 
+## History Workflow
+
+CWA's front end links the history Swagger operation as
+`get_v1_getMetadata__data_id_`, which implies a `GET /v1/getMetadata/{data_id}` style endpoint.
+The current client defaults to:
+
+```text
+https://opendata.cwa.gov.tw/historyapi/v1/getMetadata/{data_id}?Authorization=REDACTED
+```
+
+This endpoint still needs live verification against CWA because the official history Swagger JS was
+not available during the last offline implementation pass.
+
+Dry-run the inferred URL:
+
+```bash
+floodcasttw-cwa-history-list --dry-run --data-id O-A0059-001
+```
+
+After a live history index is available, create an event frame plan:
+
+```bash
+floodcasttw-cwa-event-plan \
+  --history-index data/processed/cwa_history_index.json \
+  --event-id chiayi_20260706_evening \
+  --start-time 2026-07-06T18:00:00+08:00 \
+  --end-time 2026-07-06T21:00:00+08:00
+```
+
 ## Manifest
 
 The sample manifest is `data/samples/radar_source_manifest.json`. It records:

@@ -41,7 +41,8 @@ milestone small enough to track in [tasks.md](tasks.md).
 - [x] Add a CWA file API downloader with dry-run support and key redaction.
 - [x] Confirm CWA radar/QPE projection, grid origin, shape, timestamps, and nodata encoding from
       downloaded sample files.
-- [ ] Confirm CWA historyAPI retention and collect multi-frame event sequences.
+- [x] Add a dry-run CWA history file-list client and event planning skeleton.
+- [ ] Live-verify CWA historyAPI retention and collect multi-frame event sequences.
 - [x] Decide where external checkpoints and datasets live outside git.
 - [x] Define the provisional Taiwan radar tensor contract for `NowcastNetAdapter`.
 - [x] Run a small inference-only smoke test before training.

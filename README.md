@@ -139,6 +139,22 @@ floodcasttw-cwa-grid-inspect \
   data/external/radar/cwa_o_b0045_001/O-B0045-001.json
 ```
 
+Dry-run the inferred CWA historyAPI file-list endpoint:
+
+```bash
+floodcasttw-cwa-history-list --dry-run --data-id O-A0059-001
+```
+
+After the history endpoint is live-verified, build a multi-frame event plan:
+
+```bash
+floodcasttw-cwa-event-plan \
+  --history-index data/processed/cwa_history_index.json \
+  --event-id chiayi_20260706_evening \
+  --start-time 2026-07-06T18:00:00+08:00 \
+  --end-time 2026-07-06T21:00:00+08:00
+```
+
 Check event-based train/validation/test splits:
 
 ```bash

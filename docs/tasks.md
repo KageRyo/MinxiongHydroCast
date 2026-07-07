@@ -20,12 +20,14 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Download CWA `O-A0059-001` and `O-B0045-001` sample files with a local API key.
 - [x] Confirm CWA radar/QPE CRS, grid origin, shape, nodata encoding, timestamps, and units.
 - [x] Add schema inspection tests for CWA `O-A0059-001` and `O-B0045-001` sample captures.
+- [x] Add a dry-run CWA history file-list client and event plan skeleton.
 - [ ] Populate event split manifest with confirmed historical radar events.
 
 ## Next
 
-- [ ] Confirm CWA historyAPI retention and file list workflow for `O-A0059-001`.
-- [ ] Build a multi-frame CWA radar event collector under ignored `data/external/`.
+- [ ] Live-verify CWA historyAPI endpoint and retention for `O-A0059-001`.
+- [ ] Use live history indexes to build multi-frame CWA radar event plans.
+- [ ] Download event-plan frames under ignored `data/external/`.
 - [ ] Build a production radar tensor converter once the source format is confirmed.
 - [ ] Add a production radar source adapter once native format is confirmed.
 - [ ] Wire NowcastNet inference only after code, checkpoint, and license are reviewed.

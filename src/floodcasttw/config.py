@@ -14,6 +14,7 @@ class Settings:
     wra_base_url: str
     cwa_codis_url: str
     cwa_open_data_file_api_url: str
+    cwa_history_api_url: str
     ncdr_open_api_url: str
 
 
@@ -26,6 +27,10 @@ def get_settings() -> Settings:
         cwa_open_data_file_api_url=os.getenv(
             "CWA_OPEN_DATA_FILE_API_URL",
             "https://opendata.cwa.gov.tw/fileapi/v1/opendataapi",
+        ),
+        cwa_history_api_url=os.getenv(
+            "CWA_HISTORY_API_URL",
+            "https://opendata.cwa.gov.tw/historyapi/v1/getMetadata",
         ),
         ncdr_open_api_url=os.getenv("NCDR_OPEN_API_URL", "https://watch.ncdr.nat.gov.tw/watch"),
     )
