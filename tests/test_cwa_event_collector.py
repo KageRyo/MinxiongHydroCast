@@ -1,4 +1,23 @@
-from floodcasttw.ingestion.cwa_event_collector import build_event_plan
+from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
+
+from floodcasttw.ingestion.cwa_event_collector import (
+    authorize_url,
+    build_event_plan,
+    download_event_frames,
+)
+
+
+class FakeResponse:
+    def __init__(self, content: bytes, url: str, status_code: int = 200):
+        self.content = content
+        self.url = url
+        self.status_code = status_code
+        self.headers = {"content-type": "application/json"}
+
+    def raise_for_status(self) -> None:
+        if self.status_code >= 400:
+            raise RuntimeError(f"HTTP {self.status_code}")
 
 
 def sample_history_index():
@@ -7,7 +26,7 @@ def sample_history_index():
         "files": [
             {
                 "data_time": "2026-07-06T19:40:00+08:00",
-                "url": "https://example.test/1940.json",
+                "url": "https://example.test/1940.json?Authorization=CWA-FAKE-KEY",
                 "filename": "1940.json",
                 "file_format": "JSON",
             },
@@ -42,6 +61,8 @@ def test_build_event_plan_selects_sorted_frames_in_window():
         "2026-07-06T19:30:00+08:00",
         "2026-07-06T19:40:00+08:00",
     ]
+    assert "Authorization=REDACTED" in plan.frames[1].url
+    assert "CWA-FAKE-KEY" not in plan.frames[1].url
 
 
 def test_build_event_plan_applies_limit_after_sorting():
@@ -69,3 +90,43 @@ def test_build_event_plan_rejects_reversed_time_window():
         assert "end_time" in str(exc)
     else:
         raise AssertionError("expected reversed window to fail")
+
+
+def test_authorize_url_replaces_redacted_authorization():
+    url = authorize_url(
+        "https://example.test/file.json?Authorization=REDACTED&format=JSON",
+        authorization="real-key",
+    )
+    query = parse_qs(urlsplit(url).query)
+
+    assert query["Authorization"] == ["real-key"]
+    assert query["format"] == ["JSON"]
+
+
+def test_download_event_frames_writes_outputs_without_storing_key(tmp_path: Path):
+    requested_urls = []
+
+    def fake_get(url: str, *, timeout: int, verify: bool) -> FakeResponse:
+        requested_urls.append(url)
+        return FakeResponse(b'{"ok": true}', url)
+
+    plan = build_event_plan(
+        sample_history_index(),
+        event_id="chiayi_20260706_evening",
+        start_time="2026-07-06T19:30:00+08:00",
+        end_time="2026-07-06T19:40:00+08:00",
+    )
+
+    collection = download_event_frames(
+        plan,
+        output_dir=tmp_path,
+        authorization="real-key",
+        http_get=fake_get,
+    )
+
+    assert collection.frame_count == 2
+    assert collection.bytes_written == len(b'{"ok": true}') * 2
+    assert len(requested_urls) == 2
+    assert all("Authorization=real-key" in url for url in requested_urls)
+    assert all("real-key" not in frame.source_url for frame in collection.frames)
+    assert all(Path(frame.output_path).exists() for frame in collection.frames)

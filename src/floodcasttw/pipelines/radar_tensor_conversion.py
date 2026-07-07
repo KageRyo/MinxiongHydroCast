@@ -19,6 +19,7 @@ from floodcasttw.models.radar_tensor import RadarTensorSpec, validate_radar_tens
 from floodcasttw.pipelines.radar_source_adapters import (
     CSV_PIXEL_GRID,
     CsvPixelGridAdapter,
+    SUPPORTED_SOURCE_FORMATS,
     VALUE_FIELD,
     get_radar_source_adapter,
     read_csv_pixel_records,
@@ -122,7 +123,7 @@ def load_tensor_archive(path: Path) -> dict[str, object]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Convert radar-like CSV pixels to tensor archive.")
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
-    parser.add_argument("--source-format", choices=[CSV_PIXEL_GRID], default=CSV_PIXEL_GRID)
+    parser.add_argument("--source-format", choices=SUPPORTED_SOURCE_FORMATS, default=CSV_PIXEL_GRID)
     parser.add_argument(
         "--output",
         type=Path,

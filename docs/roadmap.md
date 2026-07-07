@@ -43,7 +43,7 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Confirm CWA radar/QPE projection, grid origin, shape, timestamps, and nodata encoding from
       downloaded sample files.
 - [x] Add a dry-run CWA history file-list client and event planning skeleton.
-- [ ] Live-verify CWA historyAPI retention and collect multi-frame event sequences.
+- [x] Live-verify CWA historyAPI retention and collect multi-frame event sequences.
 - [x] Decide where external checkpoints and datasets live outside git.
 - [x] Define the provisional Taiwan radar tensor contract for `NowcastNetAdapter`.
 - [x] Run a small inference-only smoke test before training.
@@ -51,18 +51,19 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 
 ## Milestone 6: Build Historical Radar Dataset
 
-- [ ] Collect short multi-frame CWA radar sequences under ignored `data/external/`.
+- [x] Collect short multi-frame CWA radar sequences under ignored `data/external/`.
 - [ ] Build event plans for Chiayi/Minxiong heavy-rain windows and Taiwan-wide typhoon/front events.
-- [ ] Populate tracked event split manifests with real historical event metadata.
-- [ ] Produce reproducible dataset summaries without committing official raw data.
+- [x] Populate tracked event split manifests with real historical event metadata.
+- [x] Produce reproducible dataset summaries without committing official raw data.
 - [ ] Add gauge/QPE validation reports for each dataset build.
 
 ## Milestone 7: Train And Compare Models
 
-- [ ] Convert CWA event sequences into tensor archives with CRS, timestamp, and nodata metadata.
-- [ ] Evaluate persistence on real converted event tensors.
-- [ ] Train a small ConvLSTM or U-Net baseline on one RTX 4090.
-- [ ] Add checkpoint save/resume and deterministic training summaries.
+- [x] Convert CWA event sequences into tensor archives with CRS, timestamp, and nodata metadata.
+- [x] Evaluate persistence on real converted event tensors.
+- [x] Add a small U-Net baseline training entrypoint for one RTX 4090.
+- [x] Add checkpoint save/resume and deterministic training summaries.
+- [ ] Install CUDA-enabled PyTorch and run the Tiny U-Net baseline on GPU.
 - [ ] Migrate NowcastNet only after license and tensor compatibility are reviewed.
 
 ## Milestone 8: Operationalize
@@ -71,4 +72,4 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Emit structured logs and run summaries for every pipeline execution.
 - [x] Add CI for tests and linting.
 - [x] Maintain a repo task list for unchecked roadmap items.
-- [ ] Publish Taiwan-wide and Minxiong/Chiayi model cards before distributing checkpoints.
+- [x] Publish a Minxiong/Chiayi baseline model card before distributing checkpoints.

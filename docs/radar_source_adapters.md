@@ -4,11 +4,11 @@ Radar source adapters isolate source-specific file reading from the model tensor
 converter should emit the same `.npz` archive regardless of whether the input came from a tiny CSV
 fixture, CWA/QPESUMS archives, or another confirmed radar source.
 
-## Current Adapter
+## Current Adapters
 
-`csv_pixel_grid` is the only supported adapter today. It reads `data/samples/radar_pixels.csv`,
-validates required fields, builds a `[time, height, width, channels]` sequence, and passes that
-sequence to the tensor conversion pipeline.
+`csv_pixel_grid` reads `data/samples/radar_pixels.csv`, validates required fields, builds a
+`[time, height, width, channels]` sequence, and passes that sequence to the tensor conversion
+pipeline.
 
 ```bash
 floodcasttw-radar-tensor-convert \
@@ -17,11 +17,24 @@ floodcasttw-radar-tensor-convert \
   --output data/processed/radar_tensor_sample.npz
 ```
 
+`cwa_opendata_grid` reads CWA Open Data grid JSON/XML files or a collection manifest produced by
+`floodcasttw-cwa-event-plan --download`. It validates cadence, grid consistency, CRS, units,
+timestamps, and nodata encoding before emitting the tensor archive.
+
+```bash
+floodcasttw-radar-tensor-convert \
+  --source-format cwa_opendata_grid \
+  --input data/processed/cwa_event_collection.json \
+  --input-length 2 \
+  --prediction-length 1 \
+  --cadence-minutes 10 \
+  --output data/processed/cwa_recent_tensor_sample.npz
+```
+
 ## Adding A Production Adapter
 
-The first production adapter should target CWA `O-A0059-001` after sample files confirm the native
-schema. A second adapter or mode can target CWA `O-B0045-001` for past-1-hour QPESUMS rainfall
-estimate grids.
+The first production adapter targets CWA `O-A0059-001`. A second adapter or mode can target CWA
+`O-B0045-001` for past-1-hour QPESUMS rainfall estimate grids.
 
 Add a new adapter only after the radar source manifest is confirmed. A production adapter should:
 
@@ -33,5 +46,6 @@ Add a new adapter only after the radar source manifest is confirmed. A productio
 - preserve event/source metadata in the tensor archive
 - fail loudly on missing frames, duplicate pixels, or incompatible grids
 
-Do not read `CWA_API_KEY` inside the adapter. Downloading belongs in
-`floodcasttw-cwa-download`; the adapter should consume already downloaded local files.
+Do not read `CWA_API_KEY` inside the adapter. Downloading belongs in `floodcasttw-cwa-download` or
+`floodcasttw-cwa-event-plan --download`; the adapter consumes already downloaded local files and
+redacted manifests.

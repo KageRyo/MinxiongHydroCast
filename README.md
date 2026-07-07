@@ -155,6 +155,22 @@ floodcasttw-cwa-event-plan \
   --end-time 2026-07-06T21:00:00+08:00
 ```
 
+Download the selected event frames into ignored local storage:
+
+```bash
+floodcasttw-cwa-event-plan \
+  --history-index data/processed/cwa_history_index.json \
+  --event-id chiayi_20260706_evening \
+  --start-time 2026-07-06T18:00:00+08:00 \
+  --end-time 2026-07-06T21:00:00+08:00 \
+  --download \
+  --download-dir data/external/radar/events \
+  --collection-output data/processed/cwa_event_collection.json
+```
+
+The event plan and collection manifest keep CWA URLs redacted. The downloader reads
+`CWA_API_KEY` from local environment variables only.
+
 Check event-based train/validation/test splits:
 
 ```bash
@@ -172,12 +188,34 @@ floodcasttw-radar-tensor-convert \
   --output data/processed/radar_tensor_sample.npz
 ```
 
+Convert a CWA event collection manifest into a tensor archive:
+
+```bash
+floodcasttw-radar-tensor-convert \
+  --source-format cwa_opendata_grid \
+  --input data/processed/cwa_event_collection.json \
+  --input-length 2 \
+  --prediction-length 1 \
+  --cadence-minutes 10 \
+  --output data/processed/cwa_radar_tensor_sample.npz
+```
+
 Evaluate the tensor archive with the persistence baseline:
 
 ```bash
 floodcasttw-tensor-baseline-evaluate \
   --archive data/processed/radar_tensor_sample.npz \
   --output data/processed/tensor_baseline_evaluation.json
+```
+
+Train the optional PyTorch baseline after installing a CUDA-enabled PyTorch build:
+
+```bash
+floodcasttw-train-torch-baseline \
+  --archive data/processed/cwa_radar_tensor_sample.npz \
+  --output-dir data/external/checkpoints/tiny_unet \
+  --device auto \
+  --epochs 3
 ```
 
 Every command-line pipeline writes a JSON run summary under
@@ -231,3 +269,5 @@ Event split rules are documented in [docs/event_splits.md](docs/event_splits.md)
 Radar tensor conversion is documented in [docs/radar_tensor_conversion.md](docs/radar_tensor_conversion.md).
 Radar source adapters are documented in [docs/radar_source_adapters.md](docs/radar_source_adapters.md).
 The project completion plan is documented in [docs/completion_plan.md](docs/completion_plan.md).
+The current baseline model card is documented in
+[docs/model_cards/minxiong_chiayi_baseline.md](docs/model_cards/minxiong_chiayi_baseline.md).

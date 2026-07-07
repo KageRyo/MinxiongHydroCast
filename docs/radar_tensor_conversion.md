@@ -37,6 +37,26 @@ The output `.npz` archive contains:
 The command writes the standard run summary and JSONL run log.
 Source adapters are documented in [radar_source_adapters.md](radar_source_adapters.md).
 
+## Convert CWA Event Collections
+
+The CWA history `getData` endpoint currently returns XML for `O-A0059-001`, while the file API
+sample returns JSON. The `cwa_opendata_grid` adapter accepts both formats and can read a collection
+manifest produced by `floodcasttw-cwa-event-plan --download`.
+
+```bash
+floodcasttw-radar-tensor-convert \
+  --source-format cwa_opendata_grid \
+  --input data/processed/cwa_event_collection.json \
+  --event-id cwa_o_a0059_recent_sample_20260707 \
+  --input-length 2 \
+  --prediction-length 1 \
+  --cadence-minutes 10 \
+  --output data/processed/cwa_recent_tensor_sample.npz
+```
+
+The adapter validates sequence cadence and grid consistency before writing tensors. Tensor metadata
+keeps CWA data ID, timestamps, source paths, origin, resolution, nodata values, units, and CRS.
+
 ## Evaluate
 
 Run the persistence baseline against the generated archive:
@@ -49,6 +69,23 @@ floodcasttw-tensor-baseline-evaluate \
 
 This reports RMSE plus CSI/POD/FAR at the selected event threshold. Use it as the baseline before
 testing ConvLSTM, U-Net, or NowcastNet-style models on the same tensor contract.
+
+## Live CWA Smoke Result
+
+A live CWA historyAPI sample collected on 2026-07-07 validated the first real end-to-end radar
+path:
+
+- Source: `O-A0059-001`
+- Frames: 3
+- Window: `2026-07-07T08:40:00+08:00` to `2026-07-07T09:00:00+08:00`
+- Tensor input: `2 x 881 x 921 x 1`
+- Tensor target: `1 x 881 x 921 x 1`
+- Units/CRS: `dBZ`, `TWD67`
+- Cadence: 10 minutes
+
+The persistence smoke baseline at a `35.0 dBZ` event threshold produced RMSE `6.582019 dBZ`,
+CSI `0.237828`, POD `0.38081`, and FAR `0.612214`. This is a pipeline verification result, not a
+scientific benchmark.
 
 ## Production Path
 

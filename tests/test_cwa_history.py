@@ -6,6 +6,7 @@ from floodcasttw.ingestion.cwa_history import (
     extract_history_files,
     fetch_history_index,
     redact_authorization_url,
+    sanitize_cwa_payload,
 )
 
 
@@ -59,13 +60,27 @@ def test_extract_history_files_from_nested_metadata():
                     "DateTime": "2026-07-06T19:20:00+08:00",
                     "URL": "https://example.test/b.json",
                 },
+                {
+                    "DateTime": "2026-07-06T19:10:00+08:00",
+                    "ProductURL": (
+                        "https://example.test/c.json?Authorization=CWA-FAKE-KEY"
+                    ),
+                },
+                {
+                    "dataTime": [
+                        {
+                            "DateTime": "2026-07-06T19:00:00+08:00",
+                            "ProductURL": "https://example.test/d.json",
+                        }
+                    ]
+                },
             ]
         }
     }
 
     files = extract_history_files(payload)
 
-    assert len(files) == 2
+    assert len(files) == 4
     assert files[0].data_time == "2026-07-06T19:30:00+08:00"
     assert files[0].url == "https://example.test/a.json"
     assert files[0].filename == "O-A0059-001-202607061930.json"
@@ -73,6 +88,29 @@ def test_extract_history_files_from_nested_metadata():
     assert files[0].size == "1234"
     assert files[1].data_time == "2026-07-06T19:20:00+08:00"
     assert files[1].url == "https://example.test/b.json"
+    assert files[2].data_time == "2026-07-06T19:10:00+08:00"
+    assert "Authorization=REDACTED" in files[2].url
+    assert "CWA-FAKE-KEY" not in str(files[2].raw)
+    assert files[3].data_time == "2026-07-06T19:00:00+08:00"
+
+
+def test_sanitize_cwa_payload_redacts_nested_authorization_values():
+    payload = {
+        "Authorization": "real-key",
+        "nested": [
+            {
+                "ProductURL": "https://example.test/file.json?Authorization=CWA-FAKE-KEY"
+            }
+        ],
+    }
+
+    sanitized = sanitize_cwa_payload(payload)
+
+    text = str(sanitized)
+    assert sanitized["Authorization"] == "REDACTED"
+    assert "Authorization=REDACTED" in text
+    assert "real-key" not in text
+    assert "CWA-FAKE-KEY" not in text
 
 
 def test_dry_run_index_has_no_files_and_redacted_source():

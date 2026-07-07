@@ -15,6 +15,20 @@ Chiayi/Minxiong-ready model without committing credentials, raw official data, o
 - CI covers unit tests, linting, and dry-run contract checks.
 - Raw data, API keys, checkpoints, and generated artifacts remain outside git.
 
+## Current Status
+
+- Completed: CWA `O-A0059-001` historyAPI live verification, short multi-frame radar sequence
+  download, sequence validation, XML/JSON CWA grid parsing, tensor conversion, and persistence
+  baseline evaluation on a real CWA radar tensor.
+- Completed: optional Tiny U-Net training entrypoint with deterministic seed, checkpoint save, and
+  resume support.
+- Completed: baseline model card for Minxiong/Chiayi-oriented smoke testing.
+- Pending external dependency: WRA API access is still waiting for approval.
+- Pending training dependency: install a CUDA-enabled PyTorch environment before running Tiny U-Net
+  on the RTX 4090 GPUs.
+- Pending benchmark work: collect real Chiayi/Minxiong heavy-rain and Taiwan-wide typhoon/front
+  event windows before reporting model performance.
+
 ## Phase 1: Data Source Finalization
 
 - Live-verify CWA historyAPI endpoint and retention for `O-A0059-001`.

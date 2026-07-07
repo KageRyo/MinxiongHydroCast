@@ -42,6 +42,9 @@ def test_evaluate_persistence_tensor_archive_reports_metrics(tmp_path: Path):
     assert result["input_shape"] == [3, 2, 2, 1]
     assert result["target_shape"] == [2, 2, 2, 1]
     assert result["rmse_mm"] == 2.95804
+    assert result["rmse"] == 2.95804
+    assert result["value_units"] == "mm_per_hour"
+    assert result["event_threshold_units"] == "mm_per_hour"
     assert result["event_metrics"]["csi"] == 0.5
     assert result["event_metrics"]["pod"] == 0.5
     assert result["event_metrics"]["far"] == 0.0

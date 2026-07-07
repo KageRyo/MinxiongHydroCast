@@ -7,14 +7,16 @@ look better than they are.
 ## Manifest
 
 The sample manifest is `data/samples/event_split_manifest.json`. It contains demo-safe placeholder
-events and the intended schema:
+events, plus one live-verified CWA `O-A0059-001` radar sequence sample for pipeline smoke tests:
 
 - `split_strategy`: must be `event_based`
 - `target`: model or task family
 - `events`: event ID, type, region, start/end time, source, and notes
 - `splits`: event IDs assigned to `train`, `validation`, and `test`
 
-Replace the demo events with confirmed historical events before training or reporting results.
+Replace the remaining demo events with confirmed historical heavy-rain, typhoon, and frontal events
+before training or reporting results. The current CWA sample verifies the pipeline only; it is not a
+benchmark event.
 
 ## Check Command
 

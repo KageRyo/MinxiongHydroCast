@@ -46,7 +46,7 @@ before using it as a target.
 The recommended model order after CWA sample validation is:
 
 1. Persistence baseline on `O-A0059-001`.
-2. Small ConvLSTM or U-Net nowcaster on one RTX 4090.
+2. Small U-Net nowcaster through `floodcasttw-train-torch-baseline` on one RTX 4090.
 3. NowcastNet-style migration only after event splits, checkpointing, and evaluation are stable.
 
 ## GPU Training Environment
@@ -58,9 +58,13 @@ GPUs first for controlled experiments:
 - Run persistence and threshold baselines on CPU.
 - Evaluate tensor archives with `floodcasttw-tensor-baseline-evaluate` before deep learning.
 - Create a separate training environment with CUDA-enabled PyTorch.
-- Run a small ConvLSTM or U-Net nowcasting baseline on one GPU first.
+- Run `floodcasttw-train-torch-baseline --device auto` on one GPU first.
 - Use both GPUs only after data loading, checkpointing, and evaluation are repeatable.
 - Reserve NowcastNet-style training for gridded Taiwan radar tensors with event-based splits.
+
+The current default environment does not install PyTorch. Install the `model` extra and a
+CUDA-compatible PyTorch build in the training environment before running GPU jobs. Checkpoints stay
+under ignored `data/external/checkpoints/` paths.
 
 ## Recommended Roadmap
 

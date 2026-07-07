@@ -35,6 +35,7 @@ def evaluate_persistence_tensor_archive(
     target_tensor = np.asarray(archive["target"], dtype=np.float32)
     metadata = archive["metadata"]
     spec = archive["spec"]
+    value_units = str(spec.get("units", ""))
     model = PersistenceNowcaster(horizon=target_tensor.shape[0])
     prediction = model.predict(input_tensor)
     event_metrics = binary_event_metrics(
@@ -51,7 +52,12 @@ def evaluate_persistence_tensor_archive(
         "target_shape": list(target_tensor.shape),
         "prediction_shape": list(prediction.shape),
         "rmse_mm": round(rmse(prediction, target_tensor), 6),
+        "rmse": round(rmse(prediction, target_tensor), 6),
+        "value_units": value_units,
+        "rmse_units": value_units,
         "event_threshold_mm": event_threshold_mm,
+        "event_threshold": event_threshold_mm,
+        "event_threshold_units": value_units,
         "event_metrics": event_metrics.to_dict(),
         "tensor_spec": spec,
         "metadata": metadata,

@@ -10,7 +10,11 @@ def test_sample_event_split_manifest_is_ok():
 
     assert result["status"] == "ok"
     assert result["split_strategy"] == "event_based"
-    assert result["split_counts"] == {"train": 2, "validation": 1, "test": 1}
+    assert result["split_counts"] == {"train": 2, "validation": 2, "test": 1}
+    assert any(
+        event["event_id"] == "cwa_o_a0059_recent_sample_20260707"
+        for event in result["events"]
+    )
     assert result["errors"] == []
 
 

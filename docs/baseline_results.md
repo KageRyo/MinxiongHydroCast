@@ -45,6 +45,34 @@ future SOTA adapters:
 - POD: `0.5`
 - FAR: `0.0`
 
+## Live CWA Radar Smoke Baseline
+
+Run after collecting a CWA `O-A0059-001` event sequence and converting it with
+`--source-format cwa_opendata_grid`:
+
+```bash
+floodcasttw-tensor-baseline-evaluate \
+  --archive data/processed/cwa_recent_tensor_sample.npz \
+  --output data/processed/cwa_recent_tensor_baseline_evaluation.json \
+  --event-threshold-mm 35
+```
+
+The option name is retained for compatibility, but for `O-A0059-001` the threshold units are
+`dBZ`, not millimeters.
+
+- Source window: `2026-07-07T08:40:00+08:00` to `2026-07-07T09:00:00+08:00`
+- Input shape: `2 x 881 x 921 x 1`
+- Target shape: `1 x 881 x 921 x 1`
+- Units/CRS: `dBZ`, `TWD67`
+- Event threshold: `35.0 dBZ`
+- RMSE: `6.582019 dBZ`
+- CSI: `0.237828`
+- POD: `0.38081`
+- FAR: `0.612214`
+
+This live result verifies the pipeline on real CWA history data. It is too short for model
+selection or scientific reporting.
+
 ## Threshold Flood Risk
 
 - Model: `RainfallThresholdRiskScorer`

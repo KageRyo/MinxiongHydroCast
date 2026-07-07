@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
@@ -29,10 +30,22 @@ DEFAULT_DATA_ID = "O-A0059-001"
 DEFAULT_OUTPUT = Path("data/processed/cwa_history_index.json")
 
 TIME_KEYS = ("dataTime", "DataTime", "datetime", "DateTime", "time", "Time", "validTime")
-URL_KEYS = ("url", "URL", "downloadURL", "downloadUrl", "fileURL", "fileUrl", "filePath")
+URL_KEYS = (
+    "url",
+    "URL",
+    "downloadURL",
+    "downloadUrl",
+    "fileURL",
+    "fileUrl",
+    "filePath",
+    "ProductURL",
+    "productURL",
+    "productUrl",
+)
 NAME_KEYS = ("filename", "fileName", "name", "Name", "resourceName")
 FORMAT_KEYS = ("format", "Format", "fileFormat")
 SIZE_KEYS = ("size", "fileSize", "FileSize")
+CWA_KEY_PATTERN = re.compile(r"CWA-[A-F0-9-]{36}")
 
 
 class HttpResponse(Protocol):
@@ -133,9 +146,25 @@ def redact_authorization_url(url: str) -> str:
 def _first_string(payload: dict[str, Any], keys: tuple[str, ...]) -> str:
     for key in keys:
         value = payload.get(key)
-        if value not in (None, ""):
+        if value not in (None, "") and isinstance(value, str | int | float):
             return str(value)
     return ""
+
+
+def sanitize_cwa_payload(payload: Any) -> Any:
+    if isinstance(payload, dict):
+        sanitized = {}
+        for key, value in payload.items():
+            if str(key).lower() == "authorization":
+                sanitized[str(key)] = "REDACTED"
+            else:
+                sanitized[str(key)] = sanitize_cwa_payload(value)
+        return sanitized
+    if isinstance(payload, list):
+        return [sanitize_cwa_payload(item) for item in payload]
+    if isinstance(payload, str):
+        return CWA_KEY_PATTERN.sub("REDACTED", redact_authorization_url(payload))
+    return payload
 
 
 def _iter_dicts(payload: Any) -> list[dict[str, Any]]:
@@ -161,11 +190,11 @@ def extract_history_files(payload: dict[str, Any]) -> tuple[CwaHistoryFile, ...]
         files.append(
             CwaHistoryFile(
                 data_time=data_time,
-                url=url,
+                url=redact_authorization_url(url),
                 filename=filename,
                 file_format=_first_string(item, FORMAT_KEYS),
                 size=_first_string(item, SIZE_KEYS),
-                raw={str(key): value for key, value in item.items()},
+                raw=sanitize_cwa_payload(item),
             )
         )
     return tuple(files)
@@ -204,7 +233,7 @@ def fetch_history_index(
         data_id=request.data_id,
         source_url=redact_authorization_url(response.url),
         files=files,
-        raw=payload,
+        raw=sanitize_cwa_payload(payload),
     )
 
 
