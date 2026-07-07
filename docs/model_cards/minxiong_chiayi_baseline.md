@@ -23,17 +23,20 @@ The current results are pipeline smoke tests, not scientific performance claims.
 - Input shape: `2 x 881 x 921 x 1`
 - Target shape: `1 x 881 x 921 x 1`
 - Event threshold: `35.0 dBZ`
-- RMSE: `6.582019 dBZ`
-- CSI: `0.237828`
-- POD: `0.38081`
-- FAR: `0.612214`
+- Valid pixels: `1946`
+- Ignored nodata pixels: `809455`
+- RMSE: `11.676495 dBZ`
+- CSI: `0.302741`
+- POD: `0.455197`
+- FAR: `0.525234`
 
 Tiny U-Net training infrastructure smoke result:
 
 - Device: two RTX 4090 GPUs through PyTorch `DataParallel`
 - Batch repeats: 2
 - Epochs: 1
-- Final loss: `253653.125`
+- Normalization: z-score over valid input/target pixels
+- Final masked loss: `0.997039`
 - Checkpoint: ignored local path under `data/external/checkpoints/`
 
 ## Limitations
@@ -41,7 +44,8 @@ Tiny U-Net training infrastructure smoke result:
 - This baseline repeats the latest frame and has no learned dynamics.
 - The sample is too short for training or benchmark reporting.
 - Radar echo is not the same as surface rainfall or flood depth.
-- Raw CWA nodata values are still present in the neural-training smoke tensor.
+- The neural-training smoke run masks CWA nodata values, but the dataset is far too short for
+  model selection.
 - Minxiong flood-risk evaluation still requires labels, local gauges, sensors, and QPE/gauge
   validation.
 

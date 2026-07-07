@@ -65,10 +65,13 @@ The option name is retained for compatibility, but for `O-A0059-001` the thresho
 - Target shape: `1 x 881 x 921 x 1`
 - Units/CRS: `dBZ`, `TWD67`
 - Event threshold: `35.0 dBZ`
-- RMSE: `6.582019 dBZ`
-- CSI: `0.237828`
-- POD: `0.38081`
-- FAR: `0.612214`
+- Valid pixels: `1946`
+- Ignored nodata pixels: `809455`
+- Nodata values: `-999`, `-99`
+- RMSE: `11.676495 dBZ`
+- CSI: `0.302741`
+- POD: `0.455197`
+- FAR: `0.525234`
 
 This live result verifies the pipeline on real CWA history data. It is too short for model
 selection or scientific reporting.
@@ -86,11 +89,14 @@ visible through PyTorch `DataParallel`.
 - Batch repeats: 2
 - Epochs: 1
 - Hidden channels: 2
-- Final loss: `253653.125`
-- Checkpoint path: ignored `data/external/checkpoints/tiny_unet_cwa_2gpu_smoke/`
+- Normalization: z-score over valid input/target pixels
+- Valid target pixels: `6600`
+- Ignored target nodata pixels: `1616202`
+- Final masked loss: `0.997039`
+- Checkpoint path: ignored `data/external/checkpoints/tiny_unet_cwa_2gpu_masked_smoke/`
 
-This confirms the training loop, checkpoint write, run summary, and multi-GPU visibility. The loss
-is not meaningful yet because nodata values are still present in the raw radar tensor.
+This confirms the training loop, checkpoint write, run summary, multi-GPU visibility, nodata
+masking, and training normalization. It is still a smoke test rather than a benchmark.
 
 ## Threshold Flood Risk
 

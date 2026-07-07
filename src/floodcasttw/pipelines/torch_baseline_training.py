@@ -17,6 +17,7 @@ from floodcasttw.io.run_summary import (
     record_run,
     start_run,
 )
+from floodcasttw.models.radar_tensor import nodata_values_from_metadata, valid_value_mask
 from floodcasttw.pipelines.radar_tensor_conversion import load_tensor_archive
 
 PIPELINE_NAME = "torch_baseline_training"
@@ -57,6 +58,40 @@ def prepare_channels_first_arrays(archive: dict[str, object]) -> tuple[np.ndarra
     return model_input, model_target
 
 
+def arrays_to_channels_first(
+    input_array: np.ndarray,
+    target_array: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    if input_array.ndim != 4 or target_array.ndim != 4:
+        raise ValueError("arrays must be [time, height, width, channels]")
+    model_input = input_array.transpose(0, 3, 1, 2).reshape(
+        1,
+        input_array.shape[0] * input_array.shape[3],
+        input_array.shape[1],
+        input_array.shape[2],
+    )
+    model_target = target_array.transpose(0, 3, 1, 2).reshape(
+        1,
+        target_array.shape[0] * target_array.shape[3],
+        target_array.shape[1],
+        target_array.shape[2],
+    )
+    return model_input, model_target
+
+
+def prepare_channels_first_masks(
+    archive: dict[str, object],
+) -> tuple[np.ndarray, np.ndarray, tuple[float, ...]]:
+    metadata = archive.get("metadata", {})
+    if not isinstance(metadata, dict):
+        metadata = {}
+    nodata_values = nodata_values_from_metadata(metadata)
+    input_mask = valid_value_mask(archive["input"], nodata_values)
+    target_mask = valid_value_mask(archive["target"], nodata_values)
+    input_channels, target_channels = arrays_to_channels_first(input_mask, target_mask)
+    return input_channels.astype(bool), target_channels.astype(bool), nodata_values
+
+
 def repeat_training_batch(
     model_input: np.ndarray,
     model_target: np.ndarray,
@@ -71,6 +106,47 @@ def repeat_training_batch(
         np.repeat(model_input, batch_repeats, axis=0),
         np.repeat(model_target, batch_repeats, axis=0),
     )
+
+
+def normalize_training_arrays(
+    model_input: np.ndarray,
+    model_target: np.ndarray,
+    input_mask: np.ndarray,
+    target_mask: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, dict[str, object]]:
+    valid_values = np.concatenate(
+        [
+            model_input[input_mask].astype(np.float64),
+            model_target[target_mask].astype(np.float64),
+        ]
+    )
+    if valid_values.size == 0:
+        raise ValueError("training archive has no valid pixels after nodata masking")
+    mean = float(valid_values.mean())
+    std = float(valid_values.std())
+    if std == 0.0:
+        std = 1.0
+
+    normalized_input = ((model_input - mean) / std).astype(np.float32)
+    normalized_target = ((model_target - mean) / std).astype(np.float32)
+    normalized_input[~input_mask] = 0.0
+    normalized_target[~target_mask] = 0.0
+    return normalized_input, normalized_target, {
+        "method": "z_score",
+        "mean": round(mean, 6),
+        "std": round(std, 6),
+        "input_valid_pixel_count": int(input_mask.sum()),
+        "target_valid_pixel_count": int(target_mask.sum()),
+        "input_ignored_pixel_count": int(input_mask.size - int(input_mask.sum())),
+        "target_ignored_pixel_count": int(target_mask.size - int(target_mask.sum())),
+    }
+
+
+def masked_mse_loss(prediction, target, target_mask):
+    if not bool(target_mask.any()):
+        raise ValueError("training target mask has no valid pixels")
+    squared_error = (prediction - target) ** 2
+    return squared_error[target_mask].mean()
 
 
 def require_torch() -> tuple[Any, Any]:
@@ -140,10 +216,22 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
     torch, nn = require_torch()
     archive = load_tensor_archive(config.archive_path)
     model_input, model_target = prepare_channels_first_arrays(archive)
+    input_mask, target_mask, nodata_values = prepare_channels_first_masks(archive)
     model_input, model_target = repeat_training_batch(
         model_input,
         model_target,
         batch_repeats=config.batch_repeats,
+    )
+    input_mask, target_mask = repeat_training_batch(
+        input_mask,
+        target_mask,
+        batch_repeats=config.batch_repeats,
+    )
+    model_input, model_target, normalization = normalize_training_arrays(
+        model_input,
+        model_target,
+        input_mask,
+        target_mask,
     )
     device = select_device(torch, config.device)
     torch.manual_seed(config.seed)
@@ -153,6 +241,7 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
 
     x = torch.from_numpy(model_input).to(device)
     y = torch.from_numpy(model_target).to(device)
+    y_mask = torch.from_numpy(target_mask).to(device)
     model = build_tiny_unet(
         nn,
         input_channels=model_input.shape[1],
@@ -171,14 +260,13 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
     if use_data_parallel:
         model = nn.DataParallel(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
-    loss_fn = nn.MSELoss()
 
     losses: list[float] = []
     model.train()
     for _epoch in range(config.epochs):
         optimizer.zero_grad(set_to_none=True)
         prediction = model(x)
-        loss = loss_fn(prediction, y)
+        loss = masked_mse_loss(prediction, y, y_mask)
         loss.backward()
         optimizer.step()
         losses.append(round(float(loss.detach().cpu().item()), 6))
@@ -200,6 +288,8 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
             "multi_gpu": config.multi_gpu,
             "batch_repeats": config.batch_repeats,
         },
+        "normalization": normalization,
+        "nodata_values": list(nodata_values),
         "loss_history": losses,
         "tensor_spec": archive["spec"],
         "metadata": archive["metadata"],
@@ -221,6 +311,8 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
         "batch_repeats": config.batch_repeats,
         "input_shape": list(model_input.shape),
         "target_shape": list(model_target.shape),
+        "normalization": normalization,
+        "nodata_values": list(nodata_values),
         "loss_history": losses,
         "final_loss": losses[-1] if losses else None,
         "tensor_spec": archive["spec"],
@@ -284,6 +376,8 @@ def main() -> None:
                 "batch_repeats": args.batch_repeats,
                 "used_cuda_device_count": result["used_cuda_device_count"],
                 "cuda_device_names": result["cuda_device_names"],
+                "normalization": result["normalization"],
+                "nodata_values": result["nodata_values"],
             },
         )
         record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -40,6 +41,21 @@ def validate_radar_tensor(array, spec: RadarTensorSpec, *, kind: str = "input") 
     actual = tuple(np.asarray(array).shape)
     if actual != expected:
         raise ValueError(f"{kind} radar tensor shape {actual} does not match expected {expected}")
+
+
+def nodata_values_from_metadata(metadata: dict[str, Any]) -> tuple[float, ...]:
+    values = metadata.get("nodata_values", ())
+    if not isinstance(values, list | tuple):
+        return ()
+    return tuple(float(value) for value in values)
+
+
+def valid_value_mask(array, nodata_values: tuple[float, ...] = ()) -> np.ndarray:
+    values = np.asarray(array, dtype=np.float32)
+    mask = np.isfinite(values)
+    for nodata_value in nodata_values:
+        mask &= ~np.isclose(values, nodata_value)
+    return mask
 
 
 def save_spec(spec: RadarTensorSpec, path: Path) -> None:

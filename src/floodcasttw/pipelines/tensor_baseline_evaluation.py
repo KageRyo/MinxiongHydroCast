@@ -19,6 +19,7 @@ from floodcasttw.io.run_summary import (
 )
 from floodcasttw.models.baselines import PersistenceNowcaster
 from floodcasttw.models.metrics import binary_event_metrics, rmse
+from floodcasttw.models.radar_tensor import nodata_values_from_metadata, valid_value_mask
 from floodcasttw.pipelines.radar_tensor_conversion import load_tensor_archive
 
 PIPELINE_NAME = "tensor_baseline_evaluation"
@@ -36,12 +37,24 @@ def evaluate_persistence_tensor_archive(
     metadata = archive["metadata"]
     spec = archive["spec"]
     value_units = str(spec.get("units", ""))
+    nodata_values = nodata_values_from_metadata(metadata)
     model = PersistenceNowcaster(horizon=target_tensor.shape[0])
     prediction = model.predict(input_tensor)
+    target_mask = valid_value_mask(target_tensor, nodata_values)
+    latest_input_mask = valid_value_mask(input_tensor[-1:], nodata_values)
+    prediction_mask = np.repeat(latest_input_mask, target_tensor.shape[0], axis=0)
+    evaluation_mask = target_mask & prediction_mask
+    valid_pixels = int(evaluation_mask.sum())
+    ignored_pixels = int(evaluation_mask.size - valid_pixels)
+    if valid_pixels == 0:
+        raise ValueError("tensor archive has no valid pixels for evaluation")
+    prediction_valid = prediction[evaluation_mask]
+    target_valid = target_tensor[evaluation_mask]
     event_metrics = binary_event_metrics(
-        prediction >= event_threshold_mm,
-        target_tensor >= event_threshold_mm,
+        prediction_valid >= event_threshold_mm,
+        target_valid >= event_threshold_mm,
     )
+    rmse_value = round(rmse(prediction_valid, target_valid), 6)
     return {
         "generated_at": datetime.now(TAIPEI_TZ).isoformat(timespec="seconds"),
         "model": "PersistenceNowcaster",
@@ -51,14 +64,17 @@ def evaluate_persistence_tensor_archive(
         "input_shape": list(input_tensor.shape),
         "target_shape": list(target_tensor.shape),
         "prediction_shape": list(prediction.shape),
-        "rmse_mm": round(rmse(prediction, target_tensor), 6),
-        "rmse": round(rmse(prediction, target_tensor), 6),
+        "rmse_mm": rmse_value,
+        "rmse": rmse_value,
         "value_units": value_units,
         "rmse_units": value_units,
         "event_threshold_mm": event_threshold_mm,
         "event_threshold": event_threshold_mm,
         "event_threshold_units": value_units,
         "event_metrics": event_metrics.to_dict(),
+        "valid_pixel_count": valid_pixels,
+        "ignored_pixel_count": ignored_pixels,
+        "nodata_values": list(nodata_values),
         "tensor_spec": spec,
         "metadata": metadata,
     }
@@ -116,6 +132,9 @@ def main() -> None:
         metadata={
             "event_id": result["event_id"],
             "event_threshold_mm": args.event_threshold_mm,
+            "valid_pixel_count": result["valid_pixel_count"],
+            "ignored_pixel_count": result["ignored_pixel_count"],
+            "nodata_values": result["nodata_values"],
         },
     )
     record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)

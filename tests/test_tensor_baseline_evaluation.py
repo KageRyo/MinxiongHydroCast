@@ -1,5 +1,8 @@
 from pathlib import Path
 
+import numpy as np
+
+from floodcasttw.models.radar_tensor import RadarTensorSpec
 from floodcasttw.pipelines.radar_tensor_conversion import (
     convert_records,
     read_pixel_records,
@@ -48,6 +51,43 @@ def test_evaluate_persistence_tensor_archive_reports_metrics(tmp_path: Path):
     assert result["event_metrics"]["csi"] == 0.5
     assert result["event_metrics"]["pod"] == 0.5
     assert result["event_metrics"]["far"] == 0.0
+
+
+def test_evaluate_persistence_tensor_archive_ignores_nodata_pixels(tmp_path: Path):
+    archive_path = tmp_path / "masked_radar_tensor.npz"
+    input_tensor = np.array(
+        [[[[1.0], [10.0]], [[-999.0], [30.0]]]],
+        dtype=np.float32,
+    )
+    target_tensor = np.array(
+        [[[[2.0], [10.0]], [[50.0], [-999.0]]]],
+        dtype=np.float32,
+    )
+    write_tensor_archive(
+        output_path=archive_path,
+        input_tensor=input_tensor,
+        target_tensor=target_tensor,
+        spec=RadarTensorSpec(
+            input_length=1,
+            prediction_length=1,
+            height=2,
+            width=2,
+            units="dBZ",
+            crs="TWD67",
+        ),
+        metadata={"event_id": "masked_event", "nodata_values": [-999.0]},
+    )
+
+    result = evaluate_persistence_tensor_archive(
+        archive_path=archive_path,
+        event_threshold_mm=5.0,
+    )
+
+    assert result["rmse"] == 0.707107
+    assert result["valid_pixel_count"] == 2
+    assert result["ignored_pixel_count"] == 2
+    assert result["event_metrics"]["hits"] == 1
+    assert result["event_metrics"]["correct_negatives"] == 1
 
 
 def test_write_tensor_baseline_evaluation_result(tmp_path: Path):

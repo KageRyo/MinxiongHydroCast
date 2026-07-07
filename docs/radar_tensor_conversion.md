@@ -83,9 +83,10 @@ path:
 - Units/CRS: `dBZ`, `TWD67`
 - Cadence: 10 minutes
 
-The persistence smoke baseline at a `35.0 dBZ` event threshold produced RMSE `6.582019 dBZ`,
-CSI `0.237828`, POD `0.38081`, and FAR `0.612214`. This is a pipeline verification result, not a
-scientific benchmark.
+The persistence smoke baseline at a `35.0 dBZ` event threshold ignores CWA nodata values `-999`
+and `-99`. It used 1,946 valid pixels, ignored 809,455 nodata pixels, and produced RMSE
+`11.676495 dBZ`, CSI `0.302741`, POD `0.455197`, and FAR `0.525234`. This is a pipeline
+verification result, not a scientific benchmark.
 
 ## Production Path
 

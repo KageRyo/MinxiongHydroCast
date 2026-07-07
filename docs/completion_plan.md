@@ -23,12 +23,14 @@ Chiayi/Minxiong-ready model without committing credentials, raw official data, o
 - Completed: optional Tiny U-Net training entrypoint with deterministic seed, checkpoint save, and
   resume support.
 - Completed: Tiny U-Net 2-GPU smoke training on the target server with two visible RTX 4090 GPUs.
+- Completed: CWA nodata masking and z-score normalization for baseline evaluation and Tiny U-Net
+  smoke training.
 - Completed: baseline model card for Minxiong/Chiayi-oriented smoke testing.
 - Completed: local WRA API key configuration; real key stays in ignored `.env`.
 - Pending integration work: WRA official API endpoint contracts still need implementation in the
   ingestion layer.
-- Pending training work: mask nodata values and normalize radar tensors before meaningful Tiny
-  U-Net or NowcastNet training.
+- Pending training work: collect enough event windows for meaningful Tiny U-Net or NowcastNet
+  training.
 - Pending benchmark work: collect real Chiayi/Minxiong heavy-rain and Taiwan-wide typhoon/front
   event windows before reporting model performance.
 

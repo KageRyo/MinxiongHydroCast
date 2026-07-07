@@ -71,15 +71,15 @@ The Tiny U-Net entrypoint supports a multi-GPU smoke run:
 ```bash
 PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_training \
   --archive data/processed/cwa_recent_tensor_sample.npz \
-  --output-dir data/external/checkpoints/tiny_unet_cwa_2gpu_smoke \
+  --output-dir data/external/checkpoints/tiny_unet_cwa_2gpu_masked_smoke \
   --device cuda \
   --multi-gpu \
   --batch-repeats 2 \
   --epochs 1
 ```
 
-Use this to verify training infrastructure only. Real training still needs nodata masking,
-normalization, and longer event-based datasets.
+Use this to verify training infrastructure only. The training path masks CWA nodata values and
+z-score normalizes valid pixels, but real training still needs longer event-based datasets.
 
 ## Recommended Roadmap
 

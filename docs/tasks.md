@@ -33,6 +33,7 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Add an optional Tiny U-Net PyTorch training entrypoint with checkpoint save/resume and
       deterministic run summaries.
 - [x] Run Tiny U-Net smoke training on two RTX 4090 GPUs with PyTorch `DataParallel`.
+- [x] Mask CWA nodata values and z-score normalize tensors for Tiny U-Net smoke training.
 - [x] Add `WRA_API_KEY` to local configuration support and `env.example` without committing keys.
 - [x] Populate event split manifest with a live-verified historical CWA radar sequence sample.
 
@@ -63,7 +64,7 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Add a small U-Net training entrypoint for one RTX 4090 before using both GPUs.
 - [x] Add checkpoint save/resume and deterministic training run summaries.
 - [x] Use the CUDA-enabled `VLM` environment and run the Tiny U-Net baseline on two GPUs.
-- [ ] Mask CWA nodata values and normalize radar tensors before real neural training.
+- [x] Mask CWA nodata values and normalize radar tensors before neural smoke training.
 - [ ] Compare CSI, POD, FAR, RMSE, and lead-time metrics across persistence and Tiny U-Net outputs.
 - [ ] Wire NowcastNet inference only after code, checkpoint, and license are reviewed.
 

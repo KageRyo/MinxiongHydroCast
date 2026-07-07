@@ -213,12 +213,15 @@ Train the optional PyTorch baseline after installing a CUDA-enabled PyTorch buil
 ```bash
 floodcasttw-train-torch-baseline \
   --archive data/processed/cwa_radar_tensor_sample.npz \
-  --output-dir data/external/checkpoints/tiny_unet \
+  --output-dir data/external/checkpoints/tiny_unet_cwa_2gpu_masked_smoke \
   --device cuda \
   --multi-gpu \
   --batch-repeats 2 \
   --epochs 1
 ```
+
+The training command masks CWA nodata values and z-score normalizes valid pixels before computing
+loss.
 
 Every command-line pipeline writes a JSON run summary under
 `data/processed/run_summaries/` and appends a compact JSONL event to
