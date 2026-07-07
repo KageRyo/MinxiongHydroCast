@@ -1,7 +1,8 @@
 # Roadmap
 
 This roadmap turns FloodCastTW into a usable flood-risk data and nowcasting platform. Keep each
-milestone small enough to track in [tasks.md](tasks.md).
+milestone small enough to track in [tasks.md](tasks.md). The completion definition and phase-by-phase
+exit criteria are maintained in [completion_plan.md](completion_plan.md).
 
 ## Milestone 1: Stabilize Live Data Ingestion
 
@@ -48,9 +49,26 @@ milestone small enough to track in [tasks.md](tasks.md).
 - [x] Run a small inference-only smoke test before training.
 - [x] Compare the adapter tensor contract against the persistence baseline.
 
-## Milestone 6: Operationalize
+## Milestone 6: Build Historical Radar Dataset
+
+- [ ] Collect short multi-frame CWA radar sequences under ignored `data/external/`.
+- [ ] Build event plans for Chiayi/Minxiong heavy-rain windows and Taiwan-wide typhoon/front events.
+- [ ] Populate tracked event split manifests with real historical event metadata.
+- [ ] Produce reproducible dataset summaries without committing official raw data.
+- [ ] Add gauge/QPE validation reports for each dataset build.
+
+## Milestone 7: Train And Compare Models
+
+- [ ] Convert CWA event sequences into tensor archives with CRS, timestamp, and nodata metadata.
+- [ ] Evaluate persistence on real converted event tensors.
+- [ ] Train a small ConvLSTM or U-Net baseline on one RTX 4090.
+- [ ] Add checkpoint save/resume and deterministic training summaries.
+- [ ] Migrate NowcastNet only after license and tensor compatibility are reviewed.
+
+## Milestone 8: Operationalize
 
 - [ ] Add scheduled jobs only after ingestion and validation are stable.
 - [x] Emit structured logs and run summaries for every pipeline execution.
 - [x] Add CI for tests and linting.
 - [x] Maintain a repo task list for unchecked roadmap items.
+- [ ] Publish Taiwan-wide and Minxiong/Chiayi model cards before distributing checkpoints.

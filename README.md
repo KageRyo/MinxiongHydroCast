@@ -230,3 +230,4 @@ Radar source review is documented in [docs/radar_data_sources.md](docs/radar_dat
 Event split rules are documented in [docs/event_splits.md](docs/event_splits.md).
 Radar tensor conversion is documented in [docs/radar_tensor_conversion.md](docs/radar_tensor_conversion.md).
 Radar source adapters are documented in [docs/radar_source_adapters.md](docs/radar_source_adapters.md).
+The project completion plan is documented in [docs/completion_plan.md](docs/completion_plan.md).
