@@ -214,8 +214,10 @@ Train the optional PyTorch baseline after installing a CUDA-enabled PyTorch buil
 floodcasttw-train-torch-baseline \
   --archive data/processed/cwa_radar_tensor_sample.npz \
   --output-dir data/external/checkpoints/tiny_unet \
-  --device auto \
-  --epochs 3
+  --device cuda \
+  --multi-gpu \
+  --batch-repeats 2 \
+  --epochs 1
 ```
 
 Every command-line pipeline writes a JSON run summary under

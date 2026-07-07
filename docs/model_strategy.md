@@ -62,9 +62,24 @@ GPUs first for controlled experiments:
 - Use both GPUs only after data loading, checkpointing, and evaluation are repeatable.
 - Reserve NowcastNet-style training for gridded Taiwan radar tensors with event-based splits.
 
-The current default environment does not install PyTorch. Install the `model` extra and a
-CUDA-compatible PyTorch build in the training environment before running GPU jobs. Checkpoints stay
-under ignored `data/external/checkpoints/` paths.
+The current default environment does not install PyTorch. Use a CUDA-compatible PyTorch environment
+for GPU jobs; on the target server, the `VLM` conda environment has been verified with two visible
+RTX 4090 GPUs. Checkpoints stay under ignored `data/external/checkpoints/` paths.
+
+The Tiny U-Net entrypoint supports a multi-GPU smoke run:
+
+```bash
+PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_training \
+  --archive data/processed/cwa_recent_tensor_sample.npz \
+  --output-dir data/external/checkpoints/tiny_unet_cwa_2gpu_smoke \
+  --device cuda \
+  --multi-gpu \
+  --batch-repeats 2 \
+  --epochs 1
+```
+
+Use this to verify training infrastructure only. Real training still needs nodata masking,
+normalization, and longer event-based datasets.
 
 ## Recommended Roadmap
 

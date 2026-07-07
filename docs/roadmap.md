@@ -63,7 +63,8 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Evaluate persistence on real converted event tensors.
 - [x] Add a small U-Net baseline training entrypoint for one RTX 4090.
 - [x] Add checkpoint save/resume and deterministic training summaries.
-- [ ] Install CUDA-enabled PyTorch and run the Tiny U-Net baseline on GPU.
+- [x] Run the Tiny U-Net smoke baseline on two RTX 4090 GPUs.
+- [ ] Add nodata masking and radar tensor normalization for meaningful neural training.
 - [ ] Migrate NowcastNet only after license and tensor compatibility are reviewed.
 
 ## Milestone 8: Operationalize

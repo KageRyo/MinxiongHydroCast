@@ -32,6 +32,8 @@ class TorchTrainingConfig:
     device: str = "auto"
     seed: int = 42
     resume_checkpoint: Path | None = None
+    multi_gpu: bool = False
+    batch_repeats: int = 1
 
 
 def prepare_channels_first_arrays(archive: dict[str, object]) -> tuple[np.ndarray, np.ndarray]:
@@ -55,6 +57,22 @@ def prepare_channels_first_arrays(archive: dict[str, object]) -> tuple[np.ndarra
     return model_input, model_target
 
 
+def repeat_training_batch(
+    model_input: np.ndarray,
+    model_target: np.ndarray,
+    *,
+    batch_repeats: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    if batch_repeats < 1:
+        raise ValueError("batch_repeats must be at least 1")
+    if batch_repeats == 1:
+        return model_input, model_target
+    return (
+        np.repeat(model_input, batch_repeats, axis=0),
+        np.repeat(model_target, batch_repeats, axis=0),
+    )
+
+
 def require_torch() -> tuple[Any, Any]:
     try:
         import torch
@@ -73,6 +91,12 @@ def select_device(torch: Any, requested: str) -> str:
     if requested == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("CUDA was requested but torch.cuda.is_available() is false")
     return requested
+
+
+def cuda_device_names(torch: Any) -> list[str]:
+    if not torch.cuda.is_available():
+        return []
+    return [torch.cuda.get_device_name(index) for index in range(torch.cuda.device_count())]
 
 
 def build_tiny_unet(nn: Any, *, input_channels: int, output_channels: int, hidden_channels: int):
@@ -116,6 +140,11 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
     torch, nn = require_torch()
     archive = load_tensor_archive(config.archive_path)
     model_input, model_target = prepare_channels_first_arrays(archive)
+    model_input, model_target = repeat_training_batch(
+        model_input,
+        model_target,
+        batch_repeats=config.batch_repeats,
+    )
     device = select_device(torch, config.device)
     torch.manual_seed(config.seed)
     if torch.cuda.is_available():
@@ -133,6 +162,14 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
     if config.resume_checkpoint:
         checkpoint = torch.load(config.resume_checkpoint, map_location=device)
         model.load_state_dict(checkpoint["state_dict"])
+    cuda_count = torch.cuda.device_count() if torch.cuda.is_available() else 0
+    use_data_parallel = config.multi_gpu and device == "cuda" and cuda_count > 1
+    if config.multi_gpu and device != "cuda":
+        raise RuntimeError("--multi-gpu requires CUDA")
+    if config.multi_gpu and cuda_count < 2:
+        raise RuntimeError("--multi-gpu requires at least two visible CUDA devices")
+    if use_data_parallel:
+        model = nn.DataParallel(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
     loss_fn = nn.MSELoss()
 
@@ -149,9 +186,10 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
     config.output_dir.mkdir(parents=True, exist_ok=True)
     checkpoint_path = config.output_dir / "tiny_unet_nowcaster.pt"
     result_path = config.output_dir / "tiny_unet_training_result.json"
+    model_state = model.module.state_dict() if use_data_parallel else model.state_dict()
     checkpoint = {
         "model_name": "TinyUNetNowcaster",
-        "state_dict": model.state_dict(),
+        "state_dict": model_state,
         "config": {
             "epochs": config.epochs,
             "learning_rate": config.learning_rate,
@@ -159,6 +197,8 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
             "device": device,
             "seed": config.seed,
             "resume_checkpoint": str(config.resume_checkpoint or ""),
+            "multi_gpu": config.multi_gpu,
+            "batch_repeats": config.batch_repeats,
         },
         "loss_history": losses,
         "tensor_spec": archive["spec"],
@@ -173,6 +213,12 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
         "device": device,
         "seed": config.seed,
         "resume_checkpoint": str(config.resume_checkpoint or ""),
+        "multi_gpu": config.multi_gpu,
+        "data_parallel": use_data_parallel,
+        "cuda_device_count": cuda_count,
+        "cuda_device_names": cuda_device_names(torch),
+        "used_cuda_device_count": cuda_count if use_data_parallel else int(device == "cuda"),
+        "batch_repeats": config.batch_repeats,
         "input_shape": list(model_input.shape),
         "target_shape": list(model_target.shape),
         "loss_history": losses,
@@ -194,6 +240,8 @@ def main() -> None:
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--resume-checkpoint", type=Path, default=None)
+    parser.add_argument("--multi-gpu", action="store_true")
+    parser.add_argument("--batch-repeats", type=int, default=1)
     parser.add_argument(
         "--summary-output",
         type=Path,
@@ -212,6 +260,8 @@ def main() -> None:
         device=args.device,
         seed=args.seed,
         resume_checkpoint=args.resume_checkpoint,
+        multi_gpu=args.multi_gpu,
+        batch_repeats=args.batch_repeats,
     )
     try:
         result = train_tiny_unet_archive(config)
@@ -230,6 +280,10 @@ def main() -> None:
                 "hidden_channels": args.hidden_channels,
                 "seed": args.seed,
                 "resume_checkpoint": str(args.resume_checkpoint or ""),
+                "multi_gpu": args.multi_gpu,
+                "batch_repeats": args.batch_repeats,
+                "used_cuda_device_count": result["used_cuda_device_count"],
+                "cuda_device_names": result["cuda_device_names"],
             },
         )
         record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)
@@ -248,6 +302,8 @@ def main() -> None:
                 "hidden_channels": args.hidden_channels,
                 "seed": args.seed,
                 "resume_checkpoint": str(args.resume_checkpoint or ""),
+                "multi_gpu": args.multi_gpu,
+                "batch_repeats": args.batch_repeats,
             },
         )
         record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)

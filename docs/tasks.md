@@ -32,13 +32,16 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Evaluate persistence on a real converted CWA radar event tensor.
 - [x] Add an optional Tiny U-Net PyTorch training entrypoint with checkpoint save/resume and
       deterministic run summaries.
+- [x] Run Tiny U-Net smoke training on two RTX 4090 GPUs with PyTorch `DataParallel`.
+- [x] Add `WRA_API_KEY` to local configuration support and `env.example` without committing keys.
 - [x] Populate event split manifest with a live-verified historical CWA radar sequence sample.
 
 ## Next
 
 ### Phase 1: Data Source Finalization
 
-- [ ] Confirm WRA API access and data contracts after the WRA application is approved.
+- [x] Confirm local WRA API key storage without committing the key.
+- [ ] Implement WRA official API ingestion after endpoint contracts are confirmed.
 
 ### Phase 2: Dataset Build
 
@@ -59,7 +62,8 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Evaluate persistence on real converted radar event tensors.
 - [x] Add a small U-Net training entrypoint for one RTX 4090 before using both GPUs.
 - [x] Add checkpoint save/resume and deterministic training run summaries.
-- [ ] Install CUDA-enabled PyTorch in the training environment and run the Tiny U-Net baseline.
+- [x] Use the CUDA-enabled `VLM` environment and run the Tiny U-Net baseline on two GPUs.
+- [ ] Mask CWA nodata values and normalize radar tensors before real neural training.
 - [ ] Compare CSI, POD, FAR, RMSE, and lead-time metrics across persistence and Tiny U-Net outputs.
 - [ ] Wire NowcastNet inference only after code, checkpoint, and license are reviewed.
 

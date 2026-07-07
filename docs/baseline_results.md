@@ -73,6 +73,25 @@ The option name is retained for compatibility, but for `O-A0059-001` the thresho
 This live result verifies the pipeline on real CWA history data. It is too short for model
 selection or scientific reporting.
 
+## Tiny U-Net 2-GPU Smoke Training
+
+The Tiny U-Net training entrypoint was smoke-tested on the target server with two RTX 4090 GPUs
+visible through PyTorch `DataParallel`.
+
+- Environment: `VLM`
+- Device: `cuda`
+- CUDA devices used: 2
+- GPU names: `NVIDIA GeForce RTX 4090`, `NVIDIA GeForce RTX 4090`
+- Source archive: `data/processed/cwa_recent_tensor_sample.npz`
+- Batch repeats: 2
+- Epochs: 1
+- Hidden channels: 2
+- Final loss: `253653.125`
+- Checkpoint path: ignored `data/external/checkpoints/tiny_unet_cwa_2gpu_smoke/`
+
+This confirms the training loop, checkpoint write, run summary, and multi-GPU visibility. The loss
+is not meaningful yet because nodata values are still present in the raw radar tensor.
+
 ## Threshold Flood Risk
 
 - Model: `RainfallThresholdRiskScorer`
