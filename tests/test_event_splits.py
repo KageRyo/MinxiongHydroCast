@@ -10,12 +10,27 @@ def test_sample_event_split_manifest_is_ok():
 
     assert result["status"] == "ok"
     assert result["split_strategy"] == "event_based"
-    assert result["split_counts"] == {"train": 2, "validation": 2, "test": 1}
+    assert result["split_counts"] == {"train": 2, "validation": 3, "test": 3}
     assert any(
         event["event_id"] == "cwa_o_a0059_recent_sample_20260707"
         for event in result["events"]
     )
     assert result["errors"] == []
+
+
+def test_radar_event_windows_are_registered_in_event_splits():
+    manifest = load_manifest(Path("data/samples/event_split_manifest.json"))
+    event_ids = {event.event_id for event in manifest.events}
+    radar_windows = json.loads(
+        Path("data/samples/radar_event_windows.json").read_text(encoding="utf-8")
+    )
+
+    candidate_ids = {
+        candidate["event_id"] for candidate in radar_windows["candidate_windows"]
+    }
+
+    assert candidate_ids
+    assert candidate_ids <= event_ids
 
 
 def test_weather_event_rejects_invalid_time_order():

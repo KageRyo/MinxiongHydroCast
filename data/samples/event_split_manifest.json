@@ -52,6 +52,36 @@
       "end_time": "2026-07-07T09:00:00+08:00",
       "source": "CWA historyAPI O-A0059-001 live verification",
       "notes": "Three-frame live-verified radar echo sequence; use for pipeline smoke tests, not model benchmarking."
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon",
+      "name": "Chiayi/Minxiong radar heavy-rain candidate, 2026-07-02 afternoon",
+      "event_type": "extreme_rainfall_radar_candidate",
+      "region": "Minxiong, Chiayi County",
+      "start_time": "2026-07-02T12:00:00+08:00",
+      "end_time": "2026-07-02T18:00:00+08:00",
+      "source": "CWA O-A0059 hourly discovery scan",
+      "notes": "Hourly scan found local peak 58.0 dBZ at 2026-07-02T15:00:00+08:00; full 10-minute collection pending."
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon",
+      "name": "Chiayi/Minxiong radar heavy-rain coverage candidate, 2026-07-03 afternoon",
+      "event_type": "extreme_rainfall_radar_candidate",
+      "region": "Minxiong, Chiayi County",
+      "start_time": "2026-07-03T13:00:00+08:00",
+      "end_time": "2026-07-03T19:00:00+08:00",
+      "source": "CWA O-A0059 hourly discovery scan",
+      "notes": "Hourly scan found the largest local 35 dBZ coverage at 2026-07-03T17:00:00+08:00; full 10-minute collection pending."
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening",
+      "name": "Taiwan-wide widespread radar candidate, 2026-06-28 afternoon-evening",
+      "event_type": "widespread_radar_candidate",
+      "region": "Taiwan",
+      "start_time": "2026-06-28T13:00:00+08:00",
+      "end_time": "2026-06-28T21:00:00+08:00",
+      "source": "CWA O-A0059 hourly discovery scan",
+      "notes": "Hourly scan found the largest Taiwan-wide 35 dBZ coverage at 2026-06-28T13:00:00+08:00; attach official weather context before labeling as typhoon or frontal."
     }
   ],
   "splits": {
@@ -61,10 +91,13 @@
     ],
     "validation": [
       "demo_convective_validation_2025",
-      "cwa_o_a0059_recent_sample_20260707"
+      "cwa_o_a0059_recent_sample_20260707",
+      "cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening"
     ],
     "test": [
-      "demo_extreme_test_2025"
+      "demo_extreme_test_2025",
+      "cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon",
+      "cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon"
     ]
   },
   "notes": [

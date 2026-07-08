@@ -36,6 +36,10 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Mask CWA nodata values and z-score normalize tensors for Tiny U-Net smoke training.
 - [x] Add `WRA_API_KEY` to local configuration support and `env.example` without committing keys.
 - [x] Populate event split manifest with a live-verified historical CWA radar sequence sample.
+- [x] Add a CWA radar event summary command for Minxiong/Chiayi local and Taiwan-wide threshold
+      evidence.
+- [x] Identify Chiayi/Minxiong heavy-rain and Taiwan-wide widespread radar candidate windows from
+      a 240-frame CWA hourly discovery scan.
 
 ## Next
 
@@ -46,7 +50,11 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 
 ### Phase 2: Dataset Build
 
-- [ ] Add Chiayi/Minxiong heavy-rain event windows and Taiwan-wide typhoon/front event windows.
+- [x] Track Chiayi/Minxiong heavy-rain and Taiwan-wide widespread radar candidate windows in
+      `data/samples/radar_event_windows.json`.
+- [ ] Download complete 10-minute CWA sequences for the selected candidate windows.
+- [ ] Attach official CWA weather context before labeling Taiwan-wide windows as typhoon or
+      frontal events.
 - [ ] Add gauge/QPE validation reports so QPE is treated as an estimate, not direct ground truth.
 - [ ] Produce reproducible dataset summaries under ignored `data/processed/run_summaries/`.
 

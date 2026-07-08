@@ -169,7 +169,22 @@ floodcasttw-cwa-event-plan \
 ```
 
 The event plan and collection manifest keep CWA URLs redacted. The downloader reads
-`CWA_API_KEY` from local environment variables only.
+`CWA_API_KEY` from local environment variables only. For larger discovery scans, use
+`--frame-stride` to sample frames, `--max-workers` for limited concurrent downloads, and
+`--skip-existing` to resume interrupted local downloads.
+
+Summarize a downloaded CWA event collection for local Chiayi/Minxiong and Taiwan-wide radar
+threshold evidence:
+
+```bash
+floodcasttw-radar-event-summary \
+  --collection data/processed/cwa_event_collection.json \
+  --output data/processed/cwa_event_summary.json
+```
+
+Tracked candidate windows from the latest CWA hourly discovery scan are stored in
+`data/samples/radar_event_windows.json`. They are radar-derived candidates; attach official weather
+context before labeling them as typhoon or frontal events.
 
 Check event-based train/validation/test splits:
 
@@ -281,6 +296,7 @@ Baseline evaluation results are documented in [docs/baseline_results.md](docs/ba
 NowcastNet migration is documented in [docs/nowcastnet_migration.md](docs/nowcastnet_migration.md).
 Radar source review is documented in [docs/radar_data_sources.md](docs/radar_data_sources.md).
 Event split rules are documented in [docs/event_splits.md](docs/event_splits.md).
+Radar event windows are documented in [docs/radar_event_windows.md](docs/radar_event_windows.md).
 Radar tensor conversion is documented in [docs/radar_tensor_conversion.md](docs/radar_tensor_conversion.md).
 Radar source adapters are documented in [docs/radar_source_adapters.md](docs/radar_source_adapters.md).
 The project completion plan is documented in [docs/completion_plan.md](docs/completion_plan.md).

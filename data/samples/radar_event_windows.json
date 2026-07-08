@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "source": "CWA historyAPI O-A0059-001 live verification",
+  "source_data_id": "O-A0059-001",
+  "value_units": "dBZ",
+  "event_threshold": 35.0,
+  "history_index": {
+    "verified_at": "2026-07-08",
+    "first_time": "2026-06-28T13:00:00+08:00",
+    "last_time": "2026-07-08T12:40:00+08:00",
+    "file_count": 1439
+  },
+  "discovery_scan": {
+    "event_id": "cwa_o_a0059_hourly_scan_20260628_20260708",
+    "cadence_minutes": 60,
+    "frame_count": 240,
+    "start_time": "2026-06-28T13:00:00+08:00",
+    "end_time": "2026-07-08T12:00:00+08:00",
+    "collection_status": "collected_locally_ignored",
+    "summary_status": "collected_locally_ignored",
+    "summary_output": "data/processed/cwa_event_summary_hourly_scan_20260628_20260708.json"
+  },
+  "candidate_windows": [
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon",
+      "name": "Chiayi/Minxiong radar heavy-rain candidate, 2026-07-02 afternoon",
+      "event_type": "extreme_rainfall_radar_candidate",
+      "region": "Minxiong, Chiayi County",
+      "start_time": "2026-07-02T12:00:00+08:00",
+      "end_time": "2026-07-02T18:00:00+08:00",
+      "target_cadence_minutes": 10,
+      "collection_status": "candidate_identified_full_sequence_pending",
+      "selection_basis": "highest local-focus dBZ in hourly discovery scan",
+      "evidence": {
+        "source_event_id": "cwa_o_a0059_hourly_scan_20260628_20260708",
+        "local_focus": "Minxiong, Chiayi County",
+        "local_peak_time": "2026-07-02T15:00:00+08:00",
+        "local_peak_max_dbz": 58.0,
+        "hourly_local_frames_over_threshold": 12,
+        "hourly_local_total_pixels_ge_threshold": 622
+      }
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon",
+      "name": "Chiayi/Minxiong radar heavy-rain coverage candidate, 2026-07-03 afternoon",
+      "event_type": "extreme_rainfall_radar_candidate",
+      "region": "Minxiong, Chiayi County",
+      "start_time": "2026-07-03T13:00:00+08:00",
+      "end_time": "2026-07-03T19:00:00+08:00",
+      "target_cadence_minutes": 10,
+      "collection_status": "candidate_identified_full_sequence_pending",
+      "selection_basis": "largest local-focus 35 dBZ coverage in hourly discovery scan",
+      "evidence": {
+        "source_event_id": "cwa_o_a0059_hourly_scan_20260628_20260708",
+        "local_focus": "Minxiong, Chiayi County",
+        "coverage_peak_time": "2026-07-03T17:00:00+08:00",
+        "coverage_peak_pixels_ge_threshold": 198,
+        "coverage_peak_fraction_ge_threshold": 0.685121
+      }
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening",
+      "name": "Taiwan-wide widespread radar candidate, 2026-06-28 afternoon-evening",
+      "event_type": "widespread_radar_candidate",
+      "region": "Taiwan",
+      "start_time": "2026-06-28T13:00:00+08:00",
+      "end_time": "2026-06-28T21:00:00+08:00",
+      "target_cadence_minutes": 10,
+      "collection_status": "candidate_identified_full_sequence_pending",
+      "selection_basis": "largest Taiwan-wide 35 dBZ coverage in hourly discovery scan",
+      "evidence": {
+        "source_event_id": "cwa_o_a0059_hourly_scan_20260628_20260708",
+        "coverage_peak_time": "2026-06-28T13:00:00+08:00",
+        "coverage_peak_max_dbz": 56.29999923706055,
+        "coverage_peak_pixels_ge_threshold": 6498,
+        "coverage_peak_fraction_ge_threshold": 0.102568
+      }
+    }
+  ],
+  "notes": [
+    "Candidate labels are radar-derived only; do not call a window typhoon or frontal until official weather context is attached.",
+    "Full 10-minute collections remain under ignored data/external paths and should be summarized before model benchmarking.",
+    "Keep Minxiong/Chiayi candidate windows out of training when measuring local performance."
+  ]
+}

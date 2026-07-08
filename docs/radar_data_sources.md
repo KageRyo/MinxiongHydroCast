@@ -100,14 +100,11 @@ floodcasttw-cwa-grid-inspect \
 
 CWA's front end links the history Swagger operation as
 `get_v1_getMetadata__data_id_`, which implies a `GET /v1/getMetadata/{data_id}` style endpoint.
-The current client defaults to:
+This was live-verified for `O-A0059-001` on 2026-07-08. The current client defaults to:
 
 ```text
 https://opendata.cwa.gov.tw/historyapi/v1/getMetadata/{data_id}?Authorization=REDACTED
 ```
-
-This endpoint still needs live verification against CWA because the official history Swagger JS was
-not available during the last offline implementation pass.
 
 Dry-run the inferred URL:
 
@@ -124,6 +121,35 @@ floodcasttw-cwa-event-plan \
   --start-time 2026-07-06T18:00:00+08:00 \
   --end-time 2026-07-06T21:00:00+08:00
 ```
+
+For broad candidate discovery, sample the history index before downloading complete 10-minute
+windows:
+
+```bash
+floodcasttw-cwa-event-plan \
+  --history-index data/processed/cwa_history_index_live.json \
+  --event-id cwa_o_a0059_hourly_scan_20260628_20260708 \
+  --start-time 2026-06-28T13:00:00+08:00 \
+  --end-time 2026-07-08T12:40:00+08:00 \
+  --frame-stride 6 \
+  --download \
+  --skip-existing \
+  --max-workers 6 \
+  --collection-output data/processed/cwa_event_collection_hourly_scan_20260628_20260708.json
+```
+
+Then summarize the downloaded scan:
+
+```bash
+floodcasttw-radar-event-summary \
+  --collection data/processed/cwa_event_collection_hourly_scan_20260628_20260708.json \
+  --output data/processed/cwa_event_summary_hourly_scan_20260628_20260708.json \
+  --expected-cadence-minutes 60
+```
+
+The current tracked candidate windows and evidence are in
+`data/samples/radar_event_windows.json`. Raw frames and full summaries stay under ignored
+`data/external/` and `data/processed/` paths.
 
 ## Manifest
 

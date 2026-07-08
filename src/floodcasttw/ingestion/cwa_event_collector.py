@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 import re
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -134,11 +135,14 @@ def build_event_plan(
     start_time: str,
     end_time: str,
     limit: int | None = None,
+    frame_stride: int = 1,
 ) -> CwaEventPlan:
     start = parse_iso_datetime(start_time)
     end = parse_iso_datetime(end_time)
     if end < start:
         raise ValueError("end_time must be greater than or equal to start_time")
+    if frame_stride < 1:
+        raise ValueError("frame_stride must be at least 1")
 
     frames = []
     for item in history_index.get("files", []):
@@ -159,6 +163,7 @@ def build_event_plan(
             )
 
     frames.sort(key=lambda frame: parse_iso_datetime(frame.data_time))
+    frames = frames[::frame_stride]
     if limit is not None:
         frames = frames[:limit]
     return CwaEventPlan(
@@ -217,21 +222,33 @@ def download_event_frames(
     timeout: int = 60,
     http_get: UrlGet = requests.get,
     overwrite: bool = False,
+    skip_existing: bool = False,
     verify_tls: bool = True,
+    max_workers: int = 1,
 ) -> CwaEventCollection:
     if not plan.frames:
         raise ValueError("event plan has no frames")
     if not authorization:
         raise ValueError("missing CWA API key")
+    if max_workers < 1:
+        raise ValueError("max_workers must be at least 1")
     if not verify_tls:
         disable_warnings(InsecureRequestWarning)
 
-    collected: list[CwaCollectedFrame] = []
     event_dir = output_dir / plan.event_id
-    for index, frame in enumerate(plan.frames):
+
+    def collect_frame(index_and_frame: tuple[int, CwaEventFrame]) -> CwaCollectedFrame:
+        index, frame = index_and_frame
         redacted_source_url = frame_source_url(frame, data_id=plan.data_id)
         authorized_url = authorize_url(redacted_source_url, authorization=authorization)
         output_path = event_dir / safe_frame_filename(frame, data_id=plan.data_id, index=index)
+        if output_path.exists() and skip_existing and not overwrite:
+            return CwaCollectedFrame(
+                data_time=frame.data_time,
+                source_url=redacted_source_url,
+                output_path=str(output_path),
+                bytes_written=output_path.stat().st_size,
+            )
         if output_path.exists() and not overwrite:
             raise FileExistsError(f"output already exists: {output_path}")
         try:
@@ -248,14 +265,15 @@ def download_event_frames(
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_bytes(response.content)
-        collected.append(
-            CwaCollectedFrame(
-                data_time=frame.data_time,
-                source_url=redact_authorization_url(response.url),
-                output_path=str(output_path),
-                bytes_written=len(response.content),
-            )
+        return CwaCollectedFrame(
+            data_time=frame.data_time,
+            source_url=redact_authorization_url(response.url),
+            output_path=str(output_path),
+            bytes_written=len(response.content),
         )
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        collected = list(executor.map(collect_frame, enumerate(plan.frames)))
 
     return CwaEventCollection(
         event_id=plan.event_id,
@@ -281,12 +299,15 @@ def main() -> None:
     parser.add_argument("--start-time", required=True)
     parser.add_argument("--end-time", required=True)
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--frame-stride", type=int, default=1)
     parser.add_argument("--output", type=Path, default=Path("data/processed/cwa_event_plan.json"))
     parser.add_argument("--download", action="store_true")
     parser.add_argument("--download-dir", type=Path, default=DEFAULT_DOWNLOAD_DIR)
     parser.add_argument("--collection-output", type=Path, default=DEFAULT_COLLECTION_OUTPUT)
     parser.add_argument("--timeout", type=int, default=60)
     parser.add_argument("--overwrite", action="store_true")
+    parser.add_argument("--skip-existing", action="store_true")
+    parser.add_argument("--max-workers", type=int, default=1)
     parser.add_argument("--api-key-env", default="CWA_API_KEY")
     parser.add_argument(
         "--insecure-tls",
@@ -310,6 +331,7 @@ def main() -> None:
         start_time=args.start_time,
         end_time=args.end_time,
         limit=args.limit,
+        frame_stride=args.frame_stride,
     )
     write_event_plan(args.output, plan)
     collection = None
@@ -320,7 +342,9 @@ def main() -> None:
             authorization=authorization,
             timeout=args.timeout,
             overwrite=args.overwrite,
+            skip_existing=args.skip_existing,
             verify_tls=not args.insecure_tls,
+            max_workers=args.max_workers,
         )
         write_event_collection(args.collection_output, collection)
 
@@ -346,11 +370,14 @@ def main() -> None:
             "start_time": args.start_time,
             "end_time": args.end_time,
             "limit": args.limit,
+            "frame_stride": args.frame_stride,
             "download": args.download,
             "api_key_env": args.api_key_env,
             "api_key_present": bool(authorization),
             "timeout_seconds": args.timeout,
             "overwrite": args.overwrite,
+            "skip_existing": args.skip_existing,
+            "max_workers": args.max_workers,
             "verify_tls": not args.insecure_tls,
         },
     )

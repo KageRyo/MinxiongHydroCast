@@ -78,6 +78,19 @@ def test_build_event_plan_applies_limit_after_sorting():
     assert [frame.filename for frame in plan.frames] == ["1920.json", "1930.json"]
 
 
+def test_build_event_plan_applies_frame_stride_after_sorting():
+    plan = build_event_plan(
+        sample_history_index(),
+        event_id="stride",
+        start_time="2026-07-06T19:00:00+08:00",
+        end_time="2026-07-06T20:00:00+08:00",
+        frame_stride=2,
+    )
+
+    assert plan.frame_count == 2
+    assert [frame.filename for frame in plan.frames] == ["1920.json", "1940.json"]
+
+
 def test_build_event_plan_rejects_reversed_time_window():
     try:
         build_event_plan(
@@ -130,3 +143,30 @@ def test_download_event_frames_writes_outputs_without_storing_key(tmp_path: Path
     assert all("Authorization=real-key" in url for url in requested_urls)
     assert all("real-key" not in frame.source_url for frame in collection.frames)
     assert all(Path(frame.output_path).exists() for frame in collection.frames)
+
+
+def test_download_event_frames_can_skip_existing_outputs(tmp_path: Path):
+    plan = build_event_plan(
+        sample_history_index(),
+        event_id="chiayi_20260706_evening",
+        start_time="2026-07-06T19:20:00+08:00",
+        end_time="2026-07-06T19:20:00+08:00",
+    )
+    output = tmp_path / plan.event_id / "1920.json"
+    output.parent.mkdir(parents=True)
+    output.write_bytes(b'{"cached": true}')
+
+    def fake_get(url: str, *, timeout: int, verify: bool) -> FakeResponse:
+        raise AssertionError("skip_existing should not request cached frames")
+
+    collection = download_event_frames(
+        plan,
+        output_dir=tmp_path,
+        authorization="real-key",
+        http_get=fake_get,
+        skip_existing=True,
+    )
+
+    assert collection.frame_count == 1
+    assert collection.frames[0].bytes_written == len(b'{"cached": true}')
+    assert "real-key" not in collection.frames[0].source_url
