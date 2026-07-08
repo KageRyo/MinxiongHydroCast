@@ -80,6 +80,19 @@ PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_t
 
 Use this to verify training infrastructure only. The training path masks CWA nodata values and
 z-score normalizes valid pixels, but real training still needs longer event-based datasets.
+Evaluate a trained smoke checkpoint against persistence with:
+
+```bash
+PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_evaluation \
+  --archive data/processed/cwa_recent_tensor_sample.npz \
+  --checkpoint data/external/checkpoints/tiny_unet_cwa_2gpu_masked_smoke/tiny_unet_nowcaster.pt \
+  --event-threshold 35 \
+  --device cpu \
+  --output data/processed/tiny_unet_cwa_comparison.json
+```
+
+The current smoke checkpoint lowers RMSE but has CSI/POD/FAR of zero at `35 dBZ`, so it is not a
+useful nowcaster yet.
 
 ## Recommended Roadmap
 

@@ -25,6 +25,8 @@ Chiayi/Minxiong-ready model without committing credentials, raw official data, o
 - Completed: Tiny U-Net 2-GPU smoke training on the target server with two visible RTX 4090 GPUs.
 - Completed: CWA nodata masking and z-score normalization for baseline evaluation and Tiny U-Net
   smoke training.
+- Completed: persistence versus Tiny U-Net smoke comparison using the same valid-pixel mask and
+  metrics.
 - Completed: baseline model card for Minxiong/Chiayi-oriented smoke testing.
 - Completed: local WRA API key configuration; real key stays in ignored `.env`.
 - Pending integration work: WRA official API endpoint contracts still need implementation in the

@@ -48,6 +48,7 @@ floodcasttw-radar-source-check = "floodcasttw.ingestion.radar_sources:main"
 floodcasttw-radar-tensor-convert = "floodcasttw.pipelines.radar_tensor_conversion:main"
 floodcasttw-shelters = "floodcasttw.ingestion.shelters:main"
 floodcasttw-tensor-baseline-evaluate = "floodcasttw.pipelines.tensor_baseline_evaluation:main"
+floodcasttw-torch-baseline-evaluate = "floodcasttw.pipelines.torch_baseline_evaluation:main"
 floodcasttw-train-torch-baseline = "floodcasttw.pipelines.torch_baseline_training:main"
 
 [tool.setuptools.packages.find]

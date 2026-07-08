@@ -65,7 +65,8 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Add checkpoint save/resume and deterministic training run summaries.
 - [x] Use the CUDA-enabled `VLM` environment and run the Tiny U-Net baseline on two GPUs.
 - [x] Mask CWA nodata values and normalize radar tensors before neural smoke training.
-- [ ] Compare CSI, POD, FAR, RMSE, and lead-time metrics across persistence and Tiny U-Net outputs.
+- [x] Compare CSI, POD, FAR, and RMSE across persistence and Tiny U-Net smoke outputs.
+- [ ] Add lead-time metric breakdowns after collecting longer multi-step event windows.
 - [ ] Wire NowcastNet inference only after code, checkpoint, and license are reviewed.
 
 ### Phase 5: Local Flood-Risk Layer

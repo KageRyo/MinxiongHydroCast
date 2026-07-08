@@ -223,6 +223,16 @@ floodcasttw-train-torch-baseline \
 The training command masks CWA nodata values and z-score normalizes valid pixels before computing
 loss.
 
+Compare the Tiny U-Net checkpoint against persistence on the same valid pixels:
+
+```bash
+floodcasttw-torch-baseline-evaluate \
+  --archive data/processed/cwa_radar_tensor_sample.npz \
+  --checkpoint data/external/checkpoints/tiny_unet_cwa_2gpu_masked_smoke/tiny_unet_nowcaster.pt \
+  --event-threshold 35 \
+  --output data/processed/tiny_unet_cwa_comparison.json
+```
+
 Every command-line pipeline writes a JSON run summary under
 `data/processed/run_summaries/` and appends a compact JSONL event to
 `data/processed/run_logs.jsonl` by default. Override these with `--summary-output` and

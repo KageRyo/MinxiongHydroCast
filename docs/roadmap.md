@@ -65,6 +65,7 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Add checkpoint save/resume and deterministic training summaries.
 - [x] Run the Tiny U-Net smoke baseline on two RTX 4090 GPUs.
 - [x] Add nodata masking and radar tensor normalization for neural smoke training.
+- [x] Compare persistence and Tiny U-Net smoke outputs with the same metrics and mask.
 - [ ] Collect longer event datasets for meaningful neural training.
 - [ ] Migrate NowcastNet only after license and tensor compatibility are reviewed.
 

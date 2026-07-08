@@ -98,6 +98,29 @@ visible through PyTorch `DataParallel`.
 This confirms the training loop, checkpoint write, run summary, multi-GPU visibility, nodata
 masking, and training normalization. It is still a smoke test rather than a benchmark.
 
+## Tiny U-Net Versus Persistence Smoke Comparison
+
+Run:
+
+```bash
+floodcasttw-torch-baseline-evaluate \
+  --archive data/processed/cwa_recent_tensor_sample.npz \
+  --checkpoint data/external/checkpoints/tiny_unet_cwa_2gpu_masked_smoke/tiny_unet_nowcaster.pt \
+  --event-threshold 35 \
+  --output data/processed/tiny_unet_cwa_comparison.json
+```
+
+Both models are scored on the same 1,946 valid pixels after applying the CWA nodata mask and the
+latest-input validity mask.
+
+| Model | RMSE dBZ | CSI | POD | FAR |
+| --- | ---: | ---: | ---: | ---: |
+| PersistenceNowcaster | `11.676495` | `0.302741` | `0.455197` | `0.525234` |
+| TinyUNetNowcaster | `10.878726` | `0.0` | `0.0` | `0.0` |
+
+The Tiny U-Net smoke checkpoint lowers RMSE by `0.797769 dBZ` but predicts no threshold events at
+`35 dBZ`. Do not treat it as a usable model until trained on longer event splits.
+
 ## Threshold Flood Risk
 
 - Model: `RainfallThresholdRiskScorer`

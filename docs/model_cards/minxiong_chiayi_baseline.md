@@ -39,6 +39,12 @@ Tiny U-Net training infrastructure smoke result:
 - Final masked loss: `0.997039`
 - Checkpoint: ignored local path under `data/external/checkpoints/`
 
+Tiny U-Net versus persistence smoke comparison on the same valid pixels:
+
+- Persistence RMSE/CSI/POD/FAR: `11.676495`, `0.302741`, `0.455197`, `0.525234`
+- Tiny U-Net RMSE/CSI/POD/FAR: `10.878726`, `0.0`, `0.0`, `0.0`
+- Interpretation: the smoke checkpoint improves RMSE but fails event detection at `35 dBZ`.
+
 ## Limitations
 
 - This baseline repeats the latest frame and has no learned dynamics.
