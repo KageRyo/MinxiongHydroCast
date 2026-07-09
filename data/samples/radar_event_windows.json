@@ -53,13 +53,16 @@
         "summary": "data/processed/cwa_event_summary_chiayi_minxiong_heavyrain_20260702_afternoon.json",
         "tensor_archive": "data/processed/cwa_tensor_chiayi_minxiong_heavyrain_20260702_6in_6out.npz",
         "persistence_metrics": "data/processed/cwa_persistence_chiayi_minxiong_heavyrain_20260702_6in_6out.json",
-        "tiny_unet_comparison": "data/processed/tiny_unet_comparison_chiayi_minxiong_heavyrain_20260702_6in_6out.json"
+        "tiny_unet_comparison": "data/processed/tiny_unet_comparison_chiayi_minxiong_heavyrain_20260702_6in_6out.json",
+        "weighted_tiny_unet_comparison": "data/processed/tiny_unet_weighted_comparison_chiayi_minxiong_heavyrain_20260702_6in_6out.json"
       },
       "baseline_metrics": {
         "persistence_rmse": 11.465393,
         "persistence_csi": 0.278248,
         "tiny_unet_rmse": 9.914263,
-        "tiny_unet_csi": 0.086701
+        "tiny_unet_csi": 0.086701,
+        "weighted_tiny_unet_rmse": 9.56478,
+        "weighted_tiny_unet_csi": 0.246535
       }
     },
     {
@@ -93,13 +96,16 @@
         "summary": "data/processed/cwa_event_summary_chiayi_minxiong_heavyrain_20260703_afternoon.json",
         "tensor_archive": "data/processed/cwa_tensor_chiayi_minxiong_heavyrain_20260703_6in_6out.npz",
         "persistence_metrics": "data/processed/cwa_persistence_chiayi_minxiong_heavyrain_20260703_6in_6out.json",
-        "tiny_unet_comparison": "data/processed/tiny_unet_comparison_chiayi_minxiong_heavyrain_20260703_6in_6out.json"
+        "tiny_unet_comparison": "data/processed/tiny_unet_comparison_chiayi_minxiong_heavyrain_20260703_6in_6out.json",
+        "weighted_tiny_unet_comparison": "data/processed/tiny_unet_weighted_comparison_chiayi_minxiong_heavyrain_20260703_6in_6out.json"
       },
       "baseline_metrics": {
         "persistence_rmse": 10.421478,
         "persistence_csi": 0.315475,
         "tiny_unet_rmse": 9.496191,
-        "tiny_unet_csi": 0.121837
+        "tiny_unet_csi": 0.121837,
+        "weighted_tiny_unet_rmse": 8.719508,
+        "weighted_tiny_unet_csi": 0.286868
       }
     },
     {
@@ -133,13 +139,16 @@
         "summary": "data/processed/cwa_event_summary_taiwan_widespread_20260628_afternoon_evening.json",
         "tensor_archive": "data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz",
         "persistence_metrics": "data/processed/cwa_persistence_taiwan_widespread_20260628_6in_6out.json",
-        "tiny_unet_comparison": "data/processed/tiny_unet_comparison_taiwan_widespread_20260628_6in_6out.json"
+        "tiny_unet_comparison": "data/processed/tiny_unet_comparison_taiwan_widespread_20260628_6in_6out.json",
+        "weighted_tiny_unet_comparison": "data/processed/tiny_unet_weighted_comparison_taiwan_widespread_20260628_6in_6out.json"
       },
       "baseline_metrics": {
         "persistence_rmse": 8.311872,
         "persistence_csi": 0.214701,
         "tiny_unet_rmse": 8.100073,
-        "tiny_unet_csi": 0.048339
+        "tiny_unet_csi": 0.048339,
+        "weighted_tiny_unet_rmse": 6.820217,
+        "weighted_tiny_unet_csi": 0.210941
       }
     }
   ],

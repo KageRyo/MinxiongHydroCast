@@ -135,6 +135,12 @@ PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_t
 Use `threshold_focal_mse` only after the weighted run is stable. These options are meant to improve
 threshold-event detection; judge them by CSI/POD/FAR and lead-time metrics, not RMSE alone.
 
+The first weighted run completed on two RTX 4090 GPUs in the `VLM` environment with 30 training
+windows, 8 validation windows, 20 epochs, and best validation loss `0.848734`. It reduced RMSE on
+all three full events and improved Tiny U-Net CSI compared with the 1-epoch unweighted diagnostic,
+but persistence still has better CSI. The next modeling work should add more weather-diverse
+events before increasing architecture complexity.
+
 ## Recommended Roadmap
 
 1. Stabilize WRA/CWA/NCDR ingestion and validation.

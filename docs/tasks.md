@@ -91,6 +91,7 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Add lead-time metric breakdowns after collecting longer multi-step event windows.
 - [x] Add threshold-weighted Tiny U-Net loss options, validation split support, and early stopping
       metadata for stronger-event experiments.
+- [x] Run the weighted Tiny U-Net experiment on two RTX 4090 GPUs and compare full-event metrics.
 - [ ] Wire NowcastNet inference only after event diversity, code, checkpoint, tensor shape, and
       license are reviewed.
 

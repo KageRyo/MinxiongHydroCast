@@ -144,8 +144,8 @@ PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_e
 At `35 dBZ`, the 1-epoch Tiny U-Net lowers aggregate RMSE but under-detects threshold events
 compared with persistence. Treat it as a diagnostic baseline, not a deployable model.
 
-| Event | Persistence RMSE | Persistence CSI | Tiny U-Net RMSE | Tiny U-Net CSI |
-| --- | ---: | ---: | ---: | ---: |
-| Taiwan-wide train | `8.311872` | `0.214701` | `8.100073` | `0.048339` |
-| Chiayi/Minxiong 2026-07-02 test | `11.465393` | `0.278248` | `9.914263` | `0.086701` |
-| Chiayi/Minxiong 2026-07-03 test | `10.421478` | `0.315475` | `9.496191` | `0.121837` |
+| Event | Persistence RMSE | Persistence CSI | Tiny U-Net RMSE | Tiny U-Net CSI | Weighted Tiny U-Net RMSE | Weighted Tiny U-Net CSI |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Taiwan-wide train | `8.311872` | `0.214701` | `8.100073` | `0.048339` | `6.820217` | `0.210941` |
+| Chiayi/Minxiong 2026-07-02 test | `11.465393` | `0.278248` | `9.914263` | `0.086701` | `9.564780` | `0.246535` |
+| Chiayi/Minxiong 2026-07-03 test | `10.421478` | `0.315475` | `9.496191` | `0.121837` | `8.719508` | `0.286868` |

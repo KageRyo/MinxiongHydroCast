@@ -33,6 +33,8 @@ Chiayi/Minxiong-ready model without committing credentials, raw official data, o
   before official CWA evidence is attached.
 - Completed: Tiny U-Net threshold-weighted loss options, validation split support, and early
   stopping metadata for the next strong-echo experiment.
+- Completed: weighted Tiny U-Net full-event run on two RTX 4090 GPUs; RMSE improved, but CSI still
+  trails persistence.
 - Completed: baseline model card for Minxiong/Chiayi-oriented smoke testing.
 - Completed: local WRA API key configuration; real key stays in ignored `.env`.
 - Pending integration work: WRA official API endpoint contracts still need implementation in the
