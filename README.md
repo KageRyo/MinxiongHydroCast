@@ -201,6 +201,8 @@ context from `data/samples/event_weather_context.json` before labeling them as t
 frontal, or convective events. Next-batch candidates stay in
 `data/samples/event_expansion_queue.json` until they have complete 10-minute collections, tensors,
 official context, and QPE/gauge validation.
+Official CWA weather-context source review is tracked in
+`data/samples/weather_context_source_review.json`.
 
 Validate CWA 1-hour QPE against rain gauges after collecting local `O-B0045-001` and
 `O-A0002-001` captures for the same window:

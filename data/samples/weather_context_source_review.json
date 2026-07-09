@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "verified_at": "2026-07-09T22:55:00+08:00",
+  "purpose": "Track official CWA weather-context sources reviewed before assigning weather-type labels to radar-derived event windows.",
+  "source_policy": "Weather labels must cite CWA weather maps, warnings, daily reports, or official open-data products. Radar-only morphology is not acceptable evidence.",
+  "official_sources_reviewed": [
+    {
+      "source_id": "cwa_sitemap",
+      "kind": "website_page",
+      "provider": "Central Weather Administration",
+      "url": "https://www.cwa.gov.tw/V8/C/sitemap.html",
+      "finding": "Sitemap exposes official warning, typhoon, weather overview, analysis chart, PDF, and latest chart pages.",
+      "relevant_links": [
+        "https://www.cwa.gov.tw/V8/C/P/Warning/FIFOWS.html",
+        "https://www.cwa.gov.tw/V8/C/P/Typhoon/TY_WARN.html",
+        "https://www.cwa.gov.tw/V8/C/W/index.html",
+        "https://www.cwa.gov.tw/V8/C/W/analysis.html",
+        "https://www.cwa.gov.tw/V8/C/W/pdf.html",
+        "https://www.cwa.gov.tw/V8/C/W/graph_collection.html"
+      ],
+      "event_time_coverage": "navigation_only"
+    },
+    {
+      "source_id": "cwa_analysis_charts",
+      "kind": "website_page",
+      "provider": "Central Weather Administration",
+      "url": "https://www.cwa.gov.tw/V8/C/W/analysis.html",
+      "finding": "Official analysis page identifies latest weather chart, surface weather chart, weekly forecast chart, and quantitative precipitation forecast products.",
+      "relevant_products": [
+        "https://www.cwa.gov.tw/Data/js/fcst/MFC_SFCcombo_C_Data.js",
+        "https://www.cwa.gov.tw/Data/fcst_img/SFC01.pdf",
+        "https://www.cwa.gov.tw/Data/fcst_img/FI04.png"
+      ],
+      "event_time_coverage": "current_and_recent_chart_list"
+    },
+    {
+      "source_id": "cwa_surface_chart_recent_index",
+      "kind": "website_data_js",
+      "provider": "Central Weather Administration",
+      "url": "https://www.cwa.gov.tw/Data/js/fcst/MFC_SFCcombo_C_Data.js",
+      "finding": "The current JS index lists recent surface weather charts only. Local review on 2026-07-09 observed entries from 2026-07-06 20:00 to 2026-07-09 14:00.",
+      "observed_time_range": {
+        "first": "2026-07-06T20:00:00+08:00",
+        "last": "2026-07-09T14:00:00+08:00"
+      },
+      "event_time_coverage": "does_not_cover_selected_2026-06-28_2026-07-02_2026-07-03_windows",
+      "direct_historical_file_probe_status": "pending_network_quota"
+    },
+    {
+      "source_id": "cwa_forecast_pdf_page",
+      "kind": "website_page",
+      "provider": "Central Weather Administration",
+      "url": "https://www.cwa.gov.tw/V8/C/W/pdf.html",
+      "finding": "Official page links current weather overview and forecast PDFs such as W01.pdf, W11.pdf, and W53.pdf.",
+      "event_time_coverage": "current_forecast_pdf_only"
+    },
+    {
+      "source_id": "cwa_warning_content_js",
+      "kind": "website_data_js",
+      "provider": "Central Weather Administration",
+      "url": "https://www.cwa.gov.tw/Data/js/warn/Warning_Content.js",
+      "finding": "Current warning JS includes active warning content, including typhoon-related warnings on 2026-07-09, but does not provide selected event-time historical warning content.",
+      "event_time_coverage": "current_warning_content_only"
+    },
+    {
+      "source_id": "cwa_opendata_warning_products",
+      "kind": "open_data_metadata",
+      "provider": "Central Weather Administration",
+      "url": "https://opendata.cwa.gov.tw/webapi/datasetList/w",
+      "data_ids_reviewed": [
+        "W-C0033-001",
+        "W-C0033-002",
+        "W-C0033-003",
+        "W-C0034-001",
+        "W-C0034-005"
+      ],
+      "finding": "Warning and typhoon products are official sources, but reviewed metadata/products did not expose historyAPI coverage for selected event timestamps.",
+      "event_time_coverage": "current_or_non_history_products"
+    }
+  ],
+  "events": [
+    {
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening",
+      "window_start": "2026-06-28T13:00:00+08:00",
+      "window_end": "2026-06-28T21:00:00+08:00",
+      "official_weather_type": "official_context_pending",
+      "label_status": "blocked_no_event_time_official_synoptic_source",
+      "needed_sources": [
+        "CWA surface weather chart or daily weather overview covering 2026-06-28 afternoon-evening",
+        "CWA warning/typhoon check covering 2026-06-28 afternoon-evening"
+      ],
+      "next_probe_urls": [
+        "https://www.cwa.gov.tw/Data/fcst_img/2026-0628-0600_SFCcombo.jpg",
+        "https://www.cwa.gov.tw/Data/fcst_img/2026-0628-1200_SFCcombo.jpg"
+      ],
+      "notes": "Do not classify as front, Mei-yu, typhoon outer rainband, or afternoon convection until at least one event-time official source is attached."
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon",
+      "window_start": "2026-07-02T12:00:00+08:00",
+      "window_end": "2026-07-02T18:00:00+08:00",
+      "official_weather_type": "official_context_pending",
+      "label_status": "blocked_no_event_time_official_synoptic_source",
+      "needed_sources": [
+        "CWA surface weather chart or daily weather overview covering 2026-07-02 afternoon",
+        "CWA warning/advisory check for Chiayi County during 2026-07-02 afternoon"
+      ],
+      "next_probe_urls": [
+        "https://www.cwa.gov.tw/Data/fcst_img/2026-0702-0600_SFCcombo.jpg",
+        "https://www.cwa.gov.tw/Data/fcst_img/2026-0702-1200_SFCcombo.jpg"
+      ],
+      "notes": "Gauge observations confirm local hourly rain, but weather mechanism remains unclassified without official synoptic or warning evidence."
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon",
+      "window_start": "2026-07-03T13:00:00+08:00",
+      "window_end": "2026-07-03T19:00:00+08:00",
+      "official_weather_type": "official_context_pending",
+      "label_status": "blocked_no_event_time_official_synoptic_source",
+      "needed_sources": [
+        "CWA surface weather chart or daily weather overview covering 2026-07-03 afternoon-evening",
+        "CWA warning/advisory check for Chiayi County during 2026-07-03 afternoon-evening"
+      ],
+      "next_probe_urls": [
+        "https://www.cwa.gov.tw/Data/fcst_img/2026-0703-0600_SFCcombo.jpg",
+        "https://www.cwa.gov.tw/Data/fcst_img/2026-0703-1200_SFCcombo.jpg"
+      ],
+      "notes": "Use this as a radar/gauge-backed heavy-rain candidate only until official weather context is attached."
+    }
+  ],
+  "next_actions": [
+    "Probe candidate CWA SFCcombo image URLs once network quota is available.",
+    "If CWA historical chart images exist, attach the downloaded local ignored image path plus source URL and classify each event.",
+    "If historical chart images are unavailable, locate another official CWA daily report/archive before assigning labels."
+  ]
+}

@@ -125,6 +125,26 @@ event-time `O-A0002-001` rain-gauge captures are available and parse as CWA XML,
 per-event gauge-vs-QPE reports are therefore blocked until event-time QPE grids are captured
 locally or an official historical QPE archive is confirmed.
 
+## Official Weather Context
+
+Weather-type labels are tracked separately from radar/QPE collection because they need official
+CWA evidence. The source review manifest is
+`data/samples/weather_context_source_review.json`.
+
+Reviewed CWA official pages include:
+
+- `https://www.cwa.gov.tw/V8/C/sitemap.html`
+- `https://www.cwa.gov.tw/V8/C/W/analysis.html`
+- `https://www.cwa.gov.tw/V8/C/W/pdf.html`
+- `https://www.cwa.gov.tw/V8/C/W/graph_collection.html`
+- `https://www.cwa.gov.tw/Data/js/fcst/MFC_SFCcombo_C_Data.js`
+- `https://www.cwa.gov.tw/Data/js/warn/Warning_Content.js`
+
+The current surface-chart JS index is useful for official weather maps, but the observed current
+index does not cover the selected 2026-06-28, 2026-07-02, or 2026-07-03 event windows. Do not
+promote any `official_context_pending` event to front, Mei-yu, typhoon outer rainband, or
+afternoon convection until an event-time source URL is verified and recorded.
+
 ## History Workflow
 
 CWA's front end links the history Swagger operation as

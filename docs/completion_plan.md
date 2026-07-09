@@ -36,6 +36,8 @@ Chiayi/Minxiong-ready model without committing credentials, raw official data, o
   404.
 - Completed: event weather-context manifest that prevents radar-only windows from being mislabeled
   before official CWA evidence is attached.
+- Completed: CWA official weather-context source review manifest listing reviewed CWA pages,
+  current coverage, and next historical chart probe URLs.
 - Completed: Tiny U-Net threshold-weighted loss options, validation split support, and early
   stopping metadata for the next strong-echo experiment.
 - Completed: weighted Tiny U-Net full-event run on two RTX 4090 GPUs; RMSE improved, but CSI still
@@ -46,6 +48,9 @@ Chiayi/Minxiong-ready model without committing credentials, raw official data, o
   ingestion layer.
 - Pending official-label work: attach CWA weather maps, warnings, daily reports, or equivalent
   official source evidence to each selected event before weather-type stratification.
+- Pending source-probe work: verify whether event-time CWA historical surface chart URLs remain
+  accessible; the current CWA surface-chart JS index only covered recent charts from 2026-07-06
+  through 2026-07-09 during the latest review.
 - Pending validation work: run live QPE/gauge reports for each selected event after matching
   event-time QPE grids are captured or an official historical QPE archive is confirmed.
 - Pending training work: collect enough event windows for meaningful Tiny U-Net or NowcastNet

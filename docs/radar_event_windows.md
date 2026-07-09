@@ -43,6 +43,14 @@ typhoon, Mei-yu, frontal, or convective.
 Official weather-context tracking lives in `data/samples/event_weather_context.json`. The current
 entries are intentionally `official_context_pending`; do not stratify train/test by weather type
 until each event cites CWA weather maps, warnings, daily reports, or another official source.
+Official source review and next CWA probe URLs are tracked in
+`data/samples/weather_context_source_review.json`.
+
+Current official-source review found CWA pages for weather warnings, typhoon warnings, weather
+overview PDFs, analysis charts, and latest chart graphics. The CWA surface chart JS currently lists
+recent charts from `2026-07-06T20:00:00+08:00` through `2026-07-09T14:00:00+08:00`, which does
+not cover the three selected event windows. Direct historical chart URL probes are the next step
+once network quota is available.
 
 ## QPE/Gauge Status
 

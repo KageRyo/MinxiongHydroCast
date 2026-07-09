@@ -126,6 +126,20 @@ Required fields in `data/samples/event_weather_context.json`:
 Use `official_context_pending` until CWA weather maps, warnings, daily reports, or equivalent
 official sources are attached.
 
+## Weather Context Source Review
+
+Required top-level fields in `data/samples/weather_context_source_review.json`:
+
+- `schema_version`
+- `verified_at`
+- `official_sources_reviewed`
+- `events`
+- `next_actions`
+
+Each event entry should include `event_id`, `official_weather_type`, `label_status`,
+`needed_sources`, and `next_probe_urls`. Use a `blocked_*` label status until an event-time CWA
+weather map, warning, daily report, or equivalent official product is attached.
+
 ## QPE/Gauge Validation Reports
 
 Required top-level fields:

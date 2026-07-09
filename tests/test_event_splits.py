@@ -61,6 +61,34 @@ def test_radar_event_windows_have_weather_context_entries():
             assert context["official_evidence"] == []
 
 
+def test_weather_context_source_review_covers_pending_radar_windows():
+    radar_windows = json.loads(
+        Path("data/samples/radar_event_windows.json").read_text(encoding="utf-8")
+    )
+    weather_context = json.loads(
+        Path("data/samples/event_weather_context.json").read_text(encoding="utf-8")
+    )
+    source_review = json.loads(
+        Path("data/samples/weather_context_source_review.json").read_text(encoding="utf-8")
+    )
+    candidate_ids = {
+        candidate["event_id"] for candidate in radar_windows["candidate_windows"]
+    }
+    review_by_event_id = {event["event_id"]: event for event in source_review["events"]}
+
+    assert weather_context["source_review"] == "data/samples/weather_context_source_review.json"
+    assert candidate_ids <= set(review_by_event_id)
+    for source in source_review["official_sources_reviewed"]:
+        assert source["provider"] == "Central Weather Administration"
+        assert source["url"].startswith(("https://www.cwa.gov.tw/", "https://opendata.cwa.gov.tw/"))
+    for event_id in candidate_ids:
+        event = review_by_event_id[event_id]
+        assert event["official_weather_type"] == "official_context_pending"
+        assert event["label_status"].startswith("blocked_")
+        assert event["needed_sources"]
+        assert all("Authorization=" not in url for url in event["next_probe_urls"])
+
+
 def test_event_expansion_queue_tracks_uncollected_candidates_only():
     radar_windows = json.loads(
         Path("data/samples/radar_event_windows.json").read_text(encoding="utf-8")
