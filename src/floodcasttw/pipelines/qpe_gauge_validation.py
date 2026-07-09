@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -39,6 +40,7 @@ DEFAULT_RAINFALL_KEYS = (
     "rainfall",
 )
 INVALID_RAINFALL_VALUES = {-99.0, -999.0, -1.0}
+DEFAULT_XML_RAINFALL_WINDOWS = ("Past1hr", "Past1Hr", "Past1Hour")
 
 
 @dataclass(frozen=True)
@@ -143,6 +145,105 @@ def _first_data_time(payload: dict[str, Any]) -> str:
     return ""
 
 
+def _local_name(tag: str) -> str:
+    return tag.rsplit("}", 1)[-1]
+
+
+def _child(element: ET.Element, name: str) -> ET.Element | None:
+    for child in list(element):
+        if _local_name(child.tag) == name:
+            return child
+    return None
+
+
+def _child_text(element: ET.Element, path: tuple[str, ...]) -> str:
+    node: ET.Element | None = element
+    for name in path:
+        node = _child(node, name) if node is not None else None
+    if node is None or node.text is None:
+        return ""
+    return node.text.strip()
+
+
+def _station_xml_coordinates(station: ET.Element) -> tuple[float | None, float | None]:
+    geo_info = _child(station, "GeoInfo")
+    if geo_info is None:
+        return None, None
+    coordinates = [
+        child for child in list(geo_info) if _local_name(child.tag) == "Coordinates"
+    ]
+    selected = None
+    for coordinate in coordinates:
+        if _child_text(coordinate, ("CoordinateName",)).upper() == "WGS84":
+            selected = coordinate
+            break
+    if selected is None and coordinates:
+        selected = coordinates[0]
+    if selected is None:
+        return None, None
+    return (
+        _parse_float(_child_text(selected, ("StationLatitude",))),
+        _parse_float(_child_text(selected, ("StationLongitude",))),
+    )
+
+
+def _station_xml_rainfall(
+    station: ET.Element,
+    *,
+    rainfall_windows: tuple[str, ...],
+) -> float | None:
+    rainfall_element = _child(station, "RainfallElement")
+    if rainfall_element is None:
+        return None
+    for window_name in rainfall_windows:
+        window = _child(rainfall_element, window_name)
+        if window is None:
+            continue
+        parsed = _parse_float(_child_text(window, ("Precipitation",)))
+        if parsed is None:
+            parsed = _parse_float(window.text.strip() if window.text else "")
+        if parsed is not None:
+            return parsed
+    return None
+
+
+def extract_gauge_observations_from_xml(
+    xml_text: str,
+    *,
+    rainfall_windows: tuple[str, ...] = DEFAULT_XML_RAINFALL_WINDOWS,
+) -> list[GaugeObservation]:
+    root = ET.fromstring(xml_text)
+    observations = []
+    seen: set[tuple[str, str]] = set()
+    for station in root.iter():
+        if _local_name(station.tag) != "Station":
+            continue
+        station_id = _child_text(station, ("StationId",))
+        station_name = _child_text(station, ("StationName",))
+        data_time = _child_text(station, ("ObsTime", "DateTime"))
+        latitude, longitude = _station_xml_coordinates(station)
+        rainfall = _station_xml_rainfall(station, rainfall_windows=rainfall_windows)
+        if latitude is None or longitude is None or rainfall is None:
+            continue
+        if rainfall in INVALID_RAINFALL_VALUES or rainfall < 0:
+            continue
+        key = (station_id or station_name, data_time)
+        if key in seen:
+            continue
+        seen.add(key)
+        observations.append(
+            GaugeObservation(
+                station_id=station_id,
+                station_name=station_name,
+                latitude=latitude,
+                longitude=longitude,
+                rainfall_mm=rainfall,
+                data_time=data_time,
+            )
+        )
+    return observations
+
+
 def extract_gauge_observations(
     payload: dict[str, Any],
     *,
@@ -177,6 +278,28 @@ def extract_gauge_observations(
             )
         )
     return observations
+
+
+def gauge_payload_format(path: Path) -> str:
+    text = path.read_text(encoding="utf-8").lstrip()
+    if text.startswith("<"):
+        return "xml"
+    return "json"
+
+
+def load_gauge_observations(
+    path: Path,
+    *,
+    rainfall_keys: tuple[str, ...] = DEFAULT_RAINFALL_KEYS,
+) -> list[GaugeObservation]:
+    text = path.read_text(encoding="utf-8")
+    if text.lstrip().startswith("<"):
+        xml_windows = tuple(key for key in rainfall_keys if key.startswith("Past"))
+        if not xml_windows:
+            xml_windows = DEFAULT_XML_RAINFALL_WINDOWS
+        return extract_gauge_observations_from_xml(text, rainfall_windows=xml_windows)
+    payload = json.loads(text)
+    return extract_gauge_observations(payload, rainfall_keys=rainfall_keys)
 
 
 def qpe_grid_index_for_point(
@@ -312,8 +435,7 @@ def build_qpe_gauge_report(
     rainfall_keys: tuple[str, ...] = DEFAULT_RAINFALL_KEYS,
 ) -> dict[str, object]:
     inspection, values = extract_cwa_grid_values(qpe_grid_path)
-    gauge_payload = json.loads(gauge_json_path.read_text(encoding="utf-8"))
-    gauges = extract_gauge_observations(gauge_payload, rainfall_keys=rainfall_keys)
+    gauges = load_gauge_observations(gauge_json_path, rainfall_keys=rainfall_keys)
     matches = match_qpe_to_gauges(inspection=inspection, values=values, gauges=gauges)
     summary = summarize_matches(matches)
     return {
@@ -333,6 +455,7 @@ def build_qpe_gauge_report(
         "gauge_source": {
             "path": str(gauge_json_path),
             "rainfall_keys": list(rainfall_keys),
+            "format": gauge_payload_format(gauge_json_path),
             "source_data_id": "O-A0002-001",
         },
         "summary": summary,

@@ -145,6 +145,19 @@ Dry-run the inferred CWA historyAPI file-list endpoint:
 floodcasttw-cwa-history-list --dry-run --data-id O-A0059-001
 ```
 
+Download a specific CWA history `getData` timestamp into ignored local storage:
+
+```bash
+floodcasttw-cwa-history-data-download \
+  --data-id O-A0002-001 \
+  --data-time 2026-07-02T15:30:00+08:00 \
+  --output data/external/gauges/events/O-A0002-001_20260702153000.xml \
+  --insecure-tls
+```
+
+Use this for event-time rain-gauge captures and QPE availability probes. The downloader redacts
+`Authorization` in errors, run summaries, and logs.
+
 After the history endpoint is live-verified, build a multi-frame event plan:
 
 ```bash
@@ -199,6 +212,11 @@ floodcasttw-qpe-gauge-validate \
   --event-id <event_id> \
   --output data/processed/qpe_gauge_validation_<event_id>.json
 ```
+
+Current selected-event status is tracked in
+`data/samples/qpe_gauge_validation_status.json`: `O-A0002-001` gauge captures parse for the three
+events, but event-time `O-B0045-001` history `getData` probes return HTTP 404, so the actual
+gauge-vs-QPE reports remain blocked until QPE grids are captured or an official archive is found.
 
 Check event-based train/validation/test splits:
 

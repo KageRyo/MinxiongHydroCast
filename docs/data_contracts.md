@@ -138,3 +138,19 @@ Required top-level fields:
 
 Each station match should include station ID/name, coordinates, gauge rainfall, nearest QPE value,
 difference, absolute error, grid row/column, status, and exclusion reason when applicable.
+
+## QPE/Gauge Validation Status
+
+Required top-level fields in `data/samples/qpe_gauge_validation_status.json`:
+
+- `schema_version`
+- `verified_at`
+- `required_products`
+- `availability_findings`
+- `events`
+- `next_actions`
+
+Each event status should include `event_id`, `validation_time`, `gauge_status`, gauge station
+counts, `qpe_status`, a redacted QPE endpoint, and `report_status`. Use
+`blocked_missing_event_time_qpe_grid` until a matching `O-B0045-001` QPE grid exists for that
+event time.

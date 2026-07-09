@@ -90,6 +90,32 @@ def test_event_expansion_queue_tracks_uncollected_candidates_only():
         assert "run O-B0045-001 QPE versus O-A0002-001 gauge validation" in required
 
 
+def test_qpe_gauge_validation_status_covers_radar_event_windows():
+    radar_windows = json.loads(
+        Path("data/samples/radar_event_windows.json").read_text(encoding="utf-8")
+    )
+    validation_status = json.loads(
+        Path("data/samples/qpe_gauge_validation_status.json").read_text(encoding="utf-8")
+    )
+    candidate_ids = {
+        candidate["event_id"] for candidate in radar_windows["candidate_windows"]
+    }
+    status_by_event_id = {event["event_id"]: event for event in validation_status["events"]}
+
+    assert candidate_ids <= set(status_by_event_id)
+    assert validation_status["required_products"]["qpe"]["data_id"] == "O-B0045-001"
+    assert validation_status["required_products"]["gauge"]["data_id"] == "O-A0002-001"
+    for event_id in candidate_ids:
+        event = status_by_event_id[event_id]
+        assert event["gauge_status"] == "fetched_locally_ignored_parse_verified"
+        assert event["gauge_format"] in {"json", "xml"}
+        assert event["gauge_station_count"] > 0
+        assert event["qpe_redacted_endpoint"].endswith("Authorization=REDACTED")
+        if event["qpe_status"].startswith("blocked_"):
+            assert event["report_status"] == "blocked_missing_event_time_qpe_grid"
+            assert event["qpe_probe_summary"].startswith("data/processed/run_summaries/")
+
+
 def test_weather_event_rejects_invalid_time_order():
     event = WeatherEvent(
         event_id="bad_time",

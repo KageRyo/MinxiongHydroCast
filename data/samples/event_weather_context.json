@@ -18,6 +18,13 @@
     {
       "name": "CWA weather warnings and advisories",
       "provider": "Central Weather Administration",
+      "data_ids_reviewed": [
+        "W-C0033-001",
+        "W-C0033-002",
+        "W-C0033-003",
+        "W-C0034-001"
+      ],
+      "history_status": "metadata reviewed; direct event-time history getData probes returned 404 for warning products",
       "use": "Heavy-rain, extremely-heavy-rain, thunderstorm, or typhoon warning evidence."
     },
     {

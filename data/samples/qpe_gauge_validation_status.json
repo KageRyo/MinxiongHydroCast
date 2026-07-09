@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "verified_at": "2026-07-09T22:30:00+08:00",
+  "purpose": "Track whether each collected radar event can produce the required O-B0045-001 QPE versus O-A0002-001 rain-gauge validation report.",
+  "source_policy": "Commit status, counts, commands, and redacted URLs only. Keep raw gauge/QPE files, generated reports, and API keys in ignored local paths.",
+  "required_products": {
+    "qpe": {
+      "data_id": "O-B0045-001",
+      "name": "CWA QPESUMS past-1-hour quantitative precipitation estimate",
+      "required_for_report": true
+    },
+    "gauge": {
+      "data_id": "O-A0002-001",
+      "name": "CWA rain-gauge observations",
+      "required_for_report": true
+    }
+  },
+  "availability_findings": [
+    {
+      "data_id": "O-A0002-001",
+      "finding": "CWA history getData can return event-time rain-gauge files. The downloaded payload is XML even when saved with a .json suffix.",
+      "status": "available_for_event_times"
+    },
+    {
+      "data_id": "O-B0045-001",
+      "finding": "CWA history getMetadata returned Resource not found, and direct event-time history getData probes returned HTTP 404 for all three collected radar events.",
+      "status": "not_available_from_tested_history_endpoints"
+    }
+  ],
+  "events": [
+    {
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening",
+      "validation_time": "2026-06-28T13:30:00+08:00",
+      "gauge_status": "fetched_locally_ignored_parse_verified",
+      "gauge_artifact": "data/external/gauges/events/O-A0002-001_20260628133000.json",
+      "gauge_format": "xml",
+      "gauge_station_count": 1287,
+      "gauge_nonzero_station_count": 29,
+      "gauge_ge_10mm_station_count": 3,
+      "chiayi_bbox_station_count": 91,
+      "chiayi_bbox_top_hourly_rain_mm": [
+        {
+          "station_id": "C0K430",
+          "station_name": "褒忠",
+          "rainfall_mm": 6.0
+        },
+        {
+          "station_id": "C2K290",
+          "station_name": "崙內",
+          "rainfall_mm": 1.5
+        }
+      ],
+      "qpe_status": "blocked_cwa_history_getData_http_404",
+      "qpe_probe_summary": "data/processed/run_summaries/cwa_history_data_o_b0045_202606281330.json",
+      "qpe_redacted_endpoint": "https://opendata.cwa.gov.tw/historyapi/v1/getData/O-B0045-001/2026/06/28/13/30/00?Authorization=REDACTED",
+      "report_status": "blocked_missing_event_time_qpe_grid"
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon",
+      "validation_time": "2026-07-02T15:30:00+08:00",
+      "gauge_status": "fetched_locally_ignored_parse_verified",
+      "gauge_artifact": "data/external/gauges/events/O-A0002-001_20260702153000.json",
+      "gauge_format": "xml",
+      "gauge_station_count": 1312,
+      "gauge_nonzero_station_count": 132,
+      "gauge_ge_10mm_station_count": 24,
+      "chiayi_bbox_station_count": 97,
+      "chiayi_bbox_top_hourly_rain_mm": [
+        {
+          "station_id": "467480",
+          "station_name": "嘉義",
+          "rainfall_mm": 37.0
+        },
+        {
+          "station_id": "C1I131",
+          "station_name": "桶頭",
+          "rainfall_mm": 33.0
+        },
+        {
+          "station_id": "CAL050",
+          "station_name": "國三N279K",
+          "rainfall_mm": 33.0
+        },
+        {
+          "station_id": "C0M760",
+          "station_name": "民雄",
+          "rainfall_mm": 31.0
+        },
+        {
+          "station_id": "467290",
+          "station_name": "古坑",
+          "rainfall_mm": 29.0
+        }
+      ],
+      "qpe_status": "blocked_cwa_history_getData_http_404",
+      "qpe_probe_summary": "data/processed/run_summaries/cwa_history_data_o_b0045_202607021530.json",
+      "qpe_redacted_endpoint": "https://opendata.cwa.gov.tw/historyapi/v1/getData/O-B0045-001/2026/07/02/15/30/00?Authorization=REDACTED",
+      "report_status": "blocked_missing_event_time_qpe_grid"
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon",
+      "validation_time": "2026-07-03T16:20:00+08:00",
+      "gauge_status": "fetched_locally_ignored_parse_verified",
+      "gauge_artifact": "data/external/gauges/events/O-A0002-001_20260703162000.json",
+      "gauge_format": "xml",
+      "gauge_station_count": 1313,
+      "gauge_nonzero_station_count": 151,
+      "gauge_ge_10mm_station_count": 33,
+      "chiayi_bbox_station_count": 95,
+      "chiayi_bbox_top_hourly_rain_mm": [
+        {
+          "station_id": "88K590",
+          "station_name": "華山",
+          "rainfall_mm": 78.5
+        },
+        {
+          "station_id": "C0M770",
+          "station_name": "梅山",
+          "rainfall_mm": 64.5
+        },
+        {
+          "station_id": "C2K630",
+          "station_name": "荷苞",
+          "rainfall_mm": 62.0
+        },
+        {
+          "station_id": "01J960",
+          "station_name": "大埔",
+          "rainfall_mm": 59.0
+        },
+        {
+          "station_id": "467290",
+          "station_name": "古坑",
+          "rainfall_mm": 48.5
+        }
+      ],
+      "qpe_status": "blocked_cwa_history_getData_http_404",
+      "qpe_probe_summary": "data/processed/run_summaries/cwa_history_data_o_b0045_202607031620.json",
+      "qpe_redacted_endpoint": "https://opendata.cwa.gov.tw/historyapi/v1/getData/O-B0045-001/2026/07/03/16/20/00?Authorization=REDACTED",
+      "report_status": "blocked_missing_event_time_qpe_grid"
+    }
+  ],
+  "next_actions": [
+    "Start storing O-B0045-001 QPE snapshots at event collection time, or locate an official CWA/WRA historical QPE archive that supports these timestamps.",
+    "Once event-time QPE grids exist locally, run floodcasttw-qpe-gauge-validate for each event and replace the blocked report_status values with report artifact paths.",
+    "Keep O-A0002-001 gauge files under ignored data/external paths and commit only aggregate validation summaries."
+  ]
+}

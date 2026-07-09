@@ -44,6 +44,19 @@ Official weather-context tracking lives in `data/samples/event_weather_context.j
 entries are intentionally `official_context_pending`; do not stratify train/test by weather type
 until each event cites CWA weather maps, warnings, daily reports, or another official source.
 
+## QPE/Gauge Status
+
+QPE/gauge availability tracking lives in `data/samples/qpe_gauge_validation_status.json`.
+Event-time CWA `O-A0002-001` gauge captures are available locally and parse as XML. Event-time
+CWA `O-B0045-001` QPE history `getData` probes returned HTTP 404 for all three selected windows,
+so gauge-vs-QPE reports are blocked until QPE grids are captured or an official archive is found.
+
+| Event ID | Validation Time | Gauge Stations | Gauge Stations >= 10 mm | QPE Status |
+| --- | --- | ---: | ---: | --- |
+| `cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening` | `2026-06-28T13:30:00+08:00` | 1287 | 3 | blocked: `O-B0045-001` history getData HTTP 404 |
+| `cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon` | `2026-07-02T15:30:00+08:00` | 1312 | 24 | blocked: `O-B0045-001` history getData HTTP 404 |
+| `cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon` | `2026-07-03T16:20:00+08:00` | 1313 | 33 | blocked: `O-B0045-001` history getData HTTP 404 |
+
 ## Full Collection Status
 
 All three windows have complete local 10-minute CWA collections under ignored `data/external/`
@@ -101,7 +114,17 @@ floodcasttw-tensor-baseline-evaluate \
 ```
 
 Validate QPE against rain gauges after local `O-B0045-001` and `O-A0002-001` captures are
-available for the same event window:
+available for the same event window. Use the direct history downloader for gauge captures:
+
+```bash
+floodcasttw-cwa-history-data-download \
+  --data-id O-A0002-001 \
+  --data-time 2026-07-02T15:30:00+08:00 \
+  --output data/external/gauges/events/O-A0002-001_20260702153000.xml \
+  --insecure-tls
+```
+
+Then run validation once the matching QPE grid exists:
 
 ```bash
 floodcasttw-qpe-gauge-validate \

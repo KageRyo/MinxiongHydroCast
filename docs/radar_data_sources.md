@@ -119,6 +119,12 @@ The report uses nearest-grid lookup for the first pass and records station-level
 rainfall, difference, absolute error, MAE, RMSE, bias, correlation, and excluded stations. Treat
 the report as validation evidence, not as a replacement for hydrology labels.
 
+Current status is tracked in `data/samples/qpe_gauge_validation_status.json`. As of 2026-07-09,
+event-time `O-A0002-001` rain-gauge captures are available and parse as CWA XML, but event-time
+`O-B0045-001` history `getData` probes return HTTP 404 for all three selected radar windows. The
+per-event gauge-vs-QPE reports are therefore blocked until event-time QPE grids are captured
+locally or an official historical QPE archive is confirmed.
+
 ## History Workflow
 
 CWA's front end links the history Swagger operation as
@@ -134,6 +140,21 @@ Dry-run the inferred URL:
 ```bash
 floodcasttw-cwa-history-list --dry-run --data-id O-A0059-001
 ```
+
+Download a specific history `getData` timestamp directly into ignored local storage:
+
+```bash
+floodcasttw-cwa-history-data-download \
+  --data-id O-A0002-001 \
+  --data-time 2026-07-02T15:30:00+08:00 \
+  --output data/external/gauges/events/O-A0002-001_20260702153000.xml \
+  --insecure-tls
+```
+
+This downloader is used for CWA rain-gauge captures and for explicit QPE availability probes. It
+redacts `Authorization` from errors, summaries, and logs. CWA may return XML from history
+`getData` even when the source product advertises JSON/XML formats; the QPE/gauge validator accepts
+both JSON and XML gauge payloads.
 
 After a live history index is available, create an event frame plan:
 

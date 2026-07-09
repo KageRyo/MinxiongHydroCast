@@ -4,6 +4,7 @@
   "source_data_id": "O-A0059-001",
   "value_units": "dBZ",
   "event_threshold": 35.0,
+  "qpe_gauge_validation_status": "data/samples/qpe_gauge_validation_status.json",
   "history_index": {
     "verified_at": "2026-07-08",
     "first_time": "2026-06-28T13:00:00+08:00",

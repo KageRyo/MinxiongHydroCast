@@ -52,10 +52,13 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 ## Milestone 6: Build Historical Radar Dataset
 
 - [x] Collect short multi-frame CWA radar sequences under ignored `data/external/`.
-- [ ] Build event plans for Chiayi/Minxiong heavy-rain windows and Taiwan-wide typhoon/front events.
+- [x] Build event plans for Chiayi/Minxiong heavy-rain windows and Taiwan-wide radar-derived
+      candidate events.
 - [x] Populate tracked event split manifests with real historical event metadata.
 - [x] Produce reproducible dataset summaries without committing official raw data.
-- [ ] Add gauge/QPE validation reports for each dataset build.
+- [x] Track per-event QPE/gauge validation availability without committing raw official data.
+- [ ] Add gauge/QPE validation reports for each dataset build after event-time QPE grids are
+      captured or an official historical QPE archive is confirmed.
 
 ## Milestone 7: Train And Compare Models
 

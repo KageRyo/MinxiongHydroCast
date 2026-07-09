@@ -29,6 +29,11 @@ Chiayi/Minxiong-ready model without committing credentials, raw official data, o
   metrics.
 - Completed: QPE/gauge validation report CLI for local CWA `O-B0045-001` and `O-A0002-001`
   captures.
+- Completed: direct CWA history `getData` downloader for event-time products, plus XML parsing for
+  `O-A0002-001` rain-gauge captures.
+- Completed: per-event QPE/gauge availability status manifest. CWA `O-A0002-001` gauge captures
+  parse for the three selected events, but event-time `O-B0045-001` QPE history probes return HTTP
+  404.
 - Completed: event weather-context manifest that prevents radar-only windows from being mislabeled
   before official CWA evidence is attached.
 - Completed: Tiny U-Net threshold-weighted loss options, validation split support, and early
@@ -41,8 +46,8 @@ Chiayi/Minxiong-ready model without committing credentials, raw official data, o
   ingestion layer.
 - Pending official-label work: attach CWA weather maps, warnings, daily reports, or equivalent
   official source evidence to each selected event before weather-type stratification.
-- Pending validation work: run live QPE/gauge reports for each selected event after matching local
-  QPE and station captures are collected.
+- Pending validation work: run live QPE/gauge reports for each selected event after matching
+  event-time QPE grids are captured or an official historical QPE archive is confirmed.
 - Pending training work: collect enough event windows for meaningful Tiny U-Net or NowcastNet
   training and reporting.
 
@@ -61,6 +66,8 @@ Chiayi/Minxiong-ready model without committing credentials, raw official data, o
 - Populate `data/samples/event_split_manifest.json` with real historical events.
 - Add event manifests for Chiayi/Minxiong heavy-rain windows and Taiwan-wide typhoon/front events.
 - Add gauge/QPE validation reports so QPE is not treated as ground truth without checks.
+- Track QPE/gauge availability separately from completed validation reports when an official
+  product is unavailable for historical timestamps.
 - Attach official CWA weather context to every selected radar event before final weather labels are
   used for splitting or scientific reporting.
 - Produce reproducible dataset summaries under `data/processed/run_summaries/`.

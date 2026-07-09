@@ -56,9 +56,10 @@ Do not migrate NowcastNet until all of these are true:
 - External code, checkpoints, and datasets stay under ignored `data/external/` paths unless a
   license review explicitly permits tracked source integration.
 
-Current status: not ready. The repository now has three complete CWA radar event windows and
-full-event lead-time baselines, but event diversity and official weather labels are still too thin
-for a defensible SOTA migration.
+Current status: not ready. The repository now has three complete CWA radar event windows,
+full-event lead-time baselines, and per-event QPE/gauge availability tracking. However, event
+diversity is still too thin, official weather labels are still pending, and gauge-vs-QPE reports
+are blocked until event-time `O-B0045-001` QPE grids are available.
 
 ## External Assets
 

@@ -64,8 +64,13 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
       typhoon, Mei-yu, or frontal before official CWA evidence is attached.
 - [x] Add a QPE/gauge validation report command so QPE is treated as an estimate, not direct
       ground truth.
-- [ ] Run live QPE/gauge validation reports for each selected event after CWA/WRA station samples
-      are collected locally.
+- [x] Add a direct CWA history `getData` downloader for event-time rain-gauge captures and QPE
+      availability probes.
+- [x] Parse CWA `O-A0002-001` XML rain-gauge captures in the QPE/gauge validator.
+- [x] Record per-event QPE/gauge validation availability in
+      `data/samples/qpe_gauge_validation_status.json`.
+- [ ] Run live QPE/gauge validation reports for each selected event after event-time
+      `O-B0045-001` QPE grids are captured or an official historical QPE archive is confirmed.
 - [ ] Produce reproducible dataset summaries under ignored `data/processed/run_summaries/`.
 - [x] Add a next-batch event expansion queue from the existing CWA hourly discovery scan.
 - [ ] Add more train events across typhoon, frontal, Mei-yu, and convective regimes before SOTA

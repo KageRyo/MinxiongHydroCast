@@ -4,6 +4,8 @@ from pathlib import Path
 from floodcasttw.pipelines.qpe_gauge_validation import (
     build_qpe_gauge_report,
     extract_gauge_observations,
+    extract_gauge_observations_from_xml,
+    load_gauge_observations,
     qpe_grid_index_for_point,
     summarize_matches,
 )
@@ -111,6 +113,61 @@ def write_gauges(path: Path) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
 
 
+def write_xml_gauges(path: Path) -> None:
+    path.write_text(
+        """<?xml version="1.0" encoding="UTF-8"?>
+<cwaopendata xmlns="urn:cwa:gov:tw:cwacommon:0.1">
+  <dataset>
+    <Station>
+      <StationName>民雄</StationName>
+      <StationId>C0M760</StationId>
+      <ObsTime>
+        <DateTime>2026-07-02T15:30:00+08:00</DateTime>
+      </ObsTime>
+      <GeoInfo>
+        <Coordinates>
+          <CoordinateName>TWD67</CoordinateName>
+          <StationLatitude>23.560000</StationLatitude>
+          <StationLongitude>120.420000</StationLongitude>
+        </Coordinates>
+        <Coordinates>
+          <CoordinateName>WGS84</CoordinateName>
+          <StationLatitude>23.558200</StationLatitude>
+          <StationLongitude>120.428100</StationLongitude>
+        </Coordinates>
+      </GeoInfo>
+      <RainfallElement>
+        <Past1hr>
+          <Precipitation>31.0</Precipitation>
+        </Past1hr>
+      </RainfallElement>
+    </Station>
+    <Station>
+      <StationName>缺雨量</StationName>
+      <StationId>MISSING</StationId>
+      <ObsTime>
+        <DateTime>2026-07-02T15:30:00+08:00</DateTime>
+      </ObsTime>
+      <GeoInfo>
+        <Coordinates>
+          <CoordinateName>WGS84</CoordinateName>
+          <StationLatitude>23.1</StationLatitude>
+          <StationLongitude>120.1</StationLongitude>
+        </Coordinates>
+      </GeoInfo>
+      <RainfallElement>
+        <Past1hr>
+          <Precipitation>-99.0</Precipitation>
+        </Past1hr>
+      </RainfallElement>
+    </Station>
+  </dataset>
+</cwaopendata>
+""",
+        encoding="utf-8",
+    )
+
+
 def test_extract_gauge_observations_from_cwa_like_payload(tmp_path: Path):
     gauge_path = tmp_path / "gauges.json"
     write_gauges(gauge_path)
@@ -125,6 +182,32 @@ def test_extract_gauge_observations_from_cwa_like_payload(tmp_path: Path):
     assert observations[0].latitude == 23.1
     assert observations[0].longitude == 120.1
     assert observations[0].rainfall_mm == 6.5
+
+
+def test_extract_gauge_observations_from_cwa_xml_prefers_wgs84(tmp_path: Path):
+    gauge_path = tmp_path / "gauges.xml"
+    write_xml_gauges(gauge_path)
+
+    observations = extract_gauge_observations_from_xml(
+        gauge_path.read_text(encoding="utf-8")
+    )
+
+    assert len(observations) == 1
+    assert observations[0].station_id == "C0M760"
+    assert observations[0].station_name == "民雄"
+    assert observations[0].data_time == "2026-07-02T15:30:00+08:00"
+    assert observations[0].latitude == 23.5582
+    assert observations[0].longitude == 120.4281
+    assert observations[0].rainfall_mm == 31.0
+
+
+def test_load_gauge_observations_detects_xml_even_with_json_suffix(tmp_path: Path):
+    gauge_path = tmp_path / "gauges.json"
+    write_xml_gauges(gauge_path)
+
+    observations = load_gauge_observations(gauge_path)
+
+    assert [observation.station_id for observation in observations] == ["C0M760"]
 
 
 def test_extract_gauge_observations_dedupes_name_only_stations_separately():
@@ -175,6 +258,7 @@ def test_build_qpe_gauge_report_computes_error_metrics(tmp_path: Path):
 
     assert report["event_id"] == "event_a"
     assert report["qpe_source"]["data_id"] == "O-B0045-001"
+    assert report["gauge_source"]["format"] == "json"
     assert report["summary"]["status"] == "ok"
     assert report["summary"]["gauge_count"] == 4
     assert report["summary"]["matched_gauge_count"] == 2
