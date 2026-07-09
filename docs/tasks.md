@@ -44,6 +44,8 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Convert complete CWA event windows into 6-input/6-output sliding tensor archives.
 - [x] Add lead-time metric breakdowns for sliding-window tensor archives.
 - [x] Train and evaluate the Tiny U-Net/RainNet-style baseline on full CWA event windows.
+- [x] Define a NowcastNet readiness gate so SOTA migration waits for stable data and license
+      review.
 
 ## Next
 
@@ -60,6 +62,8 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
       frontal events.
 - [ ] Add gauge/QPE validation reports so QPE is treated as an estimate, not direct ground truth.
 - [ ] Produce reproducible dataset summaries under ignored `data/processed/run_summaries/`.
+- [ ] Add more train events across typhoon, frontal, Mei-yu, and convective regimes before SOTA
+      model migration.
 
 ### Phase 3: Tensor Conversion
 
@@ -79,7 +83,8 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Mask CWA nodata values and normalize radar tensors before neural smoke training.
 - [x] Compare CSI, POD, FAR, and RMSE across persistence and Tiny U-Net smoke outputs.
 - [x] Add lead-time metric breakdowns after collecting longer multi-step event windows.
-- [ ] Wire NowcastNet inference only after code, checkpoint, and license are reviewed.
+- [ ] Wire NowcastNet inference only after event diversity, code, checkpoint, tensor shape, and
+      license are reviewed.
 
 ### Phase 5: Local Flood-Risk Layer
 
