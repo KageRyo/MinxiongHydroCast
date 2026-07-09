@@ -1,6 +1,7 @@
 import numpy as np
 
 from floodcasttw.pipelines.torch_baseline_evaluation import (
+    channels_first_to_sequence,
     common_evaluation_mask,
     denormalize_with_metadata,
     evaluate_prediction_arrays,
@@ -15,6 +16,23 @@ def test_sequence_to_channels_first_flattens_time_and_channels():
     converted = sequence_to_channels_first(values)
 
     assert converted.shape == (1, 4, 3, 4)
+
+
+def test_sequence_to_channels_first_keeps_sliding_window_samples():
+    values = np.zeros((2, 3, 4, 5, 1), dtype=np.float32)
+
+    converted = sequence_to_channels_first(values)
+
+    assert converted.shape == (2, 3, 4, 5)
+
+
+def test_channels_first_to_sequence_restores_sliding_window_shape():
+    target = np.zeros((2, 3, 4, 5, 1), dtype=np.float32)
+    values = np.zeros((2, 3, 4, 5), dtype=np.float32)
+
+    restored = channels_first_to_sequence(values, target)
+
+    assert restored.shape == target.shape
 
 
 def test_normalize_and_denormalize_with_metadata_masks_inputs():
@@ -46,6 +64,46 @@ def test_common_evaluation_mask_requires_latest_input_and_target_valid():
     mask = common_evaluation_mask(archive)
 
     assert mask.tolist() == [[[[False, True]]]]
+
+
+def test_common_evaluation_mask_supports_sliding_windows():
+    archive = {
+        "input": np.array(
+            [
+                [
+                    [[[1.0], [1.0]]],
+                    [[[-999.0], [2.0]]],
+                ],
+                [
+                    [[[1.0], [1.0]]],
+                    [[[3.0], [4.0]]],
+                ],
+            ],
+            dtype=np.float32,
+        ),
+        "target": np.array(
+            [
+                [
+                    [[[3.0], [4.0]]],
+                    [[[5.0], [-999.0]]],
+                ],
+                [
+                    [[[5.0], [6.0]]],
+                    [[[7.0], [8.0]]],
+                ],
+            ],
+            dtype=np.float32,
+        ),
+        "metadata": {"nodata_values": [-999.0]},
+    }
+
+    mask = common_evaluation_mask(archive)
+
+    assert mask.shape == (2, 2, 1, 2)
+    assert mask.tolist() == [
+        [[[False, True]], [[False, False]]],
+        [[[True, True]], [[True, True]]],
+    ]
 
 
 def test_evaluate_prediction_arrays_uses_masked_pixels_only():

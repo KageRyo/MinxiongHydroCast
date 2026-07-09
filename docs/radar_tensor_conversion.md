@@ -57,6 +57,24 @@ floodcasttw-radar-tensor-convert \
 The adapter validates sequence cadence and grid consistency before writing tensors. Tensor metadata
 keeps CWA data ID, timestamps, source paths, origin, resolution, nodata values, units, and CRS.
 
+For longer CWA event windows, pass `--window-stride-frames 1` to create a sliding-window archive
+with a sample axis:
+
+```bash
+floodcasttw-radar-tensor-convert \
+  --source-format cwa_opendata_grid \
+  --input data/processed/cwa_event_collection_taiwan_widespread_20260628_afternoon_evening.json \
+  --event-id cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening \
+  --input-length 6 \
+  --prediction-length 6 \
+  --cadence-minutes 10 \
+  --window-stride-frames 1 \
+  --output data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz
+```
+
+Sliding archives use shapes such as `[sample, time, height, width, channels]`. The current full
+CWA event tensors use 6 input frames and 6 target frames, giving lead times from 10 to 60 minutes.
+
 ## Evaluate
 
 Run the persistence baseline against the generated archive:
@@ -69,6 +87,7 @@ floodcasttw-tensor-baseline-evaluate \
 
 This reports RMSE plus CSI/POD/FAR at the selected event threshold. Use it as the baseline before
 testing ConvLSTM, U-Net, or NowcastNet-style models on the same tensor contract.
+For sliding-window archives, the evaluation also reports per-lead-time metrics.
 
 ## Live CWA Smoke Result
 

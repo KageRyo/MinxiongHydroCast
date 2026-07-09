@@ -215,6 +215,21 @@ floodcasttw-radar-tensor-convert \
   --output data/processed/cwa_radar_tensor_sample.npz
 ```
 
+For longer event windows, emit sliding-window tensors by adding `--window-stride-frames 1`.
+For example, 6 input frames and 6 target frames create 10- to 60-minute lead-time samples:
+
+```bash
+floodcasttw-radar-tensor-convert \
+  --source-format cwa_opendata_grid \
+  --input data/processed/cwa_event_collection_taiwan_widespread_20260628_afternoon_evening.json \
+  --event-id cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening \
+  --input-length 6 \
+  --prediction-length 6 \
+  --cadence-minutes 10 \
+  --window-stride-frames 1 \
+  --output data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz
+```
+
 Evaluate the tensor archive with the persistence baseline:
 
 ```bash
@@ -232,6 +247,7 @@ floodcasttw-train-torch-baseline \
   --device cuda \
   --multi-gpu \
   --batch-repeats 2 \
+  --batch-size 1 \
   --epochs 1
 ```
 

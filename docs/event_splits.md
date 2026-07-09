@@ -19,7 +19,7 @@ The current tracked radar candidates are:
 
 | Event ID | Split | Region | Window | Basis |
 | --- | --- | --- | --- | --- |
-| `cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening` | validation | Taiwan | `2026-06-28T13:00:00+08:00` to `2026-06-28T21:00:00+08:00` | largest Taiwan-wide 35 dBZ coverage in hourly scan |
+| `cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening` | train | Taiwan | `2026-06-28T13:00:00+08:00` to `2026-06-28T21:00:00+08:00` | largest Taiwan-wide 35 dBZ coverage in full sequence |
 | `cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon` | test | Minxiong, Chiayi | `2026-07-02T12:00:00+08:00` to `2026-07-02T18:00:00+08:00` | highest local-focus dBZ in hourly scan |
 | `cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon` | test | Minxiong, Chiayi | `2026-07-03T13:00:00+08:00` to `2026-07-03T19:00:00+08:00` | largest local-focus 35 dBZ coverage in hourly scan |
 

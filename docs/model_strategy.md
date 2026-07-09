@@ -46,8 +46,9 @@ before using it as a target.
 The recommended model order after CWA sample validation is:
 
 1. Persistence baseline on `O-A0059-001`.
-2. Small U-Net nowcaster through `floodcasttw-train-torch-baseline` on one RTX 4090.
-3. NowcastNet-style migration only after event splits, checkpointing, and evaluation are stable.
+2. Small U-Net/RainNet-style nowcaster through `floodcasttw-train-torch-baseline` on full
+   event-window tensors.
+3. NowcastNet-style migration only after event diversity, checkpointing, and evaluation are stable.
 
 ## GPU Training Environment
 
@@ -93,6 +94,24 @@ PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_e
 
 The current smoke checkpoint lowers RMSE but has CSI/POD/FAR of zero at `35 dBZ`, so it is not a
 useful nowcaster yet.
+
+For full-event testing, use 6 input frames and 6 prediction frames with sliding windows. The first
+full-event run trained on the Taiwan-wide 2026-06-28 event with two RTX 4090 GPUs:
+
+```bash
+PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_training \
+  --archive data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz \
+  --output-dir data/external/checkpoints/tiny_unet_cwa_taiwan_widespread_20260628_6in_6out \
+  --device cuda \
+  --multi-gpu \
+  --hidden-channels 8 \
+  --batch-size 2 \
+  --epochs 1
+```
+
+The full-event Tiny U-Net checkpoint lowers aggregate RMSE against persistence on the current
+events, but CSI remains worse. It should be treated as a diagnostic baseline while persistence
+remains the primary benchmark.
 
 ## Recommended Roadmap
 

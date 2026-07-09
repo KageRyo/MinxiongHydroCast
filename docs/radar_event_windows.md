@@ -28,18 +28,28 @@ floodcasttw-radar-event-summary \
 
 Candidate evidence is tracked in `data/samples/radar_event_windows.json`.
 
-| Event ID | Region | Full Window To Collect | Evidence |
-| --- | --- | --- | --- |
-| `cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon` | Minxiong, Chiayi | `2026-07-02T12:00:00+08:00` to `2026-07-02T18:00:00+08:00` | local peak `58.0 dBZ` at `15:00` |
-| `cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon` | Minxiong, Chiayi | `2026-07-03T13:00:00+08:00` to `2026-07-03T19:00:00+08:00` | local coverage peak: 198 pixels >= `35 dBZ` |
-| `cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening` | Taiwan | `2026-06-28T13:00:00+08:00` to `2026-06-28T21:00:00+08:00` | Taiwan coverage peak: 6498 pixels >= `35 dBZ` |
+| Event ID | Split | Region | Full Window | Evidence |
+| --- | --- | --- | --- | --- |
+| `cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening` | train | Taiwan | `2026-06-28T13:00:00+08:00` to `2026-06-28T21:00:00+08:00` | Taiwan coverage peak: 7244 pixels >= `35 dBZ` in the full 10-minute sequence |
+| `cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon` | test | Minxiong, Chiayi | `2026-07-02T12:00:00+08:00` to `2026-07-02T18:00:00+08:00` | local peak `58.8 dBZ` at `15:30` |
+| `cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon` | test | Minxiong, Chiayi | `2026-07-03T13:00:00+08:00` to `2026-07-03T19:00:00+08:00` | local coverage peak: 198 pixels >= `35 dBZ` |
 
 These are radar-derived labels only. Attach official weather context before naming a window
 typhoon, Mei-yu, frontal, or convective.
 
-## Full Collection Commands
+## Full Collection Status
 
-Use the same command shape for each selected window:
+All three windows have complete local 10-minute CWA collections under ignored `data/external/`
+paths. Collection manifests, summaries, tensor archives, and run summaries stay under ignored
+`data/processed/` paths.
+
+| Event ID | Frames | Sliding Windows | Tensor Shape |
+| --- | ---: | ---: | --- |
+| `cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening` | 49 | 38 | `38 x 6 x 881 x 921 x 1` input, `38 x 6 x 881 x 921 x 1` target |
+| `cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon` | 37 | 26 | `26 x 6 x 881 x 921 x 1` input, `26 x 6 x 881 x 921 x 1` target |
+| `cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon` | 37 | 26 | `26 x 6 x 881 x 921 x 1` input, `26 x 6 x 881 x 921 x 1` target |
+
+Use the same command shape to reproduce a collection:
 
 ```bash
 floodcasttw-cwa-event-plan \
@@ -56,5 +66,65 @@ floodcasttw-cwa-event-plan \
 ```
 
 After each full collection, rerun `floodcasttw-radar-event-summary` with the default
-`--expected-cadence-minutes 10`, then convert longer sequences to tensor archives for lead-time
-metrics.
+`--expected-cadence-minutes 10`.
+
+## Tensor And Metrics Commands
+
+Convert a full collection into 6-frame input and 6-frame target sliding windows:
+
+```bash
+floodcasttw-radar-tensor-convert \
+  --source-format cwa_opendata_grid \
+  --input data/processed/cwa_event_collection_taiwan_widespread_20260628_afternoon_evening.json \
+  --event-id cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening \
+  --input-length 6 \
+  --prediction-length 6 \
+  --cadence-minutes 10 \
+  --window-stride-frames 1 \
+  --output data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz
+```
+
+Run persistence lead-time metrics:
+
+```bash
+floodcasttw-tensor-baseline-evaluate \
+  --archive data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz \
+  --event-threshold-mm 35 \
+  --output data/processed/cwa_persistence_taiwan_widespread_20260628_6in_6out.json
+```
+
+Train the current Tiny U-Net/RainNet-style baseline on the Taiwan-wide event:
+
+```bash
+PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_training \
+  --archive data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz \
+  --output-dir data/external/checkpoints/tiny_unet_cwa_taiwan_widespread_20260628_6in_6out \
+  --device cuda \
+  --multi-gpu \
+  --hidden-channels 8 \
+  --batch-size 2 \
+  --epochs 1
+```
+
+Evaluate with mini-batch inference:
+
+```bash
+PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_evaluation \
+  --archive data/processed/cwa_tensor_chiayi_minxiong_heavyrain_20260702_6in_6out.npz \
+  --checkpoint data/external/checkpoints/tiny_unet_cwa_taiwan_widespread_20260628_6in_6out/tiny_unet_nowcaster.pt \
+  --event-threshold 35 \
+  --device cuda \
+  --batch-size 1 \
+  --output data/processed/tiny_unet_comparison_chiayi_minxiong_heavyrain_20260702_6in_6out.json
+```
+
+## Baseline Snapshot
+
+At `35 dBZ`, the 1-epoch Tiny U-Net lowers aggregate RMSE but under-detects threshold events
+compared with persistence. Treat it as a diagnostic baseline, not a deployable model.
+
+| Event | Persistence RMSE | Persistence CSI | Tiny U-Net RMSE | Tiny U-Net CSI |
+| --- | ---: | ---: | ---: | ---: |
+| Taiwan-wide train | `8.311872` | `0.214701` | `8.100073` | `0.048339` |
+| Chiayi/Minxiong 2026-07-02 test | `11.465393` | `0.278248` | `9.914263` | `0.086701` |
+| Chiayi/Minxiong 2026-07-03 test | `10.421478` | `0.315475` | `9.496191` | `0.121837` |

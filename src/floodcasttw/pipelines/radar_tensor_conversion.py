@@ -72,7 +72,10 @@ def convert_source(
     cadence_minutes: int = 6,
     units: str = VALUE_FIELD,
     crs: str = "EPSG:4326",
+    window_stride_frames: int = 0,
 ) -> tuple[np.ndarray, np.ndarray, RadarTensorSpec, dict[str, object], int]:
+    if window_stride_frames < 0:
+        raise ValueError("window_stride_frames must be zero or greater")
     adapter = get_radar_source_adapter(source_format)
     batch = adapter.load_sequence(
         input_path=input_path,
@@ -84,12 +87,98 @@ def convert_source(
         cadence_minutes=cadence_minutes,
         units=units,
         crs=crs,
+        load_all_frames=window_stride_frames > 0,
     )
-    input_tensor = batch.sequence[: batch.spec.input_length]
-    target_tensor = batch.sequence[batch.spec.input_length :]
-    validate_radar_tensor(input_tensor, batch.spec, kind="input")
-    validate_radar_tensor(target_tensor, batch.spec, kind="target")
-    return input_tensor, target_tensor, batch.spec, batch.metadata, batch.source_record_count
+    if window_stride_frames > 0:
+        input_tensor, target_tensor, metadata = build_sliding_window_tensors(
+            sequence=batch.sequence,
+            spec=batch.spec,
+            metadata=batch.metadata,
+            window_stride_frames=window_stride_frames,
+        )
+    else:
+        input_tensor = batch.sequence[: batch.spec.input_length]
+        target_tensor = batch.sequence[batch.spec.input_length :]
+        metadata = batch.metadata
+        validate_radar_tensor(input_tensor, batch.spec, kind="input")
+        validate_radar_tensor(target_tensor, batch.spec, kind="target")
+    return input_tensor, target_tensor, batch.spec, metadata, batch.source_record_count
+
+
+def build_sliding_window_tensors(
+    *,
+    sequence: np.ndarray,
+    spec: RadarTensorSpec,
+    metadata: dict[str, object],
+    window_stride_frames: int,
+) -> tuple[np.ndarray, np.ndarray, dict[str, object]]:
+    if window_stride_frames < 1:
+        raise ValueError("window_stride_frames must be at least 1")
+    sequence = np.asarray(sequence, dtype=np.float32)
+    if sequence.ndim != 4:
+        raise ValueError("source sequence must be [time, height, width, channels]")
+    if sequence.shape[0] < spec.total_length:
+        raise ValueError(
+            f"source sequence has {sequence.shape[0]} frames; needs at least {spec.total_length}"
+        )
+
+    start_indices = list(
+        range(0, sequence.shape[0] - spec.total_length + 1, window_stride_frames)
+    )
+    if not start_indices:
+        raise ValueError("source sequence produced no sliding windows")
+    inputs = np.stack(
+        [
+            sequence[start : start + spec.input_length]
+            for start in start_indices
+        ],
+        axis=0,
+    )
+    targets = np.stack(
+        [
+            sequence[start + spec.input_length : start + spec.total_length]
+            for start in start_indices
+        ],
+        axis=0,
+    )
+    validate_window_tensor(inputs, spec, kind="input")
+    validate_window_tensor(targets, spec, kind="target")
+
+    data_times = metadata.get("data_times", [])
+    if isinstance(data_times, list):
+        window_start_times = [str(data_times[index]) for index in start_indices]
+        window_target_start_times = [
+            str(data_times[index + spec.input_length]) for index in start_indices
+        ]
+    else:
+        window_start_times = []
+        window_target_start_times = []
+    sliding_metadata = {
+        **metadata,
+        "archive_layout": "sliding_window",
+        "source_frame_count": int(sequence.shape[0]),
+        "window_count": len(start_indices),
+        "window_stride_frames": window_stride_frames,
+        "window_start_indices": start_indices,
+        "window_start_times": window_start_times,
+        "window_target_start_times": window_target_start_times,
+        "target_lead_times_minutes": [
+            spec.cadence_minutes * (index + 1)
+            for index in range(spec.prediction_length)
+        ],
+    }
+    return inputs, targets, sliding_metadata
+
+
+def validate_window_tensor(array: np.ndarray, spec: RadarTensorSpec, *, kind: str) -> None:
+    base_shape = spec.input_shape if kind == "input" else spec.target_shape
+    expected_tail = base_shape
+    actual = tuple(np.asarray(array).shape)
+    if len(actual) != 5 or actual[1:] != expected_tail:
+        raise ValueError(
+            f"{kind} sliding-window radar tensor shape {actual} does not match "
+            f"expected [sample, {', '.join(str(value) for value in expected_tail)}]"
+        )
 
 
 def write_tensor_archive(
@@ -138,6 +227,12 @@ def main() -> None:
     parser.add_argument("--units", default=VALUE_FIELD)
     parser.add_argument("--crs", default="EPSG:4326")
     parser.add_argument(
+        "--window-stride-frames",
+        type=int,
+        default=0,
+        help="When greater than zero, output sliding-window tensors with a sample axis.",
+    )
+    parser.add_argument(
         "--summary-output",
         type=Path,
         default=default_run_summary_path(PIPELINE_NAME),
@@ -157,6 +252,7 @@ def main() -> None:
         cadence_minutes=args.cadence_minutes,
         units=args.units,
         crs=args.crs,
+        window_stride_frames=args.window_stride_frames,
     )
     write_tensor_archive(
         output_path=args.output,
@@ -179,6 +275,9 @@ def main() -> None:
             "input_shape": list(input_tensor.shape),
             "target_shape": list(target_tensor.shape),
             "spec": spec.to_dict(),
+            "archive_layout": metadata.get("archive_layout", "single_window"),
+            "window_count": metadata.get("window_count", 1),
+            "window_stride_frames": args.window_stride_frames,
         },
     )
     record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)

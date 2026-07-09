@@ -49,6 +49,7 @@ class RadarSourceAdapter(Protocol):
         cadence_minutes: int = 6,
         units: str = VALUE_FIELD,
         crs: str = "EPSG:4326",
+        load_all_frames: bool = False,
     ) -> RadarSourceBatch:
         """Load a radar source into a model-ready sequence."""
 
@@ -95,6 +96,7 @@ class CsvPixelGridAdapter:
         cadence_minutes: int = 6,
         units: str = VALUE_FIELD,
         crs: str = "EPSG:4326",
+        load_all_frames: bool = False,
     ) -> RadarSourceBatch:
         records = read_csv_pixel_records(input_path)
         return self.build_batch_from_records(
@@ -245,6 +247,7 @@ class CwaOpenDataGridAdapter:
         cadence_minutes: int = 10,
         units: str = "",
         crs: str = "",
+        load_all_frames: bool = False,
     ) -> RadarSourceBatch:
         paths, inferred_event_id = resolve_cwa_grid_paths(input_path)
         selected_event_id = event_id or inferred_event_id
@@ -254,7 +257,8 @@ class CwaOpenDataGridAdapter:
                 f"CWA grid sequence has {len(paths)} frames; needs at least {total_length}"
             )
 
-        loaded = [extract_cwa_grid_values(path) for path in paths[:total_length]]
+        selected_paths = paths if load_all_frames else paths[:total_length]
+        loaded = [extract_cwa_grid_values(path) for path in selected_paths]
         loaded.sort(key=lambda item: item[0].data_time)
         inspections = [inspection for inspection, _values in loaded]
         sequence_check = check_cwa_grid_sequence(
@@ -310,7 +314,7 @@ class CwaOpenDataGridAdapter:
         spec: RadarTensorSpec,
     ) -> np.ndarray:
         sequence = np.empty(
-            (spec.total_length, spec.height, spec.width, spec.channels),
+            (len(loaded), spec.height, spec.width, spec.channels),
             dtype=np.float32,
         )
         for frame_index, (inspection, values) in enumerate(loaded):

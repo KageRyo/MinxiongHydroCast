@@ -26,6 +26,97 @@ PIPELINE_NAME = "tensor_baseline_evaluation"
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 
 
+def persistence_predict(input_tensor: np.ndarray, *, horizon: int) -> np.ndarray:
+    if input_tensor.ndim == 4:
+        return PersistenceNowcaster(horizon=horizon).predict(input_tensor)
+    if input_tensor.ndim == 5:
+        latest = input_tensor[:, -1:, :, :, :]
+        return np.repeat(latest, horizon, axis=1)
+    raise ValueError(
+        "input tensor must be [time, height, width, channels] or "
+        "[sample, time, height, width, channels]"
+    )
+
+
+def common_evaluation_mask(
+    input_tensor: np.ndarray,
+    target_tensor: np.ndarray,
+    nodata_values: tuple[float, ...],
+) -> np.ndarray:
+    target_mask = valid_value_mask(target_tensor, nodata_values)
+    if input_tensor.ndim == 4:
+        latest_input_mask = valid_value_mask(input_tensor[-1:], nodata_values)
+        prediction_mask = np.repeat(latest_input_mask, target_tensor.shape[0], axis=0)
+    elif input_tensor.ndim == 5:
+        latest_input_mask = valid_value_mask(input_tensor[:, -1:, :, :, :], nodata_values)
+        prediction_mask = np.repeat(latest_input_mask, target_tensor.shape[1], axis=1)
+    else:
+        raise ValueError("unsupported input tensor rank")
+    return target_mask & prediction_mask
+
+
+def evaluate_masked_arrays(
+    *,
+    prediction: np.ndarray,
+    target: np.ndarray,
+    evaluation_mask: np.ndarray,
+    event_threshold: float,
+) -> dict[str, object]:
+    valid_pixels = int(evaluation_mask.sum())
+    ignored_pixels = int(evaluation_mask.size - valid_pixels)
+    if valid_pixels == 0:
+        raise ValueError("tensor archive has no valid pixels for evaluation")
+    prediction_valid = prediction[evaluation_mask]
+    target_valid = target[evaluation_mask]
+    event_metrics = binary_event_metrics(
+        prediction_valid >= event_threshold,
+        target_valid >= event_threshold,
+    )
+    rmse_value = round(rmse(prediction_valid, target_valid), 6)
+    return {
+        "rmse": rmse_value,
+        "event_metrics": event_metrics.to_dict(),
+        "valid_pixel_count": valid_pixels,
+        "ignored_pixel_count": ignored_pixels,
+    }
+
+
+def lead_time_breakdown(
+    *,
+    prediction: np.ndarray,
+    target: np.ndarray,
+    evaluation_mask: np.ndarray,
+    event_threshold: float,
+    cadence_minutes: int,
+) -> list[dict[str, object]]:
+    lead_axis = 0 if target.ndim == 4 else 1
+    lead_count = target.shape[lead_axis]
+    results = []
+    for lead_index in range(lead_count):
+        if target.ndim == 4:
+            lead_prediction = prediction[lead_index : lead_index + 1]
+            lead_target = target[lead_index : lead_index + 1]
+            lead_mask = evaluation_mask[lead_index : lead_index + 1]
+        else:
+            lead_prediction = prediction[:, lead_index : lead_index + 1]
+            lead_target = target[:, lead_index : lead_index + 1]
+            lead_mask = evaluation_mask[:, lead_index : lead_index + 1]
+        metrics = evaluate_masked_arrays(
+            prediction=lead_prediction,
+            target=lead_target,
+            evaluation_mask=lead_mask,
+            event_threshold=event_threshold,
+        )
+        results.append(
+            {
+                "lead_index": lead_index,
+                "lead_time_minutes": cadence_minutes * (lead_index + 1),
+                **metrics,
+            }
+        )
+    return results
+
+
 def evaluate_persistence_tensor_archive(
     *,
     archive_path: Path,
@@ -37,43 +128,46 @@ def evaluate_persistence_tensor_archive(
     metadata = archive["metadata"]
     spec = archive["spec"]
     value_units = str(spec.get("units", ""))
+    cadence_minutes = int(spec.get("cadence_minutes", 0))
     nodata_values = nodata_values_from_metadata(metadata)
-    model = PersistenceNowcaster(horizon=target_tensor.shape[0])
-    prediction = model.predict(input_tensor)
-    target_mask = valid_value_mask(target_tensor, nodata_values)
-    latest_input_mask = valid_value_mask(input_tensor[-1:], nodata_values)
-    prediction_mask = np.repeat(latest_input_mask, target_tensor.shape[0], axis=0)
-    evaluation_mask = target_mask & prediction_mask
-    valid_pixels = int(evaluation_mask.sum())
-    ignored_pixels = int(evaluation_mask.size - valid_pixels)
-    if valid_pixels == 0:
-        raise ValueError("tensor archive has no valid pixels for evaluation")
-    prediction_valid = prediction[evaluation_mask]
-    target_valid = target_tensor[evaluation_mask]
-    event_metrics = binary_event_metrics(
-        prediction_valid >= event_threshold_mm,
-        target_valid >= event_threshold_mm,
+    horizon = target_tensor.shape[0] if target_tensor.ndim == 4 else target_tensor.shape[1]
+    prediction = persistence_predict(input_tensor, horizon=horizon)
+    evaluation_mask = common_evaluation_mask(input_tensor, target_tensor, nodata_values)
+    aggregate = evaluate_masked_arrays(
+        prediction=prediction,
+        target=target_tensor,
+        evaluation_mask=evaluation_mask,
+        event_threshold=event_threshold_mm,
     )
-    rmse_value = round(rmse(prediction_valid, target_valid), 6)
+    lead_metrics = lead_time_breakdown(
+        prediction=prediction,
+        target=target_tensor,
+        evaluation_mask=evaluation_mask,
+        event_threshold=event_threshold_mm,
+        cadence_minutes=cadence_minutes,
+    )
     return {
         "generated_at": datetime.now(TAIPEI_TZ).isoformat(timespec="seconds"),
         "model": "PersistenceNowcaster",
         "archive": str(archive_path),
         "event_id": metadata.get("event_id", ""),
-        "horizon": int(target_tensor.shape[0]),
+        "archive_layout": metadata.get("archive_layout", "single_window"),
+        "window_count": metadata.get("window_count", 1),
+        "horizon": int(horizon),
         "input_shape": list(input_tensor.shape),
         "target_shape": list(target_tensor.shape),
         "prediction_shape": list(prediction.shape),
-        "rmse_mm": rmse_value,
-        "rmse": rmse_value,
+        "rmse_mm": aggregate["rmse"],
+        "rmse": aggregate["rmse"],
         "value_units": value_units,
         "rmse_units": value_units,
         "event_threshold_mm": event_threshold_mm,
         "event_threshold": event_threshold_mm,
         "event_threshold_units": value_units,
-        "event_metrics": event_metrics.to_dict(),
-        "valid_pixel_count": valid_pixels,
-        "ignored_pixel_count": ignored_pixels,
+        "event_metrics": aggregate["event_metrics"],
+        "lead_time_metrics": lead_metrics,
+        "valid_pixel_count": aggregate["valid_pixel_count"],
+        "ignored_pixel_count": aggregate["ignored_pixel_count"],
         "nodata_values": list(nodata_values),
         "tensor_spec": spec,
         "metadata": metadata,
@@ -131,6 +225,8 @@ def main() -> None:
         },
         metadata={
             "event_id": result["event_id"],
+            "archive_layout": result["archive_layout"],
+            "window_count": result["window_count"],
             "event_threshold_mm": args.event_threshold_mm,
             "valid_pixel_count": result["valid_pixel_count"],
             "ignored_pixel_count": result["ignored_pixel_count"],

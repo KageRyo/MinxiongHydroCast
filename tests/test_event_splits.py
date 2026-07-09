@@ -10,7 +10,7 @@ def test_sample_event_split_manifest_is_ok():
 
     assert result["status"] == "ok"
     assert result["split_strategy"] == "event_based"
-    assert result["split_counts"] == {"train": 2, "validation": 3, "test": 3}
+    assert result["split_counts"] == {"train": 3, "validation": 2, "test": 3}
     assert any(
         event["event_id"] == "cwa_o_a0059_recent_sample_20260707"
         for event in result["events"]
@@ -21,6 +21,11 @@ def test_sample_event_split_manifest_is_ok():
 def test_radar_event_windows_are_registered_in_event_splits():
     manifest = load_manifest(Path("data/samples/event_split_manifest.json"))
     event_ids = {event.event_id for event in manifest.events}
+    split_by_event_id = {
+        event_id: split_name
+        for split_name, split_event_ids in manifest.splits.items()
+        for event_id in split_event_ids
+    }
     radar_windows = json.loads(
         Path("data/samples/radar_event_windows.json").read_text(encoding="utf-8")
     )
@@ -31,6 +36,10 @@ def test_radar_event_windows_are_registered_in_event_splits():
 
     assert candidate_ids
     assert candidate_ids <= event_ids
+    for candidate in radar_windows["candidate_windows"]:
+        assert split_by_event_id[candidate["event_id"]] == candidate["model_split"]
+        assert candidate["collection_status"] == "full_sequence_collected_locally_ignored"
+        assert candidate["tensor_status"] == "sliding_window_tensor_collected_locally_ignored"
 
 
 def test_weather_event_rejects_invalid_time_order():

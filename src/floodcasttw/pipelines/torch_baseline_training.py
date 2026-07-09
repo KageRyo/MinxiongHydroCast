@@ -35,47 +35,45 @@ class TorchTrainingConfig:
     resume_checkpoint: Path | None = None
     multi_gpu: bool = False
     batch_repeats: int = 1
+    batch_size: int = 1
 
 
 def prepare_channels_first_arrays(archive: dict[str, object]) -> tuple[np.ndarray, np.ndarray]:
     input_tensor = np.asarray(archive["input"], dtype=np.float32)
     target_tensor = np.asarray(archive["target"], dtype=np.float32)
-    if input_tensor.ndim != 4 or target_tensor.ndim != 4:
-        raise ValueError("tensor archive arrays must be [time, height, width, channels]")
+    return arrays_to_channels_first(input_tensor, target_tensor)
 
-    model_input = input_tensor.transpose(0, 3, 1, 2).reshape(
-        1,
-        input_tensor.shape[0] * input_tensor.shape[3],
-        input_tensor.shape[1],
-        input_tensor.shape[2],
+
+def array_to_channels_first(array: np.ndarray) -> np.ndarray:
+    values = np.asarray(array)
+    if values.ndim == 4:
+        return values.transpose(0, 3, 1, 2).reshape(
+            1,
+            values.shape[0] * values.shape[3],
+            values.shape[1],
+            values.shape[2],
+        )
+    if values.ndim == 5:
+        return values.transpose(0, 1, 4, 2, 3).reshape(
+            values.shape[0],
+            values.shape[1] * values.shape[4],
+            values.shape[2],
+            values.shape[3],
+        )
+    raise ValueError(
+        "arrays must be [time, height, width, channels] or "
+        "[sample, time, height, width, channels]"
     )
-    model_target = target_tensor.transpose(0, 3, 1, 2).reshape(
-        1,
-        target_tensor.shape[0] * target_tensor.shape[3],
-        target_tensor.shape[1],
-        target_tensor.shape[2],
-    )
-    return model_input, model_target
 
 
 def arrays_to_channels_first(
     input_array: np.ndarray,
     target_array: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
-    if input_array.ndim != 4 or target_array.ndim != 4:
-        raise ValueError("arrays must be [time, height, width, channels]")
-    model_input = input_array.transpose(0, 3, 1, 2).reshape(
-        1,
-        input_array.shape[0] * input_array.shape[3],
-        input_array.shape[1],
-        input_array.shape[2],
-    )
-    model_target = target_array.transpose(0, 3, 1, 2).reshape(
-        1,
-        target_array.shape[0] * target_array.shape[3],
-        target_array.shape[1],
-        target_array.shape[2],
-    )
+    model_input = array_to_channels_first(input_array)
+    model_target = array_to_channels_first(target_array)
+    if model_input.shape[0] != model_target.shape[0]:
+        raise ValueError("input and target tensors must have the same sample count")
     return model_input, model_target
 
 
@@ -214,6 +212,8 @@ def build_tiny_unet(nn: Any, *, input_channels: int, output_channels: int, hidde
 
 def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
     torch, nn = require_torch()
+    if config.batch_size < 1:
+        raise ValueError("batch_size must be at least 1")
     archive = load_tensor_archive(config.archive_path)
     model_input, model_target = prepare_channels_first_arrays(archive)
     input_mask, target_mask, nodata_values = prepare_channels_first_masks(archive)
@@ -264,12 +264,16 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
     losses: list[float] = []
     model.train()
     for _epoch in range(config.epochs):
-        optimizer.zero_grad(set_to_none=True)
-        prediction = model(x)
-        loss = masked_mse_loss(prediction, y, y_mask)
-        loss.backward()
-        optimizer.step()
-        losses.append(round(float(loss.detach().cpu().item()), 6))
+        batch_losses = []
+        for start in range(0, x.shape[0], config.batch_size):
+            stop = min(start + config.batch_size, x.shape[0])
+            optimizer.zero_grad(set_to_none=True)
+            prediction = model(x[start:stop])
+            loss = masked_mse_loss(prediction, y[start:stop], y_mask[start:stop])
+            loss.backward()
+            optimizer.step()
+            batch_losses.append(float(loss.detach().cpu().item()))
+        losses.append(round(float(np.mean(batch_losses)), 6))
 
     config.output_dir.mkdir(parents=True, exist_ok=True)
     checkpoint_path = config.output_dir / "tiny_unet_nowcaster.pt"
@@ -287,6 +291,7 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
             "resume_checkpoint": str(config.resume_checkpoint or ""),
             "multi_gpu": config.multi_gpu,
             "batch_repeats": config.batch_repeats,
+            "batch_size": config.batch_size,
         },
         "normalization": normalization,
         "nodata_values": list(nodata_values),
@@ -309,6 +314,7 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
         "cuda_device_names": cuda_device_names(torch),
         "used_cuda_device_count": cuda_count if use_data_parallel else int(device == "cuda"),
         "batch_repeats": config.batch_repeats,
+        "batch_size": config.batch_size,
         "input_shape": list(model_input.shape),
         "target_shape": list(model_target.shape),
         "normalization": normalization,
@@ -334,6 +340,7 @@ def main() -> None:
     parser.add_argument("--resume-checkpoint", type=Path, default=None)
     parser.add_argument("--multi-gpu", action="store_true")
     parser.add_argument("--batch-repeats", type=int, default=1)
+    parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument(
         "--summary-output",
         type=Path,
@@ -354,6 +361,7 @@ def main() -> None:
         resume_checkpoint=args.resume_checkpoint,
         multi_gpu=args.multi_gpu,
         batch_repeats=args.batch_repeats,
+        batch_size=args.batch_size,
     )
     try:
         result = train_tiny_unet_archive(config)
@@ -374,6 +382,7 @@ def main() -> None:
                 "resume_checkpoint": str(args.resume_checkpoint or ""),
                 "multi_gpu": args.multi_gpu,
                 "batch_repeats": args.batch_repeats,
+                "batch_size": args.batch_size,
                 "used_cuda_device_count": result["used_cuda_device_count"],
                 "cuda_device_names": result["cuda_device_names"],
                 "normalization": result["normalization"],
@@ -398,6 +407,7 @@ def main() -> None:
                 "resume_checkpoint": str(args.resume_checkpoint or ""),
                 "multi_gpu": args.multi_gpu,
                 "batch_repeats": args.batch_repeats,
+                "batch_size": args.batch_size,
             },
         )
         record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)

@@ -40,6 +40,10 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
       evidence.
 - [x] Identify Chiayi/Minxiong heavy-rain and Taiwan-wide widespread radar candidate windows from
       a 240-frame CWA hourly discovery scan.
+- [x] Download complete 10-minute CWA sequences for the selected candidate windows.
+- [x] Convert complete CWA event windows into 6-input/6-output sliding tensor archives.
+- [x] Add lead-time metric breakdowns for sliding-window tensor archives.
+- [x] Train and evaluate the Tiny U-Net/RainNet-style baseline on full CWA event windows.
 
 ## Next
 
@@ -52,7 +56,6 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 
 - [x] Track Chiayi/Minxiong heavy-rain and Taiwan-wide widespread radar candidate windows in
       `data/samples/radar_event_windows.json`.
-- [ ] Download complete 10-minute CWA sequences for the selected candidate windows.
 - [ ] Attach official CWA weather context before labeling Taiwan-wide windows as typhoon or
       frontal events.
 - [ ] Add gauge/QPE validation reports so QPE is treated as an estimate, not direct ground truth.
@@ -63,6 +66,7 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Build a production CWA radar tensor converter once the source format is confirmed.
 - [x] Add a production CWA radar source adapter once native format is confirmed.
 - [x] Convert event frame sequences into fixed tensor archives.
+- [x] Convert longer event frame sequences into sliding-window tensor archives.
 - [x] Preserve CRS, origin, resolution, nodata values, units, and timestamps in tensor metadata.
 - [x] Add regression tests using synthetic CWA-like fixtures instead of official raw data.
 
@@ -74,7 +78,7 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Use the CUDA-enabled `VLM` environment and run the Tiny U-Net baseline on two GPUs.
 - [x] Mask CWA nodata values and normalize radar tensors before neural smoke training.
 - [x] Compare CSI, POD, FAR, and RMSE across persistence and Tiny U-Net smoke outputs.
-- [ ] Add lead-time metric breakdowns after collecting longer multi-step event windows.
+- [x] Add lead-time metric breakdowns after collecting longer multi-step event windows.
 - [ ] Wire NowcastNet inference only after code, checkpoint, and license are reviewed.
 
 ### Phase 5: Local Flood-Risk Layer

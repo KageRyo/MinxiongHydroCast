@@ -29,7 +29,9 @@
       "start_time": "2026-07-02T12:00:00+08:00",
       "end_time": "2026-07-02T18:00:00+08:00",
       "target_cadence_minutes": 10,
-      "collection_status": "candidate_identified_full_sequence_pending",
+      "model_split": "test",
+      "collection_status": "full_sequence_collected_locally_ignored",
+      "tensor_status": "sliding_window_tensor_collected_locally_ignored",
       "selection_basis": "highest local-focus dBZ in hourly discovery scan",
       "evidence": {
         "source_event_id": "cwa_o_a0059_hourly_scan_20260628_20260708",
@@ -38,6 +40,26 @@
         "local_peak_max_dbz": 58.0,
         "hourly_local_frames_over_threshold": 12,
         "hourly_local_total_pixels_ge_threshold": 622
+      },
+      "full_sequence_summary": {
+        "frame_count": 37,
+        "window_count": 26,
+        "local_peak_time": "2026-07-02T15:30:00+08:00",
+        "local_peak_max_dbz": 58.79999923706055,
+        "lead_time_minutes": [10, 20, 30, 40, 50, 60]
+      },
+      "artifacts": {
+        "collection": "data/processed/cwa_event_collection_chiayi_minxiong_heavyrain_20260702_afternoon.json",
+        "summary": "data/processed/cwa_event_summary_chiayi_minxiong_heavyrain_20260702_afternoon.json",
+        "tensor_archive": "data/processed/cwa_tensor_chiayi_minxiong_heavyrain_20260702_6in_6out.npz",
+        "persistence_metrics": "data/processed/cwa_persistence_chiayi_minxiong_heavyrain_20260702_6in_6out.json",
+        "tiny_unet_comparison": "data/processed/tiny_unet_comparison_chiayi_minxiong_heavyrain_20260702_6in_6out.json"
+      },
+      "baseline_metrics": {
+        "persistence_rmse": 11.465393,
+        "persistence_csi": 0.278248,
+        "tiny_unet_rmse": 9.914263,
+        "tiny_unet_csi": 0.086701
       }
     },
     {
@@ -48,7 +70,9 @@
       "start_time": "2026-07-03T13:00:00+08:00",
       "end_time": "2026-07-03T19:00:00+08:00",
       "target_cadence_minutes": 10,
-      "collection_status": "candidate_identified_full_sequence_pending",
+      "model_split": "test",
+      "collection_status": "full_sequence_collected_locally_ignored",
+      "tensor_status": "sliding_window_tensor_collected_locally_ignored",
       "selection_basis": "largest local-focus 35 dBZ coverage in hourly discovery scan",
       "evidence": {
         "source_event_id": "cwa_o_a0059_hourly_scan_20260628_20260708",
@@ -56,6 +80,26 @@
         "coverage_peak_time": "2026-07-03T17:00:00+08:00",
         "coverage_peak_pixels_ge_threshold": 198,
         "coverage_peak_fraction_ge_threshold": 0.685121
+      },
+      "full_sequence_summary": {
+        "frame_count": 37,
+        "window_count": 26,
+        "local_peak_time": "2026-07-03T16:20:00+08:00",
+        "local_peak_max_dbz": 57.29999923706055,
+        "lead_time_minutes": [10, 20, 30, 40, 50, 60]
+      },
+      "artifacts": {
+        "collection": "data/processed/cwa_event_collection_chiayi_minxiong_heavyrain_20260703_afternoon.json",
+        "summary": "data/processed/cwa_event_summary_chiayi_minxiong_heavyrain_20260703_afternoon.json",
+        "tensor_archive": "data/processed/cwa_tensor_chiayi_minxiong_heavyrain_20260703_6in_6out.npz",
+        "persistence_metrics": "data/processed/cwa_persistence_chiayi_minxiong_heavyrain_20260703_6in_6out.json",
+        "tiny_unet_comparison": "data/processed/tiny_unet_comparison_chiayi_minxiong_heavyrain_20260703_6in_6out.json"
+      },
+      "baseline_metrics": {
+        "persistence_rmse": 10.421478,
+        "persistence_csi": 0.315475,
+        "tiny_unet_rmse": 9.496191,
+        "tiny_unet_csi": 0.121837
       }
     },
     {
@@ -66,7 +110,9 @@
       "start_time": "2026-06-28T13:00:00+08:00",
       "end_time": "2026-06-28T21:00:00+08:00",
       "target_cadence_minutes": 10,
-      "collection_status": "candidate_identified_full_sequence_pending",
+      "model_split": "train",
+      "collection_status": "full_sequence_collected_locally_ignored",
+      "tensor_status": "sliding_window_tensor_collected_locally_ignored",
       "selection_basis": "largest Taiwan-wide 35 dBZ coverage in hourly discovery scan",
       "evidence": {
         "source_event_id": "cwa_o_a0059_hourly_scan_20260628_20260708",
@@ -74,6 +120,26 @@
         "coverage_peak_max_dbz": 56.29999923706055,
         "coverage_peak_pixels_ge_threshold": 6498,
         "coverage_peak_fraction_ge_threshold": 0.102568
+      },
+      "full_sequence_summary": {
+        "frame_count": 49,
+        "window_count": 38,
+        "taiwan_coverage_peak_time": "2026-06-28T13:30:00+08:00",
+        "taiwan_coverage_peak_pixels_ge_threshold": 7244,
+        "lead_time_minutes": [10, 20, 30, 40, 50, 60]
+      },
+      "artifacts": {
+        "collection": "data/processed/cwa_event_collection_taiwan_widespread_20260628_afternoon_evening.json",
+        "summary": "data/processed/cwa_event_summary_taiwan_widespread_20260628_afternoon_evening.json",
+        "tensor_archive": "data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz",
+        "persistence_metrics": "data/processed/cwa_persistence_taiwan_widespread_20260628_6in_6out.json",
+        "tiny_unet_comparison": "data/processed/tiny_unet_comparison_taiwan_widespread_20260628_6in_6out.json"
+      },
+      "baseline_metrics": {
+        "persistence_rmse": 8.311872,
+        "persistence_csi": 0.214701,
+        "tiny_unet_rmse": 8.100073,
+        "tiny_unet_csi": 0.048339
       }
     }
   ],

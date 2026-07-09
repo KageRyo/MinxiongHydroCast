@@ -121,6 +121,28 @@ latest-input validity mask.
 The Tiny U-Net smoke checkpoint lowers RMSE by `0.797769 dBZ` but predicts no threshold events at
 `35 dBZ`. Do not treat it as a usable model until trained on longer event splits.
 
+## Full CWA Event Lead-Time Baselines
+
+The first longer CWA benchmark uses three complete `O-A0059-001` 10-minute radar windows. Each
+archive uses 6 input frames and predicts 6 lead frames, so lead-time metrics cover 10 to 60
+minutes. The Taiwan-wide event is used for Tiny U-Net training; the two Chiayi/Minxiong events are
+local test windows.
+
+| Event | Split | Windows | Persistence RMSE | Persistence CSI | Tiny U-Net RMSE | Tiny U-Net CSI |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Taiwan-wide 2026-06-28 | train | 38 | `8.311872` | `0.214701` | `8.100073` | `0.048339` |
+| Chiayi/Minxiong 2026-07-02 | test | 26 | `11.465393` | `0.278248` | `9.914263` | `0.086701` |
+| Chiayi/Minxiong 2026-07-03 | test | 26 | `10.421478` | `0.315475` | `9.496191` | `0.121837` |
+
+Persistence lead-time CSI drops as horizon increases. On the Taiwan-wide train event it moves from
+`0.347882` at 10 minutes to `0.148771` at 60 minutes. On the two Chiayi/Minxiong test events it
+moves from `0.424883` to `0.164930`, and from `0.477052` to `0.221392`.
+
+The 1-epoch Tiny U-Net/RainNet-style baseline used the CUDA-enabled `VLM` environment, two RTX 4090
+GPUs via `DataParallel`, `hidden_channels=8`, and `batch_size=2`. It lowers aggregate RMSE but has
+much worse CSI than persistence, which indicates threshold-event under-detection. Keep persistence
+as the primary benchmark until the neural baseline is trained on more event diversity.
+
 ## Threshold Flood Risk
 
 - Model: `RainfallThresholdRiskScorer`

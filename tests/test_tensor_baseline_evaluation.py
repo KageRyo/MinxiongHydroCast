@@ -90,6 +90,56 @@ def test_evaluate_persistence_tensor_archive_ignores_nodata_pixels(tmp_path: Pat
     assert result["event_metrics"]["correct_negatives"] == 1
 
 
+def test_evaluate_persistence_tensor_archive_reports_lead_times_for_sliding_windows(
+    tmp_path: Path,
+):
+    archive_path = tmp_path / "sliding_radar_tensor.npz"
+    input_tensor = np.array(
+        [
+            [[[[1.0]]]],
+            [[[[10.0]]]],
+        ],
+        dtype=np.float32,
+    )
+    target_tensor = np.array(
+        [
+            [[[[3.0]]], [[[4.0]]]],
+            [[[[30.0]]], [[[40.0]]]],
+        ],
+        dtype=np.float32,
+    )
+    write_tensor_archive(
+        output_path=archive_path,
+        input_tensor=input_tensor,
+        target_tensor=target_tensor,
+        spec=RadarTensorSpec(
+            input_length=1,
+            prediction_length=2,
+            height=1,
+            width=1,
+            units="dBZ",
+            cadence_minutes=10,
+        ),
+        metadata={
+            "event_id": "sliding_event",
+            "archive_layout": "sliding_window",
+            "window_count": 2,
+        },
+    )
+
+    result = evaluate_persistence_tensor_archive(
+        archive_path=archive_path,
+        event_threshold_mm=5.0,
+    )
+
+    assert result["archive_layout"] == "sliding_window"
+    assert result["window_count"] == 2
+    assert result["horizon"] == 2
+    assert [item["lead_time_minutes"] for item in result["lead_time_metrics"]] == [10, 20]
+    assert result["lead_time_metrics"][0]["valid_pixel_count"] == 2
+    assert result["lead_time_metrics"][1]["valid_pixel_count"] == 2
+
+
 def test_write_tensor_baseline_evaluation_result(tmp_path: Path):
     output = tmp_path / "tensor_baseline_evaluation.json"
     result = {

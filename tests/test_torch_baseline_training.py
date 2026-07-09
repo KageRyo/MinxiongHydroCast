@@ -19,6 +19,18 @@ def test_prepare_channels_first_arrays_flattens_time_and_channels():
     assert model_target.shape == (1, 4, 4, 5)
 
 
+def test_prepare_channels_first_arrays_keeps_sliding_window_samples():
+    archive = {
+        "input": np.zeros((2, 3, 4, 5, 1), dtype=np.float32),
+        "target": np.zeros((2, 2, 4, 5, 1), dtype=np.float32),
+    }
+
+    model_input, model_target = prepare_channels_first_arrays(archive)
+
+    assert model_input.shape == (2, 3, 4, 5)
+    assert model_target.shape == (2, 2, 4, 5)
+
+
 def test_repeat_training_batch_repeats_batch_axis():
     model_input = np.zeros((1, 6, 4, 5), dtype=np.float32)
     model_target = np.zeros((1, 4, 4, 5), dtype=np.float32)
