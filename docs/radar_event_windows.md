@@ -27,6 +27,9 @@ floodcasttw-radar-event-summary \
 ## Candidate Windows
 
 Candidate evidence is tracked in `data/samples/radar_event_windows.json`.
+Next-batch queued windows from the same hourly scan are tracked in
+`data/samples/event_expansion_queue.json`; they are not part of train/validation/test until full
+10-minute collections, official weather context, tensors, and validation reports exist.
 
 | Event ID | Split | Region | Full Window | Evidence |
 | --- | --- | --- | --- | --- |
@@ -36,6 +39,10 @@ Candidate evidence is tracked in `data/samples/radar_event_windows.json`.
 
 These are radar-derived labels only. Attach official weather context before naming a window
 typhoon, Mei-yu, frontal, or convective.
+
+Official weather-context tracking lives in `data/samples/event_weather_context.json`. The current
+entries are intentionally `official_context_pending`; do not stratify train/test by weather type
+until each event cites CWA weather maps, warnings, daily reports, or another official source.
 
 ## Full Collection Status
 
@@ -93,6 +100,17 @@ floodcasttw-tensor-baseline-evaluate \
   --output data/processed/cwa_persistence_taiwan_widespread_20260628_6in_6out.json
 ```
 
+Validate QPE against rain gauges after local `O-B0045-001` and `O-A0002-001` captures are
+available for the same event window:
+
+```bash
+floodcasttw-qpe-gauge-validate \
+  --qpe-grid data/external/radar/events/<event>/O-B0045-001.json \
+  --gauge-json data/external/gauges/events/<event>/O-A0002-001.json \
+  --event-id <event_id> \
+  --output data/processed/qpe_gauge_validation_<event_id>.json
+```
+
 Train the current Tiny U-Net/RainNet-style baseline on the Taiwan-wide event:
 
 ```bash
@@ -105,6 +123,9 @@ PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_t
   --batch-size 2 \
   --epochs 1
 ```
+
+For the next strong-echo experiment, add weighted loss and validation flags shown in
+[model_strategy.md](model_strategy.md).
 
 Evaluate with mini-batch inference:
 

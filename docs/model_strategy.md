@@ -113,6 +113,28 @@ The full-event Tiny U-Net checkpoint lowers aggregate RMSE against persistence o
 events, but CSI remains worse. It should be treated as a diagnostic baseline while persistence
 remains the primary benchmark.
 
+For the next Tiny U-Net experiment, keep the same tensor archives but upweight strong echoes and
+hold out sliding windows for validation:
+
+```bash
+PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_training \
+  --archive data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz \
+  --output-dir data/external/checkpoints/tiny_unet_cwa_weighted_validation \
+  --device cuda \
+  --multi-gpu \
+  --hidden-channels 8 \
+  --batch-size 2 \
+  --epochs 20 \
+  --loss-function weighted_mse \
+  --event-threshold 35 \
+  --event-weight 4 \
+  --validation-fraction 0.2 \
+  --early-stopping-patience 3
+```
+
+Use `threshold_focal_mse` only after the weighted run is stable. These options are meant to improve
+threshold-event detection; judge them by CSI/POD/FAR and lead-time metrics, not RMSE alone.
+
 ## Recommended Roadmap
 
 1. Stabilize WRA/CWA/NCDR ingestion and validation.

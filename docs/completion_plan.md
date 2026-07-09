@@ -27,14 +27,22 @@ Chiayi/Minxiong-ready model without committing credentials, raw official data, o
   smoke training.
 - Completed: persistence versus Tiny U-Net smoke comparison using the same valid-pixel mask and
   metrics.
+- Completed: QPE/gauge validation report CLI for local CWA `O-B0045-001` and `O-A0002-001`
+  captures.
+- Completed: event weather-context manifest that prevents radar-only windows from being mislabeled
+  before official CWA evidence is attached.
+- Completed: Tiny U-Net threshold-weighted loss options, validation split support, and early
+  stopping metadata for the next strong-echo experiment.
 - Completed: baseline model card for Minxiong/Chiayi-oriented smoke testing.
 - Completed: local WRA API key configuration; real key stays in ignored `.env`.
 - Pending integration work: WRA official API endpoint contracts still need implementation in the
   ingestion layer.
+- Pending official-label work: attach CWA weather maps, warnings, daily reports, or equivalent
+  official source evidence to each selected event before weather-type stratification.
+- Pending validation work: run live QPE/gauge reports for each selected event after matching local
+  QPE and station captures are collected.
 - Pending training work: collect enough event windows for meaningful Tiny U-Net or NowcastNet
-  training.
-- Pending benchmark work: collect real Chiayi/Minxiong heavy-rain and Taiwan-wide typhoon/front
-  event windows before reporting model performance.
+  training and reporting.
 
 ## Phase 1: Data Source Finalization
 
@@ -51,6 +59,8 @@ Chiayi/Minxiong-ready model without committing credentials, raw official data, o
 - Populate `data/samples/event_split_manifest.json` with real historical events.
 - Add event manifests for Chiayi/Minxiong heavy-rain windows and Taiwan-wide typhoon/front events.
 - Add gauge/QPE validation reports so QPE is not treated as ground truth without checks.
+- Attach official CWA weather context to every selected radar event before final weather labels are
+  used for splitting or scientific reporting.
 - Produce reproducible dataset summaries under `data/processed/run_summaries/`.
 
 ## Phase 3: Tensor Conversion
@@ -65,6 +75,8 @@ Chiayi/Minxiong-ready model without committing credentials, raw official data, o
 - Evaluate persistence on real converted radar events.
 - Train a small ConvLSTM or U-Net on one RTX 4090 first.
 - Add checkpoint save/resume and deterministic run summaries.
+- Use threshold-weighted or focal-style losses plus validation early stopping before increasing
+  model complexity.
 - Compare CSI, POD, FAR, RMSE, and lead-time metrics across baselines.
 - Migrate NowcastNet only after its code/checkpoint license and tensor contract are reviewed.
 

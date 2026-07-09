@@ -60,8 +60,14 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
       `data/samples/radar_event_windows.json`.
 - [ ] Attach official CWA weather context before labeling Taiwan-wide windows as typhoon or
       frontal events.
-- [ ] Add gauge/QPE validation reports so QPE is treated as an estimate, not direct ground truth.
+- [x] Add a tracked event weather-context manifest so radar-only windows cannot be mislabeled as
+      typhoon, Mei-yu, or frontal before official CWA evidence is attached.
+- [x] Add a QPE/gauge validation report command so QPE is treated as an estimate, not direct
+      ground truth.
+- [ ] Run live QPE/gauge validation reports for each selected event after CWA/WRA station samples
+      are collected locally.
 - [ ] Produce reproducible dataset summaries under ignored `data/processed/run_summaries/`.
+- [x] Add a next-batch event expansion queue from the existing CWA hourly discovery scan.
 - [ ] Add more train events across typhoon, frontal, Mei-yu, and convective regimes before SOTA
       model migration.
 
@@ -83,6 +89,8 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Mask CWA nodata values and normalize radar tensors before neural smoke training.
 - [x] Compare CSI, POD, FAR, and RMSE across persistence and Tiny U-Net smoke outputs.
 - [x] Add lead-time metric breakdowns after collecting longer multi-step event windows.
+- [x] Add threshold-weighted Tiny U-Net loss options, validation split support, and early stopping
+      metadata for stronger-event experiments.
 - [ ] Wire NowcastNet inference only after event diversity, code, checkpoint, tensor shape, and
       license are reviewed.
 

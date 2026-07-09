@@ -28,6 +28,12 @@ The best rainfall-estimate candidate for flood-risk features is:
 `O-A0058-001..006` are radar echo image products. Keep them as visualization/reference sources
 unless sample parsing proves they preserve numeric grid values well enough for training.
 
+The first official gauge validation source is:
+
+| Data ID | Name | Cadence | Format | Confirmed Metadata |
+| --- | --- | --- | --- | --- |
+| `O-A0002-001` | `雨量觀測站-雨量資料` | observation update cadence | JSON, XML, API, historyAPI | station rainfall observations for QPE validation |
+
 ## License And Access
 
 CWA metadata lists the license as `氣象資料開放平臺使用規範`, with the license URL
@@ -95,6 +101,23 @@ floodcasttw-cwa-grid-inspect \
   data/external/radar/cwa_o_a0059_001/O-A0059-001.json \
   data/external/radar/cwa_o_b0045_001/O-B0045-001.json
 ```
+
+## QPE/Gauge Validation
+
+Use `O-B0045-001` only as an estimated rainfall grid until it is checked against rain gauges. Once
+local QPE and `O-A0002-001` gauge captures exist, generate an ignored report:
+
+```bash
+floodcasttw-qpe-gauge-validate \
+  --qpe-grid data/external/radar/events/<event>/O-B0045-001.json \
+  --gauge-json data/external/gauges/events/<event>/O-A0002-001.json \
+  --event-id <event_id> \
+  --output data/processed/qpe_gauge_validation_<event_id>.json
+```
+
+The report uses nearest-grid lookup for the first pass and records station-level QPE, gauge
+rainfall, difference, absolute error, MAE, RMSE, bias, correlation, and excluded stations. Treat
+the report as validation evidence, not as a replacement for hydrology labels.
 
 ## History Workflow
 

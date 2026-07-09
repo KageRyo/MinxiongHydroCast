@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "source": "CWA O-A0059-001 hourly discovery scan, 2026-06-28 to 2026-07-08",
+  "source_summary": "data/processed/cwa_event_summary_hourly_scan_20260628_20260708.json",
+  "selection_status": "radar_only_pending_official_weather_context",
+  "target_counts": {
+    "taiwan_wide_front_or_meiyu": "2-3",
+    "chiayi_minxiong_local_heavy_rain": "2-3",
+    "typhoon_related": "1-2"
+  },
+  "candidates": [
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_candidate_20260629_afternoon",
+      "priority": 1,
+      "candidate_family": "chiayi_minxiong_local_heavy_rain",
+      "region": "Minxiong, Chiayi County",
+      "start_time": "2026-06-29T12:00:00+08:00",
+      "end_time": "2026-06-29T18:00:00+08:00",
+      "target_cadence_minutes": 10,
+      "selection_basis": "hourly scan local 35 dBZ coverage peak outside already-collected test events",
+      "evidence": {
+        "local_peak_time": "2026-06-29T15:00:00+08:00",
+        "local_peak_max_dbz": 56.8,
+        "local_coverage_peak_pixels_ge_threshold": 143
+      },
+      "required_before_training": [
+        "collect complete 10-minute O-A0059-001 sequence",
+        "attach official CWA weather context",
+        "run O-B0045-001 QPE versus O-A0002-001 gauge validation"
+      ],
+      "status": "queued"
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_candidate_20260630_late_afternoon",
+      "priority": 2,
+      "candidate_family": "chiayi_minxiong_local_heavy_rain",
+      "region": "Minxiong, Chiayi County",
+      "start_time": "2026-06-30T14:00:00+08:00",
+      "end_time": "2026-06-30T20:00:00+08:00",
+      "target_cadence_minutes": 10,
+      "selection_basis": "secondary local-focus echo candidate from hourly scan",
+      "evidence": {
+        "local_peak_time": "2026-06-30T17:00:00+08:00",
+        "local_peak_max_dbz": 42.3,
+        "local_coverage_peak_pixels_ge_threshold": 7
+      },
+      "required_before_training": [
+        "collect complete 10-minute O-A0059-001 sequence",
+        "attach official CWA weather context",
+        "run O-B0045-001 QPE versus O-A0002-001 gauge validation"
+      ],
+      "status": "queued_low_confidence"
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_candidate_20260629_morning",
+      "priority": 3,
+      "candidate_family": "taiwan_wide_front_or_meiyu",
+      "region": "Taiwan",
+      "start_time": "2026-06-29T06:00:00+08:00",
+      "end_time": "2026-06-29T12:00:00+08:00",
+      "target_cadence_minutes": 10,
+      "selection_basis": "next-largest Taiwan-wide 35 dBZ coverage after the collected 2026-06-28 event",
+      "evidence": {
+        "taiwan_coverage_peak_time": "2026-06-29T09:00:00+08:00",
+        "taiwan_coverage_peak_pixels_ge_threshold": 2654,
+        "taiwan_peak_max_dbz": 58.5
+      },
+      "required_before_training": [
+        "collect complete 10-minute O-A0059-001 sequence",
+        "attach official CWA weather context",
+        "run O-B0045-001 QPE versus O-A0002-001 gauge validation"
+      ],
+      "status": "queued"
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_candidate_20260707_morning",
+      "priority": 4,
+      "candidate_family": "taiwan_wide_front_or_meiyu",
+      "region": "Taiwan",
+      "start_time": "2026-07-07T04:00:00+08:00",
+      "end_time": "2026-07-07T12:00:00+08:00",
+      "target_cadence_minutes": 10,
+      "selection_basis": "later-window Taiwan-wide coverage candidate from hourly scan",
+      "evidence": {
+        "taiwan_coverage_peak_time": "2026-07-07T10:00:00+08:00",
+        "taiwan_coverage_peak_pixels_ge_threshold": 917,
+        "taiwan_peak_max_time": "2026-07-07T15:00:00+08:00",
+        "taiwan_peak_max_dbz": 81.5
+      },
+      "required_before_training": [
+        "collect complete 10-minute O-A0059-001 sequence",
+        "attach official CWA weather context",
+        "run O-B0045-001 QPE versus O-A0002-001 gauge validation"
+      ],
+      "status": "queued"
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_candidate_20260708_early_morning",
+      "priority": 5,
+      "candidate_family": "taiwan_wide_front_or_meiyu",
+      "region": "Taiwan",
+      "start_time": "2026-07-08T02:00:00+08:00",
+      "end_time": "2026-07-08T10:00:00+08:00",
+      "target_cadence_minutes": 10,
+      "selection_basis": "later-window Taiwan-wide morning candidate from hourly scan",
+      "evidence": {
+        "taiwan_coverage_peak_time": "2026-07-08T08:00:00+08:00",
+        "taiwan_coverage_peak_pixels_ge_threshold": 331,
+        "taiwan_peak_max_dbz": 57.5
+      },
+      "required_before_training": [
+        "collect complete 10-minute O-A0059-001 sequence",
+        "attach official CWA weather context",
+        "run O-B0045-001 QPE versus O-A0002-001 gauge validation"
+      ],
+      "status": "queued_low_confidence"
+    }
+  ],
+  "notes": [
+    "Do not add queued events to train/validation/test until complete 10-minute sequences are collected.",
+    "Do not call any queued Taiwan-wide candidate frontal, Mei-yu, or typhoon-related until official CWA context is attached.",
+    "The current scan window did not identify a typhoon-related candidate; that category needs a broader historical search."
+  ]
+}

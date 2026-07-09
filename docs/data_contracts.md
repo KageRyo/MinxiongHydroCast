@@ -109,3 +109,32 @@ Required fields:
 - `description`
 
 Grid cells should be referenced by stable cell IDs from `GridSpec.cell_id()`.
+
+## Event Weather Context
+
+Required fields in `data/samples/event_weather_context.json`:
+
+- `event_id`
+- `window_start`
+- `window_end`
+- `radar_candidate_type`
+- `official_weather_type`
+- `official_evidence`
+- `minimum_required_evidence`
+- `status`
+
+Use `official_context_pending` until CWA weather maps, warnings, daily reports, or equivalent
+official sources are attached.
+
+## QPE/Gauge Validation Reports
+
+Required top-level fields:
+
+- `event_id`
+- `qpe_source`
+- `gauge_source`
+- `summary`
+- `matches`
+
+Each station match should include station ID/name, coordinates, gauge rainfall, nearest QPE value,
+difference, absolute error, grid row/column, status, and exclusion reason when applicable.

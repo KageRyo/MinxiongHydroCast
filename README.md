@@ -184,7 +184,21 @@ floodcasttw-radar-event-summary \
 
 Tracked candidate windows from the latest CWA hourly discovery scan are stored in
 `data/samples/radar_event_windows.json`. They are radar-derived candidates; attach official weather
-context before labeling them as typhoon or frontal events.
+context from `data/samples/event_weather_context.json` before labeling them as typhoon, Mei-yu,
+frontal, or convective events. Next-batch candidates stay in
+`data/samples/event_expansion_queue.json` until they have complete 10-minute collections, tensors,
+official context, and QPE/gauge validation.
+
+Validate CWA 1-hour QPE against rain gauges after collecting local `O-B0045-001` and
+`O-A0002-001` captures for the same window:
+
+```bash
+floodcasttw-qpe-gauge-validate \
+  --qpe-grid data/external/radar/events/<event>/O-B0045-001.json \
+  --gauge-json data/external/gauges/events/<event>/O-A0002-001.json \
+  --event-id <event_id> \
+  --output data/processed/qpe_gauge_validation_<event_id>.json
+```
 
 Check event-based train/validation/test splits:
 
@@ -252,7 +266,9 @@ floodcasttw-train-torch-baseline \
 ```
 
 The training command masks CWA nodata values and z-score normalizes valid pixels before computing
-loss.
+loss. For the next strong-echo experiment, add `--loss-function weighted_mse`,
+`--event-threshold 35`, `--event-weight 4`, `--validation-fraction 0.2`, and
+`--early-stopping-patience 3`.
 
 Compare the Tiny U-Net checkpoint against persistence on the same valid pixels:
 

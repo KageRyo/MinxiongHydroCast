@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "source_policy": "Weather-type labels must cite CWA weather maps, warnings, daily reports, or official open-data products. Radar-only evidence is not enough.",
+  "allowed_weather_types": [
+    "afternoon_convection",
+    "front",
+    "meiyu",
+    "typhoon_outer_rainband",
+    "other",
+    "official_context_pending"
+  ],
+  "official_source_candidates": [
+    {
+      "name": "CWA weather maps",
+      "provider": "Central Weather Administration",
+      "use": "Synoptic pattern: front, Mei-yu front, typhoon circulation, or local convection context."
+    },
+    {
+      "name": "CWA weather warnings and advisories",
+      "provider": "Central Weather Administration",
+      "use": "Heavy-rain, extremely-heavy-rain, thunderstorm, or typhoon warning evidence."
+    },
+    {
+      "name": "CWA daily or event reports",
+      "provider": "Central Weather Administration",
+      "use": "Human-reviewed daily weather description for final event type labeling."
+    }
+  ],
+  "events": [
+    {
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening",
+      "window_start": "2026-06-28T13:00:00+08:00",
+      "window_end": "2026-06-28T21:00:00+08:00",
+      "radar_candidate_type": "widespread_radar_candidate",
+      "official_weather_type": "official_context_pending",
+      "official_evidence": [],
+      "minimum_required_evidence": [
+        "CWA weather map or daily report covering 2026-06-28 afternoon-evening",
+        "CWA warning/advisory check for Taiwan during the window"
+      ],
+      "status": "needs_official_source",
+      "notes": "Do not relabel this as front, Mei-yu, or typhoon-related until official context is attached."
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon",
+      "window_start": "2026-07-02T12:00:00+08:00",
+      "window_end": "2026-07-02T18:00:00+08:00",
+      "radar_candidate_type": "local_heavy_rain_radar_candidate",
+      "official_weather_type": "official_context_pending",
+      "official_evidence": [],
+      "minimum_required_evidence": [
+        "CWA weather map or daily report covering 2026-07-02 afternoon",
+        "CWA warning/advisory check for Chiayi County during the window"
+      ],
+      "status": "needs_official_source",
+      "notes": "The radar peak is real locally, but the weather mechanism remains unconfirmed."
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon",
+      "window_start": "2026-07-03T13:00:00+08:00",
+      "window_end": "2026-07-03T19:00:00+08:00",
+      "radar_candidate_type": "local_heavy_rain_radar_candidate",
+      "official_weather_type": "official_context_pending",
+      "official_evidence": [],
+      "minimum_required_evidence": [
+        "CWA weather map or daily report covering 2026-07-03 afternoon-evening",
+        "CWA warning/advisory check for Chiayi County during the window"
+      ],
+      "status": "needs_official_source",
+      "notes": "Use this as a radar candidate only until official context is attached."
+    }
+  ]
+}

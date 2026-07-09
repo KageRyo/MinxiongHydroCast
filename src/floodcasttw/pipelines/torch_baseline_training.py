@@ -36,6 +36,12 @@ class TorchTrainingConfig:
     multi_gpu: bool = False
     batch_repeats: int = 1
     batch_size: int = 1
+    loss_function: str = "mse"
+    event_threshold: float = 35.0
+    event_weight: float = 1.0
+    focal_gamma: float = 0.0
+    validation_fraction: float = 0.0
+    early_stopping_patience: int = 0
 
 
 def prepare_channels_first_arrays(archive: dict[str, object]) -> tuple[np.ndarray, np.ndarray]:
@@ -140,11 +146,67 @@ def normalize_training_arrays(
     }
 
 
-def masked_mse_loss(prediction, target, target_mask):
+def build_loss_weights(
+    model_target: np.ndarray,
+    target_mask: np.ndarray,
+    *,
+    loss_function: str = "mse",
+    event_threshold: float = 35.0,
+    event_weight: float = 1.0,
+    focal_gamma: float = 0.0,
+) -> np.ndarray:
+    if event_weight < 1.0:
+        raise ValueError("event_weight must be at least 1.0")
+    if focal_gamma < 0.0:
+        raise ValueError("focal_gamma must be non-negative")
+    if loss_function not in {"mse", "weighted_mse", "threshold_focal_mse"}:
+        raise ValueError("loss_function must be one of: mse, weighted_mse, threshold_focal_mse")
+    weights = np.ones_like(model_target, dtype=np.float32)
+    if loss_function in {"weighted_mse", "threshold_focal_mse"}:
+        weights = np.where(model_target >= event_threshold, event_weight, weights).astype(np.float32)
+    if loss_function == "threshold_focal_mse":
+        scale = max(abs(event_threshold), 1.0)
+        exceedance = np.maximum(model_target - event_threshold, 0.0) / scale
+        weights = (weights * (1.0 + focal_gamma * np.square(exceedance))).astype(np.float32)
+    weights[~target_mask] = 0.0
+    return weights
+
+
+def masked_mse_loss(prediction, target, target_mask, loss_weights=None):
     if not bool(target_mask.any()):
         raise ValueError("training target mask has no valid pixels")
     squared_error = (prediction - target) ** 2
-    return squared_error[target_mask].mean()
+    if loss_weights is None:
+        return squared_error[target_mask].mean()
+    weights = loss_weights[target_mask]
+    weight_sum = weights.sum()
+    if not bool(weight_sum > 0):
+        raise ValueError("training target weights have no positive valid pixels")
+    return (squared_error[target_mask] * weights).sum() / weight_sum
+
+
+def training_validation_indices(
+    sample_count: int,
+    *,
+    validation_fraction: float,
+    seed: int,
+) -> tuple[list[int], list[int]]:
+    if sample_count < 1:
+        raise ValueError("sample_count must be at least 1")
+    if validation_fraction < 0.0 or validation_fraction >= 1.0:
+        raise ValueError("validation_fraction must be in [0.0, 1.0)")
+    indices = np.arange(sample_count)
+    if validation_fraction == 0.0:
+        return indices.tolist(), []
+    if sample_count < 2:
+        raise ValueError("validation_fraction requires at least two samples")
+    rng = np.random.default_rng(seed)
+    rng.shuffle(indices)
+    validation_count = int(round(sample_count * validation_fraction))
+    validation_count = min(max(validation_count, 1), sample_count - 1)
+    validation = sorted(indices[:validation_count].tolist())
+    training = sorted(indices[validation_count:].tolist())
+    return training, validation
 
 
 def require_torch() -> tuple[Any, Any]:
@@ -227,6 +289,14 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
         target_mask,
         batch_repeats=config.batch_repeats,
     )
+    loss_weights = build_loss_weights(
+        model_target,
+        target_mask,
+        loss_function=config.loss_function,
+        event_threshold=config.event_threshold,
+        event_weight=config.event_weight,
+        focal_gamma=config.focal_gamma,
+    )
     model_input, model_target, normalization = normalize_training_arrays(
         model_input,
         model_target,
@@ -242,6 +312,7 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
     x = torch.from_numpy(model_input).to(device)
     y = torch.from_numpy(model_target).to(device)
     y_mask = torch.from_numpy(target_mask).to(device)
+    y_weights = torch.from_numpy(loss_weights).to(device)
     model = build_tiny_unet(
         nn,
         input_channels=model_input.shape[1],
@@ -260,20 +331,84 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
     if use_data_parallel:
         model = nn.DataParallel(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
+    training_indices, validation_indices = training_validation_indices(
+        int(x.shape[0]),
+        validation_fraction=config.validation_fraction,
+        seed=config.seed,
+    )
+
+    def current_model_state() -> dict[str, Any]:
+        state = model.module.state_dict() if use_data_parallel else model.state_dict()
+        return {key: value.detach().cpu().clone() for key, value in state.items()}
+
+    def load_model_state(state: dict[str, Any]) -> None:
+        if use_data_parallel:
+            model.module.load_state_dict(state)
+        else:
+            model.load_state_dict(state)
+
+    def evaluate_indices(indices: list[int]) -> float:
+        if not indices:
+            raise ValueError("cannot evaluate an empty index set")
+        losses_for_indices = []
+        with torch.no_grad():
+            for start in range(0, len(indices), config.batch_size):
+                batch_indices = indices[start : start + config.batch_size]
+                prediction = model(x[batch_indices])
+                loss = masked_mse_loss(
+                    prediction,
+                    y[batch_indices],
+                    y_mask[batch_indices],
+                    y_weights[batch_indices],
+                )
+                losses_for_indices.append(float(loss.detach().cpu().item()))
+        return round(float(np.mean(losses_for_indices)), 6)
 
     losses: list[float] = []
+    validation_losses: list[float] = []
+    best_validation_loss: float | None = None
+    best_epoch: int | None = None
+    best_state: dict[str, Any] | None = None
+    epochs_without_improvement = 0
+    early_stopped = False
     model.train()
-    for _epoch in range(config.epochs):
+    for epoch in range(config.epochs):
         batch_losses = []
-        for start in range(0, x.shape[0], config.batch_size):
-            stop = min(start + config.batch_size, x.shape[0])
+        for start in range(0, len(training_indices), config.batch_size):
+            batch_indices = training_indices[start : start + config.batch_size]
             optimizer.zero_grad(set_to_none=True)
-            prediction = model(x[start:stop])
-            loss = masked_mse_loss(prediction, y[start:stop], y_mask[start:stop])
+            prediction = model(x[batch_indices])
+            loss = masked_mse_loss(
+                prediction,
+                y[batch_indices],
+                y_mask[batch_indices],
+                y_weights[batch_indices],
+            )
             loss.backward()
             optimizer.step()
             batch_losses.append(float(loss.detach().cpu().item()))
         losses.append(round(float(np.mean(batch_losses)), 6))
+        if validation_indices:
+            model.eval()
+            validation_loss = evaluate_indices(validation_indices)
+            validation_losses.append(validation_loss)
+            model.train()
+            if best_validation_loss is None or validation_loss < best_validation_loss:
+                best_validation_loss = validation_loss
+                best_epoch = epoch + 1
+                best_state = current_model_state()
+                epochs_without_improvement = 0
+            else:
+                epochs_without_improvement += 1
+                if (
+                    config.early_stopping_patience > 0
+                    and epochs_without_improvement >= config.early_stopping_patience
+                ):
+                    early_stopped = True
+                    break
+
+    if best_state is not None:
+        load_model_state(best_state)
 
     config.output_dir.mkdir(parents=True, exist_ok=True)
     checkpoint_path = config.output_dir / "tiny_unet_nowcaster.pt"
@@ -292,10 +427,17 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
             "multi_gpu": config.multi_gpu,
             "batch_repeats": config.batch_repeats,
             "batch_size": config.batch_size,
+            "loss_function": config.loss_function,
+            "event_threshold": config.event_threshold,
+            "event_weight": config.event_weight,
+            "focal_gamma": config.focal_gamma,
+            "validation_fraction": config.validation_fraction,
+            "early_stopping_patience": config.early_stopping_patience,
         },
         "normalization": normalization,
         "nodata_values": list(nodata_values),
         "loss_history": losses,
+        "validation_loss_history": validation_losses,
         "tensor_spec": archive["spec"],
         "metadata": archive["metadata"],
     }
@@ -315,12 +457,24 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
         "used_cuda_device_count": cuda_count if use_data_parallel else int(device == "cuda"),
         "batch_repeats": config.batch_repeats,
         "batch_size": config.batch_size,
+        "loss_function": config.loss_function,
+        "event_threshold": config.event_threshold,
+        "event_weight": config.event_weight,
+        "focal_gamma": config.focal_gamma,
+        "validation_fraction": config.validation_fraction,
+        "early_stopping_patience": config.early_stopping_patience,
+        "training_sample_count": len(training_indices),
+        "validation_sample_count": len(validation_indices),
         "input_shape": list(model_input.shape),
         "target_shape": list(model_target.shape),
         "normalization": normalization,
         "nodata_values": list(nodata_values),
         "loss_history": losses,
+        "validation_loss_history": validation_losses,
         "final_loss": losses[-1] if losses else None,
+        "best_validation_loss": best_validation_loss,
+        "best_epoch": best_epoch,
+        "early_stopped": early_stopped,
         "tensor_spec": archive["spec"],
         "metadata": archive["metadata"],
     }
@@ -342,6 +496,16 @@ def main() -> None:
     parser.add_argument("--batch-repeats", type=int, default=1)
     parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument(
+        "--loss-function",
+        choices=["mse", "weighted_mse", "threshold_focal_mse"],
+        default="mse",
+    )
+    parser.add_argument("--event-threshold", type=float, default=35.0)
+    parser.add_argument("--event-weight", type=float, default=1.0)
+    parser.add_argument("--focal-gamma", type=float, default=0.0)
+    parser.add_argument("--validation-fraction", type=float, default=0.0)
+    parser.add_argument("--early-stopping-patience", type=int, default=0)
+    parser.add_argument(
         "--summary-output",
         type=Path,
         default=default_run_summary_path(PIPELINE_NAME),
@@ -362,6 +526,12 @@ def main() -> None:
         multi_gpu=args.multi_gpu,
         batch_repeats=args.batch_repeats,
         batch_size=args.batch_size,
+        loss_function=args.loss_function,
+        event_threshold=args.event_threshold,
+        event_weight=args.event_weight,
+        focal_gamma=args.focal_gamma,
+        validation_fraction=args.validation_fraction,
+        early_stopping_patience=args.early_stopping_patience,
     )
     try:
         result = train_tiny_unet_archive(config)
@@ -383,10 +553,21 @@ def main() -> None:
                 "multi_gpu": args.multi_gpu,
                 "batch_repeats": args.batch_repeats,
                 "batch_size": args.batch_size,
+                "loss_function": args.loss_function,
+                "event_threshold": args.event_threshold,
+                "event_weight": args.event_weight,
+                "focal_gamma": args.focal_gamma,
+                "validation_fraction": args.validation_fraction,
+                "early_stopping_patience": args.early_stopping_patience,
                 "used_cuda_device_count": result["used_cuda_device_count"],
                 "cuda_device_names": result["cuda_device_names"],
                 "normalization": result["normalization"],
                 "nodata_values": result["nodata_values"],
+                "training_sample_count": result["training_sample_count"],
+                "validation_sample_count": result["validation_sample_count"],
+                "best_validation_loss": result["best_validation_loss"],
+                "best_epoch": result["best_epoch"],
+                "early_stopped": result["early_stopped"],
             },
         )
         record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)
@@ -408,6 +589,12 @@ def main() -> None:
                 "multi_gpu": args.multi_gpu,
                 "batch_repeats": args.batch_repeats,
                 "batch_size": args.batch_size,
+                "loss_function": args.loss_function,
+                "event_threshold": args.event_threshold,
+                "event_weight": args.event_weight,
+                "focal_gamma": args.focal_gamma,
+                "validation_fraction": args.validation_fraction,
+                "early_stopping_patience": args.early_stopping_patience,
             },
         )
         record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)

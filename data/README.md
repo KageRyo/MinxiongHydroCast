@@ -14,3 +14,6 @@ model-ready datasets, and files containing contact details or credentials must s
 Each generated folder is ignored by `.gitignore` except for `.gitkeep`.
 
 Tracked samples include hydrology rows, location references, and starter WGS84 grid specs.
+Radar event manifests, event split manifests, and weather-context manifests are also tracked under
+`samples/`; raw CWA/WRA captures and QPE/gauge validation reports stay in ignored generated
+folders.

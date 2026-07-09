@@ -42,6 +42,54 @@ def test_radar_event_windows_are_registered_in_event_splits():
         assert candidate["tensor_status"] == "sliding_window_tensor_collected_locally_ignored"
 
 
+def test_radar_event_windows_have_weather_context_entries():
+    radar_windows = json.loads(
+        Path("data/samples/radar_event_windows.json").read_text(encoding="utf-8")
+    )
+    weather_context = json.loads(
+        Path("data/samples/event_weather_context.json").read_text(encoding="utf-8")
+    )
+    allowed_weather_types = set(weather_context["allowed_weather_types"])
+    context_by_event_id = {event["event_id"]: event for event in weather_context["events"]}
+
+    for candidate in radar_windows["candidate_windows"]:
+        context = context_by_event_id[candidate["event_id"]]
+        assert context["official_weather_type"] in allowed_weather_types
+        assert context["status"] in {"needs_official_source", "officially_labeled"}
+        if context["status"] == "needs_official_source":
+            assert context["official_weather_type"] == "official_context_pending"
+            assert context["official_evidence"] == []
+
+
+def test_event_expansion_queue_tracks_uncollected_candidates_only():
+    radar_windows = json.loads(
+        Path("data/samples/radar_event_windows.json").read_text(encoding="utf-8")
+    )
+    expansion_queue = json.loads(
+        Path("data/samples/event_expansion_queue.json").read_text(encoding="utf-8")
+    )
+    collected_event_ids = {
+        candidate["event_id"] for candidate in radar_windows["candidate_windows"]
+    }
+    queued = expansion_queue["candidates"]
+    queued_event_ids = {candidate["event_id"] for candidate in queued}
+
+    assert collected_event_ids.isdisjoint(queued_event_ids)
+    assert len(queued) >= 5
+    assert any(
+        candidate["candidate_family"] == "chiayi_minxiong_local_heavy_rain"
+        for candidate in queued
+    )
+    assert any(
+        candidate["candidate_family"] == "taiwan_wide_front_or_meiyu"
+        for candidate in queued
+    )
+    for candidate in queued:
+        required = set(candidate["required_before_training"])
+        assert "attach official CWA weather context" in required
+        assert "run O-B0045-001 QPE versus O-A0002-001 gauge validation" in required
+
+
 def test_weather_event_rejects_invalid_time_order():
     event = WeatherEvent(
         event_id="bad_time",

@@ -24,7 +24,12 @@ The current tracked radar candidates are:
 | `cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon` | test | Minxiong, Chiayi | `2026-07-03T13:00:00+08:00` to `2026-07-03T19:00:00+08:00` | largest local-focus 35 dBZ coverage in hourly scan |
 
 Candidate evidence is tracked in `data/samples/radar_event_windows.json`. These labels are
-radar-derived only; attach official CWA weather context before calling a window typhoon or frontal.
+radar-derived only; official context tracking is in `data/samples/event_weather_context.json`.
+Attach CWA weather maps, warnings, daily reports, or equivalent official evidence before calling a
+window typhoon, Mei-yu, frontal, or convective.
+The next uncollected candidates are queued in `data/samples/event_expansion_queue.json`; keep them
+out of this split manifest until complete sequences, tensors, QPE/gauge validation, and official
+weather context are available.
 Replace the remaining demo events before training or reporting scientific results. The 3-frame CWA
 sample verifies the pipeline only; it is not a benchmark event.
 

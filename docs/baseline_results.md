@@ -143,6 +143,11 @@ GPUs via `DataParallel`, `hidden_channels=8`, and `batch_size=2`. It lowers aggr
 much worse CSI than persistence, which indicates threshold-event under-detection. Keep persistence
 as the primary benchmark until the neural baseline is trained on more event diversity.
 
+The training entrypoint now supports `--loss-function weighted_mse` and
+`--loss-function threshold_focal_mse`, plus `--validation-fraction` and
+`--early-stopping-patience`. The next neural benchmark should report whether these strong-echo
+losses improve CSI/POD/FAR at 35 dBZ without relying on RMSE alone.
+
 ## Threshold Flood Risk
 
 - Model: `RainfallThresholdRiskScorer`
