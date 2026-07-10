@@ -64,7 +64,9 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
       typhoon, Mei-yu, or frontal before official CWA evidence is attached.
 - [x] Add a CWA official weather-context source review manifest with reviewed pages, current
       coverage, and next historical chart probe URLs.
-- [ ] Verify event-time CWA historical chart/report URLs and assign official weather-type labels.
+- [x] Probe candidate event-time CWA historical `SFCcombo` chart URLs.
+- [ ] Find another official CWA event-time source and assign official weather-type labels; the
+      candidate `SFCcombo` URLs returned HTTP 404.
 - [x] Add a QPE/gauge validation report command so QPE is treated as an estimate, not direct
       ground truth.
 - [x] Add a direct CWA history `getData` downloader for event-time rain-gauge captures and QPE

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "verified_at": "2026-07-09T22:55:00+08:00",
+  "verified_at": "2026-07-10T12:30:00+08:00",
   "purpose": "Track official CWA weather-context sources reviewed before assigning weather-type labels to radar-derived event windows.",
   "source_policy": "Weather labels must cite CWA weather maps, warnings, daily reports, or official open-data products. Radar-only morphology is not acceptable evidence.",
   "official_sources_reviewed": [
@@ -38,13 +38,14 @@
       "kind": "website_data_js",
       "provider": "Central Weather Administration",
       "url": "https://www.cwa.gov.tw/Data/js/fcst/MFC_SFCcombo_C_Data.js",
-      "finding": "The current JS index lists recent surface weather charts only. Local review on 2026-07-09 observed entries from 2026-07-06 20:00 to 2026-07-09 14:00.",
+      "finding": "The current JS index lists recent surface weather charts only. Local review observed entries from 2026-07-06 20:00 to 2026-07-09 14:00. Direct event-time historical SFCcombo probes for the three selected windows returned HTTP 404.",
       "observed_time_range": {
         "first": "2026-07-06T20:00:00+08:00",
         "last": "2026-07-09T14:00:00+08:00"
       },
       "event_time_coverage": "does_not_cover_selected_2026-06-28_2026-07-02_2026-07-03_windows",
-      "direct_historical_file_probe_status": "pending_network_quota"
+      "direct_historical_file_probe_status": "probed_all_selected_event_candidates_http_404",
+      "control_probe_status": "current-index SFCcombo URLs such as 2026-0706-1200 and 2026-0707-0000 returned HTTP 200 image/jpeg, confirming the URL pattern is valid."
     },
     {
       "source_id": "cwa_forecast_pdf_page",
@@ -84,7 +85,7 @@
       "window_start": "2026-06-28T13:00:00+08:00",
       "window_end": "2026-06-28T21:00:00+08:00",
       "official_weather_type": "official_context_pending",
-      "label_status": "blocked_no_event_time_official_synoptic_source",
+      "label_status": "blocked_historical_sfccombo_http_404",
       "needed_sources": [
         "CWA surface weather chart or daily weather overview covering 2026-06-28 afternoon-evening",
         "CWA warning/typhoon check covering 2026-06-28 afternoon-evening"
@@ -93,14 +94,26 @@
         "https://www.cwa.gov.tw/Data/fcst_img/2026-0628-0600_SFCcombo.jpg",
         "https://www.cwa.gov.tw/Data/fcst_img/2026-0628-1200_SFCcombo.jpg"
       ],
-      "notes": "Do not classify as front, Mei-yu, typhoon outer rainband, or afternoon convection until at least one event-time official source is attached."
+      "direct_probe_results": [
+        {
+          "url": "https://www.cwa.gov.tw/Data/fcst_img/2026-0628-0600_SFCcombo.jpg",
+          "http_status": 404,
+          "content_type": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.cwa.gov.tw/Data/fcst_img/2026-0628-1200_SFCcombo.jpg",
+          "http_status": 404,
+          "content_type": "text/html; charset=UTF-8"
+        }
+      ],
+      "notes": "Do not classify as front, Mei-yu, typhoon outer rainband, or afternoon convection until another event-time official source is attached."
     },
     {
       "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon",
       "window_start": "2026-07-02T12:00:00+08:00",
       "window_end": "2026-07-02T18:00:00+08:00",
       "official_weather_type": "official_context_pending",
-      "label_status": "blocked_no_event_time_official_synoptic_source",
+      "label_status": "blocked_historical_sfccombo_http_404",
       "needed_sources": [
         "CWA surface weather chart or daily weather overview covering 2026-07-02 afternoon",
         "CWA warning/advisory check for Chiayi County during 2026-07-02 afternoon"
@@ -109,6 +122,18 @@
         "https://www.cwa.gov.tw/Data/fcst_img/2026-0702-0600_SFCcombo.jpg",
         "https://www.cwa.gov.tw/Data/fcst_img/2026-0702-1200_SFCcombo.jpg"
       ],
+      "direct_probe_results": [
+        {
+          "url": "https://www.cwa.gov.tw/Data/fcst_img/2026-0702-0600_SFCcombo.jpg",
+          "http_status": 404,
+          "content_type": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.cwa.gov.tw/Data/fcst_img/2026-0702-1200_SFCcombo.jpg",
+          "http_status": 404,
+          "content_type": "text/html; charset=UTF-8"
+        }
+      ],
       "notes": "Gauge observations confirm local hourly rain, but weather mechanism remains unclassified without official synoptic or warning evidence."
     },
     {
@@ -116,7 +141,7 @@
       "window_start": "2026-07-03T13:00:00+08:00",
       "window_end": "2026-07-03T19:00:00+08:00",
       "official_weather_type": "official_context_pending",
-      "label_status": "blocked_no_event_time_official_synoptic_source",
+      "label_status": "blocked_historical_sfccombo_http_404",
       "needed_sources": [
         "CWA surface weather chart or daily weather overview covering 2026-07-03 afternoon-evening",
         "CWA warning/advisory check for Chiayi County during 2026-07-03 afternoon-evening"
@@ -125,12 +150,24 @@
         "https://www.cwa.gov.tw/Data/fcst_img/2026-0703-0600_SFCcombo.jpg",
         "https://www.cwa.gov.tw/Data/fcst_img/2026-0703-1200_SFCcombo.jpg"
       ],
+      "direct_probe_results": [
+        {
+          "url": "https://www.cwa.gov.tw/Data/fcst_img/2026-0703-0600_SFCcombo.jpg",
+          "http_status": 404,
+          "content_type": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.cwa.gov.tw/Data/fcst_img/2026-0703-1200_SFCcombo.jpg",
+          "http_status": 404,
+          "content_type": "text/html; charset=UTF-8"
+        }
+      ],
       "notes": "Use this as a radar/gauge-backed heavy-rain candidate only until official weather context is attached."
     }
   ],
   "next_actions": [
-    "Probe candidate CWA SFCcombo image URLs once network quota is available.",
-    "If CWA historical chart images exist, attach the downloaded local ignored image path plus source URL and classify each event.",
-    "If historical chart images are unavailable, locate another official CWA daily report/archive before assigning labels."
+    "Locate another official CWA daily report, archive, warning history, or weather-map source before assigning labels.",
+    "If another event-time official source is found, attach the source URL and classify each event.",
+    "Keep selected radar windows as official_context_pending until event-time official evidence exists."
   ]
 }

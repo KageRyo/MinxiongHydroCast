@@ -47,10 +47,12 @@ Official source review and next CWA probe URLs are tracked in
 `data/samples/weather_context_source_review.json`.
 
 Current official-source review found CWA pages for weather warnings, typhoon warnings, weather
-overview PDFs, analysis charts, and latest chart graphics. The CWA surface chart JS currently lists
-recent charts from `2026-07-06T20:00:00+08:00` through `2026-07-09T14:00:00+08:00`, which does
-not cover the three selected event windows. Direct historical chart URL probes are the next step
-once network quota is available.
+overview PDFs, analysis charts, and latest chart graphics. The CWA surface chart JS listed recent
+charts from `2026-07-06T20:00:00+08:00` through `2026-07-09T14:00:00+08:00`, which does not cover
+the three selected event windows. Direct probes for candidate `SFCcombo` chart URLs on 2026-06-28,
+2026-07-02, and 2026-07-03 returned HTTP 404, while current-index control URLs returned HTTP 200.
+The events therefore remain `official_context_pending` until another CWA event-time source is
+found.
 
 ## QPE/Gauge Status
 

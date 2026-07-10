@@ -87,6 +87,10 @@ def test_weather_context_source_review_covers_pending_radar_windows():
         assert event["label_status"].startswith("blocked_")
         assert event["needed_sources"]
         assert all("Authorization=" not in url for url in event["next_probe_urls"])
+        assert event["direct_probe_results"]
+        assert {
+            result["http_status"] for result in event["direct_probe_results"]
+        } == {404}
 
 
 def test_event_expansion_queue_tracks_uncollected_candidates_only():

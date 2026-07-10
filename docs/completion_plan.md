@@ -48,9 +48,9 @@ Chiayi/Minxiong-ready model without committing credentials, raw official data, o
   ingestion layer.
 - Pending official-label work: attach CWA weather maps, warnings, daily reports, or equivalent
   official source evidence to each selected event before weather-type stratification.
-- Pending source-probe work: verify whether event-time CWA historical surface chart URLs remain
-  accessible; the current CWA surface-chart JS index only covered recent charts from 2026-07-06
-  through 2026-07-09 during the latest review.
+- Pending source-search work: candidate event-time CWA historical `SFCcombo` chart URLs were
+  probed and returned HTTP 404, so another official CWA daily report, warning-history, archive, or
+  weather-map source is still needed before assigning labels.
 - Pending validation work: run live QPE/gauge reports for each selected event after matching
   event-time QPE grids are captured or an official historical QPE archive is confirmed.
 - Pending training work: collect enough event windows for meaningful Tiny U-Net or NowcastNet

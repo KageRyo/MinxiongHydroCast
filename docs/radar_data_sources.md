@@ -141,9 +141,12 @@ Reviewed CWA official pages include:
 - `https://www.cwa.gov.tw/Data/js/warn/Warning_Content.js`
 
 The current surface-chart JS index is useful for official weather maps, but the observed current
-index does not cover the selected 2026-06-28, 2026-07-02, or 2026-07-03 event windows. Do not
-promote any `official_context_pending` event to front, Mei-yu, typhoon outer rainband, or
-afternoon convection until an event-time source URL is verified and recorded.
+index does not cover the selected 2026-06-28, 2026-07-02, or 2026-07-03 event windows. Direct
+probes for candidate historical `SFCcombo` chart URLs for those windows returned HTTP 404; current
+index control URLs returned HTTP 200, so the URL pattern is valid but the selected historical files
+are not available there. Do not promote any `official_context_pending` event to front, Mei-yu,
+typhoon outer rainband, or afternoon convection until another event-time source URL is verified and
+recorded.
 
 ## History Workflow
 
