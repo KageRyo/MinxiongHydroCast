@@ -50,7 +50,8 @@ operations/
         └── datasets/
             ├── rainfall_alerts.csv
             ├── rain_gauges.csv
-            └── flood_sensors.csv
+            ├── flood_sensors.csv
+            └── minxiong_features.csv
 ```
 
 Each immutable manifest records the dataset classification, fields, schema SHA-256, file SHA-256,
@@ -84,12 +85,25 @@ The following endpoints are available:
 | `GET /api/v1/official-alerts/rainfall` | WRA rainfall-alert source product |
 | `GET /api/v1/observations/rain-gauges` | Validated WRA rain-gauge observations |
 | `GET /api/v1/observations/flood-sensors` | Validated WRA flood-sensor observations |
+| `GET /api/v1/features/minxiong` | Derived Minxiong township feature contract |
 | `GET /api/v1/shadow-readiness` | Shadow criteria, metrics, and notification blockers |
 | `GET /api/v1/experimental-forecasts` | Explicit unavailable state until forecast gates pass |
 
 The operator view at `/` presents official-source alerts, observations, and experimental
 forecast availability in separate sections. The server binds to `127.0.0.1` by default. Put it
 behind an authenticated reverse proxy before exposing it to another host or network.
+
+## Minxiong Feature Contract
+
+Every successful snapshot derives one Minxiong township feature row from the same immutable source
+records. It contains stable rain-gauge and flood-sensor location IDs, latest observation times,
+maximum 1-hour/24-hour station rainfall, normalized maximum sensor water level, rainfall-alert
+counts, and upstream health states.
+
+The feature is marked ready only when every upstream live dataset is healthy. It never substitutes
+missing products: `qpe_available=false`, an empty QPE accumulation, and
+`experimental_forecast_included=false` remain explicit until those sources pass their own gates.
+Demo snapshots classify the feature as `demo_fixture`.
 
 ## Shadow Deployment Gate
 

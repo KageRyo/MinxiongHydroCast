@@ -93,6 +93,7 @@ Open <http://127.0.0.1:8080/> for the operator view. The service exposes:
 - `GET /api/v1/official-alerts/rainfall`;
 - `GET /api/v1/observations/rain-gauges`;
 - `GET /api/v1/observations/flood-sensors`;
+- `GET /api/v1/features/minxiong` for the derived township feature contract;
 - `GET /api/v1/shadow-readiness` for the audited shadow gate and notification blockers;
 - `GET /api/v1/experimental-forecasts`, which remains unavailable until model and shadow gates
   pass.
@@ -125,6 +126,10 @@ floodcast-minxiong-label-audit \
 The tracked `data/samples/flood_labels.example.json` is an unconfirmed schema example and is
 deliberately rejected. The default training gate requires at least 10 confirmed flood events and
 20 confirmed non-flood events with non-overlapping windows and source/reviewer provenance.
+
+Each successful operational snapshot also contains `minxiong_features.csv`. It aggregates only
+validated Minxiong records and links gauges/sensors to stable location IDs. QPE and experimental
+forecast fields remain explicitly unavailable until their upstream products pass validation.
 
 Run the local demo pipeline for installation and schema checks only:
 

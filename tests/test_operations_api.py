@@ -146,6 +146,11 @@ def test_api_serves_status_classified_data_and_operator_view(tmp_path):
         assert observations["product_type"] == "demo_fixture"
         assert observations["row_count"] == 2
 
+        features = request_json(base_url, "/api/v1/features/minxiong")
+        assert features["product_type"] == "demo_fixture"
+        assert features["records"][0]["township"] == "民雄鄉"
+        assert features["records"][0]["qpe_available"] == "false"
+
         forecast = request_json(base_url, "/api/v1/experimental-forecasts")
         assert forecast["available"] is False
         assert forecast["product_type"] == "experimental_forecast"

@@ -37,9 +37,17 @@ def test_demo_collection_writes_versioned_non_ready_snapshot(tmp_path):
         "rainfall_alerts",
         "rain_gauges",
         "flood_sensors",
+        "minxiong_features",
     }
     assert manifest["datasets"]["rainfall_alerts"]["product_type"] == "demo_fixture"
     assert manifest["datasets"]["rain_gauges"]["product_type"] == "demo_fixture"
+    feature = store.read_dataset(manifest, "minxiong_features")[0]
+    assert feature["township"] == "民雄鄉"
+    assert feature["rain_gauge_count"] == "1"
+    assert feature["flood_sensor_count"] == "0"
+    assert feature["rainfall_alert_count"] == "1"
+    assert feature["qpe_available"] == "false"
+    assert feature["data_ready"] == "false"
     assert manifest["metadata"]["source_authority"] == "demo fixture"
     assert (tmp_path / "summary.json").exists()
     assert (tmp_path / "runs.jsonl").exists()
@@ -83,4 +91,5 @@ def test_live_payloads_use_official_product_classifications():
         "rainfall_alerts": "official_alert",
         "rain_gauges": "official_observation",
         "flood_sensors": "official_observation",
+        "minxiong_features": "derived_feature",
     }

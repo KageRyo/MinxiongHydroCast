@@ -20,6 +20,10 @@ from floodcastminxiong.io.run_summary import (
     start_run,
 )
 from floodcastminxiong.operations.health import aggregate_health, assess_dataset
+from floodcastminxiong.operations.features import (
+    MINXIONG_FEATURE_FIELDS,
+    build_minxiong_feature,
+)
 from floodcastminxiong.operations.snapshot_store import DatasetPayload, SnapshotStore
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
@@ -41,6 +45,11 @@ DATASET_CONFIG = {
         "product_type": "official_observation",
         "fieldnames": hydrological_data.FLOOD_FIELDNAMES,
         "timestamp_field": "水情時間ISO",
+    },
+    "minxiong_features": {
+        "product_type": "derived_feature",
+        "fieldnames": MINXIONG_FEATURE_FIELDS,
+        "timestamp_field": "feature_time",
     },
 }
 
@@ -124,6 +133,44 @@ def build_payloads(
                 health=health,
             )
         )
+    upstream_health = {
+        payload.name: str(payload.health["state"])
+        for payload in payloads
+    }
+    feature_records = [
+        build_minxiong_feature(
+            records,
+            mode=mode,
+            upstream_health=upstream_health,
+            now=now,
+        )
+    ]
+    feature_health = assess_dataset(
+        feature_records,
+        fieldnames=MINXIONG_FEATURE_FIELDS,
+        timestamp_field="feature_time",
+        mode=mode,
+        max_age_minutes=max_age_minutes,
+        now=now,
+    )
+    if mode == "live" and not all(
+        state == "healthy" for state in upstream_health.values()
+    ):
+        feature_health["state"] = "upstream_unhealthy"
+        feature_health["ready"] = False
+    payloads.append(
+        DatasetPayload(
+            name="minxiong_features",
+            product_type=(
+                "demo_fixture"
+                if mode == "demo"
+                else str(DATASET_CONFIG["minxiong_features"]["product_type"])
+            ),
+            records=feature_records,
+            fieldnames=MINXIONG_FEATURE_FIELDS,
+            health=feature_health,
+        )
+    )
     return payloads
 
 
@@ -191,7 +238,10 @@ def run_collection(
                     "snapshot_id": manifest["snapshot_id"],
                     "store": str(store.root),
                 },
-                row_counts={name: len(rows) for name, rows in records.items()},
+                row_counts={
+                    payload.name: len(payload.records)
+                    for payload in payloads
+                },
                 validation=health,
                 metadata={"max_age_minutes": max_age_minutes},
             )

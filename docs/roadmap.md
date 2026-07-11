@@ -78,7 +78,9 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Package rainfall-alert and hydrology ingestion as a locked, repeatable scheduled job.
 - [x] Store immutable, checksummed observation snapshots with latest and last-attempt pointers.
 - [x] Expose freshness, schema drift, failed-run, and missing-forecast health states.
-- [ ] Add feature assembly and forecast publication to the scheduled operational flow.
+- [ ] Add forecast publication to the scheduled operational flow after model gates pass.
+- [x] Add snapshot-native Minxiong observation/alert features with stable location IDs.
+- [ ] Add validated QPE and experimental forecast fields to the feature contract.
 - [ ] Add a remote durable-storage backend and deployment backups.
 - [ ] Export metrics and route failed/stale/schema alerts to named maintainers.
 - [x] Emit structured logs and run summaries for every pipeline execution.
@@ -95,6 +97,7 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Add an auditable seven-day shadow gate requiring reviewed heavy-rain coverage.
 - [x] Add a provenance-backed Minxiong flood-label audit and minimum class-coverage gate.
 - [ ] Publish forecast grids and risk features after their model/data gates pass.
+- [x] Publish the observation-derived Minxiong feature contract.
 - [ ] Backtest on multiple independent events and calibrate thresholds with local flood labels.
 - [ ] Run a shadow deployment through at least one heavy-rain period before enabling notifications.
 - [ ] Document incident response, data licensing, model rollback, and human override procedures.
