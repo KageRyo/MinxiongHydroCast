@@ -1,6 +1,6 @@
 # Radar Data Sources
 
-FloodCastTW cannot train a Taiwan-specific nowcasting model until source radar data is confirmed.
+FloodCastMinxiong cannot train a Taiwan-specific nowcasting model until source radar data is confirmed.
 This repository tracks candidates with a manifest instead of committing raw radar files.
 
 ## Current CWA Review
