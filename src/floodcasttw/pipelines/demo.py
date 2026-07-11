@@ -19,7 +19,7 @@ PIPELINE_NAME = "demo"
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run the local FloodCastTW demo pipeline.")
+    parser = argparse.ArgumentParser(description="Run the local FloodCastMinxiong demo pipeline.")
     parser.add_argument("--output-dir", type=Path, default=Path("data/processed"))
     parser.add_argument(
         "--summary-output",
