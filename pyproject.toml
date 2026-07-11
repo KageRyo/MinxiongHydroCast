@@ -41,6 +41,7 @@ floodcast-minxiong-rainfall-alerts = "floodcastminxiong.ingestion.rainfall_alert
 floodcast-minxiong-hydrology = "floodcastminxiong.ingestion.hydrological_data:main"
 floodcast-minxiong-cwa-download = "floodcastminxiong.ingestion.cwa_file_api:main"
 floodcast-minxiong-cwa-history-data-download = "floodcastminxiong.ingestion.cwa_history_data:main"
+floodcast-minxiong-cwa-rain-smoke = "floodcastminxiong.ingestion.cwa_rainfall_api:main"
 floodcast-minxiong-cwa-event-plan = "floodcastminxiong.ingestion.cwa_event_collector:main"
 floodcast-minxiong-cwa-grid-inspect = "floodcastminxiong.ingestion.cwa_grid:main"
 floodcast-minxiong-cwa-history-list = "floodcastminxiong.ingestion.cwa_history:main"

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import time
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,14 @@ from zoneinfo import ZoneInfo
 
 from floodcastminxiong.config import get_settings
 from floodcastminxiong.ingestion import hydrological_data, rainfall_alerts
+from floodcastminxiong.ingestion.cwa_rainfall_api import CwaRainGaugeAdapter
+from floodcastminxiong.ingestion.source_adapter import (
+    SourceAdapter,
+    SourceAdapterError,
+    SourceProvenance,
+    SourceRequestError,
+    records_sha256,
+)
 from floodcastminxiong.io.run_summary import (
     DEFAULT_RUN_LOG_PATH,
     build_run_summary,
@@ -63,6 +72,87 @@ DATASET_CONFIG = {
 }
 
 
+@dataclass
+class OperationalCollection:
+    records: dict[str, list[dict[str, str]]]
+    sources: dict[str, SourceProvenance]
+
+
+def _record_fetched_at(records: list[dict[str, str]]) -> str:
+    return records[0].get("抓取時間", "") if records else now_taipei_iso()
+
+
+def _fixture_source(dataset: str, records: list[dict[str, str]]) -> SourceProvenance:
+    return SourceProvenance(
+        source_kind="demo_fixture",
+        outcome="ok",
+        authority="FloodCastMinxiong",
+        dataset_id=f"demo-{dataset}",
+        source_url=f"demo://{dataset}",
+        fetched_at=_record_fetched_at(records),
+        schema_version=f"{dataset}-demo-v1",
+        content_sha256=records_sha256(records),
+    )
+
+
+def _scraper_source(
+    dataset: str,
+    records: list[dict[str, str]],
+    *,
+    source_url: str,
+    fallback_error: SourceRequestError | None = None,
+) -> SourceProvenance:
+    return SourceProvenance(
+        source_kind="scraper_fallback",
+        outcome="fallback",
+        authority="Water Resources Agency, Taiwan",
+        dataset_id=f"wra-fhy-{dataset}",
+        source_url=source_url,
+        fetched_at=_record_fetched_at(records),
+        schema_version=f"wra-fhy-{dataset}-page-v1",
+        content_sha256=records_sha256(records),
+        fallback_reason_kind=fallback_error.kind if fallback_error else None,
+        fallback_reason=str(fallback_error) if fallback_error else "official API adapter pending",
+    )
+
+
+def _derived_source(
+    dataset: str,
+    records: list[dict[str, str]],
+    *,
+    inputs: dict[str, SourceProvenance],
+    now: datetime,
+) -> SourceProvenance:
+    input_sources = list(inputs.values())
+    if input_sources and all(source.source_kind == "demo_fixture" for source in input_sources):
+        source_kind = "demo_fixture"
+        outcome = "ok"
+    elif any(source.source_kind == "scraper_fallback" for source in input_sources):
+        source_kind = "scraper_fallback"
+        outcome = "fallback"
+    else:
+        source_kind = "api"
+        outcome = "stale" if any(source.outcome == "stale" for source in input_sources) else "ok"
+    fallback_datasets = sorted(
+        name for name, source in inputs.items() if source.source_kind == "scraper_fallback"
+    )
+    return SourceProvenance(
+        source_kind=source_kind,
+        outcome=outcome,
+        authority="FloodCastMinxiong",
+        dataset_id=f"derived-{dataset}",
+        source_url=f"snapshot-derived://{dataset}",
+        fetched_at=now.isoformat(timespec="seconds"),
+        schema_version=f"{dataset}-v1",
+        content_sha256=records_sha256(records),
+        fallback_reason=(
+            f"derived from scraper fallback datasets: {', '.join(fallback_datasets)}"
+            if fallback_datasets
+            else None
+        ),
+    )
+
+
 def collect_records(
     *,
     mode: str,
@@ -70,22 +160,104 @@ def collect_records(
     headed: bool,
     timeout: int,
     debug_dir: Path | None,
-) -> dict[str, list[dict[str, str]]]:
+    rain_source: str = "auto",
+    api_timeout_seconds: float = 30,
+    max_age_minutes: float = 30,
+    rain_adapter: SourceAdapter | None = None,
+    now: datetime | None = None,
+) -> OperationalCollection:
+    if rain_source not in {"api", "auto", "scraper"}:
+        raise ValueError(f"unsupported rain source: {rain_source}")
+    settings = get_settings()
     if mode == "demo":
         alerts = rainfall_alerts.demo_records()
         rain, flood = hydrological_data.demo_records()
+        sources = {
+            "rainfall_alerts": _fixture_source("rainfall_alerts", alerts),
+            "rain_gauges": _fixture_source("rain_gauges", rain),
+            "flood_sensors": _fixture_source("flood_sensors", flood),
+        }
     elif mode == "live":
         alerts = rainfall_alerts.scrape_with_playwright(
             county_value=county,
             headless=not headed,
             timeout=timeout,
         )
-        rain, flood = hydrological_data.scrape_live(
-            county=county,
-            headless=not headed,
-            timeout=timeout,
-            debug_dir=debug_dir,
+        if not alerts:
+            raise SourceAdapterError(
+                "empty_unexpected",
+                "WRA rainfall alert scraper returned no records",
+            )
+        alert_source = _scraper_source(
+            "rainfall_alerts",
+            alerts,
+            source_url=f"{settings.wra_base_url.rstrip('/')}/service/alertQuery#",
         )
+        if rain_source == "scraper":
+            rain, flood = hydrological_data.scrape_live(
+                county=county,
+                headless=not headed,
+                timeout=timeout,
+                debug_dir=debug_dir,
+            )
+            rain_provenance = _scraper_source(
+                "rain_gauges",
+                rain,
+                source_url=f"{settings.wra_base_url}{hydrological_data.RAIN_PATH}",
+            )
+        else:
+            adapter = rain_adapter or CwaRainGaugeAdapter(
+                authorization=settings.cwa_api_key,
+                county_code=county,
+                timeout_seconds=api_timeout_seconds,
+                max_age_minutes=max_age_minutes,
+                now=now,
+            )
+            try:
+                rain_result = adapter.collect()
+            except SourceRequestError as exc:
+                if rain_source == "api":
+                    raise
+                rain, flood = hydrological_data.scrape_live(
+                    county=county,
+                    headless=not headed,
+                    timeout=timeout,
+                    debug_dir=debug_dir,
+                )
+                rain_provenance = _scraper_source(
+                    "rain_gauges",
+                    rain,
+                    source_url=f"{settings.wra_base_url}{hydrological_data.RAIN_PATH}",
+                    fallback_error=exc,
+                )
+            else:
+                if rain_result.dataset != "rain_gauges":
+                    raise SourceAdapterError(
+                        "schema_drift",
+                        f"rain adapter returned unexpected dataset: {rain_result.dataset}",
+                    )
+                rain = rain_result.records
+                rain_provenance = rain_result.provenance
+                flood = hydrological_data.scrape_flood_live(
+                    county=county,
+                    headless=not headed,
+                    timeout=timeout,
+                    debug_dir=debug_dir,
+                )
+        if not rain or not flood:
+            raise SourceAdapterError(
+                "empty_unexpected",
+                "live hydrology source returned no records",
+            )
+        sources = {
+            "rainfall_alerts": alert_source,
+            "rain_gauges": rain_provenance,
+            "flood_sensors": _scraper_source(
+                "flood_sensors",
+                flood,
+                source_url=f"{settings.wra_base_url}{hydrological_data.FLOOD_SENSOR_PATH}",
+            ),
+        }
     else:
         raise ValueError(f"unsupported mode: {mode}")
 
@@ -105,16 +277,20 @@ def collect_records(
     ]
     if errors:
         raise ValueError("; ".join(errors))
-    return {
-        "rainfall_alerts": alerts,
-        "rain_gauges": rain,
-        "flood_sensors": flood,
-    }
+    return OperationalCollection(
+        records={
+            "rainfall_alerts": alerts,
+            "rain_gauges": rain,
+            "flood_sensors": flood,
+        },
+        sources=sources,
+    )
 
 
 def build_payloads(
     records: dict[str, list[dict[str, str]]],
     *,
+    sources: dict[str, SourceProvenance],
     mode: str,
     max_age_minutes: float,
     now: datetime,
@@ -131,6 +307,12 @@ def build_payloads(
             max_age_minutes=max_age_minutes,
             now=now,
         )
+        source = sources[name]
+        if mode == "live" and source.source_kind == "scraper_fallback":
+            health["degradation_reasons"] = ["scraper_fallback"]
+            if health["state"] == "healthy":
+                health["state"] = "degraded"
+                health["ready"] = False
         payloads.append(
             DatasetPayload(
                 name=name,
@@ -140,6 +322,7 @@ def build_payloads(
                 records=dataset_records,
                 fieldnames=fieldnames,
                 health=health,
+                source=source.model_dump(exclude_none=True),
             )
         )
     upstream_health = {
@@ -154,6 +337,16 @@ def build_payloads(
             now=now,
         )
     ]
+    feature_source = _derived_source(
+        "minxiong_features",
+        feature_records,
+        inputs={
+            name: sources[name]
+            for name in ("rainfall_alerts", "rain_gauges", "flood_sensors")
+        },
+        now=now,
+    )
+    sources["minxiong_features"] = feature_source
     feature_health = assess_dataset(
         feature_records,
         fieldnames=MINXIONG_FEATURE_FIELDS,
@@ -167,6 +360,9 @@ def build_payloads(
     ):
         feature_health["state"] = "upstream_unhealthy"
         feature_health["ready"] = False
+        feature_health["degradation_reasons"] = [
+            f"{name}={state}" for name, state in sorted(upstream_health.items()) if state != "healthy"
+        ]
     payloads.append(
         DatasetPayload(
             name="minxiong_features",
@@ -178,6 +374,7 @@ def build_payloads(
             records=feature_records,
             fieldnames=MINXIONG_FEATURE_FIELDS,
             health=feature_health,
+            source=feature_source.model_dump(exclude_none=True),
         )
     )
     return payloads
@@ -198,18 +395,27 @@ def run_collection(
     pumping_stations: Path | None = None,
     shelters: Path | None = None,
     flood_risk_areas: Path | None = None,
+    rain_source: str = "auto",
+    api_timeout_seconds: float = 30,
+    rain_adapter: SourceAdapter | None = None,
 ) -> dict[str, Any]:
     now = now or datetime.now(TAIPEI_TZ)
     started_at, start_timer = start_run()
     with store.collection_lock():
         try:
-            records = collect_records(
+            collection = collect_records(
                 mode=mode,
                 county=county,
                 headed=headed,
                 timeout=timeout,
                 debug_dir=debug_dir,
+                rain_source=rain_source,
+                api_timeout_seconds=api_timeout_seconds,
+                max_age_minutes=max_age_minutes,
+                rain_adapter=rain_adapter,
+                now=now,
             )
+            records = collection.records
             records["location_reference"] = build_operational_locations(
                 records,
                 mode=mode,
@@ -218,8 +424,18 @@ def run_collection(
                 shelters=shelters,
                 flood_risk_areas=flood_risk_areas,
             )
+            collection.sources["location_reference"] = _derived_source(
+                "location_reference",
+                records["location_reference"],
+                inputs={
+                    name: collection.sources[name]
+                    for name in ("rain_gauges", "flood_sensors")
+                },
+                now=now,
+            )
             payloads = build_payloads(
                 records,
+                sources=collection.sources,
                 mode=mode,
                 max_age_minutes=max_age_minutes,
                 now=now,
@@ -241,8 +457,17 @@ def run_collection(
                     "source_authority": (
                         "demo fixture"
                         if mode == "demo"
-                        else "Water Resources Agency, Taiwan"
+                        else (
+                            "Central Weather Administration and Water Resources Agency, Taiwan"
+                        )
                     ),
+                    "source_authorities": sorted(
+                        {source.authority for source in collection.sources.values()}
+                    ),
+                    "source_kinds": {
+                        name: source.source_kind
+                        for name, source in sorted(collection.sources.items())
+                    },
                     "experimental_forecast_included": False,
                     "static_location_inputs": {
                         "pumping_stations": str(pumping_stations)
@@ -272,7 +497,14 @@ def run_collection(
                     for payload in payloads
                 },
                 validation=health,
-                metadata={"max_age_minutes": max_age_minutes},
+                metadata={
+                    "max_age_minutes": max_age_minutes,
+                    "rain_source": rain_source,
+                    "source_kinds": {
+                        name: source.source_kind
+                        for name, source in sorted(collection.sources.items())
+                    },
+                },
             )
             record_run(
                 summary_output=summary_output,
@@ -287,7 +519,13 @@ def run_collection(
                 started_at=started_at,
                 completed_at=completed_at,
                 failure_reason=str(exc),
-                metadata={"county": county},
+                metadata={
+                    "county": county,
+                    "failure_kind": (
+                        exc.kind if isinstance(exc, SourceAdapterError) else "collection"
+                    ),
+                    "rain_source": rain_source,
+                },
                 now=now,
             )
             summary = build_run_summary(
@@ -356,6 +594,13 @@ def main() -> None:
     parser.add_argument("--store", type=Path, default=DEFAULT_STORE)
     parser.add_argument("--retention-days", type=int, default=30)
     parser.add_argument(
+        "--rain-source",
+        choices=["api", "auto", "scraper"],
+        default="auto",
+        help="CWA API selection; auto falls back only for request failures.",
+    )
+    parser.add_argument("--api-timeout-seconds", type=float, default=30)
+    parser.add_argument(
         "--max-age-minutes",
         type=float,
         default=get_settings().operations_max_age_minutes,
@@ -390,6 +635,8 @@ def main() -> None:
             pumping_stations=args.pumping_stations,
             shelters=args.shelters,
             flood_risk_areas=args.flood_risk_areas,
+            rain_source=args.rain_source,
+            api_timeout_seconds=args.api_timeout_seconds,
         )
     except KeyboardInterrupt:
         print("[INFO] Scheduler stopped.")

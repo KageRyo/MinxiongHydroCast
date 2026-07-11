@@ -69,7 +69,20 @@ floodcast-minxiong-operations --mode demo --once
 Run one live collection. Live is the default mode:
 
 ```bash
-floodcast-minxiong-operations --once
+export CWA_API_KEY  # set locally; never commit the value
+floodcast-minxiong-operations --once --rain-source auto
+```
+
+`auto` uses the official CWA `O-A0002-001` API for rain gauges. Authentication, transport, HTTP,
+or rate-limit failures may use the WRA page scraper as a degraded fallback; schema drift and
+unexpected empty data always reject the collection. Use `--rain-source api` to prohibit fallback
+or `--rain-source scraper` only during a documented source incident. Scraper-backed datasets are
+published as `degraded` and never satisfy readiness.
+
+Smoke-test only the official CWA rain contract without installing a Playwright browser:
+
+```bash
+floodcast-minxiong-cwa-rain-smoke --county 10010 --county-name 嘉義縣
 ```
 
 Run the collector every 10 minutes and retain 30 days of snapshots:
@@ -107,6 +120,8 @@ Open <http://127.0.0.1:8080/> for the operator view. The service exposes:
 
 Snapshots are immutable under `data/processed/operations/snapshots/`. A failed collection updates
 `latest_attempt.json` but does not replace the last readable `latest.json` snapshot.
+Each dataset manifest and API response includes source kind, authority, dataset ID, redacted URL,
+fetch time, adapter schema version, content SHA-256, outcome, and any fallback reason.
 For a Linux host, hardened collector timer and API service templates are provided under
 `deploy/systemd/`.
 

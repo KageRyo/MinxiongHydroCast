@@ -35,6 +35,7 @@ def stable_location_id(source_type: str, *parts: str) -> str:
 def rain_gauge_location(record: dict[str, str]) -> dict[str, str]:
     admin = extract_admin_parts(record.get("行政區", ""))
     source_name = record.get("雨量站", "")
+    station_id = record.get("雨量站代碼", "")
     latitude, longitude, crs = normalize_coordinates(
         record.get("latitude") or record.get("緯度"),
         record.get("longitude") or record.get("經度"),
@@ -42,9 +43,9 @@ def rain_gauge_location(record: dict[str, str]) -> dict[str, str]:
     return {
         "location_id": stable_location_id(
             "rain_gauge",
-            admin["county"],
-            admin["township"],
-            source_name,
+            station_id or admin["county"],
+            "" if station_id else admin["township"],
+            "" if station_id else source_name,
         ),
         "source_type": "rain_gauge",
         "source_name": source_name,

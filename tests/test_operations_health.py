@@ -91,6 +91,28 @@ def test_refresh_dataset_health_becomes_stale_over_time():
     assert refreshed["ready"] is False
 
 
+def test_refresh_dataset_health_preserves_scraper_degradation():
+    collected_at = datetime(2026, 7, 11, 10, 0, tzinfo=TAIPEI_TZ)
+    health = assess_dataset(
+        [record_at(collected_at)],
+        fieldnames=FIELDS,
+        timestamp_field="observed_at",
+        mode="live",
+        max_age_minutes=30,
+        now=collected_at,
+    )
+    health["degradation_reasons"] = ["scraper_fallback"]
+
+    refreshed = refresh_dataset_health(
+        health,
+        mode="live",
+        now=collected_at + timedelta(minutes=5),
+    )
+
+    assert refreshed["state"] == "degraded"
+    assert refreshed["ready"] is False
+
+
 def test_aggregate_health_requires_all_live_datasets_to_be_healthy():
     datasets = {
         "rain": {"health": {"state": "healthy"}},

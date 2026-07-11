@@ -21,7 +21,21 @@ returns HTTP 503 so demo data cannot silently satisfy a deployment health check.
 Run a single live collection:
 
 ```bash
-floodcast-minxiong-operations --once
+export CWA_API_KEY
+floodcast-minxiong-operations --once --rain-source auto
+```
+
+Rain-gauge collection uses the official CWA `O-A0002-001` REST API. `--rain-source api` makes any
+request failure fatal; `auto` permits a WRA page fallback only for authentication, transport,
+HTTP, or rate-limit failures. Pydantic schema drift and unexpected empty station sets always fail
+the attempt. `--rain-source scraper` exists for an explicitly managed source incident. Rainfall
+alerts and flood sensors remain scraper-backed until their official endpoint contracts are
+implemented, so current live snapshots remain degraded and do not pass readiness.
+
+Validate the CWA contract independently of Chromium and the remaining WRA sources:
+
+```bash
+floodcast-minxiong-cwa-rain-smoke --county 10010 --county-name 嘉義縣
 ```
 
 Run continuously at a 10-minute interval:
@@ -62,6 +76,9 @@ Each immutable manifest records the dataset classification, fields, schema SHA-2
 row count, observed time, age, freshness threshold, and schema errors. Publishing uses atomic
 renames. A failed attempt receives its own error manifest and updates `latest_attempt.json`
 without replacing the last readable `latest.json`.
+Each dataset also records source provenance: `source_kind`, outcome, authority, dataset ID,
+redacted source URL, fetch time, adapter schema version, raw-content checksum, and fallback reason.
+The API exposes the same provenance with its dataset response.
 Every status and dataset read verifies path boundaries, manifest and file checksums, schema
 checksums, and CSV headers. Corrupt pointers, manifests, or datasets produce a structured
 `storage_error` readiness state instead of being treated as an empty or healthy store.
@@ -178,6 +195,12 @@ The templates assume:
 - a non-login `floodcast-minxiong` service user and group exist;
 - local secrets and endpoint overrides are stored in `/etc/floodcast-minxiong.env`;
 - durable snapshots and run state live under `/var/lib/floodcast-minxiong`.
+- `CWA_API_KEY` is supplied through `/etc/floodcast-minxiong.env` and never passed on the command
+  line.
+
+The scheduled `.github/workflows/cwa-live-contract.yml` workflow runs the credential-safe CWA
+contract smoke test daily. Configure the repository secret `CWA_API_KEY`; the workflow fails
+explicitly when it is absent and never prints the key or an unredacted URL.
 
 Review paths, users, filesystem permissions, browser dependencies, and reverse-proxy policy before
 installation. Prefer the systemd timer over the in-process interval loop on a single Linux host,

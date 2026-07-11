@@ -52,6 +52,8 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 ### Phase 1: Data Source Finalization
 
 - [x] Confirm local WRA API key storage without committing the key.
+- [x] Add a production CWA `O-A0002-001` rain-gauge adapter with strict Pydantic contracts,
+      retry/backoff/rate limiting, source provenance, and scheduled live contract smoke testing.
 - [ ] Implement WRA official API ingestion after endpoint contracts are confirmed.
 
 ### Phase 2: Dataset Build

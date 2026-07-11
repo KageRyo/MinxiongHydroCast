@@ -52,10 +52,13 @@ a production release.
 - Completed: locked one-shot/interval observation collection, immutable checksummed snapshots,
   retention, last-attempt tracking, dynamic freshness/schema readiness, a versioned read API, and
   a localhost operator view.
+- Completed: official CWA `O-A0002-001` operational rain-gauge adapter with strict Pydantic input
+  schemas, retry/backoff/rate limiting, WGS84/station identifiers, source provenance, degraded
+  scraper fallback, and a scheduled credential-safe live contract smoke test.
 - Pending deployment work: durable remote storage, process supervision, metrics export,
   authentication, backups, and alert routing to named maintainers.
-- Pending integration work: WRA official API endpoint contracts still need implementation in the
-  ingestion layer.
+- Pending integration work: WRA official API endpoint contracts for rainfall alerts and flood
+  sensors still need implementation in the ingestion layer.
 - Pending official-label work: attach CWA weather maps, warnings, daily reports, or equivalent
   official source evidence to each selected event before weather-type stratification.
 - Pending source-search work: candidate event-time CWA historical `SFCcombo` chart URLs were

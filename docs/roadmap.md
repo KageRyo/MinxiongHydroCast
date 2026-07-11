@@ -75,6 +75,8 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 ## Milestone 8: Operationalize
 
 - [ ] Replace page scraping with approved WRA API contracts for production-critical feeds.
+- [x] Replace operational rain-gauge scraping with the official CWA `O-A0002-001` API adapter,
+      strict upstream schemas, reliable requests, provenance, and degraded fallback semantics.
 - [x] Package rainfall-alert and hydrology ingestion as a locked, repeatable scheduled job.
 - [x] Store immutable, checksummed observation snapshots with latest and last-attempt pointers.
 - [x] Expose freshness, schema drift, failed-run, and missing-forecast health states.

@@ -6,6 +6,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from floodcastminxiong.ingestion.source_adapter import SourceProvenance
+
 Mode = Literal["demo", "live"]
 ProductType = Literal[
     "demo_fixture",
@@ -33,13 +35,21 @@ class ErrorResponse(ResponseSchema):
 
 
 class DatasetHealth(ResponseSchema):
-    state: Literal["healthy", "stale", "demo", "invalid", "upstream_unhealthy"]
+    state: Literal[
+        "healthy",
+        "stale",
+        "demo",
+        "degraded",
+        "invalid",
+        "upstream_unhealthy",
+    ]
     ready: bool
     observed_at: str
     age_minutes: float | None
     max_age_minutes: float = Field(ge=0)
     schema_sha256: str = Field(min_length=64, max_length=64)
     schema_errors: list[str]
+    degradation_reasons: list[str] = Field(default_factory=list)
 
 
 class AggregateHealth(ResponseSchema):
@@ -56,6 +66,7 @@ class DatasetStatus(ResponseSchema):
     schema_sha256: str = Field(min_length=64, max_length=64)
     sha256: str = Field(min_length=64, max_length=64)
     health: DatasetHealth
+    source: SourceProvenance | None = None
 
 
 class SnapshotSummary(ResponseSchema):
@@ -99,6 +110,7 @@ class DatasetResponse(ResponseSchema):
     product_type: ProductType
     notice: str
     health: DatasetHealth
+    source: SourceProvenance | None = None
     row_count: int = Field(ge=0)
     records: list[dict[str, str]]
 

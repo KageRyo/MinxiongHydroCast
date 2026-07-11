@@ -10,7 +10,7 @@ import shutil
 import time
 import uuid
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Iterator
@@ -36,6 +36,7 @@ class DatasetPayload:
     records: list[dict[str, object]]
     fieldnames: list[str]
     health: dict[str, Any]
+    source: dict[str, Any] = field(default_factory=dict)
 
 
 def _json_bytes(payload: dict[str, Any]) -> bytes:
@@ -193,6 +194,7 @@ class SnapshotStore:
                     "schema_sha256": schema_fingerprint(dataset.fieldnames),
                     "sha256": _sha256(output_path),
                     "health": dataset.health,
+                    **({"source": dataset.source} if dataset.source else {}),
                 }
 
             manifest = {
