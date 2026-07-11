@@ -109,16 +109,30 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 
 - [ ] Align radar/QPE, gauges, flood sensors, shelters, and risk areas to shared spatial
       references.
+- [x] Publish snapshot-aligned references for gauges, sensors, shelters, pumping stations, and
+      risk areas supplied to the operational collector.
+- [ ] Align radar/QPE grids to the same operational location and township contract.
 - [ ] Add Minxiong/Chiayi feature tables for rainfall, QPE accumulation, sensor status, and
       township/village context.
+- [x] Add an operational Minxiong township feature row for rainfall, sensors, alerts, and stable
+      location IDs.
+- [ ] Add validated QPE accumulation and village-level context to the operational feature table.
+- [x] Define and audit provenance-backed Minxiong positive/negative flood labels.
+- [ ] Collect enough confirmed labels to pass the 10-positive/20-negative training gate.
 - [ ] Evaluate `RainfallThresholdRiskScorer` on real event windows.
 - [ ] Add LightGBM/XGBoost only after labels and feature tables are stable.
 
 ### Phase 6: Release And Operations
 
 - [ ] Publish model cards for Taiwan-wide and Minxiong/Chiayi-specific checkpoints.
-- [ ] Add scheduled jobs only after ingestion and validation are repeatable by hand.
-- [ ] Add alerting only after run summaries expose reliable failure reasons.
+- [x] Add locked one-shot and interval scheduling for rainfall-alert and hydrology ingestion.
+- [x] Add immutable checksummed snapshots, latest pointers, retention, and failed-attempt records.
+- [x] Add freshness/schema/readiness health checks and a versioned read API.
+- [x] Add a localhost operator view separating official-source data and experimental forecasts.
+- [x] Add systemd collector timer and API supervision templates for Linux deployment.
+- [x] Add a shadow-history report with heavy-rain evidence and an explicit notification blocker.
+- [ ] Add a durable remote-storage backend, process supervision, metrics export, and backups.
+- [ ] Route failed/stale/schema alerts after deployment owners and channels are assigned.
 - [ ] Keep deployment configuration separate from research/training artifacts.
 
 ## Later

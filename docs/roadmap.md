@@ -75,9 +75,14 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 ## Milestone 8: Operationalize
 
 - [ ] Replace page scraping with approved WRA API contracts for production-critical feeds.
-- [ ] Package live ingestion, validation, and feature assembly as idempotent scheduled jobs.
-- [ ] Store versioned raw metadata, validated observations, features, and forecasts durably.
-- [ ] Alert on failed runs, stale sources, schema drift, and missing forecast products.
+- [x] Package rainfall-alert and hydrology ingestion as a locked, repeatable scheduled job.
+- [x] Store immutable, checksummed observation snapshots with latest and last-attempt pointers.
+- [x] Expose freshness, schema drift, failed-run, and missing-forecast health states.
+- [ ] Add forecast publication to the scheduled operational flow after model gates pass.
+- [x] Add snapshot-native Minxiong observation/alert features with stable location IDs.
+- [ ] Add validated QPE and experimental forecast fields to the feature contract.
+- [ ] Add a remote durable-storage backend and deployment backups.
+- [ ] Export metrics and route failed/stale/schema alerts to named maintainers.
 - [x] Emit structured logs and run summaries for every pipeline execution.
 - [x] Add CI for tests and linting.
 - [x] Maintain a repo task list for unchecked roadmap items.
@@ -86,8 +91,13 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 ## Milestone 9: Deliver A Minxiong Service
 
 - [ ] Define users, decisions, update cadence, latency, and data-freshness SLOs with local operators.
-- [ ] Publish a versioned read API for current observations, forecast grids, and risk features.
-- [ ] Add an operator view that clearly separates official warnings from experimental predictions.
+- [x] Publish a versioned read API for current alerts and observations.
+- [x] Add an operator view that separates official-source data from experimental predictions.
+- [x] Add systemd templates for a persistent collector timer and supervised localhost API.
+- [x] Add an auditable seven-day shadow gate requiring reviewed heavy-rain coverage.
+- [x] Add a provenance-backed Minxiong flood-label audit and minimum class-coverage gate.
+- [ ] Publish forecast grids and risk features after their model/data gates pass.
+- [x] Publish the observation-derived Minxiong feature contract.
 - [ ] Backtest on multiple independent events and calibrate thresholds with local flood labels.
 - [ ] Run a shadow deployment through at least one heavy-rain period before enabling notifications.
 - [ ] Document incident response, data licensing, model rollback, and human override procedures.

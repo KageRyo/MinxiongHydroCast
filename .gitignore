@@ -231,6 +231,7 @@ data/processed/**
 !data/processed/.gitkeep
 data/external/**
 !data/external/.gitkeep
+output/playwright/
 
 # Do not commit source exports, live captures, model weights, or archives.
 *.docx

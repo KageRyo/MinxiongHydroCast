@@ -47,12 +47,10 @@ def normalize_datetime(
         except ValueError:
             pass
 
-    for pattern in ("%m-%d %H:%M:%S", "%m-%d %H:%M"):
+    inferred_year = infer_year(production_time)
+    for pattern in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"):
         try:
-            parsed = datetime.strptime(text, pattern).replace(
-                year=infer_year(production_time),
-                tzinfo=timezone,
-            )
+            parsed = datetime.strptime(f"{inferred_year}-{text}", pattern).replace(tzinfo=timezone)
             return parsed.isoformat(timespec="seconds")
         except ValueError:
             pass

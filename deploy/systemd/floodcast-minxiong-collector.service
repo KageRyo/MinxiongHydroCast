@@ -1,0 +1,26 @@
+[Unit]
+Description=FloodCastMinxiong live observation collection
+Documentation=https://github.com/KageRyo/FloodCastMinxiong
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=floodcast-minxiong
+Group=floodcast-minxiong
+WorkingDirectory=/opt/floodcast-minxiong
+EnvironmentFile=-/etc/floodcast-minxiong.env
+Environment=PLAYWRIGHT_BROWSERS_PATH=/opt/floodcast-minxiong/.playwright
+StateDirectory=floodcast-minxiong
+ExecStart=/opt/floodcast-minxiong/.venv/bin/floodcast-minxiong-operations \
+  --mode live \
+  --once \
+  --store /var/lib/floodcast-minxiong/operations \
+  --debug-dir /var/lib/floodcast-minxiong/debug \
+  --summary-output /var/lib/floodcast-minxiong/run_summaries/operations.json \
+  --log-output /var/lib/floodcast-minxiong/run_logs.jsonl
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/floodcast-minxiong

@@ -33,9 +33,10 @@ Today the repository is useful for four concrete workflows:
 - benchmark persistence and Tiny U-Net nowcasting with common lead-time metrics;
 - assemble Minxiong/Chiayi location references and flood-risk features for downstream systems.
 
-It does not yet provide a continuously running service, public API, operator dashboard, or
-validated public flood warning. See [docs/operational_use.md](docs/operational_use.md) for supported
-operating profiles, outputs, and the gates required before public deployment.
+It includes a local operational observation service, versioned snapshots, health/readiness checks,
+a read-only API, and an operator view. It is not deployed as a public service and does not provide
+a validated public flood warning. See [docs/operational_use.md](docs/operational_use.md) for
+operating profiles, storage contracts, and the gates required before public deployment.
 
 ## Quick Start
 
@@ -53,6 +54,89 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 python -m playwright install chromium
 ```
+
+## Operational Observation Service
+
+Create a versioned demo snapshot without contacting live sources:
+
+```bash
+floodcast-minxiong-operations --mode demo --once
+```
+
+Run one live collection. Live is the default mode:
+
+```bash
+floodcast-minxiong-operations --once
+```
+
+Run the collector every 10 minutes and retain 30 days of snapshots:
+
+```bash
+floodcast-minxiong-operations \
+  --interval-seconds 600 \
+  --retention-days 30 \
+  --max-age-minutes 30 \
+  --pumping-stations data/processed/pumping_stations.csv \
+  --shelters data/processed/shelters.csv \
+  --flood-risk-areas data/processed/flood_risk_areas.csv
+```
+
+Serve the read-only API and internal operator view on localhost:
+
+```bash
+floodcast-minxiong-serve --host 127.0.0.1 --port 8080
+```
+
+Open <http://127.0.0.1:8080/> for the operator view. The service exposes:
+
+- `GET /healthz` for process liveness;
+- `GET /readyz` for data readiness, with HTTP 503 for demo, stale, invalid, or failed data;
+- `GET /metrics` for Prometheus-compatible readiness, attempt, age, and state metrics;
+- `GET /api/v1/status` for the latest attempt, snapshot, and dataset health;
+- `GET /api/v1/official-alerts/rainfall`;
+- `GET /api/v1/observations/rain-gauges`;
+- `GET /api/v1/observations/flood-sensors`;
+- `GET /api/v1/features/minxiong` for the derived township feature contract;
+- `GET /api/v1/locations` for snapshot-aligned gauges, sensors, shelters, pumps, and risk areas;
+- `GET /api/v1/shadow-readiness` for the audited shadow gate and notification blockers;
+- `GET /api/v1/experimental-forecasts`, which remains unavailable until model and shadow gates
+  pass.
+
+Snapshots are immutable under `data/processed/operations/snapshots/`. A failed collection updates
+`latest_attempt.json` but does not replace the last readable `latest.json` snapshot.
+For a Linux host, hardened collector timer and API service templates are provided under
+`deploy/systemd/`.
+
+Evaluate accumulated live snapshots against a reviewed heavy-rain period:
+
+```bash
+floodcast-minxiong-shadow-report \
+  --evidence /path/to/reviewed_shadow_evidence.json
+```
+
+The default gate requires seven days, 900 live attempts, 99% collection success, 95% readiness,
+no gap over 30 minutes, intact snapshots, and at least one continuously covered heavy-rain period.
+Passing this gate does not enable notifications; local model-label and delivery gates remain.
+
+Audit reviewed Minxiong flood-event labels before using them for model training:
+
+```bash
+floodcast-minxiong-label-audit \
+  --manifest /path/to/reviewed_flood_labels.json \
+  --output data/processed/flood_label_audit.json \
+  --require-training-ready
+```
+
+The tracked `data/samples/flood_labels.example.json` is an unconfirmed schema example and is
+deliberately rejected. The default training gate requires at least 10 confirmed flood events and
+20 confirmed non-flood events with non-overlapping windows and source/reviewer provenance.
+
+Each successful operational snapshot also contains `minxiong_features.csv`. It aggregates only
+validated Minxiong records and links gauges/sensors to stable location IDs. QPE and experimental
+forecast fields remain explicitly unavailable until their upstream products pass validation.
+The same snapshot contains `location_reference.csv`; current gauges and sensors are always
+included, while shelters, pumping stations, and risk areas are included only from explicitly
+provided processed CSV inputs.
 
 Run the local demo pipeline for installation and schema checks only:
 
@@ -331,12 +415,15 @@ FloodCastMinxiong/
 │   ├── processed/    # ignored validated outputs
 │   ├── external/     # ignored radar/model/checkpoint assets
 │   └── samples/      # tracked demo-safe samples
+├── deploy/
+│   └── systemd/      # collector timer and localhost API service templates
 ├── docs/
 ├── scripts/
 ├── src/floodcastminxiong/
 │   ├── ingestion/
 │   ├── io/
 │   ├── models/
+│   ├── operations/
 │   ├── pipelines/
 │   ├── spatial/
 │   └── validation/

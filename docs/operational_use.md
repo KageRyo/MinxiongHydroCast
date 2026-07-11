@@ -1,9 +1,193 @@
 # Operational Use
 
-FloodCastMinxiong currently provides production-oriented building blocks, but it is not yet an
-operational public warning service. The distinction matters: a pipeline that runs on real data is
-not production-ready until freshness, failure handling, delivery, and decision ownership are
-defined and monitored.
+FloodCastMinxiong provides a runnable local observation and data-quality service, but it is not an
+operational public warning service. The distinction matters: a service that runs on real data is
+not production-ready until its source contracts, deployment, alert routing, decision ownership,
+and shadow-operation evidence are defined and monitored.
+
+## Run The Observation Service
+
+Use demo mode only to verify the installation and service contract:
+
+```bash
+floodcast-minxiong-operations --mode demo --once
+floodcast-minxiong-serve --host 127.0.0.1 --port 8080
+```
+
+Demo snapshots are always marked `demo` and `ready=false`; every demo dataset uses the
+`demo_fixture` product type instead of an official classification. The readiness endpoint
+returns HTTP 503 so demo data cannot silently satisfy a deployment health check.
+
+Run a single live collection:
+
+```bash
+floodcast-minxiong-operations --once
+```
+
+Run continuously at a 10-minute interval:
+
+```bash
+floodcast-minxiong-operations \
+  --interval-seconds 600 \
+  --retention-days 30 \
+  --max-age-minutes 30 \
+  --pumping-stations data/processed/pumping_stations.csv \
+  --shelters data/processed/shelters.csv \
+  --flood-risk-areas data/processed/flood_risk_areas.csv
+```
+
+Only one collector may write a store at a time. A process lock rejects overlapping runs and
+automatically recovers when the recorded process no longer exists.
+
+## Snapshot Storage
+
+The default store is `data/processed/operations/`:
+
+```text
+operations/
+├── latest.json
+├── latest_attempt.json
+└── snapshots/
+    └── <snapshot-id>/
+        ├── manifest.json
+        └── datasets/
+            ├── rainfall_alerts.csv
+            ├── rain_gauges.csv
+            ├── flood_sensors.csv
+            ├── minxiong_features.csv
+            └── location_reference.csv
+```
+
+Each immutable manifest records the dataset classification, fields, schema SHA-256, file SHA-256,
+row count, observed time, age, freshness threshold, and schema errors. Publishing uses atomic
+renames. A failed attempt receives its own error manifest and updates `latest_attempt.json`
+without replacing the last readable `latest.json`.
+Every status and dataset read verifies path boundaries, manifest and file checksums, schema
+checksums, and CSV headers. Corrupt pointers, manifests, or datasets produce a structured
+`storage_error` readiness state instead of being treated as an empty or healthy store.
+
+Retention removes expired unreferenced snapshots. The latest readable snapshot and latest attempt
+are always protected. In deployment, mount this path on durable storage with filesystem-level
+backup and access control; the repository does not provide a remote object-store backend yet.
+
+## API And Operator View
+
+Start the localhost-only default server:
+
+```bash
+floodcast-minxiong-serve
+```
+
+The following endpoints are available:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /healthz` | Process liveness |
+| `GET /readyz` | Data readiness; returns 503 when not ready |
+| `GET /metrics` | Prometheus readiness, last-attempt, dataset-age, and state metrics |
+| `GET /api/v1/status` | Latest attempt, snapshot, freshness, and schema health |
+| `GET /api/v1/official-alerts/rainfall` | WRA rainfall-alert source product |
+| `GET /api/v1/observations/rain-gauges` | Validated WRA rain-gauge observations |
+| `GET /api/v1/observations/flood-sensors` | Validated WRA flood-sensor observations |
+| `GET /api/v1/features/minxiong` | Derived Minxiong township feature contract |
+| `GET /api/v1/locations` | Snapshot-aligned operational location reference |
+| `GET /api/v1/shadow-readiness` | Shadow criteria, metrics, and notification blockers |
+| `GET /api/v1/experimental-forecasts` | Explicit unavailable state until forecast gates pass |
+
+All JSON responses are validated and serialized through the Pydantic models in
+`floodcastminxiong.operations.schemas`. Fixed response fields reject unknown keys and invalid
+types; dataset responses also require `row_count` to match the number of returned records. The
+source-specific columns inside each record remain dynamic strings because the endpoint exposes
+multiple separately versioned tabular contracts.
+
+The operator view at `/` presents official-source alerts, observations, and experimental
+forecast availability in separate sections. The server binds to `127.0.0.1` by default. Put it
+behind an authenticated reverse proxy before exposing it to another host or network.
+
+## Minxiong Feature Contract
+
+Every successful snapshot derives one Minxiong township feature row from the same immutable source
+records. It contains stable rain-gauge and flood-sensor location IDs, latest observation times,
+maximum 1-hour/24-hour station rainfall, normalized maximum sensor water level, rainfall-alert
+counts, and upstream health states.
+
+The feature is marked ready only when every upstream live dataset is healthy. It never substitutes
+missing products: `qpe_available=false`, an empty QPE accumulation, and
+`experimental_forecast_included=false` remain explicit until those sources pass their own gates.
+Demo snapshots classify the feature as `demo_fixture`.
+
+Current rain gauges and flood sensors always produce stable location references from the same
+snapshot. Optional processed pumping-station, shelter, and flood-risk-area CSVs can be supplied to
+the collector. They are copied into the immutable location reference rather than read dynamically
+by the API, so every feature ID resolves against the same snapshot version.
+
+## Shadow Deployment Gate
+
+Copy `data/samples/shadow_evidence.example.json` outside the tracked sample directory and replace
+it with reviewed heavy-rain evidence. Unconfirmed sample evidence never satisfies the gate.
+Evaluate the accumulated snapshot history:
+
+```bash
+floodcast-minxiong-shadow-report \
+  --evidence /var/lib/floodcast-minxiong/reviewed_shadow_evidence.json
+```
+
+The default gate requires:
+
+- seven days of live collection history;
+- at least 900 live attempts;
+- at least 99% successful attempts;
+- at least 95% ready attempts;
+- no ready-data gap longer than 30 minutes;
+- no corrupt manifests or datasets;
+- at least one confirmed heavy-rain period with continuous ready coverage.
+
+The report is atomically stored as `shadow_report.json` in the operations store and exposed by the
+API and metrics endpoint. `notification_allowed` remains false even when the shadow criteria pass,
+because notification delivery and local model-label gates are separate unfinished requirements.
+
+## Local Flood Labels
+
+Real Minxiong flood labels must be kept outside tracked demo data. Start from
+`data/samples/flood_labels.example.json`, replace every placeholder with reviewed evidence, and
+audit the result:
+
+```bash
+floodcast-minxiong-label-audit \
+  --manifest /var/lib/floodcast-minxiong/reviewed_flood_labels.json \
+  --output /var/lib/floodcast-minxiong/flood_label_audit.json \
+  --require-training-ready
+```
+
+Confirmed labels require a unique event ID, a non-overlapping Minxiong time window, a boolean
+observed outcome, an allowed evidence type, a source reference, and reviewer identity/time. The
+default model-training gate requires 10 positive and 20 negative confirmed events. Unconfirmed
+examples and demo threshold events do not count.
+
+## Linux Service Supervision
+
+Templates under `deploy/systemd/` provide:
+
+- a hardened one-shot live collector service;
+- a persistent timer that runs every 10 minutes and catches up after downtime;
+- a restartable localhost API service.
+
+The templates assume:
+
+- the repository and virtual environment are installed under `/opt/floodcast-minxiong`;
+- a non-login `floodcast-minxiong` service user and group exist;
+- local secrets and endpoint overrides are stored in `/etc/floodcast-minxiong.env`;
+- durable snapshots and run state live under `/var/lib/floodcast-minxiong`.
+
+Review paths, users, filesystem permissions, browser dependencies, and reverse-proxy policy before
+installation. Prefer the systemd timer over the in-process interval loop on a single Linux host,
+because the timer records each attempt independently and uses `Persistent=true` after downtime.
+Install Playwright Chromium into the path configured by the collector unit before enabling it:
+
+```bash
+PLAYWRIGHT_BROWSERS_PATH=/opt/floodcast-minxiong/.playwright \
+  /opt/floodcast-minxiong/.venv/bin/python -m playwright install chromium
+```
 
 ## Supported Operating Profiles
 
@@ -49,8 +233,10 @@ A deployable Minxiong service should run this sequence idempotently:
 5. publish observations, experimental forecasts, and official warnings as distinct products;
 6. record metrics and lineage, then alert an operator on failure or staleness.
 
-The existing JSON run summaries and JSONL logs are the starting observability contract. They still
-need a scheduler, durable storage, metrics backend, alert routing, and a serving layer.
+The scheduler, local versioned store, health/readiness contract, JSON run summaries, JSONL logs,
+Prometheus metrics endpoint, read API, and operator view are implemented. Production deployment
+still needs a durable mounted volume or object-store backend, metrics scraping and alert rules,
+alert routing, authentication, and service supervision.
 
 ## Production Gates
 
@@ -69,8 +255,9 @@ Do not present FloodCastMinxiong as an operational warning system until all gate
 
 ## Recommended First Release
 
-The first credible release should be an internal **Minxiong observation and data-quality service**,
-not an automated warning product. Schedule live ingestion, expose freshness and validated station
-data, retain run lineage, and alert maintainers on stale feeds. Add experimental radar nowcasts
-only after the observation service is reliable; add public risk notifications only after local
-backtesting and operator review.
+The first credible release remains an internal **Minxiong observation and data-quality service**,
+not an automated warning product. The repository now supplies the runnable service foundation.
+The next deployment work is to mount durable storage, supervise both processes, export metrics,
+route stale/failure alerts to named maintainers, and complete a shadow run. Add experimental radar
+nowcasts only after the observation service is reliable; add public risk notifications only after
+local backtesting and operator review.
