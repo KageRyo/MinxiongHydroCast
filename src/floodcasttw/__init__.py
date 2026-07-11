@@ -1,4 +1,4 @@
-"""FloodCastTW package."""
+"""FloodCastMinxiong package with legacy floodcasttw import compatibility."""
 
 __all__ = ["__version__"]
 
