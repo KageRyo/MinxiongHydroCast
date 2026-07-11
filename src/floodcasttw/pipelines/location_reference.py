@@ -22,7 +22,7 @@ PIPELINE_NAME = "location_reference"
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Build FloodCastTW location references.")
+    parser = argparse.ArgumentParser(description="Build FloodCastMinxiong location references.")
     parser.add_argument("--rain", type=Path, default=Path("data/processed/rain_monitor.csv"))
     parser.add_argument("--flood", type=Path, default=Path("data/processed/flood_sensors.csv"))
     parser.add_argument("--pumping-stations", type=Path, default=None)
