@@ -55,6 +55,9 @@ pip install -e ".[dev]"
 python -m playwright install chromium
 ```
 
+`pyproject.toml` is the single source of truth for Python dependencies. Install `.[dev]` for
+linting and tests, `.[model]` for model training, or `.[dev,model]` when both are needed.
+
 ## Operational Observation Service
 
 Create a versioned demo snapshot without contacting live sources:
