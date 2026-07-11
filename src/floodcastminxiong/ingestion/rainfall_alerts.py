@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
 from pathlib import Path
 
 from playwright.sync_api import TimeoutError as PlaywrightTimeout
@@ -17,7 +16,9 @@ from floodcastminxiong.io.run_summary import (
     default_run_summary_path,
     record_run,
     start_run,
+    now_taipei_iso,
 )
+from floodcastminxiong.validation.quality import ValidationReport, validate_records
 
 DEFAULT_COUNTY_VALUE = "10010"
 DEFAULT_OUTPUT = Path("data/processed/rainfall_alerts.csv")
@@ -32,6 +33,7 @@ FIELDNAMES = [
     "抓取時間",
     "資料模式",
 ]
+NON_EMPTY_FIELDS = {"地區", "警戒", "抓取時間", "資料模式"}
 
 SAMPLE_DATA = [
     {
@@ -54,8 +56,21 @@ SAMPLE_DATA = [
 
 
 def demo_records() -> list[dict[str, str]]:
-    now = datetime.now().isoformat(timespec="seconds")
+    now = now_taipei_iso()
     return [{**record, "抓取時間": now, "資料模式": "demo"} for record in SAMPLE_DATA]
+
+
+def validate_rainfall_alert_records(
+    records: list[dict[str, str]],
+    *,
+    allow_demo: bool,
+) -> ValidationReport:
+    return validate_records(
+        records,
+        required_fields=set(FIELDNAMES),
+        required_non_empty=NON_EMPTY_FIELDS,
+        allow_demo=allow_demo,
+    )
 
 
 def scrape_with_playwright(
@@ -103,7 +118,7 @@ def scrape_with_playwright(
             print("[WARN] County selector not found; attempting to parse visible page content.")
 
         page.wait_for_timeout(3000)
-        now = datetime.now().isoformat(timespec="seconds")
+        now = now_taipei_iso()
 
         for header in page.locator("h4").all()[:120]:
             try:

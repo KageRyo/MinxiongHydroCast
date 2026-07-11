@@ -49,6 +49,11 @@ a production release.
   trails persistence.
 - Completed: baseline model card for Minxiong/Chiayi-oriented smoke testing.
 - Completed: local WRA API key configuration; real key stays in ignored `.env`.
+- Completed: locked one-shot/interval observation collection, immutable checksummed snapshots,
+  retention, last-attempt tracking, dynamic freshness/schema readiness, a versioned read API, and
+  a localhost operator view.
+- Pending deployment work: durable remote storage, process supervision, metrics export,
+  authentication, backups, and alert routing to named maintainers.
 - Pending integration work: WRA official API endpoint contracts still need implementation in the
   ingestion layer.
 - Pending official-label work: attach CWA weather maps, warnings, daily reports, or equivalent

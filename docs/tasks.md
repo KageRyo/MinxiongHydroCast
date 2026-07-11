@@ -117,8 +117,13 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 ### Phase 6: Release And Operations
 
 - [ ] Publish model cards for Taiwan-wide and Minxiong/Chiayi-specific checkpoints.
-- [ ] Add scheduled jobs only after ingestion and validation are repeatable by hand.
-- [ ] Add alerting only after run summaries expose reliable failure reasons.
+- [x] Add locked one-shot and interval scheduling for rainfall-alert and hydrology ingestion.
+- [x] Add immutable checksummed snapshots, latest pointers, retention, and failed-attempt records.
+- [x] Add freshness/schema/readiness health checks and a versioned read API.
+- [x] Add a localhost operator view separating official-source data and experimental forecasts.
+- [x] Add systemd collector timer and API supervision templates for Linux deployment.
+- [ ] Add a durable remote-storage backend, process supervision, metrics export, and backups.
+- [ ] Route failed/stale/schema alerts after deployment owners and channels are assigned.
 - [ ] Keep deployment configuration separate from research/training artifacts.
 
 ## Later
