@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "floodcasttw"
 version = "0.1.0"
-description = "Taiwan flood-risk data pipeline and nowcasting baseline toolkit."
+description = "Minxiong-first flood-risk data pipeline and rainfall-nowcasting toolkit."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }

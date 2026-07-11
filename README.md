@@ -1,6 +1,6 @@
-# FloodCastTW
+# FloodCastMinxiong
 
-[![CI](https://github.com/KageRyo/FloodCastTW/actions/workflows/ci.yml/badge.svg)](https://github.com/KageRyo/FloodCastTW/actions/workflows/ci.yml)
+[![CI](https://github.com/KageRyo/FloodCastMinxiong/actions/workflows/ci.yml/badge.svg)](https://github.com/KageRyo/FloodCastMinxiong/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Style: Ruff](https://img.shields.io/badge/style-ruff-46a6ff)](https://docs.astral.sh/ruff/)
@@ -8,9 +8,10 @@
 
 Taiwan flood-risk data pipeline and nowcasting baseline toolkit.
 
-FloodCastTW starts from Chiayi/Minxiong flood-risk use cases and is designed to grow into a
-Taiwan-wide rainfall nowcasting and flood-risk platform. The current scope is data ingestion,
-validation, baseline modeling, and a clean boundary for future SOTA model integration.
+FloodCastMinxiong is a Minxiong-first flood-risk data and rainfall-nowcasting toolkit. Its
+operational target is Minxiong Township, while Taiwan-wide radar data is used as upstream training
+and context data. The current release is a research and data-engineering toolkit, not an official
+warning system.
 
 ## What This Repo Does
 
@@ -22,6 +23,25 @@ validation, baseline modeling, and a clean boundary for future SOTA model integr
 - Provide baseline models before deep-learning training is justified.
 - Prepare a `NowcastNetAdapter` boundary for future SOTA migration.
 - Track official CWA radar/QPE candidate sources without committing raw downloads or API keys.
+
+## What You Can Use Today
+
+Today the repository is useful for four concrete workflows:
+
+- ingest and validate live WRA rainfall-alert, rain-gauge, and flood-sensor observations;
+- collect reproducible CWA radar event windows and convert them to model-ready tensors;
+- benchmark persistence and Tiny U-Net nowcasting with common lead-time metrics;
+- assemble Minxiong/Chiayi location references and flood-risk features for downstream systems.
+
+It does not yet provide a continuously running service, public API, operator dashboard, or
+validated public flood warning. See [docs/operational_use.md](docs/operational_use.md) for supported
+operating profiles, outputs, and the gates required before public deployment.
+
+## Naming And Compatibility
+
+The product and repository name is **FloodCastMinxiong**. The Python package, environment variables,
+and installed `floodcasttw-*` commands remain unchanged in this release to avoid breaking existing
+automation. They are compatibility identifiers, not a claim of Taiwan-wide operational coverage.
 
 ## Quick Start
 
@@ -40,7 +60,7 @@ pip install -e ".[dev]"
 python -m playwright install chromium
 ```
 
-Run the local demo pipeline:
+Run the local demo pipeline for installation and schema checks only:
 
 ```bash
 python scripts/run_demo.py
@@ -300,7 +320,8 @@ floodcasttw-torch-baseline-evaluate \
   --output data/processed/tiny_unet_cwa_comparison.json
 ```
 
-Every command-line pipeline writes a JSON run summary under
+For non-demo operation, use only explicit `--mode live` commands and reject any run summary whose
+`mode` is `demo`. Every command-line pipeline writes a JSON run summary under
 `data/processed/run_summaries/` and appends a compact JSONL event to
 `data/processed/run_logs.jsonl` by default. Override these with `--summary-output` and
 `--log-output`, or pass `--summary-output /tmp/example.json --log-output /tmp/runs.jsonl`
@@ -309,7 +330,7 @@ for throwaway checks.
 ## Project Layout
 
 ```text
-FloodCastTW/
+FloodCastMinxiong/
 ├── data/
 │   ├── raw/          # ignored source captures
 │   ├── interim/      # ignored cleaned intermediates

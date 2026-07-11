@@ -1,6 +1,6 @@
 # Event Splits
 
-FloodCastTW should split model data by weather event, not by random rows or radar frames. Random
+FloodCastMinxiong should split model data by weather event, not by random rows or radar frames. Random
 splits leak storm structure across train, validation, and test sets, which makes nowcasting scores
 look better than they are.
 

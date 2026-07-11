@@ -2,7 +2,7 @@
 
 ## Model
 
-- Name: FloodCastTW persistence baseline
+- Name: FloodCastMinxiong persistence baseline
 - Model type: `PersistenceNowcaster`
 - Task: radar echo nowcasting smoke baseline
 - Intended region: Taiwan-wide radar grid, with downstream checks for Chiayi County and Minxiong

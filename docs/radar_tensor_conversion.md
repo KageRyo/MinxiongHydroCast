@@ -1,6 +1,6 @@
 # Radar Tensor Conversion
 
-FloodCastTW uses a tiny tracked radar-like fixture to test model tensor I/O before real radar
+FloodCastMinxiong uses a tiny tracked radar-like fixture to test model tensor I/O before real radar
 archives are confirmed. This is a dry-run format, not a claim about CWA native radar files.
 
 ## Fixture

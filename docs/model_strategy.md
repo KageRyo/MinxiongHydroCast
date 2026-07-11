@@ -1,6 +1,6 @@
 # Model Strategy
 
-FloodCastTW should not start with a deep-learning model. The project first needs stable live data,
+FloodCastMinxiong should not start with a deep-learning model. The project first needs stable live data,
 radar grids, labels, and repeatable validation. The recommended model path is staged.
 
 ## Best First Model

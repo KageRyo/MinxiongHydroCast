@@ -18,7 +18,7 @@ PIPELINE_NAME = "baseline_evaluation"
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Evaluate FloodCastTW baseline models.")
+    parser = argparse.ArgumentParser(description="Evaluate FloodCastMinxiong baseline models.")
     parser.add_argument(
         "--events",
         type=Path,

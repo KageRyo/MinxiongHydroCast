@@ -1,8 +1,10 @@
 # Completion Plan
 
-FloodCastTW is complete when it can repeatedly build a Taiwan radar/rainfall event dataset,
-train and evaluate baselines plus one deep-learning nowcaster, and publish a documented
-Chiayi/Minxiong-ready model without committing credentials, raw official data, or model weights.
+FloodCastMinxiong is production-ready when it can continuously ingest and validate official data,
+produce versioned Minxiong risk inputs and nowcasts, expose them through a monitored service, and
+publish a documented Minxiong model without committing credentials, raw official data, or model
+weights. Building datasets and training models are necessary milestones, but are not by themselves
+a production release.
 
 ## Definition Of Done
 
@@ -12,7 +14,10 @@ Chiayi/Minxiong-ready model without committing credentials, raw official data, o
 - A persistence baseline, a small trainable neural baseline, and a SOTA migration candidate are
   evaluated with the same metrics.
 - A Minxiong/Chiayi model card documents data sources, limitations, metrics, and attribution.
-- CI covers unit tests, linting, and dry-run contract checks.
+- CI covers unit tests, linting, dry-run contract checks, and production configuration validation.
+- A scheduler retries ingestion idempotently and raises alerts for stale, missing, or invalid data.
+- Versioned outputs are stored durably and served through an authenticated API or operator surface.
+- Service-level objectives cover data freshness, pipeline success, and forecast availability.
 - Raw data, API keys, checkpoints, and generated artifacts remain outside git.
 
 ## Current Status

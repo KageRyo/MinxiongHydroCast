@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the local FloodCastTW demo pipeline."""
+"""Run the local FloodCastMinxiong demo pipeline."""
 
 from floodcasttw.pipelines.demo import main
 

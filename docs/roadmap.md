@@ -1,6 +1,6 @@
 # Roadmap
 
-This roadmap turns FloodCastTW into a usable flood-risk data and nowcasting platform. Keep each
+This roadmap turns FloodCastMinxiong into a usable flood-risk data and nowcasting platform. Keep each
 milestone small enough to track in [tasks.md](tasks.md). The completion definition and phase-by-phase
 exit criteria are maintained in [completion_plan.md](completion_plan.md).
 
@@ -74,8 +74,20 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 
 ## Milestone 8: Operationalize
 
-- [ ] Add scheduled jobs only after ingestion and validation are stable.
+- [ ] Replace page scraping with approved WRA API contracts for production-critical feeds.
+- [ ] Package live ingestion, validation, and feature assembly as idempotent scheduled jobs.
+- [ ] Store versioned raw metadata, validated observations, features, and forecasts durably.
+- [ ] Alert on failed runs, stale sources, schema drift, and missing forecast products.
 - [x] Emit structured logs and run summaries for every pipeline execution.
 - [x] Add CI for tests and linting.
 - [x] Maintain a repo task list for unchecked roadmap items.
 - [x] Publish a Minxiong/Chiayi baseline model card before distributing checkpoints.
+
+## Milestone 9: Deliver A Minxiong Service
+
+- [ ] Define users, decisions, update cadence, latency, and data-freshness SLOs with local operators.
+- [ ] Publish a versioned read API for current observations, forecast grids, and risk features.
+- [ ] Add an operator view that clearly separates official warnings from experimental predictions.
+- [ ] Backtest on multiple independent events and calibrate thresholds with local flood labels.
+- [ ] Run a shadow deployment through at least one heavy-rain period before enabling notifications.
+- [ ] Document incident response, data licensing, model rollback, and human override procedures.

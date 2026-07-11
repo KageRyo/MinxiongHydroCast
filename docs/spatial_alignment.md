@@ -1,6 +1,6 @@
 # Spatial Alignment
 
-FloodCastTW aligns observations and risk assets through a common location reference table and
+FloodCastMinxiong aligns observations and risk assets through a common location reference table and
 regular WGS84 grids.
 
 ## Location Reference

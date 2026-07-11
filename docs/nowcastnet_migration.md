@@ -1,6 +1,6 @@
 # NowcastNet Migration
 
-FloodCastTW keeps third-party SOTA code, checkpoints, and radar datasets outside git. The repo
+FloodCastMinxiong keeps third-party SOTA code, checkpoints, and radar datasets outside git. The repo
 contains only the contract and adapter needed to connect those assets once they are reviewed.
 
 ## Radar Tensor Contract
