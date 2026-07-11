@@ -109,6 +109,9 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 
 - [ ] Align radar/QPE, gauges, flood sensors, shelters, and risk areas to shared spatial
       references.
+- [x] Publish snapshot-aligned references for gauges, sensors, shelters, pumping stations, and
+      risk areas supplied to the operational collector.
+- [ ] Align radar/QPE grids to the same operational location and township contract.
 - [ ] Add Minxiong/Chiayi feature tables for rainfall, QPE accumulation, sensor status, and
       township/village context.
 - [x] Add an operational Minxiong township feature row for rainfall, sensors, alerts, and stable

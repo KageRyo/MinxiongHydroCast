@@ -20,6 +20,10 @@ from floodcastminxiong.io.run_summary import (
     start_run,
 )
 from floodcastminxiong.operations.health import aggregate_health, assess_dataset
+from floodcastminxiong.operations.locations import (
+    OPERATIONAL_LOCATION_FIELDS,
+    build_operational_locations,
+)
 from floodcastminxiong.operations.features import (
     MINXIONG_FEATURE_FIELDS,
     build_minxiong_feature,
@@ -50,6 +54,11 @@ DATASET_CONFIG = {
         "product_type": "derived_feature",
         "fieldnames": MINXIONG_FEATURE_FIELDS,
         "timestamp_field": "feature_time",
+    },
+    "location_reference": {
+        "product_type": "derived_reference",
+        "fieldnames": OPERATIONAL_LOCATION_FIELDS,
+        "timestamp_field": "snapshot_time",
     },
 }
 
@@ -186,6 +195,9 @@ def run_collection(
     summary_output: Path | None,
     log_output: Path | None,
     now: datetime | None = None,
+    pumping_stations: Path | None = None,
+    shelters: Path | None = None,
+    flood_risk_areas: Path | None = None,
 ) -> dict[str, Any]:
     now = now or datetime.now(TAIPEI_TZ)
     started_at, start_timer = start_run()
@@ -197,6 +209,14 @@ def run_collection(
                 headed=headed,
                 timeout=timeout,
                 debug_dir=debug_dir,
+            )
+            records["location_reference"] = build_operational_locations(
+                records,
+                mode=mode,
+                now=now,
+                pumping_stations=pumping_stations,
+                shelters=shelters,
+                flood_risk_areas=flood_risk_areas,
             )
             payloads = build_payloads(
                 records,
@@ -224,6 +244,15 @@ def run_collection(
                         else "Water Resources Agency, Taiwan"
                     ),
                     "experimental_forecast_included": False,
+                    "static_location_inputs": {
+                        "pumping_stations": str(pumping_stations)
+                        if pumping_stations
+                        else "",
+                        "shelters": str(shelters) if shelters else "",
+                        "flood_risk_areas": str(flood_risk_areas)
+                        if flood_risk_areas
+                        else "",
+                    },
                 },
                 now=now,
             )
@@ -334,6 +363,9 @@ def main() -> None:
     parser.add_argument("--headed", action="store_true")
     parser.add_argument("--timeout", type=int, default=45_000)
     parser.add_argument("--debug-dir", type=Path, default=Path("data/raw/debug"))
+    parser.add_argument("--pumping-stations", type=Path)
+    parser.add_argument("--shelters", type=Path)
+    parser.add_argument("--flood-risk-areas", type=Path)
     parser.add_argument(
         "--summary-output",
         type=Path,
@@ -355,6 +387,9 @@ def main() -> None:
             max_age_minutes=args.max_age_minutes,
             summary_output=args.summary_output,
             log_output=args.log_output,
+            pumping_stations=args.pumping_stations,
+            shelters=args.shelters,
+            flood_risk_areas=args.flood_risk_areas,
         )
     except KeyboardInterrupt:
         print("[INFO] Scheduler stopped.")

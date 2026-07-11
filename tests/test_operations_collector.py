@@ -38,6 +38,7 @@ def test_demo_collection_writes_versioned_non_ready_snapshot(tmp_path):
         "rain_gauges",
         "flood_sensors",
         "minxiong_features",
+        "location_reference",
     }
     assert manifest["datasets"]["rainfall_alerts"]["product_type"] == "demo_fixture"
     assert manifest["datasets"]["rain_gauges"]["product_type"] == "demo_fixture"
@@ -48,6 +49,12 @@ def test_demo_collection_writes_versioned_non_ready_snapshot(tmp_path):
     assert feature["rainfall_alert_count"] == "1"
     assert feature["qpe_available"] == "false"
     assert feature["data_ready"] == "false"
+    locations = store.read_dataset(manifest, "location_reference")
+    assert len(locations) == 4
+    assert {location["source_type"] for location in locations} == {
+        "rain_gauge",
+        "flood_sensor",
+    }
     assert manifest["metadata"]["source_authority"] == "demo fixture"
     assert (tmp_path / "summary.json").exists()
     assert (tmp_path / "runs.jsonl").exists()
@@ -79,6 +86,11 @@ def test_live_payloads_use_official_product_classifications():
         timeout=1000,
         debug_dir=None,
     )
+    records["location_reference"] = collector.build_operational_locations(
+        records,
+        mode="live",
+        now=now,
+    )
 
     payloads = collector.build_payloads(
         records,
@@ -92,4 +104,5 @@ def test_live_payloads_use_official_product_classifications():
         "rain_gauges": "official_observation",
         "flood_sensors": "official_observation",
         "minxiong_features": "derived_feature",
+        "location_reference": "derived_reference",
     }

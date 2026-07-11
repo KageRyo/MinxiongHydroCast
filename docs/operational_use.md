@@ -30,7 +30,10 @@ Run continuously at a 10-minute interval:
 floodcast-minxiong-operations \
   --interval-seconds 600 \
   --retention-days 30 \
-  --max-age-minutes 30
+  --max-age-minutes 30 \
+  --pumping-stations data/processed/pumping_stations.csv \
+  --shelters data/processed/shelters.csv \
+  --flood-risk-areas data/processed/flood_risk_areas.csv
 ```
 
 Only one collector may write a store at a time. A process lock rejects overlapping runs and
@@ -51,7 +54,8 @@ operations/
             ├── rainfall_alerts.csv
             ├── rain_gauges.csv
             ├── flood_sensors.csv
-            └── minxiong_features.csv
+            ├── minxiong_features.csv
+            └── location_reference.csv
 ```
 
 Each immutable manifest records the dataset classification, fields, schema SHA-256, file SHA-256,
@@ -86,6 +90,7 @@ The following endpoints are available:
 | `GET /api/v1/observations/rain-gauges` | Validated WRA rain-gauge observations |
 | `GET /api/v1/observations/flood-sensors` | Validated WRA flood-sensor observations |
 | `GET /api/v1/features/minxiong` | Derived Minxiong township feature contract |
+| `GET /api/v1/locations` | Snapshot-aligned operational location reference |
 | `GET /api/v1/shadow-readiness` | Shadow criteria, metrics, and notification blockers |
 | `GET /api/v1/experimental-forecasts` | Explicit unavailable state until forecast gates pass |
 
@@ -104,6 +109,11 @@ The feature is marked ready only when every upstream live dataset is healthy. It
 missing products: `qpe_available=false`, an empty QPE accumulation, and
 `experimental_forecast_included=false` remain explicit until those sources pass their own gates.
 Demo snapshots classify the feature as `demo_fixture`.
+
+Current rain gauges and flood sensors always produce stable location references from the same
+snapshot. Optional processed pumping-station, shelter, and flood-risk-area CSVs can be supplied to
+the collector. They are copied into the immutable location reference rather than read dynamically
+by the API, so every feature ID resolves against the same snapshot version.
 
 ## Shadow Deployment Gate
 

@@ -23,6 +23,7 @@ DATASET_ROUTES = {
     "/api/v1/observations/rain-gauges": "rain_gauges",
     "/api/v1/observations/flood-sensors": "flood_sensors",
     "/api/v1/features/minxiong": "minxiong_features",
+    "/api/v1/locations": "location_reference",
 }
 
 PRODUCT_NOTICES = {
@@ -41,6 +42,9 @@ PRODUCT_NOTICES = {
     ),
     "derived_feature": (
         "Derived from validated observations for Minxiong. Not an official warning or forecast."
+    ),
+    "derived_reference": (
+        "Snapshot-aligned spatial reference derived from validated operational inputs."
     ),
 }
 
@@ -368,6 +372,10 @@ OPERATOR_HTML = """<!doctype html>
       <div class="section-head"><h2>Minxiong Features</h2><span id="features-type">Loading</span></div>
       <div class="table-wrap" id="features"></div>
     </section>
+    <section>
+      <div class="section-head"><h2>Location Reference</h2><span id="locations-type">Loading</span></div>
+      <div class="table-wrap" id="locations"></div>
+    </section>
     <section class="experimental">
       <div class="section-head"><h2>Experimental Forecast</h2><span>Not an official warning</span></div>
       <div class="empty" id="forecast">Loading</div>
@@ -378,7 +386,8 @@ OPERATOR_HTML = """<!doctype html>
       alerts: "/api/v1/official-alerts/rainfall",
       gauges: "/api/v1/observations/rain-gauges",
       sensors: "/api/v1/observations/flood-sensors",
-      features: "/api/v1/features/minxiong"
+      features: "/api/v1/features/minxiong",
+      locations: "/api/v1/locations"
     };
     const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
