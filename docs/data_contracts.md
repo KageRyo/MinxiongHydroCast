@@ -1,6 +1,6 @@
 # Data Contracts
 
-FloodCastTW treats data contracts as the boundary between scraping, cleaning, modeling, and
+FloodCastMinxiong treats data contracts as the boundary between scraping, cleaning, modeling, and
 product usage. Every live dataset should include source metadata and an explicit `資料模式` value.
 
 ## Rainfall Alerts
