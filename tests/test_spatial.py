@@ -61,6 +61,25 @@ def test_hydrology_location_builders_generate_admin_keys():
     assert flood["location_id"].startswith("flood_sensor_")
 
 
+def test_rain_gauge_location_prefers_official_station_id_for_stability():
+    original = rain_gauge_location(
+        {
+            "行政區": "嘉義縣民雄鄉",
+            "雨量站": "民雄",
+            "雨量站代碼": "C0M760",
+        }
+    )
+    renamed = rain_gauge_location(
+        {
+            "行政區": "嘉義縣民雄鄉",
+            "雨量站": "民雄氣象站",
+            "雨量站代碼": "C0M760",
+        }
+    )
+
+    assert original["location_id"] == renamed["location_id"]
+
+
 def test_build_location_reference_dedupes_and_writes_csv(tmp_path: Path):
     locations = build_location_reference(
         rain_records=[

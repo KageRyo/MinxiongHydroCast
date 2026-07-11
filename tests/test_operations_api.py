@@ -228,6 +228,8 @@ def test_api_serves_status_classified_data_and_operator_view(tmp_path):
         )
         assert observations.product_type == "demo_fixture"
         assert observations.row_count == 2
+        assert observations.source.source_kind == "demo_fixture"
+        assert observations.source.dataset_id == "demo-rain_gauges"
 
         features = DatasetResponse.model_validate(
             request_json(base_url, "/api/v1/features/minxiong")
@@ -258,6 +260,7 @@ def test_api_serves_status_classified_data_and_operator_view(tmp_path):
         assert "floodcastminxiong_last_attempt_success 1" in metrics
         assert "floodcastminxiong_shadow_gate_passed 0" in metrics
         assert 'dataset="rain_gauges",state="demo"' in metrics
+        assert 'dataset="rain_gauges",source_kind="demo_fixture"' in metrics
 
         with urlopen(f"{base_url}/", timeout=3) as response:
             page = response.read().decode("utf-8")

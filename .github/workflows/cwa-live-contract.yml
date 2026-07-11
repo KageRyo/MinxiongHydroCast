@@ -1,0 +1,39 @@
+name: CWA Live Contract
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 1 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  cwa-rainfall:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Require CWA API secret
+        run: |
+          if [ -z "$CWA_API_KEY" ]; then
+            echo "::error::Repository secret CWA_API_KEY is required"
+            exit 1
+          fi
+
+      - name: Install service
+        run: python -m pip install .
+
+      - name: Validate live rain-gauge contract
+        run: floodcast-minxiong-cwa-rain-smoke --county 10010 --county-name 嘉義縣

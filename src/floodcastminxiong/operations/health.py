@@ -97,6 +97,7 @@ def refresh_dataset_health(
         refreshed["ready"] = False
         return refreshed
 
+    degradation_reasons = list(health.get("degradation_reasons", []))
     observed_at = str(health.get("observed_at", ""))
     try:
         age_minutes = max(0.0, (now - parse_timestamp(observed_at)).total_seconds() / 60)
@@ -106,6 +107,9 @@ def refresh_dataset_health(
     refreshed["age_minutes"] = round(age_minutes, 3) if age_minutes is not None else None
     if age_minutes is None or age_minutes > max_age_minutes:
         refreshed["state"] = "stale"
+        refreshed["ready"] = False
+    elif degradation_reasons:
+        refreshed["state"] = "degraded"
         refreshed["ready"] = False
     else:
         refreshed["state"] = "healthy"

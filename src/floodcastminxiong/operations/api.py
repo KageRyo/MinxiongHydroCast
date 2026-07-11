@@ -193,6 +193,7 @@ def dataset_payload(
         product_type=product_type,
         notice=PRODUCT_NOTICES[product_type],
         health=health,
+        source=details.get("source"),
         row_count=details["row_count"],
         records=store.read_dataset(latest, name),
     )
@@ -270,6 +271,18 @@ def metrics_payload(status: StatusResponse) -> str:
         lines.append(
             f'floodcastminxiong_dataset_state{{dataset="{name}",state="{state}"}} 1'
         )
+    lines.extend(
+        [
+            "# HELP floodcastminxiong_dataset_source_kind Active dataset source kind.",
+            "# TYPE floodcastminxiong_dataset_source_kind gauge",
+        ]
+    )
+    for name, details in sorted(status.datasets.items()):
+        if details.source is not None:
+            lines.append(
+                "floodcastminxiong_dataset_source_kind"
+                f'{{dataset="{name}",source_kind="{details.source.source_kind}"}} 1'
+            )
     return "\n".join(lines) + "\n"
 
 
@@ -460,7 +473,9 @@ OPERATOR_HTML = """<!doctype html>
         try {
           const payload = await getJson(path);
           document.getElementById(target + "-type").textContent =
-            "Source classification: " + payload.product_type;
+            "Source classification: " + payload.product_type + " / " +
+            (payload.source?.source_kind || "unknown") + " (" +
+            (payload.source?.outcome || "unknown") + ")";
           renderTable(document.getElementById(target), payload);
         }
         catch (error) { document.getElementById(target).innerHTML =

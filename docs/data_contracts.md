@@ -23,19 +23,40 @@ Required fields:
 - `排序`
 - `行政區`
 - `雨量站`
+- `雨量站代碼`
 - `水情時間`
 - `水情時間ISO`
 - `1小時累積雨量`
 - `1小時累積雨量mm`
 - `24小時累積雨量`
 - `24小時累積雨量mm`
+- `緯度`
+- `經度`
 - `資料產出時間`
 - `資料產出時間ISO`
 - `抓取時間`
 - `資料模式`
 - `資料來源`
 
-Future live data should add station IDs and WGS84 coordinates.
+The CWA `O-A0002-001` adapter populates the official station ID and WGS84 coordinates. Scraper
+fallback records retain these fields as empty rather than fabricating identifiers or coordinates.
+
+## Operational Source Provenance
+
+Every immutable operational dataset records:
+
+- `source_kind`: `api`, `scraper_fallback`, or `demo_fixture`
+- `outcome`: `ok`, `empty`, `stale`, or `fallback`
+- `authority`
+- `dataset_id`
+- `source_url` with credentials redacted
+- `fetched_at`
+- `schema_version`
+- `content_sha256`
+- optional `fallback_reason_kind` and `fallback_reason`
+
+`scraper_fallback` datasets are always degraded and never ready. Expected empty API products must
+use the explicit `empty` outcome; unexpected empty observation datasets fail the collection.
 
 ## Flood Sensors
 
