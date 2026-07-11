@@ -93,6 +93,7 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Add an operator view that separates official-source data from experimental predictions.
 - [x] Add systemd templates for a persistent collector timer and supervised localhost API.
 - [x] Add an auditable seven-day shadow gate requiring reviewed heavy-rain coverage.
+- [x] Add a provenance-backed Minxiong flood-label audit and minimum class-coverage gate.
 - [ ] Publish forecast grids and risk features after their model/data gates pass.
 - [ ] Backtest on multiple independent events and calibrate thresholds with local flood labels.
 - [ ] Run a shadow deployment through at least one heavy-rain period before enabling notifications.

@@ -113,6 +113,19 @@ The default gate requires seven days, 900 live attempts, 99% collection success,
 no gap over 30 minutes, intact snapshots, and at least one continuously covered heavy-rain period.
 Passing this gate does not enable notifications; local model-label and delivery gates remain.
 
+Audit reviewed Minxiong flood-event labels before using them for model training:
+
+```bash
+floodcast-minxiong-label-audit \
+  --manifest /path/to/reviewed_flood_labels.json \
+  --output data/processed/flood_label_audit.json \
+  --require-training-ready
+```
+
+The tracked `data/samples/flood_labels.example.json` is an unconfirmed schema example and is
+deliberately rejected. The default training gate requires at least 10 confirmed flood events and
+20 confirmed non-flood events with non-overlapping windows and source/reviewer provenance.
+
 Run the local demo pipeline for installation and schema checks only:
 
 ```bash

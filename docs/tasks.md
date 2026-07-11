@@ -111,6 +111,8 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
       references.
 - [ ] Add Minxiong/Chiayi feature tables for rainfall, QPE accumulation, sensor status, and
       township/village context.
+- [x] Define and audit provenance-backed Minxiong positive/negative flood labels.
+- [ ] Collect enough confirmed labels to pass the 10-positive/20-negative training gate.
 - [ ] Evaluate `RainfallThresholdRiskScorer` on real event windows.
 - [ ] Add LightGBM/XGBoost only after labels and feature tables are stable.
 

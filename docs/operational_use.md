@@ -116,6 +116,24 @@ The report is atomically stored as `shadow_report.json` in the operations store 
 API and metrics endpoint. `notification_allowed` remains false even when the shadow criteria pass,
 because notification delivery and local model-label gates are separate unfinished requirements.
 
+## Local Flood Labels
+
+Real Minxiong flood labels must be kept outside tracked demo data. Start from
+`data/samples/flood_labels.example.json`, replace every placeholder with reviewed evidence, and
+audit the result:
+
+```bash
+floodcast-minxiong-label-audit \
+  --manifest /var/lib/floodcast-minxiong/reviewed_flood_labels.json \
+  --output /var/lib/floodcast-minxiong/flood_label_audit.json \
+  --require-training-ready
+```
+
+Confirmed labels require a unique event ID, a non-overlapping Minxiong time window, a boolean
+observed outcome, an allowed evidence type, a source reference, and reviewer identity/time. The
+default model-training gate requires 10 positive and 20 negative confirmed events. Unconfirmed
+examples and demo threshold events do not count.
+
 ## Linux Service Supervision
 
 Templates under `deploy/systemd/` provide:

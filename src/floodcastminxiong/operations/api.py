@@ -194,7 +194,8 @@ def shadow_payload(store: SnapshotStore) -> dict[str, Any]:
             "notification_allowed": False,
             "notification_blockers": [
                 "shadow report has not been generated",
-                "notification delivery and local model-label gates are not implemented",
+                "notification delivery is not implemented and local model-label gates "
+                "are not satisfied",
             ],
         }
     return {

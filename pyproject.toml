@@ -44,6 +44,7 @@ floodcast-minxiong-cwa-event-plan = "floodcastminxiong.ingestion.cwa_event_colle
 floodcast-minxiong-cwa-grid-inspect = "floodcastminxiong.ingestion.cwa_grid:main"
 floodcast-minxiong-cwa-history-list = "floodcastminxiong.ingestion.cwa_history:main"
 floodcast-minxiong-locations = "floodcastminxiong.pipelines.location_reference:main"
+floodcast-minxiong-label-audit = "floodcastminxiong.validation.flood_labels:main"
 floodcast-minxiong-nowcastnet-smoke = "floodcastminxiong.pipelines.nowcastnet_smoke:main"
 floodcast-minxiong-operations = "floodcastminxiong.operations.collector:main"
 floodcast-minxiong-serve = "floodcastminxiong.operations.api:main"

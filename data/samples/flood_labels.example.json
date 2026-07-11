@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "labels": [
+    {
+      "event_id": "replace_with_real_event_id",
+      "township": "民雄鄉",
+      "start_at": "2026-07-01T00:00:00+08:00",
+      "end_at": "2026-07-01T06:00:00+08:00",
+      "observed_flood": true,
+      "source_type": "official_report",
+      "source_reference": "replace with official report URL or document reference",
+      "reviewed_by": "replace with reviewer identity",
+      "reviewed_at": "2026-07-02T09:00:00+08:00",
+      "confirmed": false,
+      "notes": "Example only. Unconfirmed labels are rejected by the audit."
+    }
+  ]
+}

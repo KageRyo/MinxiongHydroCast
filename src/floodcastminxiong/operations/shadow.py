@@ -191,7 +191,10 @@ def evaluate_shadow(
         "shadow_gate_passed": shadow_gate_passed,
         "notification_allowed": False,
         "notification_blockers": sorted(set(reasons))
-        + ["notification delivery and local model-label gates are not implemented"],
+        + [
+            "notification delivery is not implemented and local model-label gates "
+            "are not satisfied"
+        ],
     }
 
 
