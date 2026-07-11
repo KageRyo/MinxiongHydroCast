@@ -9,9 +9,9 @@ from pathlib import Path
 from playwright.sync_api import TimeoutError as PlaywrightTimeout
 from playwright.sync_api import sync_playwright
 
-from floodcasttw.config import get_settings
-from floodcasttw.io.csv_utils import write_csv
-from floodcasttw.io.run_summary import (
+from floodcastminxiong.config import get_settings
+from floodcastminxiong.io.csv_utils import write_csv
+from floodcastminxiong.io.run_summary import (
     DEFAULT_RUN_LOG_PATH,
     build_run_summary,
     default_run_summary_path,

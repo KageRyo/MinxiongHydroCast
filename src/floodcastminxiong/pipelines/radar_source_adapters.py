@@ -10,12 +10,12 @@ from typing import Protocol
 
 import numpy as np
 
-from floodcasttw.ingestion.cwa_grid import (
+from floodcastminxiong.ingestion.cwa_grid import (
     CwaGridInspection,
     check_cwa_grid_sequence,
     extract_cwa_grid_values,
 )
-from floodcasttw.models.radar_tensor import RadarTensorSpec
+from floodcastminxiong.models.radar_tensor import RadarTensorSpec
 
 CSV_PIXEL_GRID = "csv_pixel_grid"
 CWA_OPEN_DATA_GRID = "cwa_opendata_grid"

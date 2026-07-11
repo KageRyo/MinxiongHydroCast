@@ -6,15 +6,15 @@ import argparse
 import json
 from pathlib import Path
 
-from floodcasttw.io.run_summary import (
+from floodcastminxiong.io.run_summary import (
     DEFAULT_RUN_LOG_PATH,
     build_run_summary,
     default_run_summary_path,
     record_run,
     start_run,
 )
-from floodcasttw.models.assets import write_manifest
-from floodcasttw.models.nowcastnet_adapter import NowcastNetAdapter, NowcastNetConfig
+from floodcastminxiong.models.assets import write_manifest
+from floodcastminxiong.models.nowcastnet_adapter import NowcastNetAdapter, NowcastNetConfig
 
 PIPELINE_NAME = "nowcastnet_smoke"
 

@@ -11,18 +11,18 @@ fixture, CWA/QPESUMS archives, or another confirmed radar source.
 pipeline.
 
 ```bash
-floodcasttw-radar-tensor-convert \
+floodcast-minxiong-radar-tensor-convert \
   --source-format csv_pixel_grid \
   --input data/samples/radar_pixels.csv \
   --output data/processed/radar_tensor_sample.npz
 ```
 
 `cwa_opendata_grid` reads CWA Open Data grid JSON/XML files or a collection manifest produced by
-`floodcasttw-cwa-event-plan --download`. It validates cadence, grid consistency, CRS, units,
+`floodcast-minxiong-cwa-event-plan --download`. It validates cadence, grid consistency, CRS, units,
 timestamps, and nodata encoding before emitting the tensor archive.
 
 ```bash
-floodcasttw-radar-tensor-convert \
+floodcast-minxiong-radar-tensor-convert \
   --source-format cwa_opendata_grid \
   --input data/processed/cwa_event_collection.json \
   --input-length 2 \
@@ -46,6 +46,6 @@ Add a new adapter only after the radar source manifest is confirmed. A productio
 - preserve event/source metadata in the tensor archive
 - fail loudly on missing frames, duplicate pixels, or incompatible grids
 
-Do not read `CWA_API_KEY` inside the adapter. Downloading belongs in `floodcasttw-cwa-download` or
-`floodcasttw-cwa-event-plan --download`; the adapter consumes already downloaded local files and
+Do not read `CWA_API_KEY` inside the adapter. Downloading belongs in `floodcast-minxiong-cwa-download` or
+`floodcast-minxiong-cwa-event-plan --download`; the adapter consumes already downloaded local files and
 redacted manifests.

@@ -1,14 +1,14 @@
 import csv
 from pathlib import Path
 
-from floodcasttw.spatial.admin import admin_unit_key, extract_admin_parts
-from floodcasttw.spatial.coordinates import (
+from floodcastminxiong.spatial.admin import admin_unit_key, extract_admin_parts
+from floodcastminxiong.spatial.coordinates import (
     is_valid_taiwan_wgs84,
     normalize_coordinates,
     twd97_tm2_to_wgs84,
 )
-from floodcasttw.spatial.grid import CHIAYI_COUNTY_GRID, MINXIONG_GRID
-from floodcasttw.spatial.locations import (
+from floodcastminxiong.spatial.grid import CHIAYI_COUNTY_GRID, MINXIONG_GRID
+from floodcastminxiong.spatial.locations import (
     build_location_reference,
     flood_sensor_location,
     rain_gauge_location,

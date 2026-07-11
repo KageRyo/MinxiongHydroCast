@@ -12,9 +12,9 @@ from pathlib import Path
 
 import numpy as np
 
-from floodcasttw.models.assets import AssetManifest, default_nowcastnet_manifest
-from floodcasttw.models.baselines import PersistenceNowcaster
-from floodcasttw.models.radar_tensor import RadarTensorSpec, validate_radar_tensor
+from floodcastminxiong.models.assets import AssetManifest, default_nowcastnet_manifest
+from floodcastminxiong.models.baselines import PersistenceNowcaster
+from floodcastminxiong.models.radar_tensor import RadarTensorSpec, validate_radar_tensor
 
 
 @dataclass

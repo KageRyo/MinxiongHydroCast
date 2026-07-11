@@ -1,7 +1,7 @@
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
-from floodcasttw.ingestion.cwa_file_api import (
+from floodcastminxiong.ingestion.cwa_file_api import (
     CwaDownloadRequest,
     download_cwa_file,
     dry_run_result,

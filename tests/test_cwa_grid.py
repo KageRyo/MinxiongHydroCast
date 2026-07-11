@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from floodcasttw.ingestion.cwa_grid import check_cwa_grid_sequence, inspect_cwa_grid_file
+from floodcastminxiong.ingestion.cwa_grid import check_cwa_grid_sequence, inspect_cwa_grid_file
 
 
 def write_sample_grid(

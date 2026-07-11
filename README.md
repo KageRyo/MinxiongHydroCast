@@ -6,7 +6,7 @@
 [![Style: Ruff](https://img.shields.io/badge/style-ruff-46a6ff)](https://docs.astral.sh/ruff/)
 [![Data](https://img.shields.io/badge/data-demo%20safe-orange)](data/README.md)
 
-Taiwan flood-risk data pipeline and nowcasting baseline toolkit.
+Minxiong-first flood-risk data pipeline and rainfall-nowcasting toolkit.
 
 FloodCastMinxiong is a Minxiong-first flood-risk data and rainfall-nowcasting toolkit. Its
 operational target is Minxiong Township, while Taiwan-wide radar data is used as upstream training
@@ -16,7 +16,7 @@ warning system.
 ## What This Repo Does
 
 - Collect WRA rainfall alert thresholds for Chiayi County.
-- Produce explicit demo data for rain gauges and flood sensors while live parsers are developed.
+- Ingest live rain-gauge and flood-sensor observations with explicit demo fixtures for tests.
 - Parse shelter DOCX files into structured CSV without committing source documents.
 - Keep raw, interim, processed, and sample data separate.
 - Build stable location references for gauges, sensors, shelters, pumping stations, and risk areas.
@@ -37,17 +37,11 @@ It does not yet provide a continuously running service, public API, operator das
 validated public flood warning. See [docs/operational_use.md](docs/operational_use.md) for supported
 operating profiles, outputs, and the gates required before public deployment.
 
-## Naming And Compatibility
-
-The product and repository name is **FloodCastMinxiong**. The Python package, environment variables,
-and installed `floodcasttw-*` commands remain unchanged in this release to avoid breaking existing
-automation. They are compatibility identifiers, not a claim of Taiwan-wide operational coverage.
-
 ## Quick Start
 
 ```bash
 conda env create -f environment.yml
-conda activate floodcasttw
+conda activate floodcast-minxiong
 python -m playwright install chromium
 ```
 
@@ -70,20 +64,20 @@ Run rainfall alerts:
 
 ```bash
 # Demo data
-floodcasttw-rainfall-alerts --mode demo
+floodcast-minxiong-rainfall-alerts --mode demo
 
 # Live WRA page for Chiayi County, county=10010
-floodcasttw-rainfall-alerts --mode live --county 10010
+floodcast-minxiong-rainfall-alerts --mode live --county 10010
 ```
 
 Run rain gauge and flood-sensor ingestion:
 
 ```bash
 # Demo data
-floodcasttw-hydrology --mode demo
+floodcast-minxiong-hydrology --mode demo
 
 # Live WRA monitor pages for Chiayi County
-floodcasttw-hydrology --mode live --county 10010 \
+floodcast-minxiong-hydrology --mode live --county 10010 \
   --debug-dir data/raw/debug \
   --summary-output data/processed/hydrology_run_summary.json
 ```
@@ -91,13 +85,13 @@ floodcasttw-hydrology --mode live --county 10010 \
 Parse a local shelter DOCX file:
 
 ```bash
-floodcasttw-shelters --input data/raw/shelters.docx --output data/processed/shelters.csv
+floodcast-minxiong-shelters --input data/raw/shelters.docx --output data/processed/shelters.csv
 ```
 
 Build a location reference table:
 
 ```bash
-floodcasttw-locations \
+floodcast-minxiong-locations \
   --rain data/processed/rain_monitor.csv \
   --flood data/processed/flood_sensors.csv \
   --output data/processed/location_reference.csv
@@ -106,7 +100,7 @@ floodcasttw-locations \
 Evaluate baseline models:
 
 ```bash
-floodcasttw-evaluate-baselines \
+floodcast-minxiong-evaluate-baselines \
   --events data/samples/flood_risk_events.csv \
   --output data/processed/baseline_evaluation.json
 ```
@@ -114,7 +108,7 @@ floodcasttw-evaluate-baselines \
 Check NowcastNet migration prerequisites:
 
 ```bash
-floodcasttw-nowcastnet-smoke \
+floodcast-minxiong-nowcastnet-smoke \
   --code-dir data/external/nowcastnet/code \
   --checkpoint data/external/checkpoints/nowcastnet_tw.pt \
   --radar-dataset data/external/radar/taiwan \
@@ -124,7 +118,7 @@ floodcasttw-nowcastnet-smoke \
 Check whether a radar data source is ready for tensor conversion:
 
 ```bash
-floodcasttw-radar-source-check \
+floodcast-minxiong-radar-source-check \
   --manifest data/samples/radar_source_manifest.json \
   --output data/processed/radar_source_check.json
 ```
@@ -136,14 +130,14 @@ local env files only and keep downloaded files under ignored `data/external/` pa
 Dry-run a CWA file API download without a key or network fetch:
 
 ```bash
-floodcasttw-cwa-download --dry-run --data-id O-A0059-001
+floodcast-minxiong-cwa-download --dry-run --data-id O-A0059-001
 ```
 
 Download a local sample after setting `CWA_API_KEY`:
 
 ```bash
 export CWA_API_KEY  # set this locally first
-floodcasttw-cwa-download \
+floodcast-minxiong-cwa-download \
   --data-id O-A0059-001 \
   --output-dir data/external/radar
 ```
@@ -154,7 +148,7 @@ and `format` as query parameters. It redacts the key from run summaries and logs
 Inspect downloaded CWA grid samples:
 
 ```bash
-floodcasttw-cwa-grid-inspect \
+floodcast-minxiong-cwa-grid-inspect \
   data/external/radar/cwa_o_a0059_001/O-A0059-001.json \
   data/external/radar/cwa_o_b0045_001/O-B0045-001.json
 ```
@@ -162,13 +156,13 @@ floodcasttw-cwa-grid-inspect \
 Dry-run the inferred CWA historyAPI file-list endpoint:
 
 ```bash
-floodcasttw-cwa-history-list --dry-run --data-id O-A0059-001
+floodcast-minxiong-cwa-history-list --dry-run --data-id O-A0059-001
 ```
 
 Download a specific CWA history `getData` timestamp into ignored local storage:
 
 ```bash
-floodcasttw-cwa-history-data-download \
+floodcast-minxiong-cwa-history-data-download \
   --data-id O-A0002-001 \
   --data-time 2026-07-02T15:30:00+08:00 \
   --output data/external/gauges/events/O-A0002-001_20260702153000.xml \
@@ -181,7 +175,7 @@ Use this for event-time rain-gauge captures and QPE availability probes. The dow
 After the history endpoint is live-verified, build a multi-frame event plan:
 
 ```bash
-floodcasttw-cwa-event-plan \
+floodcast-minxiong-cwa-event-plan \
   --history-index data/processed/cwa_history_index.json \
   --event-id chiayi_20260706_evening \
   --start-time 2026-07-06T18:00:00+08:00 \
@@ -191,7 +185,7 @@ floodcasttw-cwa-event-plan \
 Download the selected event frames into ignored local storage:
 
 ```bash
-floodcasttw-cwa-event-plan \
+floodcast-minxiong-cwa-event-plan \
   --history-index data/processed/cwa_history_index.json \
   --event-id chiayi_20260706_evening \
   --start-time 2026-07-06T18:00:00+08:00 \
@@ -210,7 +204,7 @@ Summarize a downloaded CWA event collection for local Chiayi/Minxiong and Taiwan
 threshold evidence:
 
 ```bash
-floodcasttw-radar-event-summary \
+floodcast-minxiong-radar-event-summary \
   --collection data/processed/cwa_event_collection.json \
   --output data/processed/cwa_event_summary.json
 ```
@@ -228,7 +222,7 @@ Validate CWA 1-hour QPE against rain gauges after collecting local `O-B0045-001`
 `O-A0002-001` captures for the same window:
 
 ```bash
-floodcasttw-qpe-gauge-validate \
+floodcast-minxiong-qpe-gauge-validate \
   --qpe-grid data/external/radar/events/<event>/O-B0045-001.json \
   --gauge-json data/external/gauges/events/<event>/O-A0002-001.json \
   --event-id <event_id> \
@@ -243,7 +237,7 @@ gauge-vs-QPE reports remain blocked until QPE grids are captured or an official 
 Check event-based train/validation/test splits:
 
 ```bash
-floodcasttw-event-split-check \
+floodcast-minxiong-event-split-check \
   --manifest data/samples/event_split_manifest.json \
   --output data/processed/event_split_check.json
 ```
@@ -251,7 +245,7 @@ floodcasttw-event-split-check \
 Convert the tiny radar-like fixture into the model tensor archive format:
 
 ```bash
-floodcasttw-radar-tensor-convert \
+floodcast-minxiong-radar-tensor-convert \
   --source-format csv_pixel_grid \
   --input data/samples/radar_pixels.csv \
   --output data/processed/radar_tensor_sample.npz
@@ -260,7 +254,7 @@ floodcasttw-radar-tensor-convert \
 Convert a CWA event collection manifest into a tensor archive:
 
 ```bash
-floodcasttw-radar-tensor-convert \
+floodcast-minxiong-radar-tensor-convert \
   --source-format cwa_opendata_grid \
   --input data/processed/cwa_event_collection.json \
   --input-length 2 \
@@ -273,7 +267,7 @@ For longer event windows, emit sliding-window tensors by adding `--window-stride
 For example, 6 input frames and 6 target frames create 10- to 60-minute lead-time samples:
 
 ```bash
-floodcasttw-radar-tensor-convert \
+floodcast-minxiong-radar-tensor-convert \
   --source-format cwa_opendata_grid \
   --input data/processed/cwa_event_collection_taiwan_widespread_20260628_afternoon_evening.json \
   --event-id cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening \
@@ -287,7 +281,7 @@ floodcasttw-radar-tensor-convert \
 Evaluate the tensor archive with the persistence baseline:
 
 ```bash
-floodcasttw-tensor-baseline-evaluate \
+floodcast-minxiong-tensor-baseline-evaluate \
   --archive data/processed/radar_tensor_sample.npz \
   --output data/processed/tensor_baseline_evaluation.json
 ```
@@ -295,7 +289,7 @@ floodcasttw-tensor-baseline-evaluate \
 Train the optional PyTorch baseline after installing a CUDA-enabled PyTorch build:
 
 ```bash
-floodcasttw-train-torch-baseline \
+floodcast-minxiong-train-torch-baseline \
   --archive data/processed/cwa_radar_tensor_sample.npz \
   --output-dir data/external/checkpoints/tiny_unet_cwa_2gpu_masked_smoke \
   --device cuda \
@@ -313,7 +307,7 @@ loss. For the next strong-echo experiment, add `--loss-function weighted_mse`,
 Compare the Tiny U-Net checkpoint against persistence on the same valid pixels:
 
 ```bash
-floodcasttw-torch-baseline-evaluate \
+floodcast-minxiong-torch-baseline-evaluate \
   --archive data/processed/cwa_radar_tensor_sample.npz \
   --checkpoint data/external/checkpoints/tiny_unet_cwa_2gpu_masked_smoke/tiny_unet_nowcaster.pt \
   --event-threshold 35 \
@@ -339,7 +333,7 @@ FloodCastMinxiong/
 │   └── samples/      # tracked demo-safe samples
 ├── docs/
 ├── scripts/
-├── src/floodcasttw/
+├── src/floodcastminxiong/
 │   ├── ingestion/
 │   ├── io/
 │   ├── models/

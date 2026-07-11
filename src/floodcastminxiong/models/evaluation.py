@@ -10,8 +10,8 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 
-from floodcasttw.models.baselines import PersistenceNowcaster, RainfallThresholdRiskScorer
-from floodcasttw.models.metrics import binary_event_metrics, rmse
+from floodcastminxiong.models.baselines import PersistenceNowcaster, RainfallThresholdRiskScorer
+from floodcastminxiong.models.metrics import binary_event_metrics, rmse
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 

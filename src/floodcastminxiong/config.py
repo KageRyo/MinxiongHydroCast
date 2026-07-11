@@ -22,8 +22,8 @@ class Settings:
 
 def get_settings() -> Settings:
     return Settings(
-        data_dir=Path(os.getenv("FLOODCASTTW_DATA_DIR", "data")),
-        log_level=os.getenv("FLOODCASTTW_LOG_LEVEL", "INFO"),
+        data_dir=Path(os.getenv("FLOODCASTMINXIONG_DATA_DIR", "data")),
+        log_level=os.getenv("FLOODCASTMINXIONG_LOG_LEVEL", "INFO"),
         wra_base_url=os.getenv("WRA_BASE_URL", "https://fhy.wra.gov.tw/fhyv2"),
         wra_api_key=os.getenv("WRA_API_KEY", ""),
         cwa_codis_url=os.getenv("CWA_CODIS_URL", "https://codis.cwa.gov.tw/StationData"),

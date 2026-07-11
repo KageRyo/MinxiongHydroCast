@@ -36,7 +36,7 @@ sample verifies the pipeline only; it is not a benchmark event.
 ## Check Command
 
 ```bash
-floodcasttw-event-split-check \
+floodcast-minxiong-event-split-check \
   --manifest data/samples/event_split_manifest.json \
   --output data/processed/event_split_check.json
 ```
@@ -44,7 +44,7 @@ floodcasttw-event-split-check \
 Use `--require-ok` in training automation:
 
 ```bash
-floodcasttw-event-split-check --require-ok
+floodcast-minxiong-event-split-check --require-ok
 ```
 
 The checker verifies:
