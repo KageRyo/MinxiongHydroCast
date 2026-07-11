@@ -6,6 +6,7 @@ from urllib.request import urlopen
 from zoneinfo import ZoneInfo
 
 import pytest
+from pydantic import ValidationError
 
 from floodcastminxiong.operations.api import (
     build_server,
@@ -15,6 +16,13 @@ from floodcastminxiong.operations.api import (
     status_payload,
 )
 from floodcastminxiong.operations.collector import run_collection
+from floodcastminxiong.operations.schemas import (
+    DatasetResponse,
+    ForecastResponse,
+    HealthResponse,
+    ShadowResponse,
+    StatusResponse,
+)
 from floodcastminxiong.operations.snapshot_store import SnapshotStore
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
@@ -44,15 +52,36 @@ def request_json(base_url: str, path: str) -> dict[str, object]:
 
 def test_metrics_payload_exposes_readiness_attempt_and_dataset_age():
     metrics = metrics_payload(
-        {
-            "ready": True,
-            "latest_attempt": {"status": "ok"},
-            "datasets": {
+        StatusResponse(
+            state="healthy",
+            ready=True,
+            checked_at="2026-07-11T10:00:00+08:00",
+            latest_snapshot=None,
+            latest_attempt={
+                "snapshot_id": "snapshot-1",
+                "status": "ok",
+                "completed_at": "2026-07-11T10:00:00+08:00",
+            },
+            datasets={
                 "rain_gauges": {
-                    "health": {"state": "healthy", "age_minutes": 4.5}
+                    "product_type": "official_observation",
+                    "path": "datasets/rain_gauges.csv",
+                    "row_count": 1,
+                    "fields": ["observed_at"],
+                    "schema_sha256": "0" * 64,
+                    "sha256": "1" * 64,
+                    "health": {
+                        "state": "healthy",
+                        "ready": True,
+                        "observed_at": "2026-07-11T09:55:30+08:00",
+                        "age_minutes": 4.5,
+                        "max_age_minutes": 30.0,
+                        "schema_sha256": "0" * 64,
+                        "schema_errors": [],
+                    },
                 }
             },
-        }
+        )
     )
 
     assert "floodcastminxiong_ready 1" in metrics
@@ -67,9 +96,9 @@ def test_shadow_payload_defaults_to_blocked_and_exports_metrics(tmp_path):
     report = shadow_payload(store)
     metrics = shadow_metrics_payload(report)
 
-    assert report["state"] == "not_evaluated"
-    assert report["shadow_gate_passed"] is False
-    assert report["notification_allowed"] is False
+    assert report.state == "not_evaluated"
+    assert report.shadow_gate_passed is False
+    assert report.notification_allowed is False
     assert "floodcastminxiong_shadow_gate_passed 0" in metrics
     assert "floodcastminxiong_notification_allowed 0" in metrics
 
@@ -88,10 +117,10 @@ def test_status_reports_collector_error_without_hiding_last_snapshot(tmp_path):
 
     status = status_payload(store, now=failed_at)
 
-    assert status["state"] == "collector_error"
-    assert status["ready"] is False
-    assert status["latest_snapshot"]["snapshot_id"] == latest_snapshot_id
-    assert status["latest_attempt"]["failure_reason"] == "source unavailable"
+    assert status.state == "collector_error"
+    assert status.ready is False
+    assert status.latest_snapshot.snapshot_id == latest_snapshot_id
+    assert status.latest_attempt.failure_reason == "source unavailable"
 
 
 def test_status_reports_corrupt_pointer_as_storage_error(tmp_path):
@@ -104,9 +133,9 @@ def test_status_reports_corrupt_pointer_as_storage_error(tmp_path):
         now=datetime(2026, 7, 11, 10, 0, tzinfo=TAIPEI_TZ),
     )
 
-    assert status["state"] == "storage_error"
-    assert status["ready"] is False
-    assert "invalid snapshot pointer" in status["failure_reason"]
+    assert status.state == "storage_error"
+    assert status.ready is False
+    assert "invalid snapshot pointer" in status.failure_reason
 
 
 def test_status_reports_tampered_dataset_as_storage_error(tmp_path):
@@ -121,9 +150,58 @@ def test_status_reports_tampered_dataset_as_storage_error(tmp_path):
         now=datetime(2026, 7, 11, 10, 0, tzinfo=TAIPEI_TZ),
     )
 
-    assert status["state"] == "storage_error"
-    assert status["ready"] is False
-    assert "dataset checksum mismatch" in status["failure_reason"]
+    assert status.state == "storage_error"
+    assert status.ready is False
+    assert "dataset checksum mismatch" in status.failure_reason
+
+
+def test_status_reports_invalid_response_contract_as_storage_error():
+    class InvalidStatusStore:
+        def read_latest(self):
+            return {
+                "snapshot_id": "snapshot-1",
+                "mode": "unexpected",
+                "completed_at": "2026-07-11T10:00:00+08:00",
+                "datasets": {},
+            }
+
+        def read_latest_attempt(self):
+            return None
+
+        def verify_snapshot(self, _manifest):
+            return []
+
+    status = status_payload(
+        InvalidStatusStore(),
+        now=datetime(2026, 7, 11, 10, 0, tzinfo=TAIPEI_TZ),
+    )
+
+    assert status.state == "storage_error"
+    assert status.ready is False
+    assert "invalid snapshot response contract" in status.failure_reason
+
+
+def test_dataset_response_rejects_row_count_mismatch():
+    with pytest.raises(ValidationError, match="row_count must match"):
+        DatasetResponse(
+            snapshot_id="snapshot-1",
+            generated_at="2026-07-11T10:00:00+08:00",
+            mode="live",
+            dataset="rain_gauges",
+            product_type="official_observation",
+            notice="Validated observation.",
+            health={
+                "state": "healthy",
+                "ready": True,
+                "observed_at": "2026-07-11T10:00:00+08:00",
+                "age_minutes": 0.0,
+                "max_age_minutes": 30.0,
+                "schema_sha256": "0" * 64,
+                "schema_errors": [],
+            },
+            row_count=2,
+            records=[{"station": "Minxiong"}],
+        )
 
 
 def test_api_serves_status_classified_data_and_operator_view(tmp_path):
@@ -132,36 +210,47 @@ def test_api_serves_status_classified_data_and_operator_view(tmp_path):
     thread.start()
     base_url = f"http://127.0.0.1:{server.server_port}"
     try:
-        assert request_json(base_url, "/healthz") == {"status": "ok"}
-        status = request_json(base_url, "/api/v1/status")
-        assert status["state"] == "demo"
-        assert status["ready"] is False
+        health = HealthResponse.model_validate(request_json(base_url, "/healthz"))
+        assert health.status == "ok"
+        status = StatusResponse.model_validate(request_json(base_url, "/api/v1/status"))
+        assert status.state == "demo"
+        assert status.ready is False
 
-        alerts = request_json(base_url, "/api/v1/official-alerts/rainfall")
-        assert alerts["product_type"] == "demo_fixture"
-        assert alerts["row_count"] == 2
-        assert "Not live or official data" in alerts["notice"]
+        alerts = DatasetResponse.model_validate(
+            request_json(base_url, "/api/v1/official-alerts/rainfall")
+        )
+        assert alerts.product_type == "demo_fixture"
+        assert alerts.row_count == 2
+        assert "Not live or official data" in alerts.notice
 
-        observations = request_json(base_url, "/api/v1/observations/rain-gauges")
-        assert observations["product_type"] == "demo_fixture"
-        assert observations["row_count"] == 2
+        observations = DatasetResponse.model_validate(
+            request_json(base_url, "/api/v1/observations/rain-gauges")
+        )
+        assert observations.product_type == "demo_fixture"
+        assert observations.row_count == 2
 
-        features = request_json(base_url, "/api/v1/features/minxiong")
-        assert features["product_type"] == "demo_fixture"
-        assert features["records"][0]["township"] == "民雄鄉"
-        assert features["records"][0]["qpe_available"] == "false"
+        features = DatasetResponse.model_validate(
+            request_json(base_url, "/api/v1/features/minxiong")
+        )
+        assert features.product_type == "demo_fixture"
+        assert features.records[0]["township"] == "民雄鄉"
+        assert features.records[0]["qpe_available"] == "false"
 
-        locations = request_json(base_url, "/api/v1/locations")
-        assert locations["product_type"] == "demo_fixture"
-        assert locations["row_count"] == 4
+        locations = DatasetResponse.model_validate(request_json(base_url, "/api/v1/locations"))
+        assert locations.product_type == "demo_fixture"
+        assert locations.row_count == 4
 
-        forecast = request_json(base_url, "/api/v1/experimental-forecasts")
-        assert forecast["available"] is False
-        assert forecast["product_type"] == "experimental_forecast"
+        forecast = ForecastResponse.model_validate(
+            request_json(base_url, "/api/v1/experimental-forecasts")
+        )
+        assert forecast.available is False
+        assert forecast.product_type == "experimental_forecast"
 
-        shadow = request_json(base_url, "/api/v1/shadow-readiness")
-        assert shadow["state"] == "not_evaluated"
-        assert shadow["notification_allowed"] is False
+        shadow = ShadowResponse.model_validate(
+            request_json(base_url, "/api/v1/shadow-readiness")
+        )
+        assert shadow.state == "not_evaluated"
+        assert shadow.notification_allowed is False
 
         with urlopen(f"{base_url}/metrics", timeout=3) as response:
             metrics = response.read().decode("utf-8")

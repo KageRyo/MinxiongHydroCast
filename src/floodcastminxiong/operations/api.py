@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 from datetime import datetime
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -12,8 +11,19 @@ from typing import Any
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
+from pydantic import ValidationError
+
 from floodcastminxiong.operations.collector import DEFAULT_STORE
 from floodcastminxiong.operations.health import aggregate_health, refresh_dataset_health
+from floodcastminxiong.operations.schemas import (
+    DatasetResponse,
+    ErrorResponse,
+    ForecastResponse,
+    HealthResponse,
+    ResponseSchema,
+    ShadowResponse,
+    StatusResponse,
+)
 from floodcastminxiong.operations.snapshot_store import SnapshotStore, SnapshotStoreError
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
@@ -53,45 +63,60 @@ def status_payload(
     store: SnapshotStore,
     *,
     now: datetime | None = None,
-) -> dict[str, Any]:
+) -> StatusResponse:
     now = now or datetime.now(TAIPEI_TZ)
+    try:
+        return _validated_status_payload(store, now=now)
+    except (KeyError, TypeError, ValueError, ValidationError) as exc:
+        return StatusResponse(
+            state="storage_error",
+            ready=False,
+            checked_at=now.isoformat(timespec="seconds"),
+            failure_reason=f"invalid snapshot response contract: {exc}",
+            latest_snapshot=None,
+            latest_attempt=None,
+            datasets={},
+        )
+
+
+def _validated_status_payload(store: SnapshotStore, *, now: datetime) -> StatusResponse:
     try:
         latest = store.read_latest()
         attempt = store.read_latest_attempt()
     except SnapshotStoreError as exc:
-        return {
-            "state": "storage_error",
-            "ready": False,
-            "checked_at": now.isoformat(timespec="seconds"),
-            "failure_reason": str(exc),
-            "latest_snapshot": None,
-            "latest_attempt": None,
-            "datasets": {},
-        }
+        return StatusResponse(
+            state="storage_error",
+            ready=False,
+            checked_at=now.isoformat(timespec="seconds"),
+            failure_reason=str(exc),
+            latest_snapshot=None,
+            latest_attempt=None,
+            datasets={},
+        )
     if latest is None:
         state = "collector_error" if attempt and attempt.get("status") == "error" else "uninitialized"
-        return {
-            "state": state,
-            "ready": False,
-            "checked_at": now.isoformat(timespec="seconds"),
-            "latest_snapshot": None,
-            "latest_attempt": attempt,
-            "datasets": {},
-        }
+        return StatusResponse(
+            state=state,
+            ready=False,
+            checked_at=now.isoformat(timespec="seconds"),
+            latest_snapshot=None,
+            latest_attempt=attempt,
+            datasets={},
+        )
 
     integrity_errors = store.verify_snapshot(latest)
     if integrity_errors:
-        return {
-            "state": "storage_error",
-            "ready": False,
-            "checked_at": now.isoformat(timespec="seconds"),
-            "failure_reason": "; ".join(integrity_errors),
-            "latest_snapshot": {
+        return StatusResponse(
+            state="storage_error",
+            ready=False,
+            checked_at=now.isoformat(timespec="seconds"),
+            failure_reason="; ".join(integrity_errors),
+            latest_snapshot={
                 "snapshot_id": latest["snapshot_id"],
                 "mode": latest["mode"],
                 "completed_at": latest["completed_at"],
             },
-            "latest_attempt": {
+            latest_attempt={
                 "snapshot_id": attempt["snapshot_id"],
                 "status": attempt["status"],
                 "completed_at": attempt["completed_at"],
@@ -99,8 +124,8 @@ def status_payload(
             }
             if attempt
             else None,
-            "datasets": latest.get("datasets", {}),
-        }
+            datasets=latest.get("datasets", {}),
+        )
 
     refreshed_datasets: dict[str, Any] = {}
     for name, details in latest.get("datasets", {}).items():
@@ -120,17 +145,17 @@ def status_payload(
         health["state"] = "collector_error"
         health["ready"] = False
 
-    return {
-        "state": health["state"],
-        "ready": health["ready"],
-        "checked_at": now.isoformat(timespec="seconds"),
-        "latest_snapshot": {
+    return StatusResponse(
+        state=health["state"],
+        ready=health["ready"],
+        checked_at=now.isoformat(timespec="seconds"),
+        latest_snapshot={
             "snapshot_id": latest["snapshot_id"],
             "mode": latest["mode"],
             "completed_at": latest["completed_at"],
             "health": health,
         },
-        "latest_attempt": {
+        latest_attempt={
             "snapshot_id": attempt["snapshot_id"],
             "status": attempt["status"],
             "completed_at": attempt["completed_at"],
@@ -138,8 +163,8 @@ def status_payload(
         }
         if attempt
         else None,
-        "datasets": refreshed_datasets,
-    }
+        datasets=refreshed_datasets,
+    )
 
 
 def dataset_payload(
@@ -147,7 +172,7 @@ def dataset_payload(
     name: str,
     *,
     now: datetime | None = None,
-) -> dict[str, Any]:
+) -> DatasetResponse:
     latest = store.read_latest()
     if latest is None:
         raise KeyError(name)
@@ -160,62 +185,66 @@ def dataset_payload(
         now=now or datetime.now(TAIPEI_TZ),
     )
     product_type = str(details["product_type"])
-    return {
-        "schema_version": 1,
-        "snapshot_id": latest["snapshot_id"],
-        "generated_at": latest["completed_at"],
-        "mode": latest["mode"],
-        "dataset": name,
-        "product_type": product_type,
-        "notice": PRODUCT_NOTICES[product_type],
-        "health": health,
-        "row_count": details["row_count"],
-        "records": store.read_dataset(latest, name),
-    }
+    return DatasetResponse(
+        snapshot_id=latest["snapshot_id"],
+        generated_at=latest["completed_at"],
+        mode=latest["mode"],
+        dataset=name,
+        product_type=product_type,
+        notice=PRODUCT_NOTICES[product_type],
+        health=health,
+        row_count=details["row_count"],
+        records=store.read_dataset(latest, name),
+    )
 
 
-def forecast_payload() -> dict[str, Any]:
-    return {
-        "schema_version": 1,
-        "available": False,
-        "product_type": "experimental_forecast",
-        "notice": PRODUCT_NOTICES["experimental_forecast"],
-        "reason": "No forecast has passed the model and shadow-deployment gates.",
-        "records": [],
-    }
+def forecast_payload() -> ForecastResponse:
+    return ForecastResponse(
+        notice=PRODUCT_NOTICES["experimental_forecast"],
+        reason="No forecast has passed the model and shadow-deployment gates.",
+    )
 
 
-def shadow_payload(store: SnapshotStore) -> dict[str, Any]:
+def shadow_payload(store: SnapshotStore) -> ShadowResponse:
     try:
         report = store.read_report("shadow_report.json")
     except SnapshotStoreError as exc:
-        return {
-            "state": "storage_error",
-            "shadow_gate_passed": False,
-            "notification_allowed": False,
-            "notification_blockers": [str(exc)],
-        }
+        return ShadowResponse(
+            state="storage_error",
+            shadow_gate_passed=False,
+            notification_allowed=False,
+            notification_blockers=[str(exc)],
+        )
     if report is None:
-        return {
-            "state": "not_evaluated",
-            "shadow_gate_passed": False,
-            "notification_allowed": False,
-            "notification_blockers": [
+        return ShadowResponse(
+            state="not_evaluated",
+            shadow_gate_passed=False,
+            notification_allowed=False,
+            notification_blockers=[
                 "shadow report has not been generated",
                 "notification delivery is not implemented and local model-label gates "
                 "are not satisfied",
             ],
-        }
-    return {
-        "state": "passed" if report.get("shadow_gate_passed") else "blocked",
-        **report,
-    }
+        )
+    try:
+        return ShadowResponse.model_validate(
+            {
+                **report,
+                "state": "passed" if report.get("shadow_gate_passed") else "blocked",
+            }
+        )
+    except ValidationError as exc:
+        return ShadowResponse(
+            state="storage_error",
+            shadow_gate_passed=False,
+            notification_allowed=False,
+            notification_blockers=[f"invalid shadow report: {exc.errors()[0]['msg']}"],
+        )
 
 
-def metrics_payload(status: dict[str, Any]) -> str:
-    ready = 1 if status["ready"] else 0
-    attempt = status.get("latest_attempt") or {}
-    attempt_ok = 1 if attempt.get("status") == "ok" else 0
+def metrics_payload(status: StatusResponse) -> str:
+    ready = 1 if status.ready else 0
+    attempt_ok = 1 if status.latest_attempt and status.latest_attempt.status == "ok" else 0
     lines = [
         "# HELP floodcastminxiong_ready Whether operational data passes readiness gates.",
         "# TYPE floodcastminxiong_ready gauge",
@@ -226,9 +255,8 @@ def metrics_payload(status: dict[str, Any]) -> str:
         "# HELP floodcastminxiong_dataset_age_minutes Age of the latest dataset observation.",
         "# TYPE floodcastminxiong_dataset_age_minutes gauge",
     ]
-    for name, details in sorted(status.get("datasets", {}).items()):
-        health = details.get("health", {})
-        age = health.get("age_minutes")
+    for name, details in sorted(status.datasets.items()):
+        age = details.health.age_minutes
         if age is not None:
             lines.append(f'floodcastminxiong_dataset_age_minutes{{dataset="{name}"}} {age}')
     lines.extend(
@@ -237,17 +265,17 @@ def metrics_payload(status: dict[str, Any]) -> str:
             "# TYPE floodcastminxiong_dataset_state gauge",
         ]
     )
-    for name, details in sorted(status.get("datasets", {}).items()):
-        state = str(details.get("health", {}).get("state", "unknown"))
+    for name, details in sorted(status.datasets.items()):
+        state = details.health.state
         lines.append(
             f'floodcastminxiong_dataset_state{{dataset="{name}",state="{state}"}} 1'
         )
     return "\n".join(lines) + "\n"
 
 
-def shadow_metrics_payload(report: dict[str, Any]) -> str:
-    passed = 1 if report.get("shadow_gate_passed") else 0
-    allowed = 1 if report.get("notification_allowed") else 0
+def shadow_metrics_payload(report: ShadowResponse) -> str:
+    passed = 1 if report.shadow_gate_passed else 0
+    allowed = 1 if report.notification_allowed else 0
     return (
         "# HELP floodcastminxiong_shadow_gate_passed Whether shadow criteria passed.\n"
         "# TYPE floodcastminxiong_shadow_gate_passed gauge\n"
@@ -458,8 +486,12 @@ def handler_factory(store: SnapshotStore) -> type[BaseHTTPRequestHandler]:
     class OperationsHandler(BaseHTTPRequestHandler):
         server_version = "FloodCastMinxiong/0.1"
 
-        def _json(self, payload: dict[str, Any], status: HTTPStatus = HTTPStatus.OK) -> None:
-            body = (json.dumps(payload, ensure_ascii=False) + "\n").encode("utf-8")
+        def _json(
+            self,
+            payload: ResponseSchema,
+            status: HTTPStatus = HTTPStatus.OK,
+        ) -> None:
+            body = (payload.model_dump_json(exclude_none=True) + "\n").encode("utf-8")
             self.send_response(status)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
@@ -483,7 +515,7 @@ def handler_factory(store: SnapshotStore) -> type[BaseHTTPRequestHandler]:
                 self.wfile.write(body)
                 return
             if path == "/healthz":
-                self._json({"status": "ok"})
+                self._json(HealthResponse())
                 return
             if path == "/metrics":
                 body = (
@@ -501,7 +533,7 @@ def handler_factory(store: SnapshotStore) -> type[BaseHTTPRequestHandler]:
                 status = status_payload(store)
                 http_status = (
                     HTTPStatus.OK
-                    if path == "/api/v1/status" or status["ready"]
+                    if path == "/api/v1/status" or status.ready
                     else HTTPStatus.SERVICE_UNAVAILABLE
                 )
                 self._json(status, http_status)
@@ -509,9 +541,9 @@ def handler_factory(store: SnapshotStore) -> type[BaseHTTPRequestHandler]:
             if path in DATASET_ROUTES:
                 try:
                     payload = dataset_payload(store, DATASET_ROUTES[path])
-                except (KeyError, SnapshotStoreError):
+                except (KeyError, SnapshotStoreError, ValidationError):
                     self._json(
-                        {"error": "dataset unavailable", "path": path},
+                        ErrorResponse(error="dataset unavailable", path=path),
                         HTTPStatus.SERVICE_UNAVAILABLE,
                     )
                     return
@@ -523,7 +555,7 @@ def handler_factory(store: SnapshotStore) -> type[BaseHTTPRequestHandler]:
             if path == "/api/v1/shadow-readiness":
                 self._json(shadow_payload(store))
                 return
-            self._json({"error": "not found", "path": path}, HTTPStatus.NOT_FOUND)
+            self._json(ErrorResponse(error="not found", path=path), HTTPStatus.NOT_FOUND)
 
         def log_message(self, format: str, *args: object) -> None:
             print(f"[HTTP] {self.address_string()} {format % args}")

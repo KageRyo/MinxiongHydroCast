@@ -94,6 +94,12 @@ The following endpoints are available:
 | `GET /api/v1/shadow-readiness` | Shadow criteria, metrics, and notification blockers |
 | `GET /api/v1/experimental-forecasts` | Explicit unavailable state until forecast gates pass |
 
+All JSON responses are validated and serialized through the Pydantic models in
+`floodcastminxiong.operations.schemas`. Fixed response fields reject unknown keys and invalid
+types; dataset responses also require `row_count` to match the number of returned records. The
+source-specific columns inside each record remain dynamic strings because the endpoint exposes
+multiple separately versioned tabular contracts.
+
 The operator view at `/` presents official-source alerts, observations, and experimental
 forecast availability in separate sections. The server binds to `127.0.0.1` by default. Put it
 behind an authenticated reverse proxy before exposing it to another host or network.
