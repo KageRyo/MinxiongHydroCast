@@ -177,6 +177,32 @@ def forecast_payload() -> dict[str, Any]:
     }
 
 
+def shadow_payload(store: SnapshotStore) -> dict[str, Any]:
+    try:
+        report = store.read_report("shadow_report.json")
+    except SnapshotStoreError as exc:
+        return {
+            "state": "storage_error",
+            "shadow_gate_passed": False,
+            "notification_allowed": False,
+            "notification_blockers": [str(exc)],
+        }
+    if report is None:
+        return {
+            "state": "not_evaluated",
+            "shadow_gate_passed": False,
+            "notification_allowed": False,
+            "notification_blockers": [
+                "shadow report has not been generated",
+                "notification delivery and local model-label gates are not implemented",
+            ],
+        }
+    return {
+        "state": "passed" if report.get("shadow_gate_passed") else "blocked",
+        **report,
+    }
+
+
 def metrics_payload(status: dict[str, Any]) -> str:
     ready = 1 if status["ready"] else 0
     attempt = status.get("latest_attempt") or {}
@@ -208,6 +234,19 @@ def metrics_payload(status: dict[str, Any]) -> str:
             f'floodcastminxiong_dataset_state{{dataset="{name}",state="{state}"}} 1'
         )
     return "\n".join(lines) + "\n"
+
+
+def shadow_metrics_payload(report: dict[str, Any]) -> str:
+    passed = 1 if report.get("shadow_gate_passed") else 0
+    allowed = 1 if report.get("notification_allowed") else 0
+    return (
+        "# HELP floodcastminxiong_shadow_gate_passed Whether shadow criteria passed.\n"
+        "# TYPE floodcastminxiong_shadow_gate_passed gauge\n"
+        f"floodcastminxiong_shadow_gate_passed {passed}\n"
+        "# HELP floodcastminxiong_notification_allowed Whether notifications may be enabled.\n"
+        "# TYPE floodcastminxiong_notification_allowed gauge\n"
+        f"floodcastminxiong_notification_allowed {allowed}\n"
+    )
 
 
 OPERATOR_HTML = """<!doctype html>
@@ -251,7 +290,7 @@ OPERATOR_HTML = """<!doctype html>
     main { max-width: 1440px; margin: 0 auto; padding: 20px 24px 40px; }
     .status {
       display: grid;
-      grid-template-columns: minmax(140px, 0.6fr) repeat(3, minmax(160px, 1fr));
+      grid-template-columns: minmax(140px, 0.6fr) repeat(4, minmax(150px, 1fr));
       margin-bottom: 22px;
       background: #fff;
       border: 1px solid #d4dadd;
@@ -306,6 +345,7 @@ OPERATOR_HTML = """<!doctype html>
       <div><div class="label">Snapshot</div><div class="value" id="snapshot">-</div></div>
       <div><div class="label">Mode</div><div class="value" id="mode">-</div></div>
       <div><div class="label">Last attempt</div><div class="value" id="attempt">-</div></div>
+      <div><div class="label">Shadow gate</div><div class="value" id="shadow">-</div></div>
     </div>
     <section>
       <div class="section-head"><h2>WRA Rainfall Alerts</h2><span id="alerts-type">Loading</span></div>
@@ -364,6 +404,11 @@ OPERATOR_HTML = """<!doctype html>
       const attempt = status.latest_attempt;
       document.getElementById("attempt").textContent =
         attempt ? attempt.status + " at " + attempt.completed_at : "-";
+      const shadow = await getJson("/api/v1/shadow-readiness");
+      const shadowState = document.getElementById("shadow");
+      shadowState.textContent = shadow.state;
+      shadowState.className = "value " +
+        (shadow.shadow_gate_passed ? "healthy" : "unhealthy");
       for (const [target, path] of Object.entries(endpoints)) {
         try {
           const payload = await getJson(path);
@@ -422,7 +467,10 @@ def handler_factory(store: SnapshotStore) -> type[BaseHTTPRequestHandler]:
                 self._json({"status": "ok"})
                 return
             if path == "/metrics":
-                body = metrics_payload(status_payload(store)).encode("utf-8")
+                body = (
+                    metrics_payload(status_payload(store))
+                    + shadow_metrics_payload(shadow_payload(store))
+                ).encode("utf-8")
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
                 self.send_header("Content-Length", str(len(body)))
@@ -452,6 +500,9 @@ def handler_factory(store: SnapshotStore) -> type[BaseHTTPRequestHandler]:
                 return
             if path == "/api/v1/experimental-forecasts":
                 self._json(forecast_payload())
+                return
+            if path == "/api/v1/shadow-readiness":
+                self._json(shadow_payload(store))
                 return
             self._json({"error": "not found", "path": path}, HTTPStatus.NOT_FOUND)
 

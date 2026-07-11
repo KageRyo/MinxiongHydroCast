@@ -7,7 +7,13 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from floodcastminxiong.operations.api import build_server, metrics_payload, status_payload
+from floodcastminxiong.operations.api import (
+    build_server,
+    metrics_payload,
+    shadow_metrics_payload,
+    shadow_payload,
+    status_payload,
+)
 from floodcastminxiong.operations.collector import run_collection
 from floodcastminxiong.operations.snapshot_store import SnapshotStore
 
@@ -53,6 +59,19 @@ def test_metrics_payload_exposes_readiness_attempt_and_dataset_age():
     assert "floodcastminxiong_last_attempt_success 1" in metrics
     assert 'dataset="rain_gauges"} 4.5' in metrics
     assert 'dataset="rain_gauges",state="healthy"} 1' in metrics
+
+
+def test_shadow_payload_defaults_to_blocked_and_exports_metrics(tmp_path):
+    store = SnapshotStore(tmp_path / "operations")
+
+    report = shadow_payload(store)
+    metrics = shadow_metrics_payload(report)
+
+    assert report["state"] == "not_evaluated"
+    assert report["shadow_gate_passed"] is False
+    assert report["notification_allowed"] is False
+    assert "floodcastminxiong_shadow_gate_passed 0" in metrics
+    assert "floodcastminxiong_notification_allowed 0" in metrics
 
 
 def test_status_reports_collector_error_without_hiding_last_snapshot(tmp_path):
@@ -131,10 +150,15 @@ def test_api_serves_status_classified_data_and_operator_view(tmp_path):
         assert forecast["available"] is False
         assert forecast["product_type"] == "experimental_forecast"
 
+        shadow = request_json(base_url, "/api/v1/shadow-readiness")
+        assert shadow["state"] == "not_evaluated"
+        assert shadow["notification_allowed"] is False
+
         with urlopen(f"{base_url}/metrics", timeout=3) as response:
             metrics = response.read().decode("utf-8")
         assert "floodcastminxiong_ready 0" in metrics
         assert "floodcastminxiong_last_attempt_success 1" in metrics
+        assert "floodcastminxiong_shadow_gate_passed 0" in metrics
         assert 'dataset="rain_gauges",state="demo"' in metrics
 
         with urlopen(f"{base_url}/", timeout=3) as response:

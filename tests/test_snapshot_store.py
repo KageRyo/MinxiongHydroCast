@@ -123,6 +123,15 @@ def test_snapshot_store_rejects_manifest_outside_snapshot_directory(tmp_path):
         store.read_latest()
 
 
+def test_snapshot_store_round_trips_atomic_report(tmp_path):
+    store = SnapshotStore(tmp_path / "operations")
+
+    path = store.write_report("shadow_report.json", {"shadow_gate_passed": False})
+
+    assert path == store.root / "shadow_report.json"
+    assert store.read_report("shadow_report.json") == {"shadow_gate_passed": False}
+
+
 def test_collection_lock_rejects_overlapping_process(tmp_path):
     store = SnapshotStore(tmp_path / "operations")
 

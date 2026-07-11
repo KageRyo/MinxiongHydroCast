@@ -47,6 +47,7 @@ floodcast-minxiong-locations = "floodcastminxiong.pipelines.location_reference:m
 floodcast-minxiong-nowcastnet-smoke = "floodcastminxiong.pipelines.nowcastnet_smoke:main"
 floodcast-minxiong-operations = "floodcastminxiong.operations.collector:main"
 floodcast-minxiong-serve = "floodcastminxiong.operations.api:main"
+floodcast-minxiong-shadow-report = "floodcastminxiong.operations.shadow:main"
 floodcast-minxiong-qpe-gauge-validate = "floodcastminxiong.pipelines.qpe_gauge_validation:main"
 floodcast-minxiong-radar-event-summary = "floodcastminxiong.pipelines.radar_event_summary:main"
 floodcast-minxiong-radar-source-check = "floodcastminxiong.ingestion.radar_sources:main"

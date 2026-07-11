@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "heavy_rain_periods": [
+    {
+      "event_id": "replace_with_reviewed_event_id",
+      "start_at": "2026-07-01T00:00:00+08:00",
+      "end_at": "2026-07-01T06:00:00+08:00",
+      "source": "replace with official event evidence URL or document reference",
+      "reviewed_by": "replace with operator identity",
+      "confirmed": false,
+      "notes": "Example only. Unconfirmed evidence never satisfies the shadow gate."
+    }
+  ]
+}

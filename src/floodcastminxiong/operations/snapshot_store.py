@@ -286,6 +286,49 @@ class SnapshotStore:
     def read_latest_attempt(self) -> dict[str, Any] | None:
         return self._read_pointer(self.latest_attempt_path)
 
+    def write_report(self, name: str, payload: dict[str, Any]) -> Path:
+        if not name or Path(name).name != name or not name.endswith(".json"):
+            raise ValueError("report name must be a JSON filename")
+        path = self.root / name
+        self._atomic_json(path, payload)
+        return path
+
+    def read_report(self, name: str) -> dict[str, Any] | None:
+        if not name or Path(name).name != name or not name.endswith(".json"):
+            raise ValueError("report name must be a JSON filename")
+        path = self.root / name
+        if not path.exists():
+            return None
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise SnapshotStoreError(f"invalid report: {path}") from exc
+        if not isinstance(payload, dict):
+            raise SnapshotStoreError(f"report must be an object: {path}")
+        return payload
+
+    def scan_manifests(self) -> tuple[list[dict[str, Any]], list[str]]:
+        self.initialize()
+        manifests: list[dict[str, Any]] = []
+        errors: list[str] = []
+        for directory in sorted(self.snapshots_dir.iterdir()):
+            if not directory.is_dir():
+                continue
+            path = directory / "manifest.json"
+            if not path.is_file():
+                errors.append(f"{directory.name}: manifest is missing")
+                continue
+            try:
+                manifest = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                errors.append(f"{directory.name}: manifest cannot be read: {exc}")
+                continue
+            if not isinstance(manifest, dict):
+                errors.append(f"{directory.name}: manifest must be an object")
+                continue
+            manifests.append(manifest)
+        return manifests, errors
+
     def _dataset_path(self, manifest: dict[str, Any], details: dict[str, Any]) -> Path:
         snapshot_root = (self.snapshots_dir / str(manifest["snapshot_id"])).resolve()
         path = (snapshot_root / str(details["path"])).resolve()

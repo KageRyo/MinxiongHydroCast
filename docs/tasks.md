@@ -122,6 +122,7 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Add freshness/schema/readiness health checks and a versioned read API.
 - [x] Add a localhost operator view separating official-source data and experimental forecasts.
 - [x] Add systemd collector timer and API supervision templates for Linux deployment.
+- [x] Add a shadow-history report with heavy-rain evidence and an explicit notification blocker.
 - [ ] Add a durable remote-storage backend, process supervision, metrics export, and backups.
 - [ ] Route failed/stale/schema alerts after deployment owners and channels are assigned.
 - [ ] Keep deployment configuration separate from research/training artifacts.

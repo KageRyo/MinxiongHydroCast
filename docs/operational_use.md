@@ -84,11 +84,37 @@ The following endpoints are available:
 | `GET /api/v1/official-alerts/rainfall` | WRA rainfall-alert source product |
 | `GET /api/v1/observations/rain-gauges` | Validated WRA rain-gauge observations |
 | `GET /api/v1/observations/flood-sensors` | Validated WRA flood-sensor observations |
+| `GET /api/v1/shadow-readiness` | Shadow criteria, metrics, and notification blockers |
 | `GET /api/v1/experimental-forecasts` | Explicit unavailable state until forecast gates pass |
 
 The operator view at `/` presents official-source alerts, observations, and experimental
 forecast availability in separate sections. The server binds to `127.0.0.1` by default. Put it
 behind an authenticated reverse proxy before exposing it to another host or network.
+
+## Shadow Deployment Gate
+
+Copy `data/samples/shadow_evidence.example.json` outside the tracked sample directory and replace
+it with reviewed heavy-rain evidence. Unconfirmed sample evidence never satisfies the gate.
+Evaluate the accumulated snapshot history:
+
+```bash
+floodcast-minxiong-shadow-report \
+  --evidence /var/lib/floodcast-minxiong/reviewed_shadow_evidence.json
+```
+
+The default gate requires:
+
+- seven days of live collection history;
+- at least 900 live attempts;
+- at least 99% successful attempts;
+- at least 95% ready attempts;
+- no ready-data gap longer than 30 minutes;
+- no corrupt manifests or datasets;
+- at least one confirmed heavy-rain period with continuous ready coverage.
+
+The report is atomically stored as `shadow_report.json` in the operations store and exposed by the
+API and metrics endpoint. `notification_allowed` remains false even when the shadow criteria pass,
+because notification delivery and local model-label gates are separate unfinished requirements.
 
 ## Linux Service Supervision
 

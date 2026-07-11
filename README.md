@@ -93,6 +93,7 @@ Open <http://127.0.0.1:8080/> for the operator view. The service exposes:
 - `GET /api/v1/official-alerts/rainfall`;
 - `GET /api/v1/observations/rain-gauges`;
 - `GET /api/v1/observations/flood-sensors`;
+- `GET /api/v1/shadow-readiness` for the audited shadow gate and notification blockers;
 - `GET /api/v1/experimental-forecasts`, which remains unavailable until model and shadow gates
   pass.
 
@@ -100,6 +101,17 @@ Snapshots are immutable under `data/processed/operations/snapshots/`. A failed c
 `latest_attempt.json` but does not replace the last readable `latest.json` snapshot.
 For a Linux host, hardened collector timer and API service templates are provided under
 `deploy/systemd/`.
+
+Evaluate accumulated live snapshots against a reviewed heavy-rain period:
+
+```bash
+floodcast-minxiong-shadow-report \
+  --evidence /path/to/reviewed_shadow_evidence.json
+```
+
+The default gate requires seven days, 900 live attempts, 99% collection success, 95% readiness,
+no gap over 30 minutes, intact snapshots, and at least one continuously covered heavy-rain period.
+Passing this gate does not enable notifications; local model-label and delivery gates remain.
 
 Run the local demo pipeline for installation and schema checks only:
 
