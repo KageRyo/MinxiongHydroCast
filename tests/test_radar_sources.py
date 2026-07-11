@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from floodcasttw.ingestion.radar_sources import RadarSource, load_manifest
+from floodcastminxiong.ingestion.radar_sources import RadarSource, load_manifest
 
 
 def test_candidate_radar_source_reports_missing_fields():

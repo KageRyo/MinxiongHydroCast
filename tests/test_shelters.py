@@ -1,4 +1,4 @@
-from floodcasttw.ingestion.shelters import parse_shelter_line
+from floodcastminxiong.ingestion.shelters import parse_shelter_line
 
 
 def test_parse_shelter_line_keeps_address_tokens_together():

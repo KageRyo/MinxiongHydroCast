@@ -6,7 +6,7 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 
 ## Milestone 1: Stabilize Live Data Ingestion
 
-- [x] Implement live WRA rain gauge parsing in `src/floodcasttw/ingestion/hydrological_data.py`.
+- [x] Implement live WRA rain gauge parsing in `src/floodcastminxiong/ingestion/hydrological_data.py`.
 - [x] Implement live WRA flood-sensor parsing with explicit station, time, water level, and status fields.
 - [x] Add source metadata to every live capture: URL, fetch time, mode, row count, and failure reason.
 - [x] Save raw captures or screenshots locally under ignored `data/raw/` for parser debugging.
@@ -33,7 +33,7 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Evaluate `PersistenceNowcaster` on gridded rainfall or radar-like tensors.
 - [x] Evaluate `RainfallThresholdRiskScorer` against historical warnings or flood events.
 - [x] Add metrics: RMSE for rainfall, and CSI/POD/FAR for event prediction.
-- [x] Create a repeatable evaluation script under `src/floodcasttw/models/` or `pipelines/`.
+- [x] Create a repeatable evaluation script under `src/floodcastminxiong/models/` or `pipelines/`.
 - [x] Publish baseline results before adding deep-learning models.
 
 ## Milestone 5: Prepare SOTA Migration

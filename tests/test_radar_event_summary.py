@@ -1,11 +1,11 @@
 import json
 from pathlib import Path
 
-from floodcasttw.pipelines.radar_event_summary import (
+from floodcastminxiong.pipelines.radar_event_summary import (
     grid_xy_for_lon_lat,
     summarize_event_collection,
 )
-from floodcasttw.ingestion.cwa_grid import inspect_cwa_grid_file
+from floodcastminxiong.ingestion.cwa_grid import inspect_cwa_grid_file
 
 
 def write_grid(

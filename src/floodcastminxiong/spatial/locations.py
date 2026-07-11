@@ -6,9 +6,9 @@ import csv
 import hashlib
 from pathlib import Path
 
-from floodcasttw.io.csv_utils import write_csv
-from floodcasttw.spatial.admin import admin_unit_key, extract_admin_parts
-from floodcasttw.spatial.coordinates import normalize_coordinates
+from floodcastminxiong.io.csv_utils import write_csv
+from floodcastminxiong.spatial.admin import admin_unit_key, extract_admin_parts
+from floodcastminxiong.spatial.coordinates import normalize_coordinates
 
 LOCATION_FIELDNAMES = [
     "location_id",

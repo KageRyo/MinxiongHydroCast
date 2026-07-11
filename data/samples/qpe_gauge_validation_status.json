@@ -142,7 +142,7 @@
   ],
   "next_actions": [
     "Start storing O-B0045-001 QPE snapshots at event collection time, or locate an official CWA/WRA historical QPE archive that supports these timestamps.",
-    "Once event-time QPE grids exist locally, run floodcasttw-qpe-gauge-validate for each event and replace the blocked report_status values with report artifact paths.",
+    "Once event-time QPE grids exist locally, run floodcast-minxiong-qpe-gauge-validate for each event and replace the blocked report_status values with report artifact paths.",
     "Keep O-A0002-001 gauge files under ignored data/external paths and commit only aggregate validation summaries."
   ]
 }

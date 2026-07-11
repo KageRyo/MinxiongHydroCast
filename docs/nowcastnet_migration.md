@@ -76,7 +76,7 @@ The sample asset manifest lives at `data/samples/external_asset_manifest.json`.
 Run the adapter smoke test without loading external NowcastNet code:
 
 ```bash
-floodcasttw-nowcastnet-smoke \
+floodcast-minxiong-nowcastnet-smoke \
   --code-dir data/external/nowcastnet/code \
   --checkpoint data/external/checkpoints/nowcastnet_tw.pt \
   --radar-dataset data/external/radar/taiwan \

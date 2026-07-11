@@ -5,9 +5,9 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from floodcasttw.ingestion.hydrological_data import run_demo as run_hydrology_demo
-from floodcasttw.ingestion.rainfall_alerts import run as run_rainfall_alerts
-from floodcasttw.io.run_summary import (
+from floodcastminxiong.ingestion.hydrological_data import run_demo as run_hydrology_demo
+from floodcastminxiong.ingestion.rainfall_alerts import run as run_rainfall_alerts
+from floodcastminxiong.io.run_summary import (
     DEFAULT_RUN_LOG_PATH,
     build_run_summary,
     default_run_summary_path,

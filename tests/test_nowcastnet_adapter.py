@@ -2,9 +2,9 @@ from pathlib import Path
 
 import numpy as np
 
-from floodcasttw.models.assets import default_nowcastnet_manifest
-from floodcasttw.models.nowcastnet_adapter import NowcastNetAdapter, NowcastNetConfig
-from floodcasttw.models.radar_tensor import RadarTensorSpec, validate_radar_tensor
+from floodcastminxiong.models.assets import default_nowcastnet_manifest
+from floodcastminxiong.models.nowcastnet_adapter import NowcastNetAdapter, NowcastNetConfig
+from floodcastminxiong.models.radar_tensor import RadarTensorSpec, validate_radar_tensor
 
 
 def test_radar_tensor_spec_shapes_and_validation():

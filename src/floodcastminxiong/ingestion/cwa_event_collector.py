@@ -17,10 +17,10 @@ import requests
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 
-from floodcasttw.config import get_settings
-from floodcasttw.ingestion.cwa_file_api import looks_like_cwa_auth_error
-from floodcasttw.ingestion.cwa_history import redact_authorization_url
-from floodcasttw.io.run_summary import (
+from floodcastminxiong.config import get_settings
+from floodcastminxiong.ingestion.cwa_file_api import looks_like_cwa_auth_error
+from floodcastminxiong.ingestion.cwa_history import redact_authorization_url
+from floodcastminxiong.io.run_summary import (
     DEFAULT_RUN_LOG_PATH,
     build_run_summary,
     default_run_summary_path,

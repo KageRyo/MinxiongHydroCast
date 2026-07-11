@@ -46,7 +46,7 @@ before using it as a target.
 The recommended model order after CWA sample validation is:
 
 1. Persistence baseline on `O-A0059-001`.
-2. Small U-Net/RainNet-style nowcaster through `floodcasttw-train-torch-baseline` on full
+2. Small U-Net/RainNet-style nowcaster through `floodcast-minxiong-train-torch-baseline` on full
    event-window tensors.
 3. NowcastNet-style migration only after event diversity, checkpointing, and evaluation are stable.
 
@@ -57,9 +57,9 @@ This is enough to test modern radar nowcasting models after the data pipeline is
 GPUs first for controlled experiments:
 
 - Run persistence and threshold baselines on CPU.
-- Evaluate tensor archives with `floodcasttw-tensor-baseline-evaluate` before deep learning.
+- Evaluate tensor archives with `floodcast-minxiong-tensor-baseline-evaluate` before deep learning.
 - Create a separate training environment with CUDA-enabled PyTorch.
-- Run `floodcasttw-train-torch-baseline --device auto` on one GPU first.
+- Run `floodcast-minxiong-train-torch-baseline --device auto` on one GPU first.
 - Use both GPUs only after data loading, checkpointing, and evaluation are repeatable.
 - Reserve NowcastNet-style training for gridded Taiwan radar tensors with event-based splits.
 
@@ -70,7 +70,7 @@ RTX 4090 GPUs. Checkpoints stay under ignored `data/external/checkpoints/` paths
 The Tiny U-Net entrypoint supports a multi-GPU smoke run:
 
 ```bash
-PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_training \
+PYTHONPATH=src conda run -n VLM python -m floodcastminxiong.pipelines.torch_baseline_training \
   --archive data/processed/cwa_recent_tensor_sample.npz \
   --output-dir data/external/checkpoints/tiny_unet_cwa_2gpu_masked_smoke \
   --device cuda \
@@ -84,7 +84,7 @@ z-score normalizes valid pixels, but real training still needs longer event-base
 Evaluate a trained smoke checkpoint against persistence with:
 
 ```bash
-PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_evaluation \
+PYTHONPATH=src conda run -n VLM python -m floodcastminxiong.pipelines.torch_baseline_evaluation \
   --archive data/processed/cwa_recent_tensor_sample.npz \
   --checkpoint data/external/checkpoints/tiny_unet_cwa_2gpu_masked_smoke/tiny_unet_nowcaster.pt \
   --event-threshold 35 \
@@ -99,7 +99,7 @@ For full-event testing, use 6 input frames and 6 prediction frames with sliding 
 full-event run trained on the Taiwan-wide 2026-06-28 event with two RTX 4090 GPUs:
 
 ```bash
-PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_training \
+PYTHONPATH=src conda run -n VLM python -m floodcastminxiong.pipelines.torch_baseline_training \
   --archive data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz \
   --output-dir data/external/checkpoints/tiny_unet_cwa_taiwan_widespread_20260628_6in_6out \
   --device cuda \
@@ -117,7 +117,7 @@ For the next Tiny U-Net experiment, keep the same tensor archives but upweight s
 hold out sliding windows for validation:
 
 ```bash
-PYTHONPATH=src conda run -n VLM python -m floodcasttw.pipelines.torch_baseline_training \
+PYTHONPATH=src conda run -n VLM python -m floodcastminxiong.pipelines.torch_baseline_training \
   --archive data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz \
   --output-dir data/external/checkpoints/tiny_unet_cwa_weighted_validation \
   --device cuda \
