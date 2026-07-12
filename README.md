@@ -154,8 +154,10 @@ Snapshots are immutable under `data/processed/operations/snapshots/`. A failed c
 `latest_attempt.json` but does not replace the last readable `latest.json` snapshot.
 Each dataset manifest and API response includes source kind, authority, dataset ID, redacted URL,
 fetch time, adapter schema version, content SHA-256, outcome, and any fallback reason.
-For a Linux host, hardened collector timer and API service templates are provided under
-`deploy/systemd/`.
+For a Linux host, basic system service templates are provided under `deploy/systemd/`. The complete
+single-host profile, including durable storage, monitoring, alert auditing, backup/restore, and
+shadow scheduling, is under `deploy/systemd-user/` and `deploy/single-host/`; see
+[docs/single_host_operations.md](docs/single_host_operations.md).
 
 Evaluate accumulated live snapshots against a reviewed heavy-rain period:
 
@@ -474,7 +476,10 @@ FloodCastMinxiong/
 │   ├── external/     # ignored radar/model/checkpoint assets
 │   └── samples/      # tracked demo-safe samples
 ├── deploy/
-│   └── systemd/      # collector timer and localhost API service templates
+│   ├── prometheus/   # scrape, alert rules, and Alertmanager routing
+│   ├── single-host/  # pinned installation and runner scripts
+│   ├── systemd/      # system service templates
+│   └── systemd-user/ # complete single-host user services and timers
 ├── docs/
 ├── scripts/
 ├── src/floodcastminxiong/
@@ -512,5 +517,7 @@ Radar event windows are documented in [docs/radar_event_windows.md](docs/radar_e
 Radar tensor conversion is documented in [docs/radar_tensor_conversion.md](docs/radar_tensor_conversion.md).
 Radar source adapters are documented in [docs/radar_source_adapters.md](docs/radar_source_adapters.md).
 The project completion plan is documented in [docs/completion_plan.md](docs/completion_plan.md).
+The Linux deployment and operations runbook is documented in
+[docs/single_host_operations.md](docs/single_host_operations.md).
 The current baseline model card is documented in
 [docs/model_cards/minxiong_chiayi_baseline.md](docs/model_cards/minxiong_chiayi_baseline.md).

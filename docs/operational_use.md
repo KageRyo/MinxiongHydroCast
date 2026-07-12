@@ -198,7 +198,7 @@ floodcast-minxiong-shadow-report \
 
 The default gate requires:
 
-- seven days of live collection history;
+- seven days of live collection history measured inside an eight-day audit window;
 - at least 900 live attempts;
 - at least 99% successful attempts;
 - at least 95% ready attempts;
@@ -230,36 +230,37 @@ examples and demo threshold events do not count.
 
 ## Linux Service Supervision
 
-Templates under `deploy/systemd/` provide:
+System-level templates under `deploy/systemd/` provide the basic collector and API services.
+The executable single-host profile under `deploy/systemd-user/` and `deploy/single-host/` adds:
 
-- a hardened one-shot live collector service;
-- a persistent timer that runs every 10 minutes and catches up after downtime;
-- a restartable localhost API service.
+- a one-shot live collector with a persistent 10-minute timer;
+- a restartable localhost API and operator view;
+- Prometheus rules, Alertmanager, and a durable local notification audit receiver;
+- daily checksummed backups and an explicit restore command;
+- hourly shadow-gate evaluation;
+- a dedicated self-hosted runner for the host-bound WRA warning contract.
 
-The templates assume:
+The single-host installer uses:
 
-- the repository and virtual environment are installed under `/opt/floodcast-minxiong`;
-- a non-login `floodcast-minxiong` service user and group exist;
-- local secrets and endpoint overrides are stored in `/etc/floodcast-minxiong.env`;
-- durable snapshots and run state live under `/var/lib/floodcast-minxiong`.
-- `CWA_API_KEY` and `WRA_API_KEY` are supplied through `/etc/floodcast-minxiong.env` and never
-  passed on the command line.
+- `/mnt/8tb_hdd/ryo/floodcast-minxiong` for durable mutable state;
+- `~/.local/share/floodcast-minxiong` as a stable runtime symlink;
+- `~/.config/floodcast-minxiong/env` with mode `0600` for `CWA_API_KEY` and `WRA_API_KEY`;
+- user-level systemd supervision, with login linger enabled for service persistence.
+
+See [single_host_operations.md](single_host_operations.md) for installation, validation, alert
+drill, backup/restore drill, runner setup, and shadow evidence procedures. The system-level
+templates remain available when a dedicated service account and `/var/lib` layout are preferred.
 
 The scheduled `.github/workflows/cwa-live-contract.yml` workflow, named `Official Live Contracts`,
 exercises the official CWA rain, WRA rainfall-warning, and WRA IoW contracts. Configure the
 repository secrets `CWA_API_KEY` and `WRA_API_KEY`; the workflow fails explicitly when a required
-secret is absent and never prints
-either key or an unredacted credential-bearing request.
+secret is absent and never prints either key or an unredacted credential-bearing request. CWA and
+IoW run on GitHub-hosted infrastructure. The WRA warning job uses the dedicated host label because
+the credential can be constrained by source host.
 
-Review paths, users, filesystem permissions, browser dependencies, and reverse-proxy policy before
-installation. Prefer the systemd timer over the in-process interval loop on a single Linux host,
-because the timer records each attempt independently and uses `Persistent=true` after downtime.
-Install Playwright Chromium into the path configured by the collector unit before enabling it:
-
-```bash
-PLAYWRIGHT_BROWSERS_PATH=/opt/floodcast-minxiong/.playwright \
-  /opt/floodcast-minxiong/.venv/bin/python -m playwright install chromium
-```
+Prefer the systemd timer over the in-process interval loop on a single Linux host, because the
+timer records each attempt independently and uses `Persistent=true` after downtime. The deployed
+profile selects strict official API sources and therefore does not require a Playwright browser.
 
 ## Supported Operating Profiles
 
@@ -308,10 +309,10 @@ A deployable Minxiong service should run this sequence idempotently:
 6. record metrics and lineage, then alert an operator on failure or staleness.
 
 The scheduler, local versioned store, health/readiness contract, JSON run summaries, JSONL logs,
-Prometheus metrics endpoint, read API, and operator view are implemented. Production deployment
-still needs an actual managed-host rollout of the supplied service templates, a durable mounted
-volume or object-store backend, tested backups and restore, metrics scraping and alert rules, named
-alert routing, and authenticated network exposure.
+Prometheus metrics endpoint, read API, operator view, monitoring configs, local alert audit,
+checksummed backup/restore tooling, and single-host installation scripts are implemented. Promotion
+still requires a healthy managed-host rollout, a named human alert channel, an off-host backup,
+authenticated network exposure if needed, and completion of the shadow and model evidence gates.
 
 ## Production Gates
 
@@ -330,12 +331,10 @@ Do not present FloodCastMinxiong as an operational warning system until all gate
 
 The immediate blockers are concrete:
 
-- deploy the collector and API under supervision on a managed host, with least-privilege secret
-  delivery and authenticated/TLS network access;
-- route failed, stale, degraded, and schema-drift metrics to named maintainers, then exercise the
-  incident path;
-- place snapshots on durable storage, schedule backups, and verify a restore rather than merely
-  creating backup files;
+- finish and verify the supplied managed-host deployment with least-privilege secret delivery;
+- add a named human receiver for failed, stale, degraded, and schema alerts, then exercise the
+  incident path; the durable localhost audit receiver alone is insufficient;
+- add an off-host backup target after verifying the local scheduled backup and restore drill;
 - complete the seven-day shadow gate with at least 900 attempts, 99% collection success, 95%
   readiness, no gap over 30 minutes, and continuous coverage of at least one reviewed heavy-rain
   period;
@@ -345,8 +344,8 @@ The immediate blockers are concrete:
 ## Recommended First Release
 
 The first credible release remains an internal **Minxiong observation and data-quality service**,
-not an automated warning product. The repository now supplies the runnable service foundation.
-The next deployment work is to mount durable storage, supervise both processes, export metrics,
-route stale/failure alerts to named maintainers, and complete a shadow run. Add experimental radar
-nowcasts only after the observation service is reliable; add public risk notifications only after
-local backtesting and operator review.
+not an automated warning product. The repository supplies the runnable service and operations
+foundation. The remaining promotion work is to verify the host deployment, add off-host recovery
+and a named human alert route, and complete the real shadow run. Add experimental radar nowcasts
+only after the observation service is reliable; add public risk notifications only after local
+backtesting and operator review.
