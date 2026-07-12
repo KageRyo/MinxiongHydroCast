@@ -1,0 +1,12 @@
+[Unit]
+Description=Evaluate FloodCastMinxiong shadow-deployment evidence
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/share/floodcast-minxiong/venv/bin/floodcast-minxiong-shadow-report \
+  --store %h/.local/share/floodcast-minxiong/operations \
+  --evidence %h/.local/share/floodcast-minxiong/config/shadow_evidence.json \
+  --output %h/.local/share/floodcast-minxiong/run_summaries/shadow_report.json \
+  --allow-blocked
+NoNewPrivileges=true
+PrivateTmp=true

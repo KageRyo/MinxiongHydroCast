@@ -1,0 +1,20 @@
+[Unit]
+Description=FloodCastMinxiong Prometheus
+After=network.target floodcast-minxiong-api.service
+Wants=floodcast-minxiong-api.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.local/share/floodcast-minxiong/config/prometheus
+ExecStart=%h/.local/share/floodcast-minxiong/bin/prometheus \
+  --config.file=%h/.local/share/floodcast-minxiong/config/prometheus/prometheus.yml \
+  --storage.tsdb.path=%h/.local/share/floodcast-minxiong/prometheus \
+  --storage.tsdb.retention.time=30d \
+  --web.listen-address=127.0.0.1:9090
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

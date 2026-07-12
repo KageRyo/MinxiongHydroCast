@@ -1,8 +1,11 @@
 import json
+import sys
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from floodcastminxiong.operations.shadow import ShadowCriteria, evaluate_shadow
+import pytest
+
+from floodcastminxiong.operations.shadow import ShadowCriteria, evaluate_shadow, main
 from floodcastminxiong.operations.snapshot_store import DatasetPayload, SnapshotStore
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
@@ -76,6 +79,13 @@ def passing_criteria() -> ShadowCriteria:
     )
 
 
+def test_default_shadow_window_can_measure_a_full_seven_day_span():
+    criteria = ShadowCriteria()
+
+    assert criteria.minimum_duration_hours == 168
+    assert criteria.lookback_hours > criteria.minimum_duration_hours
+
+
 def test_shadow_gate_requires_continuous_live_coverage_and_reviewed_event(tmp_path):
     store = SnapshotStore(tmp_path / "operations")
     start = datetime(2026, 7, 11, 10, 0, tzinfo=TAIPEI_TZ)
@@ -142,3 +152,45 @@ def test_shadow_gate_counts_failed_live_attempts(tmp_path):
     assert report["metrics"]["success_rate"] == 0.75
     assert report["checks"]["success_rate"] is False
     assert report["shadow_gate_passed"] is False
+
+
+def test_shadow_cli_allows_scheduler_to_persist_blocked_report(tmp_path, monkeypatch):
+    store = tmp_path / "operations"
+    evidence = tmp_path / "shadow_evidence.json"
+    evidence.write_text('{"schema_version": 1, "heavy_rain_periods": []}', encoding="utf-8")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "floodcast-minxiong-shadow-report",
+            "--store",
+            str(store),
+            "--evidence",
+            str(evidence),
+            "--allow-blocked",
+        ],
+    )
+
+    main()
+
+    report = json.loads((store / "shadow_report.json").read_text())
+    assert report["shadow_gate_passed"] is False
+
+
+def test_shadow_cli_returns_nonzero_when_gate_is_blocked(tmp_path, monkeypatch):
+    evidence = tmp_path / "shadow_evidence.json"
+    evidence.write_text('{"schema_version": 1, "heavy_rain_periods": []}', encoding="utf-8")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "floodcast-minxiong-shadow-report",
+            "--store",
+            str(tmp_path / "operations"),
+            "--evidence",
+            str(evidence),
+        ],
+    )
+
+    with pytest.raises(SystemExit, match="2"):
+        main()

@@ -1,0 +1,11 @@
+[Unit]
+Description=Back up FloodCastMinxiong operational snapshots
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/share/floodcast-minxiong/venv/bin/floodcast-minxiong-backup create \
+  --store %h/.local/share/floodcast-minxiong/operations \
+  --backup-dir %h/.local/share/floodcast-minxiong/backups \
+  --retention-days 30
+NoNewPrivileges=true
+PrivateTmp=true

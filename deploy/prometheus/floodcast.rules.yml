@@ -1,0 +1,47 @@
+groups:
+  - name: floodcast-minxiong
+    rules:
+      - alert: FloodCastApiDown
+        expr: up{job="floodcast-minxiong"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: FloodCastMinxiong API is unavailable
+          description: Prometheus has not scraped the localhost API for two minutes.
+
+      - alert: FloodCastCollectorFailed
+        expr: floodcastminxiong_last_attempt_success == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: FloodCastMinxiong collection failed
+          description: The most recent operational collection attempt failed.
+
+      - alert: FloodCastNotReady
+        expr: floodcastminxiong_ready == 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: FloodCastMinxiong data is not ready
+          description: Operational data has failed readiness gates for 15 minutes.
+
+      - alert: FloodCastDatasetStale
+        expr: floodcastminxiong_dataset_state{state="stale"} == 1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: FloodCastMinxiong dataset is stale
+          description: Dataset {{ $labels.dataset }} exceeded its freshness limit.
+
+      - alert: FloodCastDatasetDegraded
+        expr: floodcastminxiong_dataset_state{state=~"degraded|coverage_missing|upstream_unhealthy"} == 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: FloodCastMinxiong dataset is degraded
+          description: Dataset {{ $labels.dataset }} is in state {{ $labels.state }}.

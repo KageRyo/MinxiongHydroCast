@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+rule_files:
+  - floodcast.rules.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 127.0.0.1:9093
+
+scrape_configs:
+  - job_name: floodcast-minxiong
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 127.0.0.1:8080
