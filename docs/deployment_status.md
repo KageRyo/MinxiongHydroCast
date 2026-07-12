@@ -29,7 +29,9 @@ Minxiong feature row.
 
 The `FloodCastDrill` synthetic alert produced both firing and resolved deliveries in the durable
 notification JSONL log. This proves local Prometheus/Alertmanager routing and receiver persistence;
-it does not provide a named human notification channel.
+it does not provide a named human notification channel. An allowlisted, bounded, retrying Discord
+incoming-webhook backend is implemented but remains disabled until an operator places a webhook URL
+in the ignored host environment file.
 
 The backup drill created and SHA-256 verified
 `floodcast-minxiong-20260712T234326+0800.tar.gz`. It restored three snapshots into an isolated
@@ -59,7 +61,8 @@ period may require the shadow deployment to run longer than seven calendar days.
 
 ## Remaining promotion work
 
-- Add an organization-owned, named human alert channel and exercise its incident path.
+- Configure the implemented Discord backend with an organization-owned channel, name its on-call
+  owner, and exercise its incident path.
 - Replicate backups to another device or remote system; the current backup protects snapshots from
   application-level corruption but not loss of the whole host or volume.
 - Document incident ownership, acknowledgement, override, and rollback responsibilities.

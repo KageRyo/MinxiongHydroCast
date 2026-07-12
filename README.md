@@ -156,7 +156,8 @@ Each dataset manifest and API response includes source kind, authority, dataset 
 fetch time, adapter schema version, content SHA-256, outcome, and any fallback reason.
 For a Linux host, basic system service templates are provided under `deploy/systemd/`. The complete
 single-host profile, including durable storage, monitoring, alert auditing, backup/restore, and
-shadow scheduling, is under `deploy/systemd-user/` and `deploy/single-host/`; see
+optional Discord delivery, and shadow scheduling, is under `deploy/systemd-user/` and
+`deploy/single-host/`; see
 [docs/single_host_operations.md](docs/single_host_operations.md).
 
 Evaluate accumulated live snapshots against a reviewed heavy-rain period:

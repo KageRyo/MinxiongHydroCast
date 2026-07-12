@@ -236,6 +236,7 @@ The executable single-host profile under `deploy/systemd-user/` and `deploy/sing
 - a one-shot live collector with a persistent 10-minute timer;
 - a restartable localhost API and operator view;
 - Prometheus rules, Alertmanager, and a durable local notification audit receiver;
+- optional Discord incoming-webhook delivery with redacted durable delivery results;
 - daily checksummed backups and an explicit restore command;
 - hourly shadow-gate evaluation;
 - a dedicated self-hosted runner for the host-bound WRA warning contract.

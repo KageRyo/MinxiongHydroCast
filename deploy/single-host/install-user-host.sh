@@ -88,6 +88,16 @@ git -C "$REPOSITORY_ROOT" rev-parse HEAD \
 
 mkdir -p "$HOME/.config/floodcast-minxiong" "$HOME/.config/systemd/user"
 install -m 0600 "$ENV_FILE" "$HOME/.config/floodcast-minxiong/env"
+discord_config_count="$(grep -Ec '^[[:space:]]*FLOODCAST_DISCORD_WEBHOOK_URL=' "$ENV_FILE" || true)"
+if [[ "$discord_config_count" -gt 1 ]]; then
+  echo "[ERROR] FLOODCAST_DISCORD_WEBHOOK_URL must not be defined more than once" >&2
+  exit 1
+fi
+install -m 0600 /dev/null "$HOME/.config/floodcast-minxiong/notifications.env"
+if [[ "$discord_config_count" -eq 1 ]]; then
+  grep -E '^[[:space:]]*FLOODCAST_DISCORD_WEBHOOK_URL=' "$ENV_FILE" \
+    > "$HOME/.config/floodcast-minxiong/notifications.env"
+fi
 install -m 0644 "$REPOSITORY_ROOT"/deploy/prometheus/*.yml \
   "$DURABLE_ROOT/config/prometheus/"
 install -m 0644 "$REPOSITORY_ROOT"/deploy/systemd-user/* \

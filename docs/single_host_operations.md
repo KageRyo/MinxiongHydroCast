@@ -13,11 +13,13 @@ The default installation uses:
 | --- | --- |
 | `/mnt/8tb_hdd/ryo/floodcast-minxiong` | Durable runtime, snapshots, TSDBs, backups, and runner |
 | `~/.local/share/floodcast-minxiong` | Stable symlink used by user units |
-| `~/.config/floodcast-minxiong/env` | Mode `0600` API-key environment file |
+| `~/.config/floodcast-minxiong/env` | Mode `0600` collector API-key environment file |
+| `~/.config/floodcast-minxiong/notifications.env` | Mode `0600` notification-only environment |
 | `~/.config/systemd/user` | Installed user units and timers |
 
 The repository `.env` is an installation input only. It remains ignored by Git and is copied to
-the private systemd environment path without printing its values.
+private systemd environment paths without printing values. The installer separates the optional
+Discord URL from the collector credentials so the alert receiver cannot read CWA or WRA keys.
 
 ## Install the host
 
@@ -69,9 +71,37 @@ and appends each delivery to:
 ```
 
 The local receiver proves alert generation, routing, and durable delivery. It is not a human
-notification channel. Add an organization-owned email, Slack, LINE, PagerDuty, or equivalent
-receiver to `alertmanager.yml` only after its secret and named on-call owner are available; keep
-that secret out of Git.
+notification channel by itself. An optional Discord incoming-webhook delivery backend is included
+and disabled when no URL is configured. It uses a webhook rather than a full Discord bot because
+one-way monitoring messages do not need a bot token, Gateway connection, or permission to read
+channel events.
+
+Create an incoming webhook for the target Discord channel using the
+[official Discord webhook documentation](https://docs.discord.com/developers/resources/webhook),
+then add its complete URL only to the ignored host `.env`:
+
+```dotenv
+FLOODCAST_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/WEBHOOK_ID/WEBHOOK_TOKEN
+```
+
+Re-run the idempotent installer to copy the secret and restart the receiver:
+
+```bash
+deploy/single-host/install-user-host.sh --env-file .env
+```
+
+The backend accepts only official HTTPS Discord webhook URLs, requests Discord confirmation with
+`wait=true`, disables all role/user/everyone mentions, keeps messages within Discord embed limits,
+and retries rate limits or server failures within the Alertmanager request timeout. A failed
+delivery returns HTTP 502 so Alertmanager can retry. Delivery results contain only a message ID or
+redacted error code and are fsynced separately at:
+
+```text
+/mnt/8tb_hdd/ryo/floodcast-minxiong/notifications/discord-deliveries.jsonl
+```
+
+Treat the URL as a password and rotate it in Discord if it is exposed. It must not be committed or
+placed in a command-line argument.
 
 Run a local end-to-end drill:
 
@@ -82,6 +112,8 @@ Run a local end-to-end drill:
   --annotation=summary='FloodCastMinxiong notification drill'
 sleep 12
 tail -n 1 ~/.local/share/floodcast-minxiong/notifications/alerts.jsonl
+test ! -f ~/.local/share/floodcast-minxiong/notifications/discord-deliveries.jsonl || \
+  tail -n 1 ~/.local/share/floodcast-minxiong/notifications/discord-deliveries.jsonl
 ~/.local/share/floodcast-minxiong/bin/amtool \
   --alertmanager.url=http://127.0.0.1:9093 \
   alert add FloodCastDrill severity=warning service=floodcast-minxiong \

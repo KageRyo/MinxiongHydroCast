@@ -4,10 +4,12 @@ After=network.target
 
 [Service]
 Type=simple
+EnvironmentFile=-%h/.config/floodcast-minxiong/notifications.env
 ExecStart=%h/.local/share/floodcast-minxiong/venv/bin/floodcast-minxiong-alert-receiver \
   --host 127.0.0.1 \
   --port 9087 \
-  --output %h/.local/share/floodcast-minxiong/notifications/alerts.jsonl
+  --output %h/.local/share/floodcast-minxiong/notifications/alerts.jsonl \
+  --delivery-output %h/.local/share/floodcast-minxiong/notifications/discord-deliveries.jsonl
 Restart=on-failure
 RestartSec=5
 NoNewPrivileges=true
