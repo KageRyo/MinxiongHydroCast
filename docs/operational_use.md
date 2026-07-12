@@ -245,9 +245,10 @@ The templates assume:
 - `CWA_API_KEY` and `WRA_API_KEY` are supplied through `/etc/floodcast-minxiong.env` and never
   passed on the command line.
 
-The scheduled `.github/workflows/official-live-contract.yml` workflow exercises the official CWA
-rain, WRA rainfall-warning, and WRA IoW contracts. Configure the repository secrets `CWA_API_KEY`
-and `WRA_API_KEY`; the workflow fails explicitly when a required secret is absent and never prints
+The scheduled `.github/workflows/cwa-live-contract.yml` workflow, named `Official Live Contracts`,
+exercises the official CWA rain, WRA rainfall-warning, and WRA IoW contracts. Configure the
+repository secrets `CWA_API_KEY` and `WRA_API_KEY`; the workflow fails explicitly when a required
+secret is absent and never prints
 either key or an unredacted credential-bearing request.
 
 Review paths, users, filesystem permissions, browser dependencies, and reverse-proxy policy before
