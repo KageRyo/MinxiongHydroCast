@@ -107,11 +107,17 @@ fi
   "$DURABLE_ROOT/config/prometheus/alertmanager.yml"
 
 systemctl --user daemon-reload
-systemctl --user enable --now \
+systemctl --user enable \
   floodcast-minxiong-alert-receiver.service \
   floodcast-minxiong-alertmanager.service \
   floodcast-minxiong-api.service \
-  floodcast-minxiong-prometheus.service \
+  floodcast-minxiong-prometheus.service
+systemctl --user restart \
+  floodcast-minxiong-alert-receiver.service \
+  floodcast-minxiong-alertmanager.service \
+  floodcast-minxiong-api.service \
+  floodcast-minxiong-prometheus.service
+systemctl --user enable --now \
   floodcast-minxiong-collector.timer \
   floodcast-minxiong-backup.timer \
   floodcast-minxiong-shadow.timer
