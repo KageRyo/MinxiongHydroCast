@@ -108,6 +108,8 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Publish a versioned read API for current alerts and observations.
 - [x] Add an operator view that separates official-source data from experimental predictions.
 - [x] Add systemd templates for a persistent collector timer and supervised localhost API.
+- [x] Deploy the localhost single-host profile with persistent services and least-privilege secret
+      delivery on durable storage.
 - [ ] Deploy the supplied units on a managed host with least-privilege secrets, authenticated/TLS
       access, and a documented rollback.
 - [x] Add an auditable seven-day shadow gate requiring reviewed heavy-rain coverage.
@@ -120,6 +122,6 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [ ] Complete the seven-day shadow deployment before enabling notifications: 900 attempts, 99%
       collection success, 95% readiness, no gap over 30 minutes, intact snapshots, and reviewed
       heavy-rain coverage.
-- [ ] Put operational snapshots on durable storage and verify scheduled backup restore.
+- [x] Put operational snapshots on durable storage and verify scheduled backup restore.
 - [ ] Route operational alerts to named owners and exercise incident response and human override.
 - [ ] Document incident response, data licensing, model rollback, and human override procedures.

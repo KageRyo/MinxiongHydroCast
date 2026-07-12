@@ -519,5 +519,7 @@ Radar source adapters are documented in [docs/radar_source_adapters.md](docs/rad
 The project completion plan is documented in [docs/completion_plan.md](docs/completion_plan.md).
 The Linux deployment and operations runbook is documented in
 [docs/single_host_operations.md](docs/single_host_operations.md).
+Current verified rollout evidence and remaining gates are recorded in
+[docs/deployment_status.md](docs/deployment_status.md).
 The current baseline model card is documented in
 [docs/model_cards/minxiong_chiayi_baseline.md](docs/model_cards/minxiong_chiayi_baseline.md).

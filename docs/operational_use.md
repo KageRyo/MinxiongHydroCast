@@ -310,9 +310,11 @@ A deployable Minxiong service should run this sequence idempotently:
 
 The scheduler, local versioned store, health/readiness contract, JSON run summaries, JSONL logs,
 Prometheus metrics endpoint, read API, operator view, monitoring configs, local alert audit,
-checksummed backup/restore tooling, and single-host installation scripts are implemented. Promotion
-still requires a healthy managed-host rollout, a named human alert channel, an off-host backup,
-authenticated network exposure if needed, and completion of the shadow and model evidence gates.
+checksummed backup/restore tooling, and single-host installation scripts are implemented. The
+single-host profile has been deployed and its live sources, Prometheus target, local alert routing,
+and backup restore have been exercised. See [deployment_status.md](deployment_status.md) for dated
+evidence. Promotion still requires a named human alert channel, an off-host backup, authenticated
+network exposure if needed, and completion of the shadow and model evidence gates.
 
 ## Production Gates
 
@@ -331,7 +333,6 @@ Do not present FloodCastMinxiong as an operational warning system until all gate
 
 The immediate blockers are concrete:
 
-- finish and verify the supplied managed-host deployment with least-privilege secret delivery;
 - add a named human receiver for failed, stale, degraded, and schema alerts, then exercise the
   incident path; the durable localhost audit receiver alone is insufficient;
 - add an off-host backup target after verifying the local scheduled backup and restore drill;

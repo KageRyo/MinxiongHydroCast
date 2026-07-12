@@ -147,9 +147,11 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Add a shadow-history report with heavy-rain evidence and an explicit notification blocker.
 - [x] Add a scheduled official-source live contract workflow that requires `CWA_API_KEY` and
       `WRA_API_KEY` repository secrets without printing credentials.
+- [x] Deploy the localhost single-host profile on durable storage and enable persistent user
+      services, monitoring, local alert auditing, backup, and shadow timers.
 - [ ] Deploy the supplied systemd collector/API units on a managed host with least-privilege secret
       delivery, authenticated/TLS access, and rollback instructions.
-- [ ] Put snapshots on durable mounted storage or a remote backend; schedule backups and verify a
+- [x] Put snapshots on durable mounted storage or a remote backend; schedule backups and verify a
       restore.
 - [ ] Scrape the existing metrics and route failed/stale/degraded/schema alerts after deployment
       owners and channels are assigned.
