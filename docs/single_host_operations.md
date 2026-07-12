@@ -37,7 +37,7 @@ session ends. The installer pins Prometheus and Alertmanager release versions, v
 published SHA-256 files, validates all monitoring configs, installs the Python project in a
 dedicated virtual environment, and starts:
 
-- the localhost API and operator view on `127.0.0.1:8080`;
+- the localhost API and operator view on `127.0.0.1:8180`;
 - Prometheus on `127.0.0.1:9090`;
 - Alertmanager on `127.0.0.1:9093`;
 - the local alert audit receiver on `127.0.0.1:9087`;
@@ -48,8 +48,8 @@ Inspect the deployment without exposing credentials:
 ```bash
 systemctl --user list-timers 'floodcast-minxiong-*'
 systemctl --user --no-pager --full status floodcast-minxiong-api.service
-curl --fail http://127.0.0.1:8080/healthz
-curl --fail http://127.0.0.1:8080/readyz
+curl --fail http://127.0.0.1:8180/healthz
+curl --fail http://127.0.0.1:8180/readyz
 curl --fail http://127.0.0.1:9090/-/ready
 curl --fail http://127.0.0.1:9093/-/ready
 ```
@@ -134,7 +134,7 @@ The collector timer is the source of live attempts. The hourly shadow timer writ
 while the gate is blocked. Inspect current evidence at:
 
 ```bash
-curl --fail http://127.0.0.1:8080/api/v1/shadow-readiness
+curl --fail http://127.0.0.1:8180/api/v1/shadow-readiness
 ```
 
 Do not edit `shadow_evidence.json` merely to pass the gate. After a real heavy-rain period, add the
