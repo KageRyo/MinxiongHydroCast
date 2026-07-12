@@ -80,6 +80,27 @@ def test_rain_gauge_location_prefers_official_station_id_for_stability():
     assert original["location_id"] == renamed["location_id"]
 
 
+def test_flood_sensor_location_prefers_official_sensor_id_for_stability():
+    original = flood_sensor_location(
+        {
+            "縣市": "嘉義縣",
+            "鄉鎮": "民雄鄉",
+            "感測器名稱": "CYC136 民雄鄉大崎村淹水深度",
+            "感測器代碼": "00707a34-700c-4e01-b091-396378c234f6",
+        }
+    )
+    renamed = flood_sensor_location(
+        {
+            "縣市": "嘉義縣",
+            "鄉鎮": "民雄鄉",
+            "感測器名稱": "CYC136 民雄鄉大崎村積水深度",
+            "感測器代碼": "00707a34-700c-4e01-b091-396378c234f6",
+        }
+    )
+
+    assert original["location_id"] == renamed["location_id"]
+
+
 def test_build_location_reference_dedupes_and_writes_csv(tmp_path: Path):
     locations = build_location_reference(
         rain_records=[

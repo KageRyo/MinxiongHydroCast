@@ -15,7 +15,10 @@ StateDirectory=floodcast-minxiong
 ExecStart=/opt/floodcast-minxiong/.venv/bin/floodcast-minxiong-operations \
   --mode live \
   --once \
+  --alert-source auto \
   --rain-source auto \
+  --flood-source auto \
+  --flood-max-age-minutes 90 \
   --api-timeout-seconds 30 \
   --store /var/lib/floodcast-minxiong/operations \
   --debug-dir /var/lib/floodcast-minxiong/debug \

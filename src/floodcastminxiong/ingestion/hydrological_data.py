@@ -56,10 +56,20 @@ RAIN_FIELDNAMES = [
 ]
 FLOOD_FIELDNAMES = [
     "排序",
+    "感測器代碼",
+    "觀測站代碼",
+    "縣市代碼",
+    "鄉鎮代碼",
     "縣市",
     "鄉鎮",
     "感測器名稱",
+    "觀測站名稱",
+    "維運單位",
+    "類別",
     "地址",
+    "緯度",
+    "經度",
+    "啟用狀態",
     "水情時間",
     "水情時間ISO",
     "目前感測值",
@@ -155,6 +165,16 @@ def demo_records() -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     flood = [
         {
             **record,
+            "感測器代碼": "",
+            "觀測站代碼": "",
+            "縣市代碼": "",
+            "鄉鎮代碼": "",
+            "觀測站名稱": "",
+            "維運單位": "",
+            "類別": "",
+            "緯度": "",
+            "經度": "",
+            "啟用狀態": "",
             "水情時間ISO": normalize_datetime(
                 record["水情時間"],
                 production_time=production_time,
@@ -231,10 +251,20 @@ def parse_flood_rows(
         records.append(
             {
                 "排序": row[0],
+                "感測器代碼": "",
+                "觀測站代碼": "",
+                "縣市代碼": "",
+                "鄉鎮代碼": "",
                 "縣市": row[1],
                 "鄉鎮": row[2],
                 "感測器名稱": row[3],
+                "觀測站名稱": "",
+                "維運單位": "",
+                "類別": "",
                 "地址": row[4],
+                "緯度": "",
+                "經度": "",
+                "啟用狀態": "",
                 "水情時間": row[5],
                 "水情時間ISO": normalize_datetime(row[5], production_time=production_time),
                 "目前感測值": row[6],
@@ -426,6 +456,38 @@ def scrape_flood_live(
         )
         browser.close()
     return flood
+
+
+def scrape_rain_live(
+    *,
+    county: str = DEFAULT_COUNTY_VALUE,
+    headless: bool = True,
+    timeout: int = 45_000,
+    debug_dir: Path | None = None,
+) -> list[dict[str, str]]:
+    """Collect only the legacy WRA rain page for degraded API fallback."""
+
+    settings = get_settings()
+    rain_url = f"{settings.wra_base_url}{RAIN_PATH}"
+    fetched_at = now_taipei_iso()
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(headless=headless)
+        page = browser.new_page(viewport={"width": 1600, "height": 1000})
+        page.goto(rain_url, wait_until="domcontentloaded", timeout=timeout)
+        page.wait_for_selector("select#city", timeout=timeout)
+        page.select_option("select#city", value=county)
+        page.wait_for_timeout(2500)
+        save_debug_capture(page, debug_dir, "wra_rain")
+        rain_text = page.locator("body").inner_text(timeout=timeout)
+        rain = parse_rain_rows(
+            table_rows(page),
+            production_time=extract_production_time(rain_text),
+            fetched_at=fetched_at,
+            mode="live",
+            source_url=rain_url,
+        )
+        browser.close()
+    return rain
 
 
 def run_demo(output_rain: Path, output_flood: Path) -> tuple[int, int]:

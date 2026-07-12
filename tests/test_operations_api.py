@@ -79,6 +79,16 @@ def test_metrics_payload_exposes_readiness_attempt_and_dataset_age():
                         "schema_sha256": "0" * 64,
                         "schema_errors": [],
                     },
+                    "source": {
+                        "source_kind": "api",
+                        "outcome": "ok",
+                        "authority": "Central Weather Administration, Taiwan",
+                        "dataset_id": "O-A0002-001",
+                        "source_url": "https://example.test/rain",
+                        "fetched_at": "2026-07-11T10:00:00+08:00",
+                        "schema_version": "test-v1",
+                        "content_sha256": "2" * 64,
+                    },
                 }
             },
         )
@@ -88,6 +98,8 @@ def test_metrics_payload_exposes_readiness_attempt_and_dataset_age():
     assert "floodcastminxiong_last_attempt_success 1" in metrics
     assert 'dataset="rain_gauges"} 4.5' in metrics
     assert 'dataset="rain_gauges",state="healthy"} 1' in metrics
+    assert 'dataset="rain_gauges",source_kind="api"} 1' in metrics
+    assert 'dataset="rain_gauges",outcome="ok"} 1' in metrics
 
 
 def test_shadow_payload_defaults_to_blocked_and_exports_metrics(tmp_path):
@@ -261,6 +273,7 @@ def test_api_serves_status_classified_data_and_operator_view(tmp_path):
         assert "floodcastminxiong_shadow_gate_passed 0" in metrics
         assert 'dataset="rain_gauges",state="demo"' in metrics
         assert 'dataset="rain_gauges",source_kind="demo_fixture"' in metrics
+        assert 'dataset="rain_gauges",outcome="ok"' in metrics
 
         with urlopen(f"{base_url}/", timeout=3) as response:
             page = response.read().decode("utf-8")

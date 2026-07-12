@@ -1,0 +1,42 @@
+[
+  {
+    "category": "淹水深度",
+    "orgname": "嘉義縣政府水利處",
+    "sensorid": "00707a34-700c-4e01-b091-396378c234f6",
+    "sensorname": "淹水深度",
+    "sensorfullname": "CYC136 民雄鄉大崎村淹水深度",
+    "sensordescription": "CYC136 民雄鄉大崎村淹水深度",
+    "unit": "cm",
+    "observatoryidentifier": "3765000FLCYC136",
+    "observatoryname": "CYC136 民雄鄉大崎村",
+    "longitude": "120.473759",
+    "latitude": "23.517036",
+    "countycode": "10010",
+    "countyname": "嘉義縣",
+    "areacode": "10010050",
+    "townname": "民雄鄉",
+    "isenable": "true",
+    "createdate": "2021-09-10T11:00:41+00:00",
+    "modifydate": "2024-09-16T15:13:06+00:00"
+  },
+  {
+    "category": "淹水深度",
+    "orgname": "嘉義縣政府水利處",
+    "sensorid": "021aa96e-3a1f-415e-ac6d-995f3e90d836",
+    "sensorname": "淹水深度",
+    "sensorfullname": "CYC001 布袋鎮江山里淹水深度",
+    "sensordescription": "CYC001 布袋鎮江山里淹水深度",
+    "unit": "cm",
+    "observatoryidentifier": "3765000FLCYC001",
+    "observatoryname": "CYC001 布袋鎮江山里",
+    "longitude": "120.19971",
+    "latitude": "23.38255",
+    "countycode": "10010",
+    "countyname": "嘉義縣",
+    "areacode": "10010030",
+    "townname": "布袋鎮",
+    "isenable": "true",
+    "createdate": "2019-11-12T15:22:39+00:00",
+    "modifydate": "2024-07-12T09:18:47+00:00"
+  }
+]

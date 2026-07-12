@@ -24,33 +24,63 @@ DEFAULT_COUNTY_VALUE = "10010"
 DEFAULT_OUTPUT = Path("data/processed/rainfall_alerts.csv")
 PIPELINE_NAME = "rainfall_alerts"
 FIELDNAMES = [
+    "雨量站代碼",
+    "縣市代碼",
+    "鄉鎮代碼",
     "地區",
+    "水情時間",
+    "水情時間ISO",
     "警戒",
+    "警戒級別",
     "影響村落",
-    "1h雨量",
-    "3h雨量",
-    "6h雨量",
+    "10分鐘雨量mm",
+    "1小時雨量mm",
+    "3小時雨量mm",
+    "6小時雨量mm",
+    "12小時雨量mm",
+    "24小時雨量mm",
     "抓取時間",
     "資料模式",
+    "資料來源",
 ]
 NON_EMPTY_FIELDS = {"地區", "警戒", "抓取時間", "資料模式"}
 
 SAMPLE_DATA = [
     {
+        "雨量站代碼": "demo-minxiong",
+        "縣市代碼": "10010",
+        "鄉鎮代碼": "10010050",
         "地區": "嘉義 民雄鄉",
+        "水情時間": "",
+        "水情時間ISO": "",
         "警戒": "未達警戒",
+        "警戒級別": "0",
         "影響村落": "民雄鄉-雙福村,福樂村,大崎村,秀林村,金興村,北斗村",
-        "1h雨量": "1H 0 50 60",
-        "3h雨量": "3H 0 100 110",
-        "6h雨量": "6H 0 130 150",
+        "10分鐘雨量mm": "0",
+        "1小時雨量mm": "0",
+        "3小時雨量mm": "0",
+        "6小時雨量mm": "0",
+        "12小時雨量mm": "0",
+        "24小時雨量mm": "0",
+        "資料來源": "demo",
     },
     {
+        "雨量站代碼": "demo-shakeng",
+        "縣市代碼": "10010",
+        "鄉鎮代碼": "",
         "地區": "沙坑 竹崎鄉",
+        "水情時間": "",
+        "水情時間ISO": "",
         "警戒": "未達警戒",
+        "警戒級別": "0",
         "影響村落": "竹崎鄉-灣橋村,沙坑村,獅埜村,龍山村",
-        "1h雨量": "1H 0 70 80",
-        "3h雨量": "3H 0 135 145",
-        "6h雨量": "6H 0 180 200",
+        "10分鐘雨量mm": "0",
+        "1小時雨量mm": "0",
+        "3小時雨量mm": "0",
+        "6小時雨量mm": "0",
+        "12小時雨量mm": "0",
+        "24小時雨量mm": "0",
+        "資料來源": "demo",
     },
 ]
 
@@ -157,14 +187,24 @@ def scrape_with_playwright(
 
                 records.append(
                     {
+                        "雨量站代碼": "",
+                        "縣市代碼": county_value,
+                        "鄉鎮代碼": "",
                         "地區": location,
+                        "水情時間": "",
+                        "水情時間ISO": "",
                         "警戒": status,
+                        "警戒級別": "",
                         "影響村落": affected,
-                        "1h雨量": rain_1h,
-                        "3h雨量": rain_3h,
-                        "6h雨量": rain_6h,
+                        "10分鐘雨量mm": "",
+                        "1小時雨量mm": _current_rainfall(rain_1h),
+                        "3小時雨量mm": _current_rainfall(rain_3h),
+                        "6小時雨量mm": _current_rainfall(rain_6h),
+                        "12小時雨量mm": "",
+                        "24小時雨量mm": "",
                         "抓取時間": now,
                         "資料模式": "live",
+                        "資料來源": url,
                     }
                 )
             except Exception as exc:
@@ -173,6 +213,18 @@ def scrape_with_playwright(
         browser.close()
 
     return records
+
+
+def _current_rainfall(value: str) -> str:
+    """Extract the current value from the page's `1H current level1 level2` text."""
+
+    parts = value.split()
+    if len(parts) < 2:
+        return ""
+    try:
+        return f"{float(parts[1]):g}"
+    except ValueError:
+        return ""
 
 
 def run(output: Path, mode: str, county: str, headed: bool, timeout: int) -> int:

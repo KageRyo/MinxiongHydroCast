@@ -54,7 +54,17 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Confirm local WRA API key storage without committing the key.
 - [x] Add a production CWA `O-A0002-001` rain-gauge adapter with strict Pydantic contracts,
       retry/backoff/rate limiting, source provenance, and scheduled live contract smoke testing.
-- [ ] Implement WRA official API ingestion after endpoint contracts are confirmed.
+- [x] Add the official WRA OpenApiv3 rainfall-warning adapter using the `apikey` header, strict
+      Pydantic validation, request reliability controls, and source provenance.
+- [x] Treat a valid WRA warning `Data=[]` response as healthy `outcome=empty` instead of an error.
+- [x] Add the official WRA IoW flood-sensor adapter by joining government Open Data 142980 latest
+      measurements with 142979 metadata and applying a 90-minute freshness limit.
+- [x] Restrict scraper fallback to request failures and fail closed on schema drift, invalid units,
+      broken joins, and unexpected empty observation sets.
+- [x] Confirm WRA dataset 25768 is river/regional-drainage water level, not a valid substitute for
+      street/community `flood_sensors`.
+- [ ] Define a separate `river_water_levels` product and use case before integrating dataset 25768;
+      preserve `checkresult`, `checkdesc`, observation time, and freshness.
 
 ### Phase 2: Dataset Build
 
@@ -118,6 +128,8 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
       township/village context.
 - [x] Add an operational Minxiong township feature row for rainfall, sensors, alerts, and stable
       location IDs.
+- [x] Block readiness when official county feeds have no Minxiong rain-gauge or enabled
+      flood-sensor coverage.
 - [ ] Add validated QPE accumulation and village-level context to the operational feature table.
 - [x] Define and audit provenance-backed Minxiong positive/negative flood labels.
 - [ ] Collect enough confirmed labels to pass the 10-positive/20-negative training gate.
@@ -133,8 +145,17 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 - [x] Add a localhost operator view separating official-source data and experimental forecasts.
 - [x] Add systemd collector timer and API supervision templates for Linux deployment.
 - [x] Add a shadow-history report with heavy-rain evidence and an explicit notification blocker.
-- [ ] Add a durable remote-storage backend, process supervision, metrics export, and backups.
-- [ ] Route failed/stale/schema alerts after deployment owners and channels are assigned.
+- [x] Add a scheduled official-source live contract workflow that requires `CWA_API_KEY` and
+      `WRA_API_KEY` repository secrets without printing credentials.
+- [ ] Deploy the supplied systemd collector/API units on a managed host with least-privilege secret
+      delivery, authenticated/TLS access, and rollback instructions.
+- [ ] Put snapshots on durable mounted storage or a remote backend; schedule backups and verify a
+      restore.
+- [ ] Scrape the existing metrics and route failed/stale/degraded/schema alerts after deployment
+      owners and channels are assigned.
+- [ ] Complete the seven-day shadow gate with 900 attempts, 99% collection success, 95% readiness,
+      no gap over 30 minutes, intact snapshots, and a reviewed heavy-rain period.
+- [ ] Exercise incident response, operator override, and recovery before enabling notifications.
 - [ ] Keep deployment configuration separate from research/training artifacts.
 
 ## Later

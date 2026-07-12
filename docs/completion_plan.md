@@ -55,10 +55,13 @@ a production release.
 - Completed: official CWA `O-A0002-001` operational rain-gauge adapter with strict Pydantic input
   schemas, retry/backoff/rate limiting, WGS84/station identifiers, source provenance, degraded
   scraper fallback, and a scheduled credential-safe live contract smoke test.
+- Completed: official WRA OpenApiv3 rainfall-warning adapter and WRA IoW flood-depth Open Data
+  adapter, including strict Pydantic contracts, healthy empty-warning semantics, paginated
+  measurement/metadata joins, provenance, and request-only degraded fallback.
 - Pending deployment work: durable remote storage, process supervision, metrics export,
   authentication, backups, and alert routing to named maintainers.
-- Pending integration work: WRA official API endpoint contracts for rainfall alerts and flood
-  sensors still need implementation in the ingestion layer.
+- Pending optional hydrology work: define a separate operational use case and contract before
+  integrating river/regional-drainage water levels; never substitute them for flood-depth sensors.
 - Pending official-label work: attach CWA weather maps, warnings, daily reports, or equivalent
   official source evidence to each selected event before weather-type stratification.
 - Pending source-search work: candidate event-time CWA historical `SFCcombo` chart URLs were
@@ -76,7 +79,7 @@ a production release.
 - Extend event planning from file-list selection to actual frame download.
 - Add schema checks for every frame in a sequence: timestamp spacing, grid consistency, units, and
   nodata encoding.
-- Confirm WRA API/access once the WRA application is approved.
+- Live-verify and continuously monitor the WRA rainfall-warning and IoW flood-depth contracts.
 
 ## Phase 2: Dataset Build
 

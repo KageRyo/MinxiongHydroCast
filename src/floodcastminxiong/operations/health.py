@@ -31,13 +31,20 @@ def assess_dataset(
     mode: str,
     max_age_minutes: float,
     now: datetime,
+    empty_observed_at: str | None = None,
+    freshness_observed_at: str | None = None,
 ) -> dict[str, Any]:
     expected = set(fieldnames)
     schema_errors: list[str] = []
     timestamps: list[datetime] = []
 
-    if not records:
+    if not records and empty_observed_at is None:
         schema_errors.append("dataset contains no records")
+    elif not records:
+        try:
+            timestamps.append(parse_timestamp(empty_observed_at))
+        except (TypeError, ValueError):
+            schema_errors.append(f"invalid empty observation timestamp: {empty_observed_at}")
 
     for index, record in enumerate(records, start=1):
         actual = set(record)
@@ -55,6 +62,12 @@ def assess_dataset(
             timestamps.append(parse_timestamp(raw_timestamp))
         except ValueError:
             schema_errors.append(f"row {index}: invalid {timestamp_field}: {raw_timestamp}")
+
+    if freshness_observed_at is not None:
+        try:
+            timestamps = [parse_timestamp(freshness_observed_at)]
+        except (TypeError, ValueError):
+            schema_errors.append(f"invalid freshness timestamp: {freshness_observed_at}")
 
     observed_at = max(timestamps).isoformat(timespec="seconds") if timestamps else ""
     age_minutes: float | None = None
@@ -98,6 +111,7 @@ def refresh_dataset_health(
         return refreshed
 
     degradation_reasons = list(health.get("degradation_reasons", []))
+    persistent_state = health.get("persistent_state")
     observed_at = str(health.get("observed_at", ""))
     try:
         age_minutes = max(0.0, (now - parse_timestamp(observed_at)).total_seconds() / 60)
@@ -107,6 +121,14 @@ def refresh_dataset_health(
     refreshed["age_minutes"] = round(age_minutes, 3) if age_minutes is not None else None
     if age_minutes is None or age_minutes > max_age_minutes:
         refreshed["state"] = "stale"
+        refreshed["ready"] = False
+    elif persistent_state in {
+        "stale",
+        "degraded",
+        "upstream_unhealthy",
+        "coverage_missing",
+    }:
+        refreshed["state"] = persistent_state
         refreshed["ready"] = False
     elif degradation_reasons:
         refreshed["state"] = "degraded"

@@ -1,20 +1,43 @@
 # Data Contracts
 
-FloodCastMinxiong treats data contracts as the boundary between scraping, cleaning, modeling, and
-product usage. Every live dataset should include source metadata and an explicit `資料模式` value.
+FloodCastMinxiong treats data contracts as the boundary between upstream collection, cleaning,
+modeling, and product usage. Every live dataset includes source metadata and an explicit
+`資料模式` value. Operational collection prefers official machine-readable sources; a page scraper
+is only a degraded request-failure fallback.
 
 ## Rainfall Alerts
 
 Required fields:
 
+- `雨量站代碼`
+- `縣市代碼`
+- `鄉鎮代碼`
 - `地區`
+- `水情時間`
+- `水情時間ISO`
 - `警戒`
+- `警戒級別`
 - `影響村落`
-- `1h雨量`
-- `3h雨量`
-- `6h雨量`
+- `10分鐘雨量mm`
+- `1小時雨量mm`
+- `3小時雨量mm`
+- `6小時雨量mm`
+- `12小時雨量mm`
+- `24小時雨量mm`
 - `抓取時間`
 - `資料模式`
+- `資料來源`
+
+The primary source is the WRA OpenApiv3 `GET /v2/Rainfall/Warning` contract. The API key is sent
+only in the `apikey` request header. Its top-level `UpdataTime` and `Data` payload, warning fields,
+numeric ranges, and timestamps are validated with strict Pydantic schemas; missing, unexpected, or
+wrongly typed fields are schema drift and fail the collection without scraper fallback.
+
+This product contains only warnings that are currently in effect. A validated response with
+`Data=[]` is therefore a successful no-active-warning result, represented by zero records and
+`outcome=empty`. The collector uses its fetch time for freshness, so a fresh official empty result
+is `healthy` and ready. It must not be converted into an error row or a fabricated "no warning"
+record.
 
 ## Rain Gauges
 
@@ -58,15 +81,29 @@ Every immutable operational dataset records:
 `scraper_fallback` datasets are always degraded and never ready. Expected empty API products must
 use the explicit `empty` outcome; unexpected empty observation datasets fail the collection.
 
+In `auto` source mode, only authentication, transport, HTTP, timeout, and rate-limit request
+failures can invoke a scraper fallback. Upstream Pydantic schema drift, invalid timestamps, unit
+changes, join failures, and unexpected empty observation sets fail closed.
+
 ## Flood Sensors
 
 Required fields:
 
 - `排序`
+- `感測器代碼`
+- `觀測站代碼`
+- `縣市代碼`
+- `鄉鎮代碼`
 - `縣市`
 - `鄉鎮`
 - `感測器名稱`
+- `觀測站名稱`
+- `維運單位`
+- `類別`
 - `地址`
+- `緯度`
+- `經度`
+- `啟用狀態`
 - `水情時間`
 - `水情時間ISO`
 - `目前感測值`
@@ -78,7 +115,37 @@ Required fields:
 - `資料模式`
 - `資料來源`
 
-Future live data should add sensor IDs, WGS84 coordinates, and water-level units.
+The official adapter joins the WRA IoW latest flood-depth measurements from government Open Data
+dataset [142980](https://data.gov.tw/dataset/142980) with sensor metadata from dataset
+[142979](https://data.gov.tw/dataset/142979) by `sensorid`. It requires matching county/town codes,
+official observatory identifiers, WGS84 coordinates, enabled state, category `淹水深度`, and unit
+`cm`. A measurement without matching metadata, duplicate sensor IDs, conflicting location codes,
+negative target depth, or an unexpected empty target set fails closed as an upstream contract
+error. Dataset 142979 does
+not provide a street address, so official API records leave `地址` empty instead of fabricating one.
+Disabled sensors remain in the source dataset for auditability but do not contribute to the
+Minxiong feature or determine source freshness; a target with no enabled sensor is not ready.
+
+These endpoints are official public Open Data snapshots updated approximately hourly. They are not
+the bearer-protected, station-origin real-time feed, so the operational freshness threshold is 90
+minutes and the service must not claim sub-hour sensor latency. The source can be official and
+healthy while still having a slower publication cadence than the original measuring station.
+
+## River Water Levels
+
+Government Open Data dataset [25768](https://data.gov.tw/dataset/25768) contains river and regional
+drainage water-level observations. It is not a street/community flood-depth sensor product, and its
+records are not fully quality-controlled. FloodCastMinxiong therefore does not map it into
+`flood_sensors`, derive Minxiong flood-sensor features from it, or expose it as an operational
+dataset today. A future integration must use a separate `river_water_levels` contract and retain
+the upstream `checkresult`, `checkdesc`, observation timestamp, and explicit freshness state.
+
+## Minxiong Feature Coverage
+
+The derived `minxiong_features` row includes `coverage_ready` and `coverage_gaps`. Live readiness
+requires at least one Minxiong rain gauge and one enabled Minxiong flood-depth sensor. A healthy
+Chiayi County feed with no Minxiong records is `coverage_missing`, not ready. A valid empty rainfall
+warning remains healthy and contributes an alert count of zero; it is not a coverage gap.
 
 ## Shelters
 
@@ -112,7 +179,9 @@ Required fields:
 - `coordinate_source`
 - `admin_unit_key`
 
-Use generated location IDs only until official station or sensor IDs are available.
+`location_id` remains a snapshot-stable derived hash. Keep the official station and sensor IDs in
+their source datasets for authoritative cross-system joins; do not present the derived hash as a
+WRA or CWA identifier.
 
 ## Grid Specs
 
