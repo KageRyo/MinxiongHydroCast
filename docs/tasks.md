@@ -1,7 +1,8 @@
 # Task List
 
-This list replaces GitHub issues for now. Keep tasks small enough to finish, test, and push on
-`main`. The end-to-end target is defined in [completion_plan.md](completion_plan.md).
+This list replaces GitHub issues for now. Keep tasks small enough to finish, test, and propose
+through a focused pull request. The end-to-end target is defined in
+[completion_plan.md](completion_plan.md).
 
 ## Active
 
@@ -138,7 +139,8 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
 
 ### Phase 6: Release And Operations
 
-- [ ] Publish model cards for Taiwan-wide and Minxiong/Chiayi-specific checkpoints.
+- [x] Publish the Minxiong/Chiayi baseline smoke-test model card.
+- [ ] Publish model cards for any future Taiwan-wide or promoted Minxiong/Chiayi checkpoints.
 - [x] Add locked one-shot and interval scheduling for rainfall-alert and hydrology ingestion.
 - [x] Add immutable checksummed snapshots, latest pointers, retention, and failed-attempt records.
 - [x] Add freshness/schema/readiness health checks and a versioned read API.
@@ -149,18 +151,23 @@ This list replaces GitHub issues for now. Keep tasks small enough to finish, tes
       `WRA_API_KEY` repository secrets without printing credentials.
 - [x] Deploy the localhost single-host profile on durable storage and enable persistent user
       services, monitoring, local alert auditing, backup, and shadow timers.
-- [ ] Deploy the supplied systemd collector/API units on a managed host with least-privilege secret
-      delivery, authenticated/TLS access, and rollback instructions.
-- [x] Put snapshots on durable mounted storage or a remote backend; schedule backups and verify a
-      restore.
-- [ ] Scrape the existing metrics and route failed/stale/degraded/schema alerts after deployment
-      owners and channels are assigned.
+- [x] Deploy the supplied user-systemd units on the managed host with least-privilege secret
+      delivery, localhost-only access, and documented rollback instructions.
+- [ ] Add authenticated TLS ingress only before making the service reachable beyond localhost.
+- [x] Put snapshots on durable mounted storage, schedule local backups, and verify a restore.
+- [ ] Replicate verified backups to a different device or remote system.
+- [x] Scrape service metrics and route failed/stale/degraded/schema alerts to the durable local audit
+      receiver.
+- [ ] Route operational alerts to named primary and backup human receivers.
 - [ ] Complete the seven-day shadow gate with 900 attempts, 99% collection success, 95% readiness,
       no gap over 30 minutes, intact snapshots, and a reviewed heavy-rain period.
 - [ ] Exercise incident response, operator override, and recovery before enabling notifications.
-- [ ] Keep deployment configuration separate from research/training artifacts.
+- [x] Keep deployment configuration separate from research/training artifacts.
 
 ## Later
 
-- [ ] Move selected stable workflows from manual commands to scheduled automation.
-- [ ] Add a lightweight dashboard only after ingestion, validation, and model outputs are stable.
+- [x] Schedule stable observation collection, shadow evaluation, backups, and official live
+      contracts.
+- [ ] Schedule radar/model workflows only after their data and model gates are stable.
+- [ ] Extend the operator view with experimental forecast products only after model outputs pass
+      their gates.
