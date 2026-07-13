@@ -24,6 +24,7 @@ from minxionghydrocast.operations.schemas import (
     ShadowResponse,
     StatusResponse,
 )
+from minxionghydrocast.operations.shadow import NOTIFICATION_GATE_BLOCKER
 from minxionghydrocast.operations.snapshot_store import SnapshotStore, SnapshotStoreError
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
@@ -223,8 +224,7 @@ def shadow_payload(store: SnapshotStore) -> ShadowResponse:
             notification_allowed=False,
             notification_blockers=[
                 "shadow report has not been generated",
-                "notification delivery is not implemented and local model-label gates "
-                "are not satisfied",
+                NOTIFICATION_GATE_BLOCKER,
             ],
         )
     try:
