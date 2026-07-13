@@ -61,12 +61,24 @@ python -m playwright install chromium
 `pyproject.toml` is the single source of truth for Python dependencies. Install `.[dev]` for
 linting and tests, `.[model]` for model training, or `.[dev,model]` when both are needed.
 
+Use the concise `mhc` dispatcher for interactive commands:
+
+```bash
+mhc --help
+mhc operations --help
+mhc serve --help
+```
+
+Every existing `minxiong-hydrocast-<command>` entry point is available as `mhc <command>`.
+`mhc collect` aliases `mhc operations`, and `mhc shadow` aliases `mhc shadow-report`. The full
+entry points remain available for explicit service definitions and automation.
+
 ## Operational Observation Service
 
 Create a versioned demo snapshot without contacting live sources:
 
 ```bash
-minxiong-hydrocast-operations --mode demo --once
+mhc operations --mode demo --once
 ```
 
 Run one live collection. Live is the default mode. Store both keys in an ignored local `.env`
@@ -77,7 +89,7 @@ set -a
 source .env
 set +a
 
-minxiong-hydrocast-operations --once \
+mhc operations --once \
   --alert-source auto \
   --rain-source auto \
   --flood-source auto \
@@ -108,15 +120,15 @@ the collector applies a separate 90-minute freshness limit.
 Smoke-test all three official observation contracts without installing a Playwright browser:
 
 ```bash
-minxiong-hydrocast-cwa-rain-smoke --county 10010 --county-name 嘉義縣
-minxiong-hydrocast-wra-alert-smoke --county 10010
-minxiong-hydrocast-wra-flood-smoke --county 10010
+mhc cwa-rain-smoke --county 10010 --county-name 嘉義縣
+mhc wra-alert-smoke --county 10010
+mhc wra-flood-smoke --county 10010
 ```
 
 Run the collector every 10 minutes and retain 30 days of snapshots:
 
 ```bash
-minxiong-hydrocast-operations \
+mhc operations \
   --interval-seconds 600 \
   --retention-days 30 \
   --max-age-minutes 30 \
@@ -132,7 +144,7 @@ minxiong-hydrocast-operations \
 Serve the read-only API and internal operator view on localhost:
 
 ```bash
-minxiong-hydrocast-serve --host 127.0.0.1 --port 8080
+mhc serve --host 127.0.0.1 --port 8080
 ```
 
 Open <http://127.0.0.1:8080/> for the operator view. The service exposes:
@@ -163,7 +175,7 @@ optional Discord delivery, and shadow scheduling, is under `deploy/systemd-user/
 Evaluate accumulated live snapshots against a reviewed heavy-rain period:
 
 ```bash
-minxiong-hydrocast-shadow-report \
+mhc shadow-report \
   --evidence /path/to/reviewed_shadow_evidence.json
 ```
 
@@ -174,7 +186,7 @@ Passing this gate does not enable notifications; local model-label and delivery 
 Audit reviewed Minxiong flood-event labels before using them for model training:
 
 ```bash
-minxiong-hydrocast-label-audit \
+mhc label-audit \
   --manifest /path/to/reviewed_flood_labels.json \
   --output data/processed/flood_label_audit.json \
   --require-training-ready
@@ -196,7 +208,7 @@ provided processed CSV inputs.
 Run the local demo pipeline for installation and schema checks only:
 
 ```bash
-python scripts/run_demo.py
+mhc demo
 ```
 
 The standalone rainfall-alert and hydrology CLIs below exercise the legacy page parsers. Keep them

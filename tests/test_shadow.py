@@ -104,7 +104,8 @@ def test_shadow_gate_requires_continuous_live_coverage_and_reviewed_event(tmp_pa
     assert report["metrics"]["covered_heavy_rain_periods"] == 1
     assert report["notification_allowed"] is False
     assert report["notification_blockers"] == [
-        "notification delivery is not implemented and local model-label gates are not satisfied"
+        "external notification delivery is not enabled and local model-label gates are not "
+        "satisfied"
     ]
 
 

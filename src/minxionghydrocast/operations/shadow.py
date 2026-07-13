@@ -15,6 +15,9 @@ from minxionghydrocast.operations.health import parse_timestamp
 from minxionghydrocast.operations.snapshot_store import SnapshotStore
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
+NOTIFICATION_GATE_BLOCKER = (
+    "external notification delivery is not enabled and local model-label gates are not satisfied"
+)
 
 
 @dataclass(frozen=True)
@@ -186,9 +189,7 @@ def evaluate_shadow(
         "shadow_gate_passed": shadow_gate_passed,
         "notification_allowed": False,
         "notification_blockers": sorted(set(reasons))
-        + [
-            "notification delivery is not implemented and local model-label gates are not satisfied"
-        ],
+        + [NOTIFICATION_GATE_BLOCKER],
     }
 
 

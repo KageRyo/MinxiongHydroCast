@@ -208,7 +208,8 @@ The default gate requires:
 
 The report is atomically stored as `shadow_report.json` in the operations store and exposed by the
 API and metrics endpoint. `notification_allowed` remains false even when the shadow criteria pass,
-because notification delivery and local model-label gates are separate unfinished requirements.
+because external notification delivery must be explicitly enabled and the local model-label gates
+are separate unfinished requirements.
 
 ## Local Flood Labels
 

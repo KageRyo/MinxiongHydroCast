@@ -34,6 +34,7 @@ model = [
 ]
 
 [project.scripts]
+mhc = "minxionghydrocast.cli:main"
 minxiong-hydrocast-demo = "minxionghydrocast.pipelines.demo:main"
 minxiong-hydrocast-event-split-check = "minxionghydrocast.models.event_splits:main"
 minxiong-hydrocast-evaluate-baselines = "minxionghydrocast.pipelines.baseline_evaluation:main"
