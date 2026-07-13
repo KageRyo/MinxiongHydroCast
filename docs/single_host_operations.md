@@ -177,6 +177,6 @@ period. The eight-day audit window allows the hourly evaluator to measure a full
 without requiring attempts to land exactly on both window boundaries. A missing qualifying weather
 event means the deployment must continue beyond seven days.
 
-The pull request remains draft while this gate is accumulating or any operational drill is
-unresolved. Convert it to ready for review only after the report says `shadow_gate_passed=true` and
-the workflow, services, alert drill, and restore drill are all healthy.
+Public exposure, automated risk notification, and forecast promotion remain blocked while this
+gate is accumulating or any operational drill is unresolved. Internal code and documentation may
+merge independently when their own review and CI checks pass.

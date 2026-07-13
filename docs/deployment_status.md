@@ -3,12 +3,12 @@
 This page records verified deployment evidence. It is not a release approval or a claim that
 MinxiongHydroCast is an official warning system.
 
-## Verified on 2026-07-12
+## Verified on 2026-07-13
 
 The single-host shadow deployment is running on Linux host `RTX4090` with user-systemd linger
-enabled. Its private environment file has mode `0600` and is not tracked by Git. The verified
-runtime predates the canonical identifier rollout described below; its durable state must be
-preserved during that migration.
+enabled. Mutable state is stored under `/mnt/8tb_hdd/ryo/minxiong-hydrocast`, and the stable
+service path is `~/.local/share/minxiong-hydrocast`. Its private environment file has mode `0600`
+and is not tracked by Git.
 
 Verified runtime components:
 
@@ -18,51 +18,57 @@ Verified runtime components:
 - Alertmanager 0.33.1 on `127.0.0.1:9093`;
 - Pydantic-validated alert audit receiver on `127.0.0.1:9087`;
 - daily backup and hourly shadow-evaluation timers;
-- a dedicated host-bound GitHub Actions runner for source contracts that require host credentials.
+- dedicated runner `RTX4090-minxiong-hydrocast`, online with the `minxiong-hydrocast` label, for
+  source contracts that require host credentials.
 
-The initial live snapshot was healthy and ready. It contained a valid empty WRA rainfall-warning
-product, 81 CWA rain-gauge observations, 150 WRA IoW flood-sensor observations, and a ready
-Minxiong feature row.
+The post-migration live snapshot was healthy and ready. It contained a valid empty WRA
+rainfall-warning product, 82 CWA rain-gauge observations, 150 WRA IoW flood-sensor observations,
+and a ready Minxiong feature row.
 
 ## Operational drills
 
-The `MinxiongHydroCastDrill` synthetic alert produced both firing and resolved deliveries in the durable
-notification JSONL log. This proves local Prometheus/Alertmanager routing and receiver persistence;
-it does not provide a named human notification channel. An allowlisted, bounded, retrying Discord
-incoming-webhook backend is implemented but remains disabled until an operator places a webhook URL
-in the ignored host environment file.
+The original `MinxiongHydroCastDrill` and post-migration `MinxiongHydroCastMigrationDrill`
+synthetic alerts produced durable local notification audit records. This proves local
+Prometheus/Alertmanager routing and receiver persistence; it does not provide a named human
+notification channel. An allowlisted, bounded, retrying Discord incoming-webhook backend is
+implemented, but the deployed notification environment is deliberately empty pending explicit
+activation and assignment of a named owner.
 
-The backup drill created and SHA-256 verified a timestamped archive. It restored three snapshots
-into an isolated durable drill directory, verified every snapshot, and confirmed that the restored
-latest snapshot ID matched the archive metadata.
+The post-migration backup drill created and SHA-256 verified a 68-snapshot archive. It restored the
+archive into an isolated durable drill directory, verified every snapshot, and confirmed that the
+restored latest snapshot ID matched the archive metadata.
 
-The manually dispatched Official Live Contracts run `29198834843` passed both jobs:
-GitHub-hosted CWA/IoW contracts and the host-bound WRA rainfall-warning contract.
+The manually dispatched Official Live Contracts run `29219192303` passed both jobs:
+GitHub-hosted CWA/IoW contracts and the host-bound WRA rainfall-warning contract on the renamed
+self-hosted runner.
 
 The complete local suite passed with 233 tests, and Ruff reported no issues.
 
 ## Canonical identifier rollout
 
-The source tree, package, commands, environment variables, metrics, service templates, and runner
-configuration use the canonical identifiers defined in [project_identity.md](project_identity.md).
-The repository and running host have not yet been migrated. After this change merges, the rollout
-must preserve the existing operations store and shadow evidence while it:
+The canonical identifier rollout is complete. The GitHub repository and local remote, durable
+root, stable service link, private environment paths, Python distribution and entry points,
+Prometheus rules and live metric prefix, user-systemd units and timers, and self-hosted runner all
+use the identifiers defined in [project_identity.md](project_identity.md).
 
-- renames the GitHub repository and refreshes its local remote;
-- moves or relinks the durable root and stable service path to their canonical locations;
-- migrates the ignored host environment variable names without exposing their values;
-- replaces and re-enables the renamed user-systemd units and timers;
-- reconfigures the self-hosted runner name and `minxiong-hydrocast` label;
-- verifies API readiness, metrics, notification audit, backup, and shadow-history continuity.
+The runtime migration used a same-filesystem directory rename rather than copying state. Before
+the move, all 66 retained snapshots passed application-level integrity verification and a fresh
+backup was verified. After the move, checksums for all 396 pre-existing immutable snapshot files
+matched, and the store continued to 68 healthy attempts without resetting its first observation.
+The shadow report retained a 100% success and readiness rate, a 10.283-minute maximum gap, and a
+passing storage-integrity check. Historical Prometheus samples remain in the existing TSDB while
+the live endpoint exports only the `minxionghydrocast_` prefix.
 
-Until that checklist passes, canonical service paths and runner labels are target configuration,
-not deployment evidence.
+All canonical services and timers are enabled, old unit files and timer stamps are absent, the API
+and operator view return HTTP 200, Prometheus reports its API target up, Alertmanager is ready, and
+the runner is listening under its canonical name and label. Discord delivery was not activated by
+the migration.
 
 ## Active shadow gate
 
-The shadow deployment started on 2026-07-12. Its early audit reported three successful and ready
-live attempts with 100% success and readiness. The gate remains blocked by design until all of the
-following are observed rather than simulated:
+The shadow deployment started on 2026-07-12. At the migration verification point it retained 68
+successful and ready live attempts with 100% success and readiness and no gap over 10.283 minutes.
+The gate remains blocked by design until all of the following are observed rather than simulated:
 
 - at least 168 hours between the first and last retained live attempt;
 - at least 900 attempts in the eight-day audit window;
