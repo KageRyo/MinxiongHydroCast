@@ -271,7 +271,7 @@ def download_event_frames(
         temporary_path.replace(output_path)
         return CwaCollectedFrame(
             data_time=frame.data_time,
-            source_url=redact_authorization_url(response.url),
+            source_url=redacted_source_url,
             output_path=str(output_path),
             bytes_written=len(response.content),
         )

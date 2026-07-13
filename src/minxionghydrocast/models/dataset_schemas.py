@@ -44,6 +44,10 @@ class RadarDatasetEvent(DatasetSchema):
     start_time: str = Field(min_length=1)
     end_time: str = Field(min_length=1)
     source: str = Field(min_length=1)
+    evidence_candidate_id: str | None = Field(
+        default=None,
+        pattern=r"^[a-z0-9][a-z0-9_.-]+$",
+    )
     notes: str = ""
 
     @model_validator(mode="after")
@@ -59,6 +63,13 @@ class RadarDatasetEvent(DatasetSchema):
             raise ValueError(f"{self.event_id}: end_time must be after start_time")
         if self.source.casefold() == "demo" or self.event_id.startswith("demo_"):
             raise ValueError(f"{self.event_id}: demo events are prohibited")
+        if (
+            self.event_id.startswith("cwa_o_a0059_candidate_")
+            and self.evidence_candidate_id != self.event_id
+        ):
+            raise ValueError(
+                f"{self.event_id}: discovered candidate requires evidence_candidate_id"
+            )
         return self
 
 
@@ -76,6 +87,13 @@ class RadarDatasetManifest(DatasetSchema):
         event_ids = [event.event_id for event in self.events]
         if len(event_ids) != len(set(event_ids)):
             raise ValueError("event IDs must be unique")
+        candidate_ids = [
+            event.evidence_candidate_id
+            for event in self.events
+            if event.evidence_candidate_id is not None
+        ]
+        if len(candidate_ids) != len(set(candidate_ids)):
+            raise ValueError("evidence candidate IDs must be unique")
         event_id_set = set(event_ids)
         assigned: dict[str, str] = {}
         minimums = self.dataset.minimum_counts

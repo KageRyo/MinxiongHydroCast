@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import logging
 import os
@@ -13,7 +12,6 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 import numpy as np
-from pydantic import BaseModel
 
 from minxionghydrocast.config import get_settings
 from minxionghydrocast.ingestion.cwa_event_collector import (
@@ -36,6 +34,13 @@ from minxionghydrocast.io.run_summary import (
     record_run,
     start_run,
 )
+from minxionghydrocast.io.research_store import (
+    ResearchLayout,
+    artifact_record,
+    atomic_write_schema,
+    require_external_research_root,
+    sha256_file,
+)
 from minxionghydrocast.models.dataset_schemas import (
     REQUIRED_SPLITS,
     ArtifactRecord,
@@ -47,6 +52,9 @@ from minxionghydrocast.models.dataset_schemas import (
     RadarDatasetEvent,
     RadarDatasetManifest,
     WeightedTinyUnetAssessment,
+)
+from minxionghydrocast.pipelines.event_promotion import (
+    validate_candidate_promotion_gate,
 )
 from minxionghydrocast.pipelines.radar_tensor_conversion import (
     convert_source,
@@ -71,64 +79,12 @@ TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 LOGGER = logging.getLogger(__name__)
 
 
-class ResearchLayout:
-    def __init__(self, root: Path) -> None:
-        self.root = root.expanduser().resolve()
-        self.raw = self.root / "raw"
-        self.events = self.root / "events"
-        self.tensors = self.root / "tensors"
-        self.models = self.root / "models"
-        self.reports = self.root / "reports"
-        self.catalog = self.root / "catalog"
-
-    def ensure(self) -> None:
-        for path in (
-            self.root,
-            self.raw,
-            self.events,
-            self.tensors,
-            self.models,
-            self.reports,
-            self.catalog,
-        ):
-            path.mkdir(parents=True, exist_ok=True)
-
-    def relative(self, path: Path) -> str:
-        return str(path.resolve().relative_to(self.root))
-
-
-def require_external_research_root(layout: ResearchLayout, *, repository_root: Path) -> None:
-    repository_root = repository_root.resolve()
-    try:
-        layout.root.relative_to(repository_root)
-    except ValueError:
-        return
-    raise ValueError("research root must be outside the Git repository")
-
-
 def parse_iso_datetime(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00"))
 
 
 def load_dataset_manifest(path: Path) -> RadarDatasetManifest:
     return RadarDatasetManifest.model_validate_json(path.read_text(encoding="utf-8"))
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def artifact_record(layout: ResearchLayout, path: Path, *, kind: str) -> ArtifactRecord:
-    return ArtifactRecord(
-        kind=kind,
-        path=layout.relative(path),
-        sha256=sha256_file(path),
-        bytes=path.stat().st_size,
-    )
 
 
 def catalog_artifacts(catalog: DatasetCatalog) -> list[ArtifactRecord]:
@@ -217,13 +173,6 @@ def verify_dataset_catalog(
     report_path = layout.catalog / "dataset_verification.json"
     atomic_write_schema(report_path, report)
     return report, report_path
-
-
-def atomic_write_schema(path: Path, payload: BaseModel) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(f".{path.name}.tmp")
-    temporary.write_text(payload.model_dump_json(indent=2) + "\n", encoding="utf-8")
-    temporary.replace(path)
 
 
 def expected_frame_count(event: RadarDatasetEvent, *, cadence_minutes: int) -> int:
@@ -552,6 +501,7 @@ def build_dataset(
     research_root: Path,
     history_index_path: Path | None,
     authorization: str,
+    event_evidence_catalog_path: Path | None = None,
     skip_download: bool = False,
     verify_tls: bool = True,
     timeout: int = 60,
@@ -560,6 +510,11 @@ def build_dataset(
     retry_backoff_seconds: float = 1.0,
 ) -> tuple[DatasetCatalog, Path]:
     manifest = load_dataset_manifest(manifest_path)
+    validate_candidate_promotion_gate(
+        manifest=manifest,
+        event_evidence_catalog_path=event_evidence_catalog_path,
+        repository_root=Path.cwd(),
+    )
     layout = ResearchLayout(research_root)
     require_external_research_root(layout, repository_root=Path.cwd())
     layout.ensure()
@@ -696,6 +651,7 @@ def main() -> None:
     )
     parser.add_argument("--root", type=Path, default=get_settings().research_root)
     parser.add_argument("--history-index", type=Path, default=None)
+    parser.add_argument("--event-evidence-catalog", type=Path, default=None)
     parser.add_argument("--api-key-env", default="CWA_API_KEY")
     parser.add_argument("--skip-download", action="store_true")
     parser.add_argument("--timeout", type=int, default=60)
@@ -736,6 +692,7 @@ def main() -> None:
             research_root=args.root,
             history_index_path=args.history_index,
             authorization=os.getenv(args.api_key_env, ""),
+            event_evidence_catalog_path=args.event_evidence_catalog,
             skip_download=args.skip_download,
             verify_tls=not args.insecure_tls,
             timeout=args.timeout,
@@ -770,7 +727,12 @@ def main() -> None:
             status="ok",
             started_at=started_at,
             start_timer=start_timer,
-            inputs={"manifest": str(args.manifest)},
+            inputs={
+                "manifest": str(args.manifest),
+                "event_evidence_catalog": (
+                    str(args.event_evidence_catalog) if args.event_evidence_catalog else ""
+                ),
+            },
             outputs={
                 "catalog": str(catalog_path),
                 "verification": str(verification_path),
@@ -803,7 +765,12 @@ def main() -> None:
             failure_reason=str(exc),
             started_at=started_at,
             start_timer=start_timer,
-            inputs={"manifest": str(args.manifest)},
+            inputs={
+                "manifest": str(args.manifest),
+                "event_evidence_catalog": (
+                    str(args.event_evidence_catalog) if args.event_evidence_catalog else ""
+                ),
+            },
             outputs={"catalog": ""},
             metadata={
                 "research_root": str(args.root.expanduser()),

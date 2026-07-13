@@ -22,6 +22,13 @@ The Pydantic manifest gate requires exactly `train`, `validation`, and `test`; m
 no `demo` source or ID. Candidate weather types remain radar-derived until official CWA weather
 context is attached.
 
+A newly discovered event must retain its `evidence_candidate_id`. Before it can enter this
+manifest, `mhc event-review` must record a complete, synchronized, official-context-backed approval.
+`event-split-check` and `dataset-build` accept `--event-evidence-catalog <path>` and share one gate
+that verifies the approval, all cataloged checksums, the source data ID, exact window, and reviewed
+regime. The build runs it before downloading data or training. Discovery and review commands never
+choose or edit the formal split themselves.
+
 ## Independence Rules
 
 - Training normalization is computed only from the combined training archive.
@@ -42,6 +49,7 @@ Validate the general event-split contract:
 ```bash
 mhc event-split-check \
   --manifest data/samples/event_split_manifest.json \
+  --event-evidence-catalog "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json" \
   --output data/processed/event_split_check.json \
   --require-ok
 ```
@@ -51,8 +59,12 @@ Build and validate the stronger formal dataset contract:
 ```bash
 mhc dataset-build \
   --manifest data/samples/event_split_manifest.json \
+  --event-evidence-catalog "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json" \
   --root "$MINXIONGHYDROCAST_RESEARCH_ROOT"
 ```
+
+The evidence-catalog argument is required for either command only after the manifest references a
+discovery candidate.
 
 Historical candidate evidence may remain in `data/samples/radar_event_windows.json` and
 `data/samples/event_expansion_queue.json`, but it does not belong to an active split until the
