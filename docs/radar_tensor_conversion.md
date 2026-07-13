@@ -1,6 +1,6 @@
 # Radar Tensor Conversion
 
-FloodCastMinxiong uses a tiny tracked radar-like fixture to test model tensor I/O before real radar
+MinxiongHydroCast uses a tiny tracked radar-like fixture to test model tensor I/O before real radar
 archives are confirmed. This is a dry-run format, not a claim about CWA native radar files.
 
 ## Fixture
@@ -21,7 +21,7 @@ The sample has five `2 x 2` frames. With `input_length=3` and `prediction_length
 ## Convert
 
 ```bash
-floodcast-minxiong-radar-tensor-convert \
+minxiong-hydrocast-radar-tensor-convert \
   --source-format csv_pixel_grid \
   --input data/samples/radar_pixels.csv \
   --output data/processed/radar_tensor_sample.npz
@@ -41,10 +41,10 @@ Source adapters are documented in [radar_source_adapters.md](radar_source_adapte
 
 The CWA history `getData` endpoint currently returns XML for `O-A0059-001`, while the file API
 sample returns JSON. The `cwa_opendata_grid` adapter accepts both formats and can read a collection
-manifest produced by `floodcast-minxiong-cwa-event-plan --download`.
+manifest produced by `minxiong-hydrocast-cwa-event-plan --download`.
 
 ```bash
-floodcast-minxiong-radar-tensor-convert \
+minxiong-hydrocast-radar-tensor-convert \
   --source-format cwa_opendata_grid \
   --input data/processed/cwa_event_collection.json \
   --event-id cwa_o_a0059_recent_sample_20260707 \
@@ -61,7 +61,7 @@ For longer CWA event windows, pass `--window-stride-frames 1` to create a slidin
 with a sample axis:
 
 ```bash
-floodcast-minxiong-radar-tensor-convert \
+minxiong-hydrocast-radar-tensor-convert \
   --source-format cwa_opendata_grid \
   --input data/processed/cwa_event_collection_taiwan_widespread_20260628_afternoon_evening.json \
   --event-id cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening \
@@ -80,7 +80,7 @@ CWA event tensors use 6 input frames and 6 target frames, giving lead times from
 Run the persistence baseline against the generated archive:
 
 ```bash
-floodcast-minxiong-tensor-baseline-evaluate \
+minxiong-hydrocast-tensor-baseline-evaluate \
   --archive data/processed/radar_tensor_sample.npz \
   --output data/processed/tensor_baseline_evaluation.json
 ```

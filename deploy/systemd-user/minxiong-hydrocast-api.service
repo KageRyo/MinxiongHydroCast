@@ -1,0 +1,18 @@
+[Unit]
+Description=MinxiongHydroCast observation API and operator view
+After=network.target
+
+[Service]
+Type=simple
+EnvironmentFile=%h/.config/minxiong-hydrocast/env
+ExecStart=%h/.local/share/minxiong-hydrocast/venv/bin/minxiong-hydrocast-serve \
+  --store %h/.local/share/minxiong-hydrocast/operations \
+  --host 127.0.0.1 \
+  --port 8180
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

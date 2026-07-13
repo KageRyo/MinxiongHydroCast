@@ -18,7 +18,7 @@ The current discovery scan used the 2026-07-08 live history index:
 Summarize a scan or collection with:
 
 ```bash
-floodcast-minxiong-radar-event-summary \
+minxiong-hydrocast-radar-event-summary \
   --collection data/processed/cwa_event_collection_hourly_scan_20260628_20260708.json \
   --output data/processed/cwa_event_summary_hourly_scan_20260628_20260708.json \
   --expected-cadence-minutes 60
@@ -82,7 +82,7 @@ paths. Collection manifests, summaries, tensor archives, and run summaries stay 
 Use the same command shape to reproduce a collection:
 
 ```bash
-floodcast-minxiong-cwa-event-plan \
+minxiong-hydrocast-cwa-event-plan \
   --history-index data/processed/cwa_history_index_live.json \
   --event-id cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon \
   --start-time 2026-07-02T12:00:00+08:00 \
@@ -95,7 +95,7 @@ floodcast-minxiong-cwa-event-plan \
   --insecure-tls
 ```
 
-After each full collection, rerun `floodcast-minxiong-radar-event-summary` with the default
+After each full collection, rerun `minxiong-hydrocast-radar-event-summary` with the default
 `--expected-cadence-minutes 10`.
 
 ## Tensor And Metrics Commands
@@ -103,7 +103,7 @@ After each full collection, rerun `floodcast-minxiong-radar-event-summary` with 
 Convert a full collection into 6-frame input and 6-frame target sliding windows:
 
 ```bash
-floodcast-minxiong-radar-tensor-convert \
+minxiong-hydrocast-radar-tensor-convert \
   --source-format cwa_opendata_grid \
   --input data/processed/cwa_event_collection_taiwan_widespread_20260628_afternoon_evening.json \
   --event-id cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening \
@@ -117,7 +117,7 @@ floodcast-minxiong-radar-tensor-convert \
 Run persistence lead-time metrics:
 
 ```bash
-floodcast-minxiong-tensor-baseline-evaluate \
+minxiong-hydrocast-tensor-baseline-evaluate \
   --archive data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz \
   --event-threshold-mm 35 \
   --output data/processed/cwa_persistence_taiwan_widespread_20260628_6in_6out.json
@@ -127,7 +127,7 @@ Validate QPE against rain gauges after local `O-B0045-001` and `O-A0002-001` cap
 available for the same event window. Use the direct history downloader for gauge captures:
 
 ```bash
-floodcast-minxiong-cwa-history-data-download \
+minxiong-hydrocast-cwa-history-data-download \
   --data-id O-A0002-001 \
   --data-time 2026-07-02T15:30:00+08:00 \
   --output data/external/gauges/events/O-A0002-001_20260702153000.xml \
@@ -137,7 +137,7 @@ floodcast-minxiong-cwa-history-data-download \
 Then run validation once the matching QPE grid exists:
 
 ```bash
-floodcast-minxiong-qpe-gauge-validate \
+minxiong-hydrocast-qpe-gauge-validate \
   --qpe-grid data/external/radar/events/<event>/O-B0045-001.json \
   --gauge-json data/external/gauges/events/<event>/O-A0002-001.json \
   --event-id <event_id> \
@@ -147,7 +147,7 @@ floodcast-minxiong-qpe-gauge-validate \
 Train the current Tiny U-Net/RainNet-style baseline on the Taiwan-wide event:
 
 ```bash
-PYTHONPATH=src conda run -n VLM python -m floodcastminxiong.pipelines.torch_baseline_training \
+PYTHONPATH=src conda run -n VLM python -m minxionghydrocast.pipelines.torch_baseline_training \
   --archive data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz \
   --output-dir data/external/checkpoints/tiny_unet_cwa_taiwan_widespread_20260628_6in_6out \
   --device cuda \
@@ -163,7 +163,7 @@ For the next strong-echo experiment, add weighted loss and validation flags show
 Evaluate with mini-batch inference:
 
 ```bash
-PYTHONPATH=src conda run -n VLM python -m floodcastminxiong.pipelines.torch_baseline_evaluation \
+PYTHONPATH=src conda run -n VLM python -m minxionghydrocast.pipelines.torch_baseline_evaluation \
   --archive data/processed/cwa_tensor_chiayi_minxiong_heavyrain_20260702_6in_6out.npz \
   --checkpoint data/external/checkpoints/tiny_unet_cwa_taiwan_widespread_20260628_6in_6out/tiny_unet_nowcaster.pt \
   --event-threshold 35 \

@@ -1,4 +1,4 @@
-from floodcastminxiong.validation.flood_labels import LabelCriteria, audit_labels
+from minxionghydrocast.validation.flood_labels import LabelCriteria, audit_labels
 
 
 def label(event_id, start, end, observed_flood):

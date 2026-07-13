@@ -1,0 +1,11 @@
+[Unit]
+Description=Collect MinxiongHydroCast observations every 10 minutes
+
+[Timer]
+OnCalendar=*-*-* *:0/10:00
+Persistent=true
+RandomizedDelaySec=30
+Unit=minxiong-hydrocast-collector.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,17 @@
+[Unit]
+Description=GitHub Actions runner for MinxiongHydroCast host-bound contracts
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.local/share/minxiong-hydrocast/actions-runner
+ExecStart=%h/.local/share/minxiong-hydrocast/actions-runner/run.sh
+Restart=always
+RestartSec=10
+KillMode=process
+TimeoutStopSec=5min
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

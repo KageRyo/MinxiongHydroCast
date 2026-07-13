@@ -1,7 +1,7 @@
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
-from floodcastminxiong.ingestion.cwa_event_collector import (
+from minxionghydrocast.ingestion.cwa_event_collector import (
     authorize_url,
     build_event_plan,
     download_event_frames,

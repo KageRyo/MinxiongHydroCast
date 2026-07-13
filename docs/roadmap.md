@@ -1,6 +1,6 @@
 # Roadmap
 
-This roadmap turns FloodCastMinxiong into a usable flood-risk data and nowcasting platform. Keep each
+This roadmap turns MinxiongHydroCast into a usable flood-risk data and nowcasting platform. Keep each
 milestone small enough to track in [tasks.md](tasks.md). The completion definition and phase-by-phase
 exit criteria are maintained in [completion_plan.md](completion_plan.md).
 
@@ -33,7 +33,7 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Evaluate `PersistenceNowcaster` on gridded rainfall or radar-like tensors.
 - [x] Evaluate `RainfallThresholdRiskScorer` against historical warnings or flood events.
 - [x] Add metrics: RMSE for rainfall, and CSI/POD/FAR for event prediction.
-- [x] Create a repeatable evaluation script under `src/floodcastminxiong/models/` or `pipelines/`.
+- [x] Create a repeatable evaluation script under `src/minxionghydrocast/models/` or `pipelines/`.
 - [x] Publish baseline results before adding deep-learning models.
 
 ## Milestone 5: Prepare SOTA Migration
@@ -124,4 +124,5 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
       heavy-rain coverage.
 - [x] Put operational snapshots on durable storage and verify scheduled backup restore.
 - [ ] Route operational alerts to named owners and exercise incident response and human override.
-- [ ] Document incident response, data licensing, model rollback, and human override procedures.
+- [x] Document incident response, data-source rights review, model rollback, and human override
+      procedures.

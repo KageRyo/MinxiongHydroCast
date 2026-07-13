@@ -1,6 +1,6 @@
 from urllib.parse import parse_qs, urlsplit
 
-from floodcastminxiong.ingestion.cwa_history import (
+from minxionghydrocast.ingestion.cwa_history import (
     CwaHistoryRequest,
     dry_run_index,
     extract_history_files,

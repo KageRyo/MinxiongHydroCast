@@ -1,6 +1,6 @@
 # Completion Plan
 
-FloodCastMinxiong is production-ready when it can continuously ingest and validate official data,
+MinxiongHydroCast is production-ready when it can continuously ingest and validate official data,
 produce versioned Minxiong risk inputs and nowcasts, expose them through a monitored service, and
 publish a documented Minxiong model without committing credentials, raw official data, or model
 weights. Building datasets and training models are necessary milestones, but are not by themselves

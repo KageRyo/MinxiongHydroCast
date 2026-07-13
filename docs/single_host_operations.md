@@ -1,6 +1,6 @@
 # Single-host operations runbook
 
-This runbook deploys FloodCastMinxiong as localhost-only user services on one Linux x86_64 host.
+This runbook deploys MinxiongHydroCast as localhost-only user services on one Linux x86_64 host.
 It keeps all mutable state on a durable volume and stores the API credentials outside the
 repository. The deployment is an internal observation service and shadow deployment; it is not an
 official warning system.
@@ -11,10 +11,10 @@ The default installation uses:
 
 | Path | Purpose |
 | --- | --- |
-| `/mnt/8tb_hdd/ryo/floodcast-minxiong` | Durable runtime, snapshots, TSDBs, backups, and runner |
-| `~/.local/share/floodcast-minxiong` | Stable symlink used by user units |
-| `~/.config/floodcast-minxiong/env` | Mode `0600` collector API-key environment file |
-| `~/.config/floodcast-minxiong/notifications.env` | Mode `0600` notification-only environment |
+| `/mnt/8tb_hdd/ryo/minxiong-hydrocast` | Durable runtime, snapshots, TSDBs, backups, and runner |
+| `~/.local/share/minxiong-hydrocast` | Stable symlink used by user units |
+| `~/.config/minxiong-hydrocast/env` | Mode `0600` collector API-key environment file |
+| `~/.config/minxiong-hydrocast/notifications.env` | Mode `0600` notification-only environment |
 | `~/.config/systemd/user` | Installed user units and timers |
 
 The repository `.env` is an installation input only. It remains ignored by Git and is copied to
@@ -48,8 +48,8 @@ dedicated virtual environment, and starts:
 Inspect the deployment without exposing credentials:
 
 ```bash
-systemctl --user list-timers 'floodcast-minxiong-*'
-systemctl --user --no-pager --full status floodcast-minxiong-api.service
+systemctl --user list-timers 'minxiong-hydrocast-*'
+systemctl --user --no-pager --full status minxiong-hydrocast-api.service
 curl --fail http://127.0.0.1:8180/healthz
 curl --fail http://127.0.0.1:8180/readyz
 curl --fail http://127.0.0.1:9090/-/ready
@@ -62,12 +62,12 @@ network access.
 
 ## Alert routing and drill
 
-Prometheus evaluates `deploy/prometheus/floodcast.rules.yml`. Alertmanager sends firing and
+Prometheus evaluates `deploy/prometheus/minxiong-hydrocast.rules.yml`. Alertmanager sends firing and
 resolved notifications to the durable local receiver. The receiver validates the webhook contract
 and appends each delivery to:
 
 ```text
-/mnt/8tb_hdd/ryo/floodcast-minxiong/notifications/alerts.jsonl
+/mnt/8tb_hdd/ryo/minxiong-hydrocast/notifications/alerts.jsonl
 ```
 
 The local receiver proves alert generation, routing, and durable delivery. It is not a human
@@ -81,7 +81,7 @@ Create an incoming webhook for the target Discord channel using the
 then add its complete URL only to the ignored host `.env`:
 
 ```dotenv
-FLOODCAST_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/WEBHOOK_ID/WEBHOOK_TOKEN
+MINXIONGHYDROCAST_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/WEBHOOK_ID/WEBHOOK_TOKEN
 ```
 
 Re-run the idempotent installer to copy the secret and restart the receiver:
@@ -97,7 +97,7 @@ delivery returns HTTP 502 so Alertmanager can retry. Delivery results contain on
 redacted error code and are fsynced separately at:
 
 ```text
-/mnt/8tb_hdd/ryo/floodcast-minxiong/notifications/discord-deliveries.jsonl
+/mnt/8tb_hdd/ryo/minxiong-hydrocast/notifications/discord-deliveries.jsonl
 ```
 
 Treat the URL as a password and rotate it in Discord if it is exposed. It must not be committed or
@@ -106,17 +106,17 @@ placed in a command-line argument.
 Run a local end-to-end drill:
 
 ```bash
-~/.local/share/floodcast-minxiong/bin/amtool \
+~/.local/share/minxiong-hydrocast/bin/amtool \
   --alertmanager.url=http://127.0.0.1:9093 \
-  alert add FloodCastDrill severity=warning service=floodcast-minxiong \
-  --annotation=summary='FloodCastMinxiong notification drill'
+  alert add MinxiongHydroCastDrill severity=warning service=minxiong-hydrocast \
+  --annotation=summary='MinxiongHydroCast notification drill'
 sleep 12
-tail -n 1 ~/.local/share/floodcast-minxiong/notifications/alerts.jsonl
-test ! -f ~/.local/share/floodcast-minxiong/notifications/discord-deliveries.jsonl || \
-  tail -n 1 ~/.local/share/floodcast-minxiong/notifications/discord-deliveries.jsonl
-~/.local/share/floodcast-minxiong/bin/amtool \
+tail -n 1 ~/.local/share/minxiong-hydrocast/notifications/alerts.jsonl
+test ! -f ~/.local/share/minxiong-hydrocast/notifications/discord-deliveries.jsonl || \
+  tail -n 1 ~/.local/share/minxiong-hydrocast/notifications/discord-deliveries.jsonl
+~/.local/share/minxiong-hydrocast/bin/amtool \
   --alertmanager.url=http://127.0.0.1:9093 \
-  alert add FloodCastDrill severity=warning service=floodcast-minxiong \
+  alert add MinxiongHydroCastDrill severity=warning service=minxiong-hydrocast \
   --end="$(date --iso-8601=seconds)"
 ```
 
@@ -130,13 +130,13 @@ and snapshots that fail integrity verification.
 Create, verify, and restore a fresh backup:
 
 ```bash
-systemctl --user start floodcast-minxiong-backup.service
-archive="$(find ~/.local/share/floodcast-minxiong/backups -name '*.tar.gz' -printf '%T@ %p\n' \
+systemctl --user start minxiong-hydrocast-backup.service
+archive="$(find ~/.local/share/minxiong-hydrocast/backups -name '*.tar.gz' -printf '%T@ %p\n' \
   | sort -n | tail -n 1 | cut -d' ' -f2-)"
-~/.local/share/floodcast-minxiong/venv/bin/floodcast-minxiong-backup \
+~/.local/share/minxiong-hydrocast/venv/bin/minxiong-hydrocast-backup \
   verify --archive "$archive"
-target="$HOME/.local/share/floodcast-minxiong/restore_drills/$(date +%Y%m%dT%H%M%S)"
-~/.local/share/floodcast-minxiong/venv/bin/floodcast-minxiong-backup \
+target="$HOME/.local/share/minxiong-hydrocast/restore_drills/$(date +%Y%m%dT%H%M%S)"
+~/.local/share/minxiong-hydrocast/venv/bin/minxiong-hydrocast-backup \
   restore --archive "$archive" --target "$target"
 test -f "$target/restore_report.json"
 ```
@@ -152,11 +152,11 @@ only after the base runtime is healthy:
 
 ```bash
 deploy/single-host/install-actions-runner.sh
-systemctl --user --no-pager status floodcast-minxiong-runner.service
+systemctl --user --no-pager status minxiong-hydrocast-runner.service
 ```
 
 The installer obtains a short-lived registration token through the authenticated `gh` session,
-verifies the official runner asset digest, and applies the `floodcast-minxiong` label. The workflow
+verifies the official runner asset digest, and applies the `minxiong-hydrocast` label. The workflow
 runs only by schedule or manual dispatch. CWA and public WRA IoW checks stay on GitHub-hosted
 runners; only the WRA warning check runs on this dedicated host.
 

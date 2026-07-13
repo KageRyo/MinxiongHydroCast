@@ -1,0 +1,20 @@
+[Unit]
+Description=MinxiongHydroCast Prometheus
+After=network.target minxiong-hydrocast-api.service
+Wants=minxiong-hydrocast-api.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.local/share/minxiong-hydrocast/config/prometheus
+ExecStart=%h/.local/share/minxiong-hydrocast/bin/prometheus \
+  --config.file=%h/.local/share/minxiong-hydrocast/config/prometheus/prometheus.yml \
+  --storage.tsdb.path=%h/.local/share/minxiong-hydrocast/prometheus \
+  --storage.tsdb.retention.time=30d \
+  --web.listen-address=127.0.0.1:9090
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

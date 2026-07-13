@@ -1,0 +1,31 @@
+[Unit]
+Description=MinxiongHydroCast live observation collection
+Documentation=https://github.com/KageRyo/MinxiongHydroCast
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=minxiong-hydrocast
+Group=minxiong-hydrocast
+WorkingDirectory=/opt/minxiong-hydrocast
+EnvironmentFile=-/etc/minxiong-hydrocast.env
+Environment=PLAYWRIGHT_BROWSERS_PATH=/opt/minxiong-hydrocast/.playwright
+StateDirectory=minxiong-hydrocast
+ExecStart=/opt/minxiong-hydrocast/.venv/bin/minxiong-hydrocast-operations \
+  --mode live \
+  --once \
+  --alert-source auto \
+  --rain-source auto \
+  --flood-source auto \
+  --flood-max-age-minutes 90 \
+  --api-timeout-seconds 30 \
+  --store /var/lib/minxiong-hydrocast/operations \
+  --debug-dir /var/lib/minxiong-hydrocast/debug \
+  --summary-output /var/lib/minxiong-hydrocast/run_summaries/operations.json \
+  --log-output /var/lib/minxiong-hydrocast/run_logs.jsonl
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/minxiong-hydrocast

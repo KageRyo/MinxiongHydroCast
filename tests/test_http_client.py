@@ -2,14 +2,14 @@ import json
 
 import pytest
 
-from floodcastminxiong.ingestion.http_client import (
+from minxionghydrocast.ingestion.http_client import (
     ReliableJsonClient,
     RetryPolicy,
     close_verified_session,
     _verified_session,
     verified_compatible_ssl_context,
 )
-from floodcastminxiong.ingestion.source_adapter import SourceRequestError, SourceSchemaError
+from minxionghydrocast.ingestion.source_adapter import SourceRequestError, SourceSchemaError
 
 
 class FakeResponse:

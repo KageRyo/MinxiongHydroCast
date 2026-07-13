@@ -8,10 +8,10 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from floodcastminxiong.ingestion.http_client import ReliableJsonClient
-from floodcastminxiong.ingestion.hydrological_data import FLOOD_FIELDNAMES
-from floodcastminxiong.ingestion.source_adapter import SourceSchemaError
-from floodcastminxiong.ingestion.wra_flood_sensor_api import (
+from minxionghydrocast.ingestion.http_client import ReliableJsonClient
+from minxionghydrocast.ingestion.hydrological_data import FLOOD_FIELDNAMES
+from minxionghydrocast.ingestion.source_adapter import SourceSchemaError
+from minxionghydrocast.ingestion.wra_flood_sensor_api import (
     CATALOG_DATASET_ID,
     LATEST_DATASET_ID,
     WraFloodSensorAdapter,

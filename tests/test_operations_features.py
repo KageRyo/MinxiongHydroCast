@@ -1,7 +1,7 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from floodcastminxiong.operations.features import build_minxiong_feature
+from minxionghydrocast.operations.features import build_minxiong_feature
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 

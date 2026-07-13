@@ -3,7 +3,7 @@ global:
   evaluation_interval: 30s
 
 rule_files:
-  - floodcast.rules.yml
+  - minxiong-hydrocast.rules.yml
 
 alerting:
   alertmanagers:
@@ -12,7 +12,7 @@ alerting:
             - 127.0.0.1:9093
 
 scrape_configs:
-  - job_name: floodcast-minxiong
+  - job_name: minxiong-hydrocast
     metrics_path: /metrics
     static_configs:
       - targets:

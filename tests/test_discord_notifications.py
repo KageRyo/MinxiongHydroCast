@@ -2,8 +2,8 @@ from typing import Any
 
 import pytest
 
-from floodcastminxiong.operations.alert_receiver import AlertmanagerWebhook
-from floodcastminxiong.operations.discord_notifications import (
+from minxionghydrocast.operations.alert_receiver import AlertmanagerWebhook
+from minxionghydrocast.operations.discord_notifications import (
     FIRING_COLOR,
     DiscordDeliveryError,
     DiscordWebhookClient,
@@ -14,19 +14,19 @@ from floodcastminxiong.operations.discord_notifications import (
 def webhook_payload() -> dict[str, object]:
     return {
         "version": "4",
-        "groupKey": '{}:{alertname="FloodCastNotReady"}',
+        "groupKey": '{}:{alertname="MinxiongHydroCastNotReady"}',
         "status": "firing",
         "receiver": "operations-audit",
         "commonLabels": {"severity": "critical"},
-        "commonAnnotations": {"summary": "FloodCast is not ready"},
+        "commonAnnotations": {"summary": "MinxiongHydroCast is not ready"},
         "alerts": [
             {
                 "status": "firing",
                 "labels": {
-                    "alertname": "FloodCastNotReady",
+                    "alertname": "MinxiongHydroCastNotReady",
                     "severity": "critical",
                 },
-                "annotations": {"summary": "FloodCast is not ready"},
+                "annotations": {"summary": "MinxiongHydroCast is not ready"},
                 "startsAt": "2026-07-12T10:00:00Z",
                 "fingerprint": "fixture",
             }
@@ -62,10 +62,10 @@ def test_discord_message_is_bounded_and_disables_mentions():
 
     message = build_discord_message(webhook)
 
-    assert message.username == "FloodCastMinxiong"
+    assert message.username == "MinxiongHydroCast"
     assert message.allowed_mentions.parse == []
     assert message.embeds[0].color == FIRING_COLOR
-    assert "FloodCastNotReady" in message.embeds[0].fields[0].name
+    assert "MinxiongHydroCastNotReady" in message.embeds[0].fields[0].name
     assert len(message.embeds[0].description) <= 800
 
 

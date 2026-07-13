@@ -1,0 +1,11 @@
+[Unit]
+Description=Back up MinxiongHydroCast daily
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+Persistent=true
+RandomizedDelaySec=300
+Unit=minxiong-hydrocast-backup.service
+
+[Install]
+WantedBy=timers.target

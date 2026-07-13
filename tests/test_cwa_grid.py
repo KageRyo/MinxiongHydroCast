@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from floodcastminxiong.ingestion.cwa_grid import check_cwa_grid_sequence, inspect_cwa_grid_file
+from minxionghydrocast.ingestion.cwa_grid import check_cwa_grid_sequence, inspect_cwa_grid_file
 
 
 def write_sample_grid(

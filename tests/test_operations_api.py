@@ -8,22 +8,22 @@ from zoneinfo import ZoneInfo
 import pytest
 from pydantic import ValidationError
 
-from floodcastminxiong.operations.api import (
+from minxionghydrocast.operations.api import (
     build_server,
     metrics_payload,
     shadow_metrics_payload,
     shadow_payload,
     status_payload,
 )
-from floodcastminxiong.operations.collector import run_collection
-from floodcastminxiong.operations.schemas import (
+from minxionghydrocast.operations.collector import run_collection
+from minxionghydrocast.operations.schemas import (
     DatasetResponse,
     ForecastResponse,
     HealthResponse,
     ShadowResponse,
     StatusResponse,
 )
-from floodcastminxiong.operations.snapshot_store import SnapshotStore
+from minxionghydrocast.operations.snapshot_store import SnapshotStore
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 
@@ -94,8 +94,8 @@ def test_metrics_payload_exposes_readiness_attempt_and_dataset_age():
         )
     )
 
-    assert "floodcastminxiong_ready 1" in metrics
-    assert "floodcastminxiong_last_attempt_success 1" in metrics
+    assert "minxionghydrocast_ready 1" in metrics
+    assert "minxionghydrocast_last_attempt_success 1" in metrics
     assert 'dataset="rain_gauges"} 4.5' in metrics
     assert 'dataset="rain_gauges",state="healthy"} 1' in metrics
     assert 'dataset="rain_gauges",source_kind="api"} 1' in metrics
@@ -111,8 +111,8 @@ def test_shadow_payload_defaults_to_blocked_and_exports_metrics(tmp_path):
     assert report.state == "not_evaluated"
     assert report.shadow_gate_passed is False
     assert report.notification_allowed is False
-    assert "floodcastminxiong_shadow_gate_passed 0" in metrics
-    assert "floodcastminxiong_notification_allowed 0" in metrics
+    assert "minxionghydrocast_shadow_gate_passed 0" in metrics
+    assert "minxionghydrocast_notification_allowed 0" in metrics
 
 
 def test_status_reports_collector_error_without_hiding_last_snapshot(tmp_path):
@@ -268,16 +268,16 @@ def test_api_serves_status_classified_data_and_operator_view(tmp_path):
 
         with urlopen(f"{base_url}/metrics", timeout=3) as response:
             metrics = response.read().decode("utf-8")
-        assert "floodcastminxiong_ready 0" in metrics
-        assert "floodcastminxiong_last_attempt_success 1" in metrics
-        assert "floodcastminxiong_shadow_gate_passed 0" in metrics
+        assert "minxionghydrocast_ready 0" in metrics
+        assert "minxionghydrocast_last_attempt_success 1" in metrics
+        assert "minxionghydrocast_shadow_gate_passed 0" in metrics
         assert 'dataset="rain_gauges",state="demo"' in metrics
         assert 'dataset="rain_gauges",source_kind="demo_fixture"' in metrics
         assert 'dataset="rain_gauges",outcome="ok"' in metrics
 
         with urlopen(f"{base_url}/", timeout=3) as response:
             page = response.read().decode("utf-8")
-        assert "FloodCastMinxiong Operations" in page
+        assert "MinxiongHydroCast Operations" in page
         assert "Source classification:" in page
         assert "Not an official warning" in page
     finally:

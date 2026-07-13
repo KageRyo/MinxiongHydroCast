@@ -1,4 +1,4 @@
-from floodcastminxiong.ingestion.rainfall_alerts import (
+from minxionghydrocast.ingestion.rainfall_alerts import (
     demo_records,
     validate_rainfall_alert_records,
 )

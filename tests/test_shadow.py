@@ -5,8 +5,8 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from floodcastminxiong.operations.shadow import ShadowCriteria, evaluate_shadow, main
-from floodcastminxiong.operations.snapshot_store import DatasetPayload, SnapshotStore
+from minxionghydrocast.operations.shadow import ShadowCriteria, evaluate_shadow, main
+from minxionghydrocast.operations.snapshot_store import DatasetPayload, SnapshotStore
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 
@@ -162,7 +162,7 @@ def test_shadow_cli_allows_scheduler_to_persist_blocked_report(tmp_path, monkeyp
         sys,
         "argv",
         [
-            "floodcast-minxiong-shadow-report",
+            "minxiong-hydrocast-shadow-report",
             "--store",
             str(store),
             "--evidence",
@@ -184,7 +184,7 @@ def test_shadow_cli_returns_nonzero_when_gate_is_blocked(tmp_path, monkeypatch):
         sys,
         "argv",
         [
-            "floodcast-minxiong-shadow-report",
+            "minxiong-hydrocast-shadow-report",
             "--store",
             str(tmp_path / "operations"),
             "--evidence",
