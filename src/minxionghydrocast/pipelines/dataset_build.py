@@ -12,6 +12,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 import numpy as np
+
 from minxionghydrocast.config import get_settings
 from minxionghydrocast.ingestion.cwa_event_collector import (
     build_event_plan,
@@ -51,6 +52,9 @@ from minxionghydrocast.models.dataset_schemas import (
     RadarDatasetEvent,
     RadarDatasetManifest,
     WeightedTinyUnetAssessment,
+)
+from minxionghydrocast.pipelines.event_promotion import (
+    validate_candidate_promotion_gate,
 )
 from minxionghydrocast.pipelines.radar_tensor_conversion import (
     convert_source,
@@ -497,6 +501,7 @@ def build_dataset(
     research_root: Path,
     history_index_path: Path | None,
     authorization: str,
+    event_evidence_catalog_path: Path | None = None,
     skip_download: bool = False,
     verify_tls: bool = True,
     timeout: int = 60,
@@ -505,6 +510,11 @@ def build_dataset(
     retry_backoff_seconds: float = 1.0,
 ) -> tuple[DatasetCatalog, Path]:
     manifest = load_dataset_manifest(manifest_path)
+    validate_candidate_promotion_gate(
+        manifest=manifest,
+        event_evidence_catalog_path=event_evidence_catalog_path,
+        repository_root=Path.cwd(),
+    )
     layout = ResearchLayout(research_root)
     require_external_research_root(layout, repository_root=Path.cwd())
     layout.ensure()
@@ -641,6 +651,7 @@ def main() -> None:
     )
     parser.add_argument("--root", type=Path, default=get_settings().research_root)
     parser.add_argument("--history-index", type=Path, default=None)
+    parser.add_argument("--event-evidence-catalog", type=Path, default=None)
     parser.add_argument("--api-key-env", default="CWA_API_KEY")
     parser.add_argument("--skip-download", action="store_true")
     parser.add_argument("--timeout", type=int, default=60)
@@ -681,6 +692,7 @@ def main() -> None:
             research_root=args.root,
             history_index_path=args.history_index,
             authorization=os.getenv(args.api_key_env, ""),
+            event_evidence_catalog_path=args.event_evidence_catalog,
             skip_download=args.skip_download,
             verify_tls=not args.insecure_tls,
             timeout=args.timeout,
@@ -715,7 +727,12 @@ def main() -> None:
             status="ok",
             started_at=started_at,
             start_timer=start_timer,
-            inputs={"manifest": str(args.manifest)},
+            inputs={
+                "manifest": str(args.manifest),
+                "event_evidence_catalog": (
+                    str(args.event_evidence_catalog) if args.event_evidence_catalog else ""
+                ),
+            },
             outputs={
                 "catalog": str(catalog_path),
                 "verification": str(verification_path),
@@ -748,7 +765,12 @@ def main() -> None:
             failure_reason=str(exc),
             started_at=started_at,
             start_timer=start_timer,
-            inputs={"manifest": str(args.manifest)},
+            inputs={
+                "manifest": str(args.manifest),
+                "event_evidence_catalog": (
+                    str(args.event_evidence_catalog) if args.event_evidence_catalog else ""
+                ),
+            },
             outputs={"catalog": ""},
             metadata={
                 "research_root": str(args.root.expanduser()),

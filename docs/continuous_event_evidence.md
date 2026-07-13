@@ -72,10 +72,48 @@ Discovery always writes:
 - `automatic_formal_split_updates=false` at catalog level.
 
 A complete radar window moves only to `operational_status=awaiting_review`. A reviewer must inspect
-the radar frames, source timing, QPE, gauges, warnings, and official synoptic context before setting
-`review_status` and assigning `typhoon`, `front`, `mei_yu`, `convective`, or `other`. Approval still
-does not edit `data/samples/event_split_manifest.json`; adding a reviewed event to a formal split is
-a separate tracked change with an explicit train/validation/test decision.
+the radar frames, source timing, QPE, gauges, warnings, and official synoptic context. Record the
+decision through the schema-validated command rather than editing JSON directly:
+
+```bash
+mhc event-review \
+  --catalog "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json" \
+  --candidate-id <candidate-id> \
+  --decision approved \
+  --reviewer <reviewer-identity> \
+  --weather-regime convective \
+  --official-context https://www.cwa.gov.tw/<official-source> \
+  --notes "Reviewed radar, QPE, gauges, warnings, and official context."
+```
+
+Approval requires a complete window, at least one capture with synchronized QPE/gauge/warning
+evidence, a named reviewer, timezone-aware review time, a non-`unclassified` regime, and at least
+one official HTTPS context reference. A repeated identical review is idempotent; a conflicting
+second decision is rejected. Rejection also requires a complete window and reviewer identity, but
+may remain `unclassified` when the candidate is a false positive.
+
+`mhc event-review` still does not edit `data/samples/event_split_manifest.json`. Adding an approved
+event is a separate tracked change with an explicit train/validation/test decision. The manifest
+event must set `evidence_candidate_id`, use the reviewed window, and match the reviewed weather
+regime in `event_type`. Then run:
+
+```bash
+mhc event-split-check \
+  --manifest data/samples/event_split_manifest.json \
+  --event-evidence-catalog \
+    "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json" \
+  --require-ok
+
+mhc dataset-build \
+  --manifest data/samples/event_split_manifest.json \
+  --event-evidence-catalog \
+    "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json" \
+  --root "$MINXIONGHYDROCAST_RESEARCH_ROOT"
+```
+
+Both commands reject a referenced candidate that is unknown, incomplete, unapproved,
+checksum-invalid, time-mismatched, or regime-mismatched. The dataset build applies the same gate
+before any download or training.
 
 Retraining is allowed only after newly reviewed events enter the formal manifest. It must rerun the
 same independent validation/test comparison and unchanged Persistence promotion gate. Do not tune

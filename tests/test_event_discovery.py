@@ -19,6 +19,7 @@ from minxionghydrocast.pipelines.event_discovery import (
     run_event_discovery,
     verify_event_evidence_catalog,
 )
+from minxionghydrocast.pipelines.event_review import review_event_candidate
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 
@@ -283,6 +284,16 @@ def test_event_discovery_resumes_window_and_is_idempotent(tmp_path: Path):
     assert sha256_file(frame_path) == frame_artifact.sha256
     assert fourth.catalog_path.read_bytes() == second_bytes
 
+    review_event_candidate(
+        catalog_path=fourth.catalog_path,
+        repository_root=repository,
+        candidate_id=candidate.candidate_id,
+        decision="approved",
+        reviewer="reviewer@example.test",
+        weather_regime="convective",
+        official_context_references=("https://www.cwa.gov.tw/official-context",),
+        now=datetime(2026, 7, 14, 10, 27, tzinfo=TAIPEI_TZ),
+    )
     gauge_artifact = capture.gauges.artifact
     assert gauge_artifact is not None
     gauge_path = research / gauge_artifact.path
@@ -297,6 +308,7 @@ def test_event_discovery_resumes_window_and_is_idempotent(tmp_path: Path):
     )
     assert fifth.catalog_changed is True
     assert fifth.evidence_error_count == 0
+    assert repaired_catalog.candidates[0].review_status == "approved"
     assert verify_event_evidence_catalog(
         repaired_catalog,
         layout=ResearchLayout(research),

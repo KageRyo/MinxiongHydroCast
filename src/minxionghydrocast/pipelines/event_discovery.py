@@ -915,9 +915,8 @@ def _mark_corrupt_evidence(
         )
     if not changed:
         return candidate
-    return EventCandidate.model_validate(
-        candidate.model_dump(mode="python") | {"evidence_captures": tuple(captures)}
-    )
+    # A reviewed candidate may be temporarily invalid while its corrupt evidence is retried.
+    return candidate.model_copy(update={"evidence_captures": tuple(captures)})
 
 
 def _capture_evidence(

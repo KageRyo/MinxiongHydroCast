@@ -197,6 +197,36 @@ class SynchronizedEvidenceCapture(EventEvidenceSchema):
         return self
 
 
+class EventReviewRecord(EventEvidenceSchema):
+    decision: Literal["approved", "rejected"]
+    reviewer: str = Field(min_length=1, max_length=200)
+    reviewed_at: str
+    weather_regime: WeatherRegime
+    official_context_references: tuple[str, ...] = ()
+    notes: str = Field(default="", max_length=2000)
+
+    @model_validator(mode="after")
+    def validate_review(self) -> "EventReviewRecord":
+        aware_datetime(self.reviewed_at, field="reviewed_at")
+        if self.reviewer != self.reviewer.strip():
+            raise ValueError("reviewer must be a trimmed non-blank value")
+        if len(self.official_context_references) != len(
+            set(self.official_context_references)
+        ):
+            raise ValueError("official context references must be unique")
+        if any(
+            not reference.startswith("https://")
+            for reference in self.official_context_references
+        ):
+            raise ValueError("official context references must use HTTPS URLs")
+        if self.decision == "approved":
+            if self.weather_regime == "unclassified":
+                raise ValueError("approved review requires a classified weather regime")
+            if not self.official_context_references:
+                raise ValueError("approved review requires official context evidence")
+        return self
+
+
 class EventCandidate(EventEvidenceSchema):
     candidate_id: str = Field(pattern=r"^[a-z0-9][a-z0-9_.-]+$")
     source_data_id: RadarDataId = "O-A0059-001"
@@ -215,6 +245,7 @@ class EventCandidate(EventEvidenceSchema):
     triggers: tuple[RadarFrameMetric, ...]
     radar_collection: CandidateRadarCollection
     evidence_captures: tuple[SynchronizedEvidenceCapture, ...] = ()
+    review: EventReviewRecord | None = None
 
     @model_validator(mode="after")
     def validate_candidate(self) -> "EventCandidate":
@@ -241,8 +272,25 @@ class EventCandidate(EventEvidenceSchema):
             raise ValueError("complete candidate must await human review")
         if not self.radar_collection.complete and self.operational_status == "awaiting_review":
             raise ValueError("incomplete candidate cannot await review")
-        if self.review_status == "approved" and not self.radar_collection.complete:
-            raise ValueError("human review cannot approve an incomplete candidate")
+        if self.review_status != "pending" and not self.radar_collection.complete:
+            raise ValueError("human review requires a complete candidate window")
+        if self.review_status == "pending":
+            if self.review is not None or self.weather_regime != "unclassified":
+                raise ValueError("pending candidate cannot contain review conclusions")
+        else:
+            if self.review is None or self.review.decision != self.review_status:
+                raise ValueError("review record must match candidate review_status")
+            if self.weather_regime != self.review.weather_regime:
+                raise ValueError("candidate weather_regime must match its review record")
+        if self.review_status == "approved":
+            synchronized = any(
+                capture.qpe.status == "ok"
+                and capture.gauges.status == "ok"
+                and capture.warnings.status in {"ok", "empty"}
+                for capture in self.evidence_captures
+            )
+            if not synchronized:
+                raise ValueError("approved candidate requires synchronized official evidence")
         return self
 
 

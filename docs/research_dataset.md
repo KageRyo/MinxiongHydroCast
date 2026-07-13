@@ -63,6 +63,12 @@ Run `mhc event-discover` every 10 to 30 minutes to preserve new candidate events
 history window expires. Its separate `EventEvidenceCatalog` is candidate-only and cannot modify the
 formal event manifest. See [continuous_event_evidence.md](continuous_event_evidence.md).
 
+When a formal manifest deliberately references a reviewed discovery candidate through
+`evidence_candidate_id`, pass `--event-evidence-catalog` to both `event-split-check` and
+`dataset-build`. They share the same approval gate. The build fails before download or training
+unless the candidate window is complete, synchronized evidence is intact, the human review is
+approved, and the formal time window and event type match the reviewed catalog.
+
 ## Data Contract
 
 The tracked manifest uses schema version `2.0` and requires exactly these event-based splits:

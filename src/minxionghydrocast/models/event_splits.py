@@ -2,22 +2,12 @@
 
 from __future__ import annotations
 
-import argparse
 import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from minxionghydrocast.io.run_summary import (
-    DEFAULT_RUN_LOG_PATH,
-    build_run_summary,
-    default_run_summary_path,
-    record_run,
-    start_run,
-)
-
-PIPELINE_NAME = "event_split_check"
 DEFAULT_MANIFEST = Path("data/samples/event_split_manifest.json")
 REQUIRED_SPLITS = ("train", "validation", "test")
 
@@ -193,50 +183,3 @@ def write_check_result(result: dict[str, object], output_path: Path) -> None:
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Check event-based model split readiness.")
-    parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
-    parser.add_argument(
-        "--output",
-        type=Path,
-        default=Path("data/processed/event_split_check.json"),
-    )
-    parser.add_argument("--require-ok", action="store_true")
-    parser.add_argument(
-        "--summary-output",
-        type=Path,
-        default=default_run_summary_path(PIPELINE_NAME),
-    )
-    parser.add_argument("--log-output", type=Path, default=DEFAULT_RUN_LOG_PATH)
-    args = parser.parse_args()
-
-    started_at, start_timer = start_run()
-    manifest = load_manifest(args.manifest)
-    result = manifest.check()
-    write_check_result(result, args.output)
-    summary = build_run_summary(
-        pipeline=PIPELINE_NAME,
-        status=str(result["status"]),
-        failure_reason="; ".join(result["errors"]),
-        started_at=started_at,
-        start_timer=start_timer,
-        inputs={"manifest": str(args.manifest)},
-        outputs={"check_result": str(args.output)},
-        row_counts={
-            "events": result["event_count"],
-            "train": result["split_counts"]["train"],
-            "validation": result["split_counts"]["validation"],
-            "test": result["split_counts"]["test"],
-        },
-        metadata={"target": result["target"], "require_ok": args.require_ok},
-    )
-    record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)
-    print(f"[OK] Wrote event split check to {args.output}")
-    if args.require_ok and result["status"] != "ok":
-        raise SystemExit("[ERROR] Event split manifest failed validation.")
-
-
-if __name__ == "__main__":
-    main()

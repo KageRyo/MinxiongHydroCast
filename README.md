@@ -71,6 +71,7 @@ mhc operations --help
 mhc serve --help
 mhc dataset-build --help
 mhc event-discover --help
+mhc event-review --help
 ```
 
 Every existing `minxiong-hydrocast-<command>` entry point is available as `mhc <command>`.
@@ -118,6 +119,13 @@ coverage, resumes complete event-window downloads, and synchronizes `O-B0045-001
 `O-A0002-001` gauges, and WRA rainfall warnings. Candidates remain pending human review and cannot
 automatically enter train, validation, or test splits. See
 [docs/continuous_event_evidence.md](docs/continuous_event_evidence.md).
+
+After a candidate window is complete, record a provenance-backed human decision with
+`mhc event-review`. Approval requires a classified weather regime and at least one official HTTPS
+context source. A later formal manifest change must reference the candidate through
+`evidence_candidate_id`; both `mhc event-split-check --event-evidence-catalog ...` and
+`mhc dataset-build --event-evidence-catalog ...` reject unapproved, incomplete, checksum-invalid,
+time-mismatched, or regime-mismatched promotions.
 
 ## Operational Observation Service
 

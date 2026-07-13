@@ -62,6 +62,9 @@ through a focused pull request. The end-to-end target is defined in
 - [x] Capture synchronized `O-B0045-001` QPE, `O-A0002-001` gauges, and WRA rainfall warnings in a
       strict Pydantic `EventEvidenceCatalog`.
 - [x] Schedule candidate discovery every 20 minutes while preventing automatic formal-split edits.
+- [x] Add auditable `mhc event-review` decisions and make `event-split-check` plus `dataset-build`
+      reject incomplete, unapproved, checksum-invalid, time-mismatched, or regime-mismatched
+      candidate promotions.
 
 ## Next
 

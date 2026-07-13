@@ -66,6 +66,8 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Add continuous 20-minute `O-A0059-001` event discovery with local and Taiwan-wide `35 dBZ`
       coverage, resumable candidate windows, and synchronized QPE/gauge/warning evidence.
 - [x] Enforce a Pydantic candidate queue that requires human review and cannot update formal splits.
+- [x] Record reviewer, review time, regime, and official context through `mhc event-review`, and
+      reject unapproved promotion in both `event-split-check` and `dataset-build`.
 - [ ] Accumulate reviewed typhoon, frontal, Mei-yu, and convective candidates before retraining.
 
 ## Milestone 7: Train And Compare Models
