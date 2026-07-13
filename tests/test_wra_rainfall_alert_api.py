@@ -131,6 +131,22 @@ def test_wra_adapter_uses_opaque_codes_when_affected_area_is_blank():
     assert record["鄉鎮代碼"] == "10010050"
 
 
+def test_wra_adapter_trims_affected_area_consistently():
+    payload = fixture_payload()
+    payload["Data"][0]["AffectedArea"] = "  民雄鄉雙福村、福樂村  "
+    adapter = WraRainfallAlertAdapter(
+        api_key="real-secret",
+        county_code="10010",
+        client=client_for(payload),
+        now=datetime(2026, 7, 12, 3, 25, tzinfo=TAIPEI_TZ),
+    )
+
+    record = adapter.collect().records[0]
+
+    assert record["地區"] == "民雄鄉雙福村、福樂村"
+    assert record["影響村落"] == "民雄鄉雙福村、福樂村"
+
+
 def test_wra_adapter_marks_old_observations_stale():
     now = datetime(2026, 7, 12, 3, 20, tzinfo=TAIPEI_TZ) + timedelta(minutes=31)
     adapter = WraRainfallAlertAdapter(

@@ -514,6 +514,37 @@ def test_disabled_flood_sensor_cannot_make_dataset_fresh():
     assert refreshed["state"] == "stale"
 
 
+def test_all_disabled_flood_sensors_fall_back_to_record_timestamps():
+    now = datetime(2026, 7, 11, 10, 0, tzinfo=TAIPEI_TZ)
+    alerts, rain, flood = live_scraper_records(now)
+    for record in flood:
+        record["啟用狀態"] = "false"
+    records = {
+        "rainfall_alerts": alerts,
+        "rain_gauges": rain,
+        "flood_sensors": flood,
+    }
+    sources = {
+        "rainfall_alerts": wra_api_source("rainfall_alerts", alerts, now),
+        "rain_gauges": api_source(rain, now),
+        "flood_sensors": wra_api_source("flood_sensors", flood, now),
+    }
+
+    payloads = collector.build_payloads(
+        records,
+        sources=sources,
+        mode="live",
+        max_age_minutes=30,
+        flood_max_age_minutes=90,
+        now=now,
+    )
+    flood_payload = next(payload for payload in payloads if payload.name == "flood_sensors")
+
+    assert flood_payload.health["state"] == "healthy"
+    assert flood_payload.health["observed_at"] == now.isoformat(timespec="seconds")
+    assert flood_payload.health["schema_errors"] == []
+
+
 def test_alert_schema_drift_never_uses_scraper_fallback(monkeypatch):
     class DriftingAlertAdapter:
         dataset = "rainfall_alerts"

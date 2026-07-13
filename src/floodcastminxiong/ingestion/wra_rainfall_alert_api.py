@@ -107,7 +107,7 @@ def warning_record(
         "水情時間ISO": observed_at.isoformat(timespec="seconds"),
         "警戒": f"{warning.warning_level}級警戒",
         "警戒級別": str(warning.warning_level),
-        "影響村落": warning.affected_area,
+        "影響村落": affected_area,
         "10分鐘雨量mm": _rainfall(warning.m10),
         "1小時雨量mm": _rainfall(warning.h1),
         "3小時雨量mm": _rainfall(warning.h3),

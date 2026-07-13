@@ -439,11 +439,12 @@ def build_payloads(
         freshness_observed_at: str | None = None
         if name == "flood_sensors" and dataset_records:
             active_timestamps = [
-                record.get("水情時間ISO", "")
+                timestamp
                 for record in dataset_records
+                if (timestamp := record.get("水情時間ISO", "").strip())
                 if record.get("啟用狀態", "true").strip().lower() != "false"
             ]
-            freshness_observed_at = max(active_timestamps) if active_timestamps else ""
+            freshness_observed_at = max(active_timestamps) if active_timestamps else None
         health = assess_dataset(
             dataset_records,
             fieldnames=fieldnames,
