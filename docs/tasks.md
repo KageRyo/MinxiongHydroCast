@@ -155,7 +155,6 @@ through a focused pull request. The end-to-end target is defined in
       delivery, localhost-only access, and documented rollback instructions.
 - [ ] Add authenticated TLS ingress only before making the service reachable beyond localhost.
 - [x] Put snapshots on durable mounted storage, schedule local backups, and verify a restore.
-- [ ] Replicate verified backups to a different device or remote system.
 - [x] Scrape service metrics and route failed/stale/degraded/schema alerts to the durable local audit
       receiver.
 - [ ] Route operational alerts to named primary and backup human receivers.
@@ -168,6 +167,8 @@ through a focused pull request. The end-to-end target is defined in
 
 - [x] Schedule stable observation collection, shadow evaluation, backups, and official live
       contracts.
+- [ ] Replicate verified backups to a different device or remote system before public operational
+      promotion; deferred while the service remains internal and localhost-only.
 - [ ] Schedule radar/model workflows only after their data and model gates are stable.
 - [ ] Extend the operator view with experimental forecast products only after model outputs pass
       their gates.

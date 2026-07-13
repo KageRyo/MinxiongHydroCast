@@ -95,7 +95,8 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Add snapshot-native Minxiong observation/alert features with stable location IDs.
 - [ ] Add validated QPE and experimental forecast fields to the feature contract.
 - [x] Add scheduled checksummed local backups and verify isolated restore.
-- [ ] Replicate verified backups to a different device or remote system.
+- [ ] Replicate verified backups to a different device or remote system before public operational
+      promotion; deferred while the service remains internal and localhost-only.
 - [x] Export readiness, age, state, and shadow-gate metrics.
 - [x] Scrape metrics with Prometheus and route failed/stale/degraded/schema alerts to the durable
       local audit receiver.

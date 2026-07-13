@@ -315,8 +315,9 @@ Prometheus metrics endpoint, read API, operator view, monitoring configs, local 
 checksummed backup/restore tooling, and single-host installation scripts are implemented. The
 single-host profile has been deployed and its live sources, Prometheus target, local alert routing,
 and backup restore have been exercised. See [deployment_status.md](deployment_status.md) for dated
-evidence. Promotion still requires a named human alert channel, an off-host backup, authenticated
-network exposure if needed, and completion of the shadow and model evidence gates.
+evidence. Public operational promotion still requires a named human alert channel, an off-host
+backup, authenticated network exposure if needed, and completion of the shadow and model evidence
+gates.
 
 ## Production Gates
 
@@ -337,19 +338,21 @@ The immediate blockers are concrete:
 
 - add a named human receiver for failed, stale, degraded, and schema alerts, then exercise the
   incident path; the durable localhost audit receiver alone is insufficient;
-- add an off-host backup target after verifying the local scheduled backup and restore drill;
 - complete the seven-day shadow gate with at least 900 attempts, 99% collection success, 95%
   readiness, no gap over 30 minutes, and continuous coverage of at least one reviewed heavy-rain
   period;
 - assign decision owners and exercise the documented incident, human-override, and rollback paths
   before enabling any external operational notification.
 
+Off-host backup replication is deferred while the first release remains internal and
+localhost-only. It is still required before public operational promotion because the current local
+backup does not protect against loss of the host or storage volume.
+
 ## Recommended First Release
 
 The first credible release remains an internal **Minxiong observation and data-quality service**,
 not an automated warning product. The repository supplies the runnable service and operations
-foundation. The remaining promotion work is to add off-host recovery and a named human alert route,
-assign decision owners, exercise incident/override procedures, and complete the real shadow run.
-Add experimental radar nowcasts
-only after the observation service is reliable; add public risk notifications only after local
-backtesting and operator review.
+foundation. The immediate promotion work is to add a named human alert route, assign decision
+owners, exercise incident/override procedures, and complete the real shadow run. Add experimental
+radar nowcasts only after the observation service is reliable; add public risk notifications only
+after local backtesting, operator review, and off-host recovery are complete.
