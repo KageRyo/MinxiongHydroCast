@@ -87,7 +87,8 @@ merge independently when their own review and CI checks pass.
 
 - Explicitly activate the implemented Discord backend only after naming its primary and backup
   on-call owners, then exercise its incident path.
-- Replicate backups to another device or remote system; the current backup protects snapshots from
+- Before public operational promotion, replicate backups to another device or remote system. This
+  is deferred for the current internal localhost stage; the current backup protects snapshots from
   application-level corruption but not loss of the whole host or volume.
 - Assign incident ownership and exercise acknowledgement, override, and rollback responsibilities.
 - Complete the real shadow gate and local model/label gates before enabling risk notifications.

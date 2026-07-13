@@ -11,8 +11,8 @@ credentials, raw official data, or model weights.
 
 1. **Internal observation service:** official-source collection, immutable snapshots, readiness,
    localhost API/operator view, monitoring, local alert audit, backup/restore, and supervised
-   scheduling are implemented and deployed. Promotion still requires the real shadow gate,
-   off-host recovery, named operators, and exercised incident paths.
+   scheduling are implemented and deployed. Public operational promotion still requires the real
+   shadow gate, off-host recovery, named operators, and exercised incident paths.
 2. **Experimental rainfall nowcast:** event diversity, QPE/gauge validation, local labels,
    independent-event evaluation, calibration, and model promotion evidence remain incomplete.
 3. **Public operational service:** authenticated/TLS ingress, approved SLOs and data rights, named
@@ -77,9 +77,10 @@ credentials, raw official data, or model weights.
   Alertmanager routing to a durable local audit receiver, scheduled local backup/restore, hourly
   shadow evaluation, and an online host-bound GitHub Actions runner. See
   [deployment_status.md](deployment_status.md) for dated evidence.
-- Pending operations promotion: replicate backups off-host, assign primary and backup operators,
-  route alerts to a named human receiver, exercise incident/override/rollback procedures, and
-  complete the real shadow gate.
+- Deferred for the current internal localhost stage: replicate backups to another device or remote
+  system. The accepted risk must be revisited before public operational promotion.
+- Pending operations promotion: assign primary and backup operators, route alerts to a named human
+  receiver, exercise incident/override/rollback procedures, and complete the real shadow gate.
 - Pending public exposure work: define SLOs and add authenticated TLS ingress only if the service
   must become reachable beyond localhost.
 - Pending optional hydrology work: define a separate operational use case and contract before
@@ -91,8 +92,9 @@ credentials, raw official data, or model weights.
   weather-map source is still needed before assigning labels.
 - Pending validation work: run live QPE/gauge reports for each selected event after matching
   event-time QPE grids are captured or an official historical QPE archive is confirmed.
-- Pending training work: collect enough event windows for meaningful Tiny U-Net or NowcastNet
-  training and reporting.
+- Next technical focus: collect weather-diverse event windows, create reproducible dataset
+  summaries, and backtest persistence and Tiny U-Net on independent events before considering
+  NowcastNet or forecast publication.
 
 ## Phase 1: Data Source Finalization
 
