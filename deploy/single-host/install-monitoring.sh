@@ -3,7 +3,7 @@ set -euo pipefail
 
 PROMETHEUS_VERSION="3.13.1"
 ALERTMANAGER_VERSION="0.33.1"
-RUNTIME_ROOT="${1:-$HOME/.local/share/floodcast-minxiong}"
+RUNTIME_ROOT="${1:-$HOME/.local/share/minxiong-hydrocast}"
 BIN_DIR="$RUNTIME_ROOT/bin"
 
 if [[ "$(uname -s)" != "Linux" || "$(uname -m)" != "x86_64" ]]; then

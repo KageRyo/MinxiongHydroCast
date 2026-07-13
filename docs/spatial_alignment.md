@@ -1,6 +1,6 @@
 # Spatial Alignment
 
-FloodCastMinxiong aligns observations and risk assets through a common location reference table and
+MinxiongHydroCast aligns observations and risk assets through a common location reference table and
 regular WGS84 grids.
 
 ## Location Reference
@@ -8,7 +8,7 @@ regular WGS84 grids.
 Build a reference table from processed hydrology outputs:
 
 ```bash
-floodcast-minxiong-locations \
+minxiong-hydrocast-locations \
   --rain data/processed/rain_monitor.csv \
   --flood data/processed/flood_sensors.csv \
   --output data/processed/location_reference.csv
@@ -32,7 +32,7 @@ silently accepted.
 
 ## Grids
 
-Two starter grids are defined in `src/floodcastminxiong/spatial/grid.py`:
+Two starter grids are defined in `src/minxionghydrocast/spatial/grid.py`:
 
 - `CHIAYI_COUNTY_GRID`: 0.01 degree cells for county-scale alignment.
 - `MINXIONG_GRID`: 0.005 degree cells for local calibration.

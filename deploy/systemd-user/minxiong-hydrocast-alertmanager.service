@@ -1,0 +1,18 @@
+[Unit]
+Description=MinxiongHydroCast Alertmanager
+After=network.target minxiong-hydrocast-alert-receiver.service
+Wants=minxiong-hydrocast-alert-receiver.service
+
+[Service]
+Type=simple
+ExecStart=%h/.local/share/minxiong-hydrocast/bin/alertmanager \
+  --config.file=%h/.local/share/minxiong-hydrocast/config/prometheus/alertmanager.yml \
+  --storage.path=%h/.local/share/minxiong-hydrocast/alertmanager \
+  --web.listen-address=127.0.0.1:9093
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

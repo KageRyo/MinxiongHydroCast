@@ -3,8 +3,8 @@ import json
 
 import numpy as np
 
-from floodcastminxiong.models.baselines import PersistenceNowcaster
-from floodcastminxiong.pipelines.radar_tensor_conversion import (
+from minxionghydrocast.models.baselines import PersistenceNowcaster
+from minxionghydrocast.pipelines.radar_tensor_conversion import (
     convert_source,
     convert_records,
     load_tensor_archive,

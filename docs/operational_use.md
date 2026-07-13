@@ -1,6 +1,6 @@
 # Operational Use
 
-FloodCastMinxiong provides a runnable local observation and data-quality service, but it is not an
+MinxiongHydroCast provides a runnable local observation and data-quality service, but it is not an
 operational public warning service. The distinction matters: a service that runs on real data is
 not production-ready until its source contracts, deployment, alert routing, decision ownership,
 and shadow-operation evidence are defined and monitored.
@@ -10,8 +10,8 @@ and shadow-operation evidence are defined and monitored.
 Use demo mode only to verify the installation and service contract:
 
 ```bash
-floodcast-minxiong-operations --mode demo --once
-floodcast-minxiong-serve --host 127.0.0.1 --port 8080
+minxiong-hydrocast-operations --mode demo --once
+minxiong-hydrocast-serve --host 127.0.0.1 --port 8080
 ```
 
 Demo snapshots are always marked `demo` and `ready=false`; every demo dataset uses the
@@ -26,7 +26,7 @@ set -a
 source .env
 set +a
 
-floodcast-minxiong-operations --once \
+minxiong-hydrocast-operations --once \
   --alert-source auto \
   --rain-source auto \
   --flood-source auto \
@@ -73,15 +73,15 @@ freshness.
 Validate all three official observation contracts independently of Chromium:
 
 ```bash
-floodcast-minxiong-cwa-rain-smoke --county 10010 --county-name 嘉義縣
-floodcast-minxiong-wra-alert-smoke --county 10010
-floodcast-minxiong-wra-flood-smoke --county 10010
+minxiong-hydrocast-cwa-rain-smoke --county 10010 --county-name 嘉義縣
+minxiong-hydrocast-wra-alert-smoke --county 10010
+minxiong-hydrocast-wra-flood-smoke --county 10010
 ```
 
 Run continuously at a 10-minute interval:
 
 ```bash
-floodcast-minxiong-operations \
+minxiong-hydrocast-operations \
   --interval-seconds 600 \
   --retention-days 30 \
   --max-age-minutes 30 \
@@ -136,7 +136,7 @@ backup and access control; the repository does not provide a remote object-store
 Start the localhost-only default server:
 
 ```bash
-floodcast-minxiong-serve
+minxiong-hydrocast-serve
 ```
 
 The following endpoints are available:
@@ -156,7 +156,7 @@ The following endpoints are available:
 | `GET /api/v1/experimental-forecasts` | Explicit unavailable state until forecast gates pass |
 
 All JSON responses are validated and serialized through the Pydantic models in
-`floodcastminxiong.operations.schemas`. Fixed response fields reject unknown keys and invalid
+`minxionghydrocast.operations.schemas`. Fixed response fields reject unknown keys and invalid
 types; dataset responses also require `row_count` to match the number of returned records. The
 source-specific columns inside each record remain dynamic strings because the endpoint exposes
 multiple separately versioned tabular contracts.
@@ -192,8 +192,8 @@ it with reviewed heavy-rain evidence. Unconfirmed sample evidence never satisfie
 Evaluate the accumulated snapshot history:
 
 ```bash
-floodcast-minxiong-shadow-report \
-  --evidence /var/lib/floodcast-minxiong/reviewed_shadow_evidence.json
+minxiong-hydrocast-shadow-report \
+  --evidence /var/lib/minxiong-hydrocast/reviewed_shadow_evidence.json
 ```
 
 The default gate requires:
@@ -217,9 +217,9 @@ Real Minxiong flood labels must be kept outside tracked demo data. Start from
 audit the result:
 
 ```bash
-floodcast-minxiong-label-audit \
-  --manifest /var/lib/floodcast-minxiong/reviewed_flood_labels.json \
-  --output /var/lib/floodcast-minxiong/flood_label_audit.json \
+minxiong-hydrocast-label-audit \
+  --manifest /var/lib/minxiong-hydrocast/reviewed_flood_labels.json \
+  --output /var/lib/minxiong-hydrocast/flood_label_audit.json \
   --require-training-ready
 ```
 
@@ -243,9 +243,9 @@ The executable single-host profile under `deploy/systemd-user/` and `deploy/sing
 
 The single-host installer uses:
 
-- `/mnt/8tb_hdd/ryo/floodcast-minxiong` for durable mutable state;
-- `~/.local/share/floodcast-minxiong` as a stable runtime symlink;
-- `~/.config/floodcast-minxiong/env` with mode `0600` for `CWA_API_KEY` and `WRA_API_KEY`;
+- `/mnt/8tb_hdd/ryo/minxiong-hydrocast` for durable mutable state;
+- `~/.local/share/minxiong-hydrocast` as a stable runtime symlink;
+- `~/.config/minxiong-hydrocast/env` with mode `0600` for `CWA_API_KEY` and `WRA_API_KEY`;
 - user-level systemd supervision, with login linger enabled for service persistence.
 
 See [single_host_operations.md](single_host_operations.md) for installation, validation, alert
@@ -273,7 +273,7 @@ decision.
 
 ### 2. Live observation ingestion
 
-Run `floodcast-minxiong-operations` with live mode and the three source selectors. Inspect each JSON
+Run `minxiong-hydrocast-operations` with live mode and the three source selectors. Inspect each JSON
 run summary and reject the run if its mode is not `live`, its status is not `ok`, observations are
 empty or stale, or validation reports contain errors. A rainfall-warning row count of zero is valid
 only when its official source provenance says `outcome=empty`.
@@ -319,7 +319,7 @@ network exposure if needed, and completion of the shadow and model evidence gate
 
 ## Production Gates
 
-Do not present FloodCastMinxiong as an operational warning system until all gates pass:
+Do not present MinxiongHydroCast as an operational warning system until all gates pass:
 
 - **Source gate:** approved WRA/CWA contracts, documented licensing, and measured retention.
 - **Data gate:** freshness and quality SLOs with automated schema-drift and missing-data alarms.
@@ -340,14 +340,15 @@ The immediate blockers are concrete:
 - complete the seven-day shadow gate with at least 900 attempts, 99% collection success, 95%
   readiness, no gap over 30 minutes, and continuous coverage of at least one reviewed heavy-rain
   period;
-- document decision ownership, incident response, human override, and rollback before enabling
-  any notification.
+- assign decision owners and exercise the documented incident, human-override, and rollback paths
+  before enabling any external operational notification.
 
 ## Recommended First Release
 
 The first credible release remains an internal **Minxiong observation and data-quality service**,
 not an automated warning product. The repository supplies the runnable service and operations
-foundation. The remaining promotion work is to verify the host deployment, add off-host recovery
-and a named human alert route, and complete the real shadow run. Add experimental radar nowcasts
+foundation. The remaining promotion work is to add off-host recovery and a named human alert route,
+assign decision owners, exercise incident/override procedures, and complete the real shadow run.
+Add experimental radar nowcasts
 only after the observation service is reliable; add public risk notifications only after local
 backtesting and operator review.

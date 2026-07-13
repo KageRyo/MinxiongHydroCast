@@ -1,0 +1,11 @@
+[Unit]
+Description=Evaluate MinxiongHydroCast shadow gate hourly
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+RandomizedDelaySec=120
+Unit=minxiong-hydrocast-shadow.service
+
+[Install]
+WantedBy=timers.target

@@ -1,4 +1,17 @@
-from floodcastminxiong.config import get_settings
+from minxionghydrocast.config import get_settings
+
+
+def test_settings_load_canonical_operational_prefix(monkeypatch, tmp_path):
+    store = tmp_path / "operations"
+    monkeypatch.setenv("MINXIONGHYDROCAST_OPERATIONS_STORE", str(store))
+    monkeypatch.setenv("MINXIONGHYDROCAST_MAX_AGE_MINUTES", "45")
+    monkeypatch.setenv("MINXIONGHYDROCAST_FLOOD_MAX_AGE_MINUTES", "120")
+
+    settings = get_settings()
+
+    assert settings.operations_store == store
+    assert settings.operations_max_age_minutes == 45
+    assert settings.operations_flood_max_age_minutes == 120
 
 
 def test_settings_load_cwa_rest_api_and_key(monkeypatch):
@@ -24,6 +37,6 @@ def test_settings_load_wra_api_endpoints_and_key(monkeypatch):
 
 
 def test_settings_load_flood_snapshot_freshness(monkeypatch):
-    monkeypatch.setenv("FLOODCASTMINXIONG_FLOOD_MAX_AGE_MINUTES", "120")
+    monkeypatch.setenv("MINXIONGHYDROCAST_FLOOD_MAX_AGE_MINUTES", "120")
 
     assert get_settings().operations_flood_max_age_minutes == 120

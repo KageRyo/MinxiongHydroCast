@@ -1,0 +1,47 @@
+groups:
+  - name: minxiong-hydrocast
+    rules:
+      - alert: MinxiongHydroCastApiDown
+        expr: up{job="minxiong-hydrocast"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: MinxiongHydroCast API is unavailable
+          description: Prometheus has not scraped the localhost API for two minutes.
+
+      - alert: MinxiongHydroCastCollectorFailed
+        expr: minxionghydrocast_last_attempt_success == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: MinxiongHydroCast collection failed
+          description: The most recent operational collection attempt failed.
+
+      - alert: MinxiongHydroCastNotReady
+        expr: minxionghydrocast_ready == 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: MinxiongHydroCast data is not ready
+          description: Operational data has failed readiness gates for 15 minutes.
+
+      - alert: MinxiongHydroCastDatasetStale
+        expr: minxionghydrocast_dataset_state{state="stale"} == 1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: MinxiongHydroCast dataset is stale
+          description: Dataset {{ $labels.dataset }} exceeded its freshness limit.
+
+      - alert: MinxiongHydroCastDatasetDegraded
+        expr: minxionghydrocast_dataset_state{state=~"degraded|coverage_missing|upstream_unhealthy"} == 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: MinxiongHydroCast dataset is degraded
+          description: Dataset {{ $labels.dataset }} is in state {{ $labels.state }}.

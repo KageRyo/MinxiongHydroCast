@@ -6,10 +6,10 @@ usage() {
 }
 
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-DURABLE_ROOT="/mnt/8tb_hdd/ryo/floodcast-minxiong"
+DURABLE_ROOT="/mnt/8tb_hdd/ryo/minxiong-hydrocast"
 ENV_FILE=""
 PYTHON_BIN="python3"
-RUNTIME_LINK="$HOME/.local/share/floodcast-minxiong"
+RUNTIME_LINK="$HOME/.local/share/minxiong-hydrocast"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -86,17 +86,17 @@ fi
 git -C "$REPOSITORY_ROOT" rev-parse HEAD \
   > "$DURABLE_ROOT/config/installed-revision.txt"
 
-mkdir -p "$HOME/.config/floodcast-minxiong" "$HOME/.config/systemd/user"
-install -m 0600 "$ENV_FILE" "$HOME/.config/floodcast-minxiong/env"
-discord_config_count="$(grep -Ec '^[[:space:]]*FLOODCAST_DISCORD_WEBHOOK_URL=' "$ENV_FILE" || true)"
+mkdir -p "$HOME/.config/minxiong-hydrocast" "$HOME/.config/systemd/user"
+install -m 0600 "$ENV_FILE" "$HOME/.config/minxiong-hydrocast/env"
+discord_config_count="$(grep -Ec '^[[:space:]]*MINXIONGHYDROCAST_DISCORD_WEBHOOK_URL=' "$ENV_FILE" || true)"
 if [[ "$discord_config_count" -gt 1 ]]; then
-  echo "[ERROR] FLOODCAST_DISCORD_WEBHOOK_URL must not be defined more than once" >&2
+  echo "[ERROR] MINXIONGHYDROCAST_DISCORD_WEBHOOK_URL must not be defined more than once" >&2
   exit 1
 fi
-install -m 0600 /dev/null "$HOME/.config/floodcast-minxiong/notifications.env"
+install -m 0600 /dev/null "$HOME/.config/minxiong-hydrocast/notifications.env"
 if [[ "$discord_config_count" -eq 1 ]]; then
-  grep -E '^[[:space:]]*FLOODCAST_DISCORD_WEBHOOK_URL=' "$ENV_FILE" \
-    > "$HOME/.config/floodcast-minxiong/notifications.env"
+  grep -E '^[[:space:]]*MINXIONGHYDROCAST_DISCORD_WEBHOOK_URL=' "$ENV_FILE" \
+    > "$HOME/.config/minxiong-hydrocast/notifications.env"
 fi
 install -m 0644 "$REPOSITORY_ROOT"/deploy/prometheus/*.yml \
   "$DURABLE_ROOT/config/prometheus/"
@@ -112,27 +112,31 @@ fi
 "$DURABLE_ROOT/bin/promtool" check config \
   "$DURABLE_ROOT/config/prometheus/prometheus.yml"
 "$DURABLE_ROOT/bin/promtool" check rules \
-  "$DURABLE_ROOT/config/prometheus/floodcast.rules.yml"
+  "$DURABLE_ROOT/config/prometheus/minxiong-hydrocast.rules.yml"
 "$DURABLE_ROOT/bin/amtool" check-config \
   "$DURABLE_ROOT/config/prometheus/alertmanager.yml"
 
 systemctl --user daemon-reload
 systemctl --user enable \
-  floodcast-minxiong-alert-receiver.service \
-  floodcast-minxiong-alertmanager.service \
-  floodcast-minxiong-api.service \
-  floodcast-minxiong-prometheus.service
+  minxiong-hydrocast-alert-receiver.service \
+  minxiong-hydrocast-alertmanager.service \
+  minxiong-hydrocast-api.service \
+  minxiong-hydrocast-prometheus.service
 systemctl --user restart \
-  floodcast-minxiong-alert-receiver.service \
-  floodcast-minxiong-alertmanager.service \
-  floodcast-minxiong-api.service \
-  floodcast-minxiong-prometheus.service
+  minxiong-hydrocast-alert-receiver.service \
+  minxiong-hydrocast-alertmanager.service \
+  minxiong-hydrocast-api.service \
+  minxiong-hydrocast-prometheus.service
 systemctl --user enable --now \
-  floodcast-minxiong-collector.timer \
-  floodcast-minxiong-backup.timer \
-  floodcast-minxiong-shadow.timer
-systemctl --user start floodcast-minxiong-collector.service
-systemctl --user start floodcast-minxiong-shadow.service
+  minxiong-hydrocast-collector.timer \
+  minxiong-hydrocast-backup.timer \
+  minxiong-hydrocast-shadow.timer
+systemctl --user start minxiong-hydrocast-collector.service
+systemctl --user start minxiong-hydrocast-shadow.service
 
-echo "[OK] FloodCastMinxiong installed at $DURABLE_ROOT"
-echo "[ACTION] Run 'sudo loginctl enable-linger $USER' once so user services survive logout"
+echo "[OK] MinxiongHydroCast installed at $DURABLE_ROOT"
+if [[ "$(loginctl show-user "$USER" -p Linger --value 2>/dev/null || true)" == "yes" ]]; then
+  echo "[OK] systemd user linger is enabled for $USER"
+else
+  echo "[ACTION] Run 'sudo loginctl enable-linger $USER' once so user services survive logout"
+fi

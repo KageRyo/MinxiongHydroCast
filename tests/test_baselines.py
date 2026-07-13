@@ -1,6 +1,6 @@
 import numpy as np
 
-from floodcastminxiong.models.baselines import PersistenceNowcaster, RainfallThresholdRiskScorer
+from minxionghydrocast.models.baselines import PersistenceNowcaster, RainfallThresholdRiskScorer
 
 
 def test_persistence_nowcaster_repeats_latest_frame():

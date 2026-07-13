@@ -217,7 +217,7 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# FloodCastMinxiong local configuration and generated data
+# MinxiongHydroCast local configuration and generated data
 env.local
 *.env
 !.env.example

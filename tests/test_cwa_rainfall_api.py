@@ -5,9 +5,9 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from floodcastminxiong.ingestion.cwa_rainfall_api import CwaRainGaugeAdapter
-from floodcastminxiong.ingestion.http_client import ReliableJsonClient
-from floodcastminxiong.ingestion.source_adapter import (
+from minxionghydrocast.ingestion.cwa_rainfall_api import CwaRainGaugeAdapter
+from minxionghydrocast.ingestion.http_client import ReliableJsonClient
+from minxionghydrocast.ingestion.source_adapter import (
     SourceProvenance,
     SourceRequestError,
     SourceResult,

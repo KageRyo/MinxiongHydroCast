@@ -1,6 +1,6 @@
 # Event Splits
 
-FloodCastMinxiong should split model data by weather event, not by random rows or radar frames. Random
+MinxiongHydroCast should split model data by weather event, not by random rows or radar frames. Random
 splits leak storm structure across train, validation, and test sets, which makes nowcasting scores
 look better than they are.
 
@@ -36,7 +36,7 @@ sample verifies the pipeline only; it is not a benchmark event.
 ## Check Command
 
 ```bash
-floodcast-minxiong-event-split-check \
+minxiong-hydrocast-event-split-check \
   --manifest data/samples/event_split_manifest.json \
   --output data/processed/event_split_check.json
 ```
@@ -44,7 +44,7 @@ floodcast-minxiong-event-split-check \
 Use `--require-ok` in training automation:
 
 ```bash
-floodcast-minxiong-event-split-check --require-ok
+minxiong-hydrocast-event-split-check --require-ok
 ```
 
 The checker verifies:

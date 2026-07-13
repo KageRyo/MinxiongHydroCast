@@ -1,9 +1,9 @@
-from floodcastminxiong.validation.normalization import (
+from minxionghydrocast.validation.normalization import (
     normalize_datetime,
     normalize_rainfall_mm,
     normalize_water_level,
 )
-from floodcastminxiong.validation.quality import validate_records
+from minxionghydrocast.validation.quality import validate_records
 
 
 def test_normalize_datetime_uses_production_year_and_taipei_timezone():

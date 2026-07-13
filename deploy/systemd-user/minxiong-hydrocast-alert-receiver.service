@@ -1,0 +1,19 @@
+[Unit]
+Description=MinxiongHydroCast Alertmanager webhook audit receiver
+After=network.target
+
+[Service]
+Type=simple
+EnvironmentFile=-%h/.config/minxiong-hydrocast/notifications.env
+ExecStart=%h/.local/share/minxiong-hydrocast/venv/bin/minxiong-hydrocast-alert-receiver \
+  --host 127.0.0.1 \
+  --port 9087 \
+  --output %h/.local/share/minxiong-hydrocast/notifications/alerts.jsonl \
+  --delivery-output %h/.local/share/minxiong-hydrocast/notifications/discord-deliveries.jsonl
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

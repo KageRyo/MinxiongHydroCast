@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from floodcastminxiong.operations.snapshot_store import (
+from minxionghydrocast.operations.snapshot_store import (
     DatasetPayload,
     RunLockError,
     SnapshotStore,

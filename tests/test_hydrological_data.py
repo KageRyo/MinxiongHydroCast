@@ -1,4 +1,4 @@
-from floodcastminxiong.ingestion.hydrological_data import (
+from minxionghydrocast.ingestion.hydrological_data import (
     extract_production_time,
     parse_flood_rows,
     parse_rain_rows,

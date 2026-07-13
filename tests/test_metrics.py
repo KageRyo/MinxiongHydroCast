@@ -1,6 +1,6 @@
 import numpy as np
 
-from floodcastminxiong.models.metrics import binary_event_metrics, rmse
+from minxionghydrocast.models.metrics import binary_event_metrics, rmse
 
 
 def test_rmse_matches_expected_value():

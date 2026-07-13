@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Run the local FloodCastMinxiong demo pipeline."""
+"""Run the local MinxiongHydroCast demo pipeline."""
 
-from floodcastminxiong.pipelines.demo import main
+from minxionghydrocast.pipelines.demo import main
 
 
 if __name__ == "__main__":

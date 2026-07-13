@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from floodcastminxiong.models.event_splits import EventSplitManifest, WeatherEvent, load_manifest
+from minxionghydrocast.models.event_splits import EventSplitManifest, WeatherEvent, load_manifest
 
 
 def test_sample_event_split_manifest_is_ok():

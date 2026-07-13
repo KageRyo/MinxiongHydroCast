@@ -1,6 +1,6 @@
 # Data Contracts
 
-FloodCastMinxiong treats data contracts as the boundary between upstream collection, cleaning,
+MinxiongHydroCast treats data contracts as the boundary between upstream collection, cleaning,
 modeling, and product usage. Every live dataset includes source metadata and an explicit
 `資料模式` value. Operational collection prefers official machine-readable sources; a page scraper
 is only a degraded request-failure fallback.
@@ -135,7 +135,7 @@ healthy while still having a slower publication cadence than the original measur
 
 Government Open Data dataset [25768](https://data.gov.tw/dataset/25768) contains river and regional
 drainage water-level observations. It is not a street/community flood-depth sensor product, and its
-records are not fully quality-controlled. FloodCastMinxiong therefore does not map it into
+records are not fully quality-controlled. MinxiongHydroCast therefore does not map it into
 `flood_sensors`, derive Minxiong flood-sensor features from it, or expose it as an operational
 dataset today. A future integration must use a separate `river_water_levels` contract and retain
 the upstream `checkresult`, `checkdesc`, observation timestamp, and explicit freshness state.

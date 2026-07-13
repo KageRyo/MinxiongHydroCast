@@ -2,8 +2,8 @@
 set -euo pipefail
 
 RUNNER_VERSION="2.335.1"
-REPOSITORY="${1:-KageRyo/FloodCastMinxiong}"
-RUNTIME_ROOT="${2:-$HOME/.local/share/floodcast-minxiong}"
+REPOSITORY="${1:-KageRyo/MinxiongHydroCast}"
+RUNTIME_ROOT="${2:-$HOME/.local/share/minxiong-hydrocast}"
 RUNNER_ROOT="$RUNTIME_ROOT/actions-runner"
 ASSET="actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz"
 
@@ -46,18 +46,18 @@ tar -xzf "$temporary/$ASSET" -C "$RUNNER_ROOT"
 
 registration_token="$(gh api --method POST \
   "repos/$REPOSITORY/actions/runners/registration-token" --jq .token)"
-runner_name="$(hostname)-floodcast-minxiong"
+runner_name="$(hostname)-minxiong-hydrocast"
 (
   cd "$RUNNER_ROOT"
   ./config.sh --unattended --replace \
     --url "https://github.com/$REPOSITORY" \
     --token "$registration_token" \
     --name "$runner_name" \
-    --labels floodcast-minxiong \
+    --labels minxiong-hydrocast \
     --work _work
 )
 unset registration_token
 
 systemctl --user daemon-reload
-systemctl --user enable --now floodcast-minxiong-runner.service
+systemctl --user enable --now minxiong-hydrocast-runner.service
 echo "[OK] Actions runner $runner_name installed and started"

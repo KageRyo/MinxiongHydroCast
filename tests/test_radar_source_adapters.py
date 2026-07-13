@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from floodcastminxiong.pipelines.radar_source_adapters import (
+from minxionghydrocast.pipelines.radar_source_adapters import (
     CWA_OPEN_DATA_GRID,
     CSV_PIXEL_GRID,
     CwaOpenDataGridAdapter,

@@ -10,13 +10,13 @@ from zoneinfo import ZoneInfo
 import pytest
 from pydantic import ValidationError
 
-from floodcastminxiong.operations.alert_receiver import (
+from minxionghydrocast.operations.alert_receiver import (
     AlertAuditLog,
     AlertmanagerWebhook,
     DeliveryAuditLog,
     handler_factory,
 )
-from floodcastminxiong.operations.discord_notifications import (
+from minxionghydrocast.operations.discord_notifications import (
     DiscordDeliveryError,
     DiscordDeliveryReceipt,
 )
@@ -27,22 +27,22 @@ TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 def webhook_payload() -> dict[str, object]:
     return {
         "version": "4",
-        "groupKey": '{}:{alertname="FloodCastNotReady"}',
+        "groupKey": '{}:{alertname="MinxiongHydroCastNotReady"}',
         "truncatedAlerts": 0,
         "status": "firing",
         "receiver": "operations-audit",
-        "groupLabels": {"alertname": "FloodCastNotReady"},
+        "groupLabels": {"alertname": "MinxiongHydroCastNotReady"},
         "commonLabels": {"severity": "critical"},
-        "commonAnnotations": {"summary": "FloodCast is not ready"},
+        "commonAnnotations": {"summary": "MinxiongHydroCast is not ready"},
         "externalURL": "http://127.0.0.1:9093",
         "alerts": [
             {
                 "status": "firing",
                 "labels": {
-                    "alertname": "FloodCastNotReady",
+                    "alertname": "MinxiongHydroCastNotReady",
                     "severity": "critical",
                 },
-                "annotations": {"summary": "FloodCast is not ready"},
+                "annotations": {"summary": "MinxiongHydroCast is not ready"},
                 "startsAt": "2026-07-12T10:00:00Z",
                 "endsAt": "0001-01-01T00:00:00Z",
                 "generatorURL": "http://127.0.0.1:9090/graph",

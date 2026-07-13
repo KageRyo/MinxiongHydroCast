@@ -5,9 +5,9 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from floodcastminxiong.ingestion.http_client import ReliableJsonClient, RetryPolicy
-from floodcastminxiong.ingestion.source_adapter import SourceRequestError, SourceSchemaError
-from floodcastminxiong.ingestion.wra_rainfall_alert_api import (
+from minxionghydrocast.ingestion.http_client import ReliableJsonClient, RetryPolicy
+from minxionghydrocast.ingestion.source_adapter import SourceRequestError, SourceSchemaError
+from minxionghydrocast.ingestion.wra_rainfall_alert_api import (
     DEFAULT_ENDPOINT,
     WraRainfallAlertAdapter,
 )

@@ -1,19 +1,19 @@
-# FloodCastMinxiong
+# MinxiongHydroCast
 
-[![CI](https://github.com/KageRyo/FloodCastMinxiong/actions/workflows/ci.yml/badge.svg)](https://github.com/KageRyo/FloodCastMinxiong/actions/workflows/ci.yml)
+[![CI](https://github.com/KageRyo/MinxiongHydroCast/actions/workflows/ci.yml/badge.svg)](https://github.com/KageRyo/MinxiongHydroCast/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Style: Ruff](https://img.shields.io/badge/style-ruff-46a6ff)](https://docs.astral.sh/ruff/)
 [![Service](https://img.shields.io/badge/service-observation%20service-blue)](docs/operational_use.md)
 [![Operational Gate](https://img.shields.io/badge/operational%20gate-pending-orange)](docs/operational_use.md#production-gates)
 
-Minxiong-first flood-risk data pipeline and rainfall-nowcasting toolkit.
+Minxiong-first hydrometeorological observation and rainfall-nowcasting toolkit.
 
-FloodCastMinxiong is a Minxiong-first flood-risk data and rainfall-nowcasting toolkit. Its
-operational target is Minxiong Township, while Taiwan-wide radar data is used as upstream training
-and context data. The repository now includes a live official-source observation service and is no
-longer demo-only. It is still an internal research and data-engineering system, not an official
-warning system or a production-ready public service.
+MinxiongHydroCast is a Minxiong-first hydrometeorological observation and rainfall-nowcasting
+toolkit. Its operational target is Minxiong Township, while Taiwan-wide radar data is used as
+upstream training and context data. The repository includes a live official-source observation
+service and is no longer demo-only. It is still an internal research and data-engineering system,
+not an official warning system or a production-ready public service.
 
 ## What This Repo Does
 
@@ -45,7 +45,7 @@ operating profiles, storage contracts, and the gates required before public depl
 
 ```bash
 conda env create -f environment.yml
-conda activate floodcast-minxiong
+conda activate minxiong-hydrocast
 python -m playwright install chromium
 ```
 
@@ -66,7 +66,7 @@ linting and tests, `.[model]` for model training, or `.[dev,model]` when both ar
 Create a versioned demo snapshot without contacting live sources:
 
 ```bash
-floodcast-minxiong-operations --mode demo --once
+minxiong-hydrocast-operations --mode demo --once
 ```
 
 Run one live collection. Live is the default mode. Store both keys in an ignored local `.env`
@@ -77,7 +77,7 @@ set -a
 source .env
 set +a
 
-floodcast-minxiong-operations --once \
+minxiong-hydrocast-operations --once \
   --alert-source auto \
   --rain-source auto \
   --flood-source auto \
@@ -108,15 +108,15 @@ the collector applies a separate 90-minute freshness limit.
 Smoke-test all three official observation contracts without installing a Playwright browser:
 
 ```bash
-floodcast-minxiong-cwa-rain-smoke --county 10010 --county-name 嘉義縣
-floodcast-minxiong-wra-alert-smoke --county 10010
-floodcast-minxiong-wra-flood-smoke --county 10010
+minxiong-hydrocast-cwa-rain-smoke --county 10010 --county-name 嘉義縣
+minxiong-hydrocast-wra-alert-smoke --county 10010
+minxiong-hydrocast-wra-flood-smoke --county 10010
 ```
 
 Run the collector every 10 minutes and retain 30 days of snapshots:
 
 ```bash
-floodcast-minxiong-operations \
+minxiong-hydrocast-operations \
   --interval-seconds 600 \
   --retention-days 30 \
   --max-age-minutes 30 \
@@ -132,7 +132,7 @@ floodcast-minxiong-operations \
 Serve the read-only API and internal operator view on localhost:
 
 ```bash
-floodcast-minxiong-serve --host 127.0.0.1 --port 8080
+minxiong-hydrocast-serve --host 127.0.0.1 --port 8080
 ```
 
 Open <http://127.0.0.1:8080/> for the operator view. The service exposes:
@@ -155,7 +155,7 @@ Snapshots are immutable under `data/processed/operations/snapshots/`. A failed c
 Each dataset manifest and API response includes source kind, authority, dataset ID, redacted URL,
 fetch time, adapter schema version, content SHA-256, outcome, and any fallback reason.
 For a Linux host, basic system service templates are provided under `deploy/systemd/`. The complete
-single-host profile, including durable storage, monitoring, alert auditing, backup/restore, and
+single-host profile, including durable storage, monitoring, alert auditing, backup/restore,
 optional Discord delivery, and shadow scheduling, is under `deploy/systemd-user/` and
 `deploy/single-host/`; see
 [docs/single_host_operations.md](docs/single_host_operations.md).
@@ -163,7 +163,7 @@ optional Discord delivery, and shadow scheduling, is under `deploy/systemd-user/
 Evaluate accumulated live snapshots against a reviewed heavy-rain period:
 
 ```bash
-floodcast-minxiong-shadow-report \
+minxiong-hydrocast-shadow-report \
   --evidence /path/to/reviewed_shadow_evidence.json
 ```
 
@@ -174,7 +174,7 @@ Passing this gate does not enable notifications; local model-label and delivery 
 Audit reviewed Minxiong flood-event labels before using them for model training:
 
 ```bash
-floodcast-minxiong-label-audit \
+minxiong-hydrocast-label-audit \
   --manifest /path/to/reviewed_flood_labels.json \
   --output data/processed/flood_label_audit.json \
   --require-training-ready
@@ -200,27 +200,27 @@ python scripts/run_demo.py
 ```
 
 The standalone rainfall-alert and hydrology CLIs below exercise the legacy page parsers. Keep them
-for fixture generation and managed fallback diagnostics; use `floodcast-minxiong-operations` for
+for fixture generation and managed fallback diagnostics; use `minxiong-hydrocast-operations` for
 the official-source operational path.
 
 Run rainfall-alert parser diagnostics:
 
 ```bash
 # Demo data
-floodcast-minxiong-rainfall-alerts --mode demo
+minxiong-hydrocast-rainfall-alerts --mode demo
 
 # Direct WRA page parser for Chiayi County, county=10010
-floodcast-minxiong-rainfall-alerts --mode live --county 10010
+minxiong-hydrocast-rainfall-alerts --mode live --county 10010
 ```
 
 Run rain-gauge and flood-sensor parser diagnostics:
 
 ```bash
 # Demo data
-floodcast-minxiong-hydrology --mode demo
+minxiong-hydrocast-hydrology --mode demo
 
 # Direct WRA monitor-page parsers for Chiayi County
-floodcast-minxiong-hydrology --mode live --county 10010 \
+minxiong-hydrocast-hydrology --mode live --county 10010 \
   --debug-dir data/raw/debug \
   --summary-output data/processed/hydrology_run_summary.json
 ```
@@ -228,13 +228,13 @@ floodcast-minxiong-hydrology --mode live --county 10010 \
 Parse a local shelter DOCX file:
 
 ```bash
-floodcast-minxiong-shelters --input data/raw/shelters.docx --output data/processed/shelters.csv
+minxiong-hydrocast-shelters --input data/raw/shelters.docx --output data/processed/shelters.csv
 ```
 
 Build a location reference table:
 
 ```bash
-floodcast-minxiong-locations \
+minxiong-hydrocast-locations \
   --rain data/processed/rain_monitor.csv \
   --flood data/processed/flood_sensors.csv \
   --output data/processed/location_reference.csv
@@ -243,7 +243,7 @@ floodcast-minxiong-locations \
 Evaluate baseline models:
 
 ```bash
-floodcast-minxiong-evaluate-baselines \
+minxiong-hydrocast-evaluate-baselines \
   --events data/samples/flood_risk_events.csv \
   --output data/processed/baseline_evaluation.json
 ```
@@ -251,7 +251,7 @@ floodcast-minxiong-evaluate-baselines \
 Check NowcastNet migration prerequisites:
 
 ```bash
-floodcast-minxiong-nowcastnet-smoke \
+minxiong-hydrocast-nowcastnet-smoke \
   --code-dir data/external/nowcastnet/code \
   --checkpoint data/external/checkpoints/nowcastnet_tw.pt \
   --radar-dataset data/external/radar/taiwan \
@@ -261,7 +261,7 @@ floodcast-minxiong-nowcastnet-smoke \
 Check whether a radar data source is ready for tensor conversion:
 
 ```bash
-floodcast-minxiong-radar-source-check \
+minxiong-hydrocast-radar-source-check \
   --manifest data/samples/radar_source_manifest.json \
   --output data/processed/radar_source_check.json
 ```
@@ -273,14 +273,14 @@ local env files only and keep downloaded files under ignored `data/external/` pa
 Dry-run a CWA file API download without a key or network fetch:
 
 ```bash
-floodcast-minxiong-cwa-download --dry-run --data-id O-A0059-001
+minxiong-hydrocast-cwa-download --dry-run --data-id O-A0059-001
 ```
 
 Download a local sample after setting `CWA_API_KEY`:
 
 ```bash
 export CWA_API_KEY  # set this locally first
-floodcast-minxiong-cwa-download \
+minxiong-hydrocast-cwa-download \
   --data-id O-A0059-001 \
   --output-dir data/external/radar
 ```
@@ -291,7 +291,7 @@ and `format` as query parameters. It redacts the key from run summaries and logs
 Inspect downloaded CWA grid samples:
 
 ```bash
-floodcast-minxiong-cwa-grid-inspect \
+minxiong-hydrocast-cwa-grid-inspect \
   data/external/radar/cwa_o_a0059_001/O-A0059-001.json \
   data/external/radar/cwa_o_b0045_001/O-B0045-001.json
 ```
@@ -299,13 +299,13 @@ floodcast-minxiong-cwa-grid-inspect \
 Dry-run the inferred CWA historyAPI file-list endpoint:
 
 ```bash
-floodcast-minxiong-cwa-history-list --dry-run --data-id O-A0059-001
+minxiong-hydrocast-cwa-history-list --dry-run --data-id O-A0059-001
 ```
 
 Download a specific CWA history `getData` timestamp into ignored local storage:
 
 ```bash
-floodcast-minxiong-cwa-history-data-download \
+minxiong-hydrocast-cwa-history-data-download \
   --data-id O-A0002-001 \
   --data-time 2026-07-02T15:30:00+08:00 \
   --output data/external/gauges/events/O-A0002-001_20260702153000.xml \
@@ -318,7 +318,7 @@ Use this for event-time rain-gauge captures and QPE availability probes. The dow
 After the history endpoint is live-verified, build a multi-frame event plan:
 
 ```bash
-floodcast-minxiong-cwa-event-plan \
+minxiong-hydrocast-cwa-event-plan \
   --history-index data/processed/cwa_history_index.json \
   --event-id chiayi_20260706_evening \
   --start-time 2026-07-06T18:00:00+08:00 \
@@ -328,7 +328,7 @@ floodcast-minxiong-cwa-event-plan \
 Download the selected event frames into ignored local storage:
 
 ```bash
-floodcast-minxiong-cwa-event-plan \
+minxiong-hydrocast-cwa-event-plan \
   --history-index data/processed/cwa_history_index.json \
   --event-id chiayi_20260706_evening \
   --start-time 2026-07-06T18:00:00+08:00 \
@@ -347,7 +347,7 @@ Summarize a downloaded CWA event collection for local Chiayi/Minxiong and Taiwan
 threshold evidence:
 
 ```bash
-floodcast-minxiong-radar-event-summary \
+minxiong-hydrocast-radar-event-summary \
   --collection data/processed/cwa_event_collection.json \
   --output data/processed/cwa_event_summary.json
 ```
@@ -365,7 +365,7 @@ Validate CWA 1-hour QPE against rain gauges after collecting local `O-B0045-001`
 `O-A0002-001` captures for the same window:
 
 ```bash
-floodcast-minxiong-qpe-gauge-validate \
+minxiong-hydrocast-qpe-gauge-validate \
   --qpe-grid data/external/radar/events/<event>/O-B0045-001.json \
   --gauge-json data/external/gauges/events/<event>/O-A0002-001.json \
   --event-id <event_id> \
@@ -380,7 +380,7 @@ gauge-vs-QPE reports remain blocked until QPE grids are captured or an official 
 Check event-based train/validation/test splits:
 
 ```bash
-floodcast-minxiong-event-split-check \
+minxiong-hydrocast-event-split-check \
   --manifest data/samples/event_split_manifest.json \
   --output data/processed/event_split_check.json
 ```
@@ -388,7 +388,7 @@ floodcast-minxiong-event-split-check \
 Convert the tiny radar-like fixture into the model tensor archive format:
 
 ```bash
-floodcast-minxiong-radar-tensor-convert \
+minxiong-hydrocast-radar-tensor-convert \
   --source-format csv_pixel_grid \
   --input data/samples/radar_pixels.csv \
   --output data/processed/radar_tensor_sample.npz
@@ -397,7 +397,7 @@ floodcast-minxiong-radar-tensor-convert \
 Convert a CWA event collection manifest into a tensor archive:
 
 ```bash
-floodcast-minxiong-radar-tensor-convert \
+minxiong-hydrocast-radar-tensor-convert \
   --source-format cwa_opendata_grid \
   --input data/processed/cwa_event_collection.json \
   --input-length 2 \
@@ -410,7 +410,7 @@ For longer event windows, emit sliding-window tensors by adding `--window-stride
 For example, 6 input frames and 6 target frames create 10- to 60-minute lead-time samples:
 
 ```bash
-floodcast-minxiong-radar-tensor-convert \
+minxiong-hydrocast-radar-tensor-convert \
   --source-format cwa_opendata_grid \
   --input data/processed/cwa_event_collection_taiwan_widespread_20260628_afternoon_evening.json \
   --event-id cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening \
@@ -424,7 +424,7 @@ floodcast-minxiong-radar-tensor-convert \
 Evaluate the tensor archive with the persistence baseline:
 
 ```bash
-floodcast-minxiong-tensor-baseline-evaluate \
+minxiong-hydrocast-tensor-baseline-evaluate \
   --archive data/processed/radar_tensor_sample.npz \
   --output data/processed/tensor_baseline_evaluation.json
 ```
@@ -432,7 +432,7 @@ floodcast-minxiong-tensor-baseline-evaluate \
 Train the optional PyTorch baseline after installing a CUDA-enabled PyTorch build:
 
 ```bash
-floodcast-minxiong-train-torch-baseline \
+minxiong-hydrocast-train-torch-baseline \
   --archive data/processed/cwa_radar_tensor_sample.npz \
   --output-dir data/external/checkpoints/tiny_unet_cwa_2gpu_masked_smoke \
   --device cuda \
@@ -450,7 +450,7 @@ loss. For the next strong-echo experiment, add `--loss-function weighted_mse`,
 Compare the Tiny U-Net checkpoint against persistence on the same valid pixels:
 
 ```bash
-floodcast-minxiong-torch-baseline-evaluate \
+minxiong-hydrocast-torch-baseline-evaluate \
   --archive data/processed/cwa_radar_tensor_sample.npz \
   --checkpoint data/external/checkpoints/tiny_unet_cwa_2gpu_masked_smoke/tiny_unet_nowcaster.pt \
   --event-threshold 35 \
@@ -469,7 +469,7 @@ for throwaway checks.
 ## Project Layout
 
 ```text
-FloodCastMinxiong/
+MinxiongHydroCast/
 ├── data/
 │   ├── raw/          # ignored source captures
 │   ├── interim/      # ignored cleaned intermediates
@@ -483,7 +483,7 @@ FloodCastMinxiong/
 │   └── systemd-user/ # complete single-host user services and timers
 ├── docs/
 ├── scripts/
-├── src/floodcastminxiong/
+├── src/minxionghydrocast/
 │   ├── ingestion/
 │   ├── io/
 │   ├── models/
@@ -522,5 +522,13 @@ The Linux deployment and operations runbook is documented in
 [docs/single_host_operations.md](docs/single_host_operations.md).
 Current verified rollout evidence and remaining gates are recorded in
 [docs/deployment_status.md](docs/deployment_status.md).
+The canonical name and claims vocabulary are defined in
+[docs/project_identity.md](docs/project_identity.md), and supported product boundaries are defined
+in [docs/project_scope.md](docs/project_scope.md).
+Operational escalation and recovery procedures are documented in
+[docs/incident_response.md](docs/incident_response.md) and [docs/rollback.md](docs/rollback.md).
+Decision authority and fail-closed human overrides are defined in
+[docs/decision_authority.md](docs/decision_authority.md). Source purpose and rights-review status
+are tracked in [docs/data_source_register.md](docs/data_source_register.md).
 The current baseline model card is documented in
 [docs/model_cards/minxiong_chiayi_baseline.md](docs/model_cards/minxiong_chiayi_baseline.md).

@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from floodcastminxiong.pipelines.qpe_gauge_validation import (
+from minxionghydrocast.pipelines.qpe_gauge_validation import (
     build_qpe_gauge_report,
     extract_gauge_observations,
     extract_gauge_observations_from_xml,
@@ -9,7 +9,7 @@ from floodcastminxiong.pipelines.qpe_gauge_validation import (
     qpe_grid_index_for_point,
     summarize_matches,
 )
-from floodcastminxiong.ingestion.cwa_grid import inspect_cwa_grid_file
+from minxionghydrocast.ingestion.cwa_grid import inspect_cwa_grid_file
 
 
 def write_qpe_grid(path: Path) -> None:

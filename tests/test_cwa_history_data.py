@@ -1,7 +1,7 @@
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
-from floodcastminxiong.ingestion.cwa_history_data import (
+from minxionghydrocast.ingestion.cwa_history_data import (
     CwaHistoryDataRequest,
     download_history_data,
     dry_run_result,

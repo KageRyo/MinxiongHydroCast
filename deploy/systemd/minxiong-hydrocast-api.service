@@ -1,0 +1,26 @@
+[Unit]
+Description=MinxiongHydroCast observation API and operator view
+Documentation=https://github.com/KageRyo/MinxiongHydroCast
+After=network.target
+
+[Service]
+Type=simple
+User=minxiong-hydrocast
+Group=minxiong-hydrocast
+WorkingDirectory=/opt/minxiong-hydrocast
+EnvironmentFile=-/etc/minxiong-hydrocast.env
+StateDirectory=minxiong-hydrocast
+ExecStart=/opt/minxiong-hydrocast/.venv/bin/minxiong-hydrocast-serve \
+  --store /var/lib/minxiong-hydrocast/operations \
+  --host 127.0.0.1 \
+  --port 8080
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadOnlyPaths=/var/lib/minxiong-hydrocast
+
+[Install]
+WantedBy=multi-user.target

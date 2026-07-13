@@ -1,6 +1,6 @@
 # NowcastNet Migration
 
-FloodCastMinxiong keeps third-party SOTA code, checkpoints, and radar datasets outside git. The repo
+MinxiongHydroCast keeps third-party SOTA code, checkpoints, and radar datasets outside git. The repo
 contains only the contract and adapter needed to connect those assets once they are reviewed.
 
 ## Radar Tensor Contract
@@ -76,7 +76,7 @@ The sample asset manifest lives at `data/samples/external_asset_manifest.json`.
 Run the adapter smoke test without loading external NowcastNet code:
 
 ```bash
-floodcast-minxiong-nowcastnet-smoke \
+minxiong-hydrocast-nowcastnet-smoke \
   --code-dir data/external/nowcastnet/code \
   --checkpoint data/external/checkpoints/nowcastnet_tw.pt \
   --radar-dataset data/external/radar/taiwan \
