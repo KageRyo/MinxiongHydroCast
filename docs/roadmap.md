@@ -6,8 +6,8 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 
 ## Milestone 1: Stabilize Live Data Ingestion
 
-- [x] Implement live WRA rain gauge parsing in `src/floodcastminxiong/ingestion/hydrological_data.py`.
-- [x] Implement live WRA flood-sensor parsing with explicit station, time, water level, and status fields.
+- [x] Retain WRA rain-gauge and flood-sensor page parsers for degraded fallback diagnostics.
+- [x] Implement official-source adapters with explicit station, time, value, unit, and status fields.
 - [x] Add source metadata to every live capture: URL, fetch time, mode, row count, and failure reason.
 - [x] Save raw captures or screenshots locally under ignored `data/raw/` for parser debugging.
 - [x] Keep `demo` and `live` modes separate in every ingestion command.
@@ -74,9 +74,20 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 
 ## Milestone 8: Operationalize
 
-- [ ] Replace page scraping with approved WRA API contracts for production-critical feeds.
+- [x] Make official machine-readable sources primary for all three operational observation feeds;
+      retain page scraping only as an explicit degraded request-failure fallback.
 - [x] Replace operational rain-gauge scraping with the official CWA `O-A0002-001` API adapter,
       strict upstream schemas, reliable requests, provenance, and degraded fallback semantics.
+- [x] Add the WRA OpenApiv3 rainfall-warning adapter with `apikey` header authentication, strict
+      Pydantic validation, and a healthy `outcome=empty` for valid `Data=[]` responses.
+- [x] Join WRA IoW government Open Data 142980 measurements with 142979 sensor metadata and enforce
+      a 90-minute freshness limit for the approximately hourly public snapshot.
+- [x] Fail closed on official-source schema drift and permit scraper fallback only for request
+      failures.
+- [x] Review WRA river/regional-drainage water-level dataset 25768 and prohibit substituting it for
+      `flood_sensors`.
+- [ ] Add a separate `river_water_levels` contract only after an operational use case is defined;
+      retain upstream quality flags and do not feed it into current Minxiong flood features.
 - [x] Package rainfall-alert and hydrology ingestion as a locked, repeatable scheduled job.
 - [x] Store immutable, checksummed observation snapshots with latest and last-attempt pointers.
 - [x] Expose freshness, schema drift, failed-run, and missing-forecast health states.
@@ -84,7 +95,8 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Add snapshot-native Minxiong observation/alert features with stable location IDs.
 - [ ] Add validated QPE and experimental forecast fields to the feature contract.
 - [ ] Add a remote durable-storage backend and deployment backups.
-- [ ] Export metrics and route failed/stale/schema alerts to named maintainers.
+- [x] Export readiness, age, state, and shadow-gate metrics.
+- [ ] Scrape metrics and route failed/stale/degraded/schema alerts to named maintainers.
 - [x] Emit structured logs and run summaries for every pipeline execution.
 - [x] Add CI for tests and linting.
 - [x] Maintain a repo task list for unchecked roadmap items.
@@ -96,10 +108,20 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Publish a versioned read API for current alerts and observations.
 - [x] Add an operator view that separates official-source data from experimental predictions.
 - [x] Add systemd templates for a persistent collector timer and supervised localhost API.
+- [x] Deploy the localhost single-host profile with persistent services and least-privilege secret
+      delivery on durable storage.
+- [ ] Deploy the supplied units on a managed host with least-privilege secrets, authenticated/TLS
+      access, and a documented rollback.
 - [x] Add an auditable seven-day shadow gate requiring reviewed heavy-rain coverage.
 - [x] Add a provenance-backed Minxiong flood-label audit and minimum class-coverage gate.
 - [ ] Publish forecast grids and risk features after their model/data gates pass.
 - [x] Publish the observation-derived Minxiong feature contract.
+- [x] Require explicit Minxiong rain-gauge and enabled flood-sensor coverage before feature
+      readiness can pass.
 - [ ] Backtest on multiple independent events and calibrate thresholds with local flood labels.
-- [ ] Run a shadow deployment through at least one heavy-rain period before enabling notifications.
+- [ ] Complete the seven-day shadow deployment before enabling notifications: 900 attempts, 99%
+      collection success, 95% readiness, no gap over 30 minutes, intact snapshots, and reviewed
+      heavy-rain coverage.
+- [x] Put operational snapshots on durable storage and verify scheduled backup restore.
+- [ ] Route operational alerts to named owners and exercise incident response and human override.
 - [ ] Document incident response, data licensing, model rollback, and human override procedures.

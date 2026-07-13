@@ -1,0 +1,22 @@
+[Unit]
+Description=FloodCastMinxiong live observation collection
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=%h/.config/floodcast-minxiong/env
+ExecStart=%h/.local/share/floodcast-minxiong/venv/bin/floodcast-minxiong-operations \
+  --mode live \
+  --once \
+  --alert-source api \
+  --rain-source api \
+  --flood-source api \
+  --flood-max-age-minutes 90 \
+  --api-timeout-seconds 30 \
+  --store %h/.local/share/floodcast-minxiong/operations \
+  --debug-dir %h/.local/share/floodcast-minxiong/debug \
+  --summary-output %h/.local/share/floodcast-minxiong/run_summaries/operations.json \
+  --log-output %h/.local/share/floodcast-minxiong/run_logs.jsonl
+NoNewPrivileges=true
+PrivateTmp=true

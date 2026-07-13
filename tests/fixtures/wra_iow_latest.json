@@ -1,0 +1,16 @@
+[
+  {
+    "sensorid": "00707a34-700c-4e01-b091-396378c234f6",
+    "latestvalue": "12.50",
+    "timestamp": "2026-07-12T11:45:35+08:00",
+    "areacode": "10010050",
+    "countycode": "10010"
+  },
+  {
+    "sensorid": "021aa96e-3a1f-415e-ac6d-995f3e90d836",
+    "latestvalue": "0",
+    "timestamp": "2026-07-12T11:26:14+08:00",
+    "areacode": "10010030",
+    "countycode": "10010"
+  }
+]

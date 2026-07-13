@@ -19,7 +19,7 @@ TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 
 @dataclass(frozen=True)
 class ShadowCriteria:
-    lookback_hours: float = 168
+    lookback_hours: float = 192
     minimum_duration_hours: float = 168
     minimum_live_attempts: int = 900
     minimum_success_rate: float = 0.99
@@ -101,8 +101,7 @@ def evaluate_shadow(
         integrity_errors = store.verify_snapshot(item[1])
         if integrity_errors:
             manifest_errors.extend(
-                f"{item[1].get('snapshot_id', 'unknown')}: {error}"
-                for error in integrity_errors
+                f"{item[1].get('snapshot_id', 'unknown')}: {error}" for error in integrity_errors
             )
             continue
         if item[1].get("health", {}).get("ready") is True:
@@ -149,10 +148,8 @@ def evaluate_shadow(
         "live_attempts": attempt_count >= criteria.minimum_live_attempts,
         "success_rate": success_rate >= criteria.minimum_success_rate,
         "readiness_rate": readiness_rate >= criteria.minimum_readiness_rate,
-        "maximum_gap": maximum_gap is not None
-        and maximum_gap <= criteria.maximum_gap_minutes,
-        "heavy_rain_periods": len(covered_evidence)
-        >= criteria.required_heavy_rain_periods,
+        "maximum_gap": maximum_gap is not None and maximum_gap <= criteria.maximum_gap_minutes,
+        "heavy_rain_periods": len(covered_evidence) >= criteria.required_heavy_rain_periods,
         "storage_integrity": not manifest_errors,
         "evidence_valid": not evidence_errors,
     }
@@ -181,9 +178,7 @@ def evaluate_shadow(
             "duration_hours": round(duration_hours, 3),
             "success_rate": success_rate,
             "readiness_rate": readiness_rate,
-            "maximum_gap_minutes": round(maximum_gap, 3)
-            if maximum_gap is not None
-            else None,
+            "maximum_gap_minutes": round(maximum_gap, 3) if maximum_gap is not None else None,
             "confirmed_heavy_rain_periods": len(evidence),
             "covered_heavy_rain_periods": len(covered_evidence),
         },
@@ -192,8 +187,7 @@ def evaluate_shadow(
         "notification_allowed": False,
         "notification_blockers": sorted(set(reasons))
         + [
-            "notification delivery is not implemented and local model-label gates "
-            "are not satisfied"
+            "notification delivery is not implemented and local model-label gates are not satisfied"
         ],
     }
 
@@ -203,13 +197,18 @@ def main() -> None:
     parser.add_argument("--store", type=Path, default=DEFAULT_STORE)
     parser.add_argument("--evidence", type=Path, required=True)
     parser.add_argument("--output", type=Path)
-    parser.add_argument("--lookback-hours", type=float, default=168)
+    parser.add_argument("--lookback-hours", type=float, default=192)
     parser.add_argument("--minimum-duration-hours", type=float, default=168)
     parser.add_argument("--minimum-live-attempts", type=int, default=900)
     parser.add_argument("--minimum-success-rate", type=float, default=0.99)
     parser.add_argument("--minimum-readiness-rate", type=float, default=0.95)
     parser.add_argument("--maximum-gap-minutes", type=float, default=30)
     parser.add_argument("--required-heavy-rain-periods", type=int, default=1)
+    parser.add_argument(
+        "--allow-blocked",
+        action="store_true",
+        help="Write a blocked report without returning a non-zero scheduler status.",
+    )
     args = parser.parse_args()
     report = evaluate_shadow(
         SnapshotStore(args.store),
@@ -236,7 +235,7 @@ def main() -> None:
         f"[OK] Shadow gate passed={report['shadow_gate_passed']} "
         f"notification_allowed={report['notification_allowed']}"
     )
-    if not report["shadow_gate_passed"]:
+    if not report["shadow_gate_passed"] and not args.allow_blocked:
         raise SystemExit(2)
 
 

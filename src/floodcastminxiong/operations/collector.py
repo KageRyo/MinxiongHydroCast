@@ -13,13 +13,17 @@ from zoneinfo import ZoneInfo
 from floodcastminxiong.config import get_settings
 from floodcastminxiong.ingestion import hydrological_data, rainfall_alerts
 from floodcastminxiong.ingestion.cwa_rainfall_api import CwaRainGaugeAdapter
+from floodcastminxiong.ingestion.http_client import close_verified_session
 from floodcastminxiong.ingestion.source_adapter import (
     SourceAdapter,
     SourceAdapterError,
     SourceProvenance,
     SourceRequestError,
+    SourceSchemaError,
     records_sha256,
 )
+from floodcastminxiong.ingestion.wra_flood_sensor_api import WraFloodSensorAdapter
+from floodcastminxiong.ingestion.wra_rainfall_alert_api import WraRainfallAlertAdapter
 from floodcastminxiong.io.run_summary import (
     DEFAULT_RUN_LOG_PATH,
     build_run_summary,
@@ -47,7 +51,7 @@ DATASET_CONFIG = {
     "rainfall_alerts": {
         "product_type": "official_alert",
         "fieldnames": rainfall_alerts.FIELDNAMES,
-        "timestamp_field": "抓取時間",
+        "timestamp_field": "水情時間ISO",
     },
     "rain_gauges": {
         "product_type": "official_observation",
@@ -112,7 +116,9 @@ def _scraper_source(
         schema_version=f"wra-fhy-{dataset}-page-v1",
         content_sha256=records_sha256(records),
         fallback_reason_kind=fallback_error.kind if fallback_error else None,
-        fallback_reason=str(fallback_error) if fallback_error else "official API adapter pending",
+        fallback_reason=(
+            str(fallback_error) if fallback_error else "scraper source explicitly selected"
+        ),
     )
 
 
@@ -153,6 +159,158 @@ def _derived_source(
     )
 
 
+def _check_adapter_result(result: Any, *, dataset: str) -> tuple[list[dict[str, str]], SourceProvenance]:
+    if result.dataset != dataset:
+        raise SourceSchemaError(
+            "schema_drift",
+            f"source adapter returned unexpected dataset: {result.dataset}",
+        )
+    return result.records, result.provenance
+
+
+def _collect_alerts(
+    *,
+    source: str,
+    county: str,
+    headed: bool,
+    timeout: int,
+    api_timeout_seconds: float,
+    max_age_minutes: float,
+    adapter: SourceAdapter | None,
+    now: datetime | None,
+) -> tuple[list[dict[str, str]], SourceProvenance]:
+    settings = get_settings()
+    fallback_error: SourceRequestError | None = None
+    if source != "scraper":
+        official_adapter = adapter or WraRainfallAlertAdapter(
+            api_key=settings.wra_api_key,
+            county_code=county,
+            base_url=settings.wra_api_url,
+            timeout_seconds=api_timeout_seconds,
+            max_age_minutes=max_age_minutes,
+            now=now,
+        )
+        try:
+            return _check_adapter_result(official_adapter.collect(), dataset="rainfall_alerts")
+        except SourceRequestError as exc:
+            if source == "api":
+                raise
+            fallback_error = exc
+
+    records = rainfall_alerts.scrape_with_playwright(
+        county_value=county,
+        headless=not headed,
+        timeout=timeout,
+    )
+    if not records:
+        raise SourceAdapterError(
+            "empty_unexpected",
+            "WRA rainfall alert scraper returned no records",
+        )
+    return records, _scraper_source(
+        "rainfall_alerts",
+        records,
+        source_url=f"{settings.wra_base_url.rstrip('/')}/service/alertQuery#",
+        fallback_error=fallback_error,
+    )
+
+
+def _collect_rain_gauges(
+    *,
+    source: str,
+    county: str,
+    headed: bool,
+    timeout: int,
+    debug_dir: Path | None,
+    api_timeout_seconds: float,
+    max_age_minutes: float,
+    adapter: SourceAdapter | None,
+    now: datetime | None,
+) -> tuple[list[dict[str, str]], SourceProvenance]:
+    settings = get_settings()
+    fallback_error: SourceRequestError | None = None
+    if source != "scraper":
+        official_adapter = adapter or CwaRainGaugeAdapter(
+            authorization=settings.cwa_api_key,
+            county_code=county,
+            timeout_seconds=api_timeout_seconds,
+            max_age_minutes=max_age_minutes,
+            now=now,
+        )
+        try:
+            return _check_adapter_result(official_adapter.collect(), dataset="rain_gauges")
+        except SourceRequestError as exc:
+            if source == "api":
+                raise
+            fallback_error = exc
+
+    records = hydrological_data.scrape_rain_live(
+        county=county,
+        headless=not headed,
+        timeout=timeout,
+        debug_dir=debug_dir,
+    )
+    if not records:
+        raise SourceAdapterError(
+            "empty_unexpected",
+            "WRA rain-gauge scraper returned no records",
+        )
+    return records, _scraper_source(
+        "rain_gauges",
+        records,
+        source_url=f"{settings.wra_base_url}{hydrological_data.RAIN_PATH}",
+        fallback_error=fallback_error,
+    )
+
+
+def _collect_flood_sensors(
+    *,
+    source: str,
+    county: str,
+    headed: bool,
+    timeout: int,
+    debug_dir: Path | None,
+    api_timeout_seconds: float,
+    max_age_minutes: float,
+    adapter: SourceAdapter | None,
+    now: datetime | None,
+) -> tuple[list[dict[str, str]], SourceProvenance]:
+    settings = get_settings()
+    fallback_error: SourceRequestError | None = None
+    if source != "scraper":
+        official_adapter = adapter or WraFloodSensorAdapter(
+            county_code=county,
+            base_url=settings.wra_open_data_api_url,
+            timeout_seconds=api_timeout_seconds,
+            max_age_minutes=max_age_minutes,
+            now=now,
+        )
+        try:
+            return _check_adapter_result(official_adapter.collect(), dataset="flood_sensors")
+        except SourceRequestError as exc:
+            if source == "api":
+                raise
+            fallback_error = exc
+
+    records = hydrological_data.scrape_flood_live(
+        county=county,
+        headless=not headed,
+        timeout=timeout,
+        debug_dir=debug_dir,
+    )
+    if not records:
+        raise SourceAdapterError(
+            "empty_unexpected",
+            "WRA flood-sensor scraper returned no records",
+        )
+    return records, _scraper_source(
+        "flood_sensors",
+        records,
+        source_url=f"{settings.wra_base_url}{hydrological_data.FLOOD_SENSOR_PATH}",
+        fallback_error=fallback_error,
+    )
+
+
 def collect_records(
     *,
     mode: str,
@@ -160,15 +318,27 @@ def collect_records(
     headed: bool,
     timeout: int,
     debug_dir: Path | None,
+    alert_source: str = "auto",
     rain_source: str = "auto",
+    flood_source: str = "auto",
     api_timeout_seconds: float = 30,
     max_age_minutes: float = 30,
+    flood_max_age_minutes: float = 90,
+    alert_adapter: SourceAdapter | None = None,
     rain_adapter: SourceAdapter | None = None,
+    flood_adapter: SourceAdapter | None = None,
     now: datetime | None = None,
 ) -> OperationalCollection:
-    if rain_source not in {"api", "auto", "scraper"}:
-        raise ValueError(f"unsupported rain source: {rain_source}")
-    settings = get_settings()
+    source_options = {
+        "alert": alert_source,
+        "rain": rain_source,
+        "flood": flood_source,
+    }
+    for name, source in source_options.items():
+        if source not in {"api", "auto", "scraper"}:
+            raise ValueError(f"unsupported {name} source: {source}")
+    if max_age_minutes <= 0 or flood_max_age_minutes <= 0:
+        raise ValueError("freshness limits must be positive")
     if mode == "demo":
         alerts = rainfall_alerts.demo_records()
         rain, flood = hydrological_data.demo_records()
@@ -178,85 +348,42 @@ def collect_records(
             "flood_sensors": _fixture_source("flood_sensors", flood),
         }
     elif mode == "live":
-        alerts = rainfall_alerts.scrape_with_playwright(
-            county_value=county,
-            headless=not headed,
+        alerts, alert_provenance = _collect_alerts(
+            source=alert_source,
+            county=county,
+            headed=headed,
             timeout=timeout,
+            api_timeout_seconds=api_timeout_seconds,
+            max_age_minutes=max_age_minutes,
+            adapter=alert_adapter,
+            now=now,
         )
-        if not alerts:
-            raise SourceAdapterError(
-                "empty_unexpected",
-                "WRA rainfall alert scraper returned no records",
-            )
-        alert_source = _scraper_source(
-            "rainfall_alerts",
-            alerts,
-            source_url=f"{settings.wra_base_url.rstrip('/')}/service/alertQuery#",
+        rain, rain_provenance = _collect_rain_gauges(
+            source=rain_source,
+            county=county,
+            headed=headed,
+            timeout=timeout,
+            debug_dir=debug_dir,
+            api_timeout_seconds=api_timeout_seconds,
+            max_age_minutes=max_age_minutes,
+            adapter=rain_adapter,
+            now=now,
         )
-        if rain_source == "scraper":
-            rain, flood = hydrological_data.scrape_live(
-                county=county,
-                headless=not headed,
-                timeout=timeout,
-                debug_dir=debug_dir,
-            )
-            rain_provenance = _scraper_source(
-                "rain_gauges",
-                rain,
-                source_url=f"{settings.wra_base_url}{hydrological_data.RAIN_PATH}",
-            )
-        else:
-            adapter = rain_adapter or CwaRainGaugeAdapter(
-                authorization=settings.cwa_api_key,
-                county_code=county,
-                timeout_seconds=api_timeout_seconds,
-                max_age_minutes=max_age_minutes,
-                now=now,
-            )
-            try:
-                rain_result = adapter.collect()
-            except SourceRequestError as exc:
-                if rain_source == "api":
-                    raise
-                rain, flood = hydrological_data.scrape_live(
-                    county=county,
-                    headless=not headed,
-                    timeout=timeout,
-                    debug_dir=debug_dir,
-                )
-                rain_provenance = _scraper_source(
-                    "rain_gauges",
-                    rain,
-                    source_url=f"{settings.wra_base_url}{hydrological_data.RAIN_PATH}",
-                    fallback_error=exc,
-                )
-            else:
-                if rain_result.dataset != "rain_gauges":
-                    raise SourceAdapterError(
-                        "schema_drift",
-                        f"rain adapter returned unexpected dataset: {rain_result.dataset}",
-                    )
-                rain = rain_result.records
-                rain_provenance = rain_result.provenance
-                flood = hydrological_data.scrape_flood_live(
-                    county=county,
-                    headless=not headed,
-                    timeout=timeout,
-                    debug_dir=debug_dir,
-                )
-        if not rain or not flood:
-            raise SourceAdapterError(
-                "empty_unexpected",
-                "live hydrology source returned no records",
-            )
+        flood, flood_provenance = _collect_flood_sensors(
+            source=flood_source,
+            county=county,
+            headed=headed,
+            timeout=timeout,
+            debug_dir=debug_dir,
+            api_timeout_seconds=api_timeout_seconds,
+            max_age_minutes=flood_max_age_minutes,
+            adapter=flood_adapter,
+            now=now,
+        )
         sources = {
-            "rainfall_alerts": alert_source,
+            "rainfall_alerts": alert_provenance,
             "rain_gauges": rain_provenance,
-            "flood_sensors": _scraper_source(
-                "flood_sensors",
-                flood,
-                source_url=f"{settings.wra_base_url}{hydrological_data.FLOOD_SENSOR_PATH}",
-            ),
+            "flood_sensors": flood_provenance,
         }
     else:
         raise ValueError(f"unsupported mode: {mode}")
@@ -293,23 +420,53 @@ def build_payloads(
     sources: dict[str, SourceProvenance],
     mode: str,
     max_age_minutes: float,
+    flood_max_age_minutes: float | None = None,
     now: datetime,
 ) -> list[DatasetPayload]:
     payloads: list[DatasetPayload] = []
     for name, dataset_records in records.items():
         config = DATASET_CONFIG[name]
         fieldnames = list(config["fieldnames"])
+        source = sources[name]
+        timestamp_field = str(config["timestamp_field"])
+        if name == "rainfall_alerts" and source.source_kind != "api":
+            timestamp_field = "抓取時間"
+        dataset_max_age = (
+            flood_max_age_minutes
+            if name == "flood_sensors" and flood_max_age_minutes is not None
+            else max_age_minutes
+        )
+        freshness_observed_at: str | None = None
+        if name == "flood_sensors" and dataset_records:
+            active_timestamps = [
+                timestamp
+                for record in dataset_records
+                if (timestamp := record.get("水情時間ISO", "").strip())
+                if record.get("啟用狀態", "true").strip().lower() != "false"
+            ]
+            freshness_observed_at = max(active_timestamps) if active_timestamps else None
         health = assess_dataset(
             dataset_records,
             fieldnames=fieldnames,
-            timestamp_field=str(config["timestamp_field"]),
+            timestamp_field=timestamp_field,
             mode=mode,
-            max_age_minutes=max_age_minutes,
+            max_age_minutes=dataset_max_age,
             now=now,
+            empty_observed_at=(
+                source.fetched_at
+                if name == "rainfall_alerts" and source.outcome == "empty"
+                else None
+            ),
+            freshness_observed_at=freshness_observed_at,
         )
-        source = sources[name]
+        if mode == "live" and source.outcome == "stale" and health["state"] == "healthy":
+            health["state"] = "stale"
+            health["ready"] = False
+            health["persistent_state"] = "stale"
+            health["degradation_reasons"] = ["source_stale"]
         if mode == "live" and source.source_kind == "scraper_fallback":
             health["degradation_reasons"] = ["scraper_fallback"]
+            health["persistent_state"] = "degraded"
             if health["state"] == "healthy":
                 health["state"] = "degraded"
                 health["ready"] = False
@@ -355,13 +512,28 @@ def build_payloads(
         max_age_minutes=max_age_minutes,
         now=now,
     )
-    if mode == "live" and not all(
-        state == "healthy" for state in upstream_health.values()
-    ):
+    unhealthy_upstreams = {
+        name: state for name, state in upstream_health.items() if state != "healthy"
+    }
+    coverage_gaps = feature_records[0]["coverage_gaps"].split(";")
+    coverage_gaps = [gap for gap in coverage_gaps if gap]
+    if mode == "live" and unhealthy_upstreams:
         feature_health["state"] = "upstream_unhealthy"
         feature_health["ready"] = False
+        feature_health["persistent_state"] = "upstream_unhealthy"
         feature_health["degradation_reasons"] = [
-            f"{name}={state}" for name, state in sorted(upstream_health.items()) if state != "healthy"
+            *(
+                f"{name}={state}"
+                for name, state in sorted(unhealthy_upstreams.items())
+            ),
+            *(f"coverage:{gap}" for gap in coverage_gaps),
+        ]
+    elif mode == "live" and coverage_gaps:
+        feature_health["state"] = "coverage_missing"
+        feature_health["ready"] = False
+        feature_health["persistent_state"] = "coverage_missing"
+        feature_health["degradation_reasons"] = [
+            f"coverage:{gap}" for gap in coverage_gaps
         ]
     payloads.append(
         DatasetPayload(
@@ -395,9 +567,14 @@ def run_collection(
     pumping_stations: Path | None = None,
     shelters: Path | None = None,
     flood_risk_areas: Path | None = None,
+    alert_source: str = "auto",
     rain_source: str = "auto",
+    flood_source: str = "auto",
     api_timeout_seconds: float = 30,
+    flood_max_age_minutes: float = 90,
+    alert_adapter: SourceAdapter | None = None,
     rain_adapter: SourceAdapter | None = None,
+    flood_adapter: SourceAdapter | None = None,
 ) -> dict[str, Any]:
     now = now or datetime.now(TAIPEI_TZ)
     started_at, start_timer = start_run()
@@ -409,10 +586,15 @@ def run_collection(
                 headed=headed,
                 timeout=timeout,
                 debug_dir=debug_dir,
+                alert_source=alert_source,
                 rain_source=rain_source,
+                flood_source=flood_source,
                 api_timeout_seconds=api_timeout_seconds,
                 max_age_minutes=max_age_minutes,
+                flood_max_age_minutes=flood_max_age_minutes,
+                alert_adapter=alert_adapter,
                 rain_adapter=rain_adapter,
+                flood_adapter=flood_adapter,
                 now=now,
             )
             records = collection.records
@@ -438,6 +620,7 @@ def run_collection(
                 sources=collection.sources,
                 mode=mode,
                 max_age_minutes=max_age_minutes,
+                flood_max_age_minutes=flood_max_age_minutes,
                 now=now,
             )
             dataset_details = {
@@ -499,7 +682,10 @@ def run_collection(
                 validation=health,
                 metadata={
                     "max_age_minutes": max_age_minutes,
+                    "flood_max_age_minutes": flood_max_age_minutes,
+                    "alert_source": alert_source,
                     "rain_source": rain_source,
+                    "flood_source": flood_source,
                     "source_kinds": {
                         name: source.source_kind
                         for name, source in sorted(collection.sources.items())
@@ -524,7 +710,9 @@ def run_collection(
                     "failure_kind": (
                         exc.kind if isinstance(exc, SourceAdapterError) else "collection"
                     ),
+                    "alert_source": alert_source,
                     "rain_source": rain_source,
+                    "flood_source": flood_source,
                 },
                 now=now,
             )
@@ -594,16 +782,34 @@ def main() -> None:
     parser.add_argument("--store", type=Path, default=DEFAULT_STORE)
     parser.add_argument("--retention-days", type=int, default=30)
     parser.add_argument(
+        "--alert-source",
+        choices=["api", "auto", "scraper"],
+        default="auto",
+        help="WRA warning API selection; auto falls back only for request failures.",
+    )
+    parser.add_argument(
         "--rain-source",
         choices=["api", "auto", "scraper"],
         default="auto",
         help="CWA API selection; auto falls back only for request failures.",
+    )
+    parser.add_argument(
+        "--flood-source",
+        choices=["api", "auto", "scraper"],
+        default="auto",
+        help="WRA IoW API selection; auto falls back only for request failures.",
     )
     parser.add_argument("--api-timeout-seconds", type=float, default=30)
     parser.add_argument(
         "--max-age-minutes",
         type=float,
         default=get_settings().operations_max_age_minutes,
+    )
+    parser.add_argument(
+        "--flood-max-age-minutes",
+        type=float,
+        default=get_settings().operations_flood_max_age_minutes,
+        help="Freshness limit for the hourly WRA IoW Open Data snapshot.",
     )
     parser.add_argument("--headed", action="store_true")
     parser.add_argument("--timeout", type=int, default=45_000)
@@ -635,14 +841,19 @@ def main() -> None:
             pumping_stations=args.pumping_stations,
             shelters=args.shelters,
             flood_risk_areas=args.flood_risk_areas,
+            alert_source=args.alert_source,
             rain_source=args.rain_source,
+            flood_source=args.flood_source,
             api_timeout_seconds=args.api_timeout_seconds,
+            flood_max_age_minutes=args.flood_max_age_minutes,
         )
     except KeyboardInterrupt:
         print("[INFO] Scheduler stopped.")
         return
     except Exception as exc:
         raise SystemExit(f"[ERROR] {exc}") from exc
+    finally:
+        close_verified_session()
 
     if manifest and args.mode == "live" and not manifest["health"]["ready"]:
         raise SystemExit(2)

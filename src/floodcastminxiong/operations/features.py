@@ -17,6 +17,8 @@ MINXIONG_FEATURE_FIELDS = [
     "data_mode",
     "data_ready",
     "upstream_health",
+    "coverage_ready",
+    "coverage_gaps",
     "rain_gauge_count",
     "rain_gauge_location_ids",
     "latest_rain_observed_at",
@@ -85,11 +87,13 @@ def build_minxiong_feature(
         record
         for record in records["flood_sensors"]
         if record.get("鄉鎮", "").strip() == "民雄鄉"
+        and record.get("啟用狀態", "true").strip().lower() != "false"
     ]
     alerts = [
         record
         for record in records["rainfall_alerts"]
-        if "民雄鄉" in record.get("地區", "")
+        if record.get("鄉鎮代碼", "").strip() == "10010050"
+        or "民雄鄉" in record.get("地區", "")
         or "民雄鄉" in record.get("影響村落", "")
     ]
     active_alerts = [
@@ -104,15 +108,23 @@ def build_minxiong_feature(
         {flood_sensor_location(record)["location_id"] for record in flood}
     )
     upstream_ready = all(state == "healthy" for state in upstream_health.values())
+    coverage_gaps: list[str] = []
+    if not rain:
+        coverage_gaps.append("rain_gauges=0")
+    if not flood:
+        coverage_gaps.append("flood_sensors=0")
+    coverage_ready = not coverage_gaps
     return {
         "feature_time": now.isoformat(timespec="seconds"),
         "county": "嘉義縣",
         "township": "民雄鄉",
         "data_mode": mode,
-        "data_ready": str(upstream_ready).lower(),
+        "data_ready": str(upstream_ready and coverage_ready).lower(),
         "upstream_health": ";".join(
             f"{name}={state}" for name, state in sorted(upstream_health.items())
         ),
+        "coverage_ready": str(coverage_ready).lower(),
+        "coverage_gaps": ";".join(coverage_gaps),
         "rain_gauge_count": str(len(rain)),
         "rain_gauge_location_ids": ";".join(rain_locations),
         "latest_rain_observed_at": _latest(rain, "水情時間ISO"),

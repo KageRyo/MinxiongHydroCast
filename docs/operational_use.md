@@ -18,24 +18,64 @@ Demo snapshots are always marked `demo` and `ready=false`; every demo dataset us
 `demo_fixture` product type instead of an official classification. The readiness endpoint
 returns HTTP 503 so demo data cannot silently satisfy a deployment health check.
 
-Run a single live collection:
+Run a single live collection. The collector reads process environment variables and does not
+auto-load `.env`; keep the local file ignored and source it before starting the process:
 
 ```bash
-export CWA_API_KEY
-floodcast-minxiong-operations --once --rain-source auto
+set -a
+source .env
+set +a
+
+floodcast-minxiong-operations --once \
+  --alert-source auto \
+  --rain-source auto \
+  --flood-source auto \
+  --flood-max-age-minutes 90
 ```
 
-Rain-gauge collection uses the official CWA `O-A0002-001` REST API. `--rain-source api` makes any
-request failure fatal; `auto` permits a WRA page fallback only for authentication, transport,
-HTTP, or rate-limit failures. Pydantic schema drift and unexpected empty station sets always fail
-the attempt. `--rain-source scraper` exists for an explicitly managed source incident. Rainfall
-alerts and flood sensors remain scraper-backed until their official endpoint contracts are
-implemented, so current live snapshots remain degraded and do not pass readiness.
+Primary live collection requires `WRA_API_KEY` and `CWA_API_KEY` in the environment. Never pass
+either value on the command line, store it in a tracked file, or include it in a source URL.
 
-Validate the CWA contract independently of Chromium and the remaining WRA sources:
+The three selectors `--alert-source`, `--rain-source`, and `--flood-source` each accept `api`,
+`auto`, or `scraper`:
+
+- rainfall warnings use WRA OpenApiv3 `GET /v2/Rainfall/Warning`; `WRA_API_KEY` is sent in the
+  `apikey` request header;
+- rain gauges use the official CWA `O-A0002-001` REST API with `CWA_API_KEY`;
+- flood-depth sensors join WRA IoW government Open Data dataset
+  [142980](https://data.gov.tw/dataset/142980) latest measurements to
+  [142979](https://data.gov.tw/dataset/142979) sensor metadata by `sensorid`.
+
+`auto` permits the corresponding WRA page fallback only for authentication, timeout, transport,
+HTTP, or rate-limit request failures. Any fallback dataset is explicitly `degraded`, records the
+request-failure reason, and cannot pass readiness. `api` makes request failures fatal; `scraper` is
+for an explicitly managed source incident. Strict upstream Pydantic schema drift, invalid
+timestamps or units, broken IoW joins, and unexpected empty observation sets always fail closed
+without scraper fallback.
+
+The rainfall-warning API publishes only active warnings. A schema-valid `Data=[]` response means
+that no matching warning is in effect: it produces zero rows with `outcome=empty`, uses the fetch
+time for freshness, and is healthy while fresh. Rain-gauge and flood-sensor empty sets are not
+expected and remain collection errors.
+
+WRA IoW 142980/142979 is an official public snapshot updated approximately hourly. It is not the
+bearer-protected, station-origin real-time API, so `--flood-max-age-minutes` defaults to 90. Do not
+promise sub-hour sensor latency from this source. Disabled sensors remain visible in the source
+dataset for audit purposes but are excluded from the Minxiong feature and freshness decision.
+
+WRA government Open Data dataset [25768](https://data.gov.tw/dataset/25768) is a different product:
+it reports river and regional-drainage water levels, and its observations are not fully
+quality-controlled. It is not a substitute for street/community flood-depth sensors. The collector
+does not ingest it into `flood_sensors` or operational features; a future integration must publish a
+separate `river_water_levels` dataset retaining `checkresult`, `checkdesc`, timestamps, and
+freshness.
+
+Validate all three official observation contracts independently of Chromium:
 
 ```bash
 floodcast-minxiong-cwa-rain-smoke --county 10010 --county-name 嘉義縣
+floodcast-minxiong-wra-alert-smoke --county 10010
+floodcast-minxiong-wra-flood-smoke --county 10010
 ```
 
 Run continuously at a 10-minute interval:
@@ -45,6 +85,10 @@ floodcast-minxiong-operations \
   --interval-seconds 600 \
   --retention-days 30 \
   --max-age-minutes 30 \
+  --flood-max-age-minutes 90 \
+  --alert-source auto \
+  --rain-source auto \
+  --flood-source auto \
   --pumping-stations data/processed/pumping_stations.csv \
   --shelters data/processed/shelters.csv \
   --flood-risk-areas data/processed/flood_risk_areas.csv
@@ -101,11 +145,11 @@ The following endpoints are available:
 | --- | --- |
 | `GET /healthz` | Process liveness |
 | `GET /readyz` | Data readiness; returns 503 when not ready |
-| `GET /metrics` | Prometheus readiness, last-attempt, dataset-age, and state metrics |
+| `GET /metrics` | Prometheus readiness, attempt, age, state, source-kind, and outcome metrics |
 | `GET /api/v1/status` | Latest attempt, snapshot, freshness, and schema health |
 | `GET /api/v1/official-alerts/rainfall` | WRA rainfall-alert source product |
-| `GET /api/v1/observations/rain-gauges` | Validated WRA rain-gauge observations |
-| `GET /api/v1/observations/flood-sensors` | Validated WRA flood-sensor observations |
+| `GET /api/v1/observations/rain-gauges` | Validated CWA rain-gauge observations |
+| `GET /api/v1/observations/flood-sensors` | Validated WRA IoW flood-depth snapshots |
 | `GET /api/v1/features/minxiong` | Derived Minxiong township feature contract |
 | `GET /api/v1/locations` | Snapshot-aligned operational location reference |
 | `GET /api/v1/shadow-readiness` | Shadow criteria, metrics, and notification blockers |
@@ -128,10 +172,13 @@ records. It contains stable rain-gauge and flood-sensor location IDs, latest obs
 maximum 1-hour/24-hour station rainfall, normalized maximum sensor water level, rainfall-alert
 counts, and upstream health states.
 
-The feature is marked ready only when every upstream live dataset is healthy. It never substitutes
-missing products: `qpe_available=false`, an empty QPE accumulation, and
+The feature is marked ready only when every upstream live dataset is healthy and the snapshot has
+at least one Minxiong rain gauge plus one enabled Minxiong flood-depth sensor. The
+`coverage_ready` and `coverage_gaps` fields distinguish missing township coverage from a healthy
+county-wide feed. It never substitutes missing products: `qpe_available=false`, an empty QPE accumulation, and
 `experimental_forecast_included=false` remain explicit until those sources pass their own gates.
-Demo snapshots classify the feature as `demo_fixture`.
+Demo snapshots classify the feature as `demo_fixture`. A healthy empty rainfall-warning input
+contributes an alert count of zero and does not block the feature; an empty observation input does.
 
 Current rain gauges and flood sensors always produce stable location references from the same
 snapshot. Optional processed pumping-station, shelter, and flood-risk-area CSVs can be supplied to
@@ -151,7 +198,7 @@ floodcast-minxiong-shadow-report \
 
 The default gate requires:
 
-- seven days of live collection history;
+- seven days of live collection history measured inside an eight-day audit window;
 - at least 900 live attempts;
 - at least 99% successful attempts;
 - at least 95% ready attempts;
@@ -183,34 +230,38 @@ examples and demo threshold events do not count.
 
 ## Linux Service Supervision
 
-Templates under `deploy/systemd/` provide:
+System-level templates under `deploy/systemd/` provide the basic collector and API services.
+The executable single-host profile under `deploy/systemd-user/` and `deploy/single-host/` adds:
 
-- a hardened one-shot live collector service;
-- a persistent timer that runs every 10 minutes and catches up after downtime;
-- a restartable localhost API service.
+- a one-shot live collector with a persistent 10-minute timer;
+- a restartable localhost API and operator view;
+- Prometheus rules, Alertmanager, and a durable local notification audit receiver;
+- optional Discord incoming-webhook delivery with redacted durable delivery results;
+- daily checksummed backups and an explicit restore command;
+- hourly shadow-gate evaluation;
+- a dedicated self-hosted runner for the host-bound WRA warning contract.
 
-The templates assume:
+The single-host installer uses:
 
-- the repository and virtual environment are installed under `/opt/floodcast-minxiong`;
-- a non-login `floodcast-minxiong` service user and group exist;
-- local secrets and endpoint overrides are stored in `/etc/floodcast-minxiong.env`;
-- durable snapshots and run state live under `/var/lib/floodcast-minxiong`.
-- `CWA_API_KEY` is supplied through `/etc/floodcast-minxiong.env` and never passed on the command
-  line.
+- `/mnt/8tb_hdd/ryo/floodcast-minxiong` for durable mutable state;
+- `~/.local/share/floodcast-minxiong` as a stable runtime symlink;
+- `~/.config/floodcast-minxiong/env` with mode `0600` for `CWA_API_KEY` and `WRA_API_KEY`;
+- user-level systemd supervision, with login linger enabled for service persistence.
 
-The scheduled `.github/workflows/cwa-live-contract.yml` workflow runs the credential-safe CWA
-contract smoke test daily. Configure the repository secret `CWA_API_KEY`; the workflow fails
-explicitly when it is absent and never prints the key or an unredacted URL.
+See [single_host_operations.md](single_host_operations.md) for installation, validation, alert
+drill, backup/restore drill, runner setup, and shadow evidence procedures. The system-level
+templates remain available when a dedicated service account and `/var/lib` layout are preferred.
 
-Review paths, users, filesystem permissions, browser dependencies, and reverse-proxy policy before
-installation. Prefer the systemd timer over the in-process interval loop on a single Linux host,
-because the timer records each attempt independently and uses `Persistent=true` after downtime.
-Install Playwright Chromium into the path configured by the collector unit before enabling it:
+The scheduled `.github/workflows/cwa-live-contract.yml` workflow, named `Official Live Contracts`,
+exercises the official CWA rain, WRA rainfall-warning, and WRA IoW contracts. Configure the
+repository secrets `CWA_API_KEY` and `WRA_API_KEY`; the workflow fails explicitly when a required
+secret is absent and never prints either key or an unredacted credential-bearing request. CWA and
+IoW run on GitHub-hosted infrastructure. The WRA warning job uses the dedicated host label because
+the credential can be constrained by source host.
 
-```bash
-PLAYWRIGHT_BROWSERS_PATH=/opt/floodcast-minxiong/.playwright \
-  /opt/floodcast-minxiong/.venv/bin/python -m playwright install chromium
-```
+Prefer the systemd timer over the in-process interval loop on a single Linux host, because the
+timer records each attempt independently and uses `Persistent=true` after downtime. The deployed
+profile selects strict official API sources and therefore does not require a Playwright browser.
 
 ## Supported Operating Profiles
 
@@ -222,13 +273,15 @@ decision.
 
 ### 2. Live observation ingestion
 
-Run the rainfall-alert and hydrology commands with explicit `--mode live`. Inspect each JSON run
-summary and reject the run if its mode is not `live`, its status is not `ok`, required row counts
-are zero, timestamps are stale, or validation reports contain errors.
+Run `floodcast-minxiong-operations` with live mode and the three source selectors. Inspect each JSON
+run summary and reject the run if its mode is not `live`, its status is not `ok`, observations are
+empty or stale, or validation reports contain errors. A rainfall-warning row count of zero is valid
+only when its official source provenance says `outcome=empty`.
 
-This profile can support an internal Minxiong situational-data feed. Page-scraped WRA sources remain
-fragile and should be replaced by approved official API contracts before they become a
-production-critical dependency.
+This profile can support an internal Minxiong situational-data feed. Its primary observation inputs
+are official APIs/Open Data; any page-scraped fallback is visible as degraded and not ready. That
+makes the project more than a demo, but does not satisfy the deployment, operations, evidence, and
+public-communication gates below.
 
 ### 3. Historical radar dataset construction
 
@@ -257,9 +310,12 @@ A deployable Minxiong service should run this sequence idempotently:
 6. record metrics and lineage, then alert an operator on failure or staleness.
 
 The scheduler, local versioned store, health/readiness contract, JSON run summaries, JSONL logs,
-Prometheus metrics endpoint, read API, and operator view are implemented. Production deployment
-still needs a durable mounted volume or object-store backend, metrics scraping and alert rules,
-alert routing, authentication, and service supervision.
+Prometheus metrics endpoint, read API, operator view, monitoring configs, local alert audit,
+checksummed backup/restore tooling, and single-host installation scripts are implemented. The
+single-host profile has been deployed and its live sources, Prometheus target, local alert routing,
+and backup restore have been exercised. See [deployment_status.md](deployment_status.md) for dated
+evidence. Promotion still requires a named human alert channel, an off-host backup, authenticated
+network exposure if needed, and completion of the shadow and model evidence gates.
 
 ## Production Gates
 
@@ -276,11 +332,22 @@ Do not present FloodCastMinxiong as an operational warning system until all gate
 - **Communication gate:** official warnings and experimental predictions are visually and
   semantically separated; uncertainty and update time are always shown.
 
+The immediate blockers are concrete:
+
+- add a named human receiver for failed, stale, degraded, and schema alerts, then exercise the
+  incident path; the durable localhost audit receiver alone is insufficient;
+- add an off-host backup target after verifying the local scheduled backup and restore drill;
+- complete the seven-day shadow gate with at least 900 attempts, 99% collection success, 95%
+  readiness, no gap over 30 minutes, and continuous coverage of at least one reviewed heavy-rain
+  period;
+- document decision ownership, incident response, human override, and rollback before enabling
+  any notification.
+
 ## Recommended First Release
 
 The first credible release remains an internal **Minxiong observation and data-quality service**,
-not an automated warning product. The repository now supplies the runnable service foundation.
-The next deployment work is to mount durable storage, supervise both processes, export metrics,
-route stale/failure alerts to named maintainers, and complete a shadow run. Add experimental radar
-nowcasts only after the observation service is reliable; add public risk notifications only after
-local backtesting and operator review.
+not an automated warning product. The repository supplies the runnable service and operations
+foundation. The remaining promotion work is to verify the host deployment, add off-host recovery
+and a named human alert route, and complete the real shadow run. Add experimental radar nowcasts
+only after the observation service is reliable; add public risk notifications only after local
+backtesting and operator review.

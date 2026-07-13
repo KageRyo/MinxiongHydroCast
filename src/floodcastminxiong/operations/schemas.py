@@ -42,6 +42,7 @@ class DatasetHealth(ResponseSchema):
         "degraded",
         "invalid",
         "upstream_unhealthy",
+        "coverage_missing",
     ]
     ready: bool
     observed_at: str
@@ -50,6 +51,12 @@ class DatasetHealth(ResponseSchema):
     schema_sha256: str = Field(min_length=64, max_length=64)
     schema_errors: list[str]
     degradation_reasons: list[str] = Field(default_factory=list)
+    persistent_state: Literal[
+        "stale",
+        "degraded",
+        "upstream_unhealthy",
+        "coverage_missing",
+    ] | None = None
 
 
 class AggregateHealth(ResponseSchema):

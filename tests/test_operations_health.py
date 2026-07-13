@@ -70,6 +70,41 @@ def test_assess_dataset_reports_schema_drift():
     ]
 
 
+def test_assess_dataset_accepts_expected_empty_feed_using_successful_fetch_time():
+    now = datetime(2026, 7, 11, 10, 0, tzinfo=TAIPEI_TZ)
+
+    health = assess_dataset(
+        [],
+        fieldnames=FIELDS,
+        timestamp_field="observed_at",
+        mode="live",
+        max_age_minutes=30,
+        now=now,
+        empty_observed_at=(now - timedelta(minutes=2)).isoformat(timespec="seconds"),
+    )
+
+    assert health["state"] == "healthy"
+    assert health["ready"] is True
+    assert health["observed_at"] == "2026-07-11T09:58:00+08:00"
+    assert health["age_minutes"] == 2.0
+
+
+def test_assess_dataset_can_use_source_selected_freshness_timestamp():
+    now = datetime(2026, 7, 11, 10, 0, tzinfo=TAIPEI_TZ)
+    health = assess_dataset(
+        [record_at(now), record_at(now - timedelta(minutes=31))],
+        fieldnames=FIELDS,
+        timestamp_field="observed_at",
+        mode="live",
+        max_age_minutes=30,
+        now=now,
+        freshness_observed_at=(now - timedelta(minutes=31)).isoformat(timespec="seconds"),
+    )
+
+    assert health["observed_at"] == "2026-07-11T09:29:00+08:00"
+    assert health["state"] == "stale"
+
+
 def test_refresh_dataset_health_becomes_stale_over_time():
     collected_at = datetime(2026, 7, 11, 10, 0, tzinfo=TAIPEI_TZ)
     health = assess_dataset(
@@ -89,6 +124,32 @@ def test_refresh_dataset_health_becomes_stale_over_time():
 
     assert refreshed["state"] == "stale"
     assert refreshed["ready"] is False
+
+
+def test_refresh_dataset_health_preserves_collection_time_blocking_state():
+    now = datetime(2026, 7, 11, 10, 0, tzinfo=TAIPEI_TZ)
+    for persistent_state in (
+        "stale",
+        "degraded",
+        "upstream_unhealthy",
+        "coverage_missing",
+    ):
+        health = assess_dataset(
+            [record_at(now)],
+            fieldnames=FIELDS,
+            timestamp_field="observed_at",
+            mode="live",
+            max_age_minutes=30,
+            now=now,
+        )
+        health["state"] = persistent_state
+        health["ready"] = False
+        health["persistent_state"] = persistent_state
+
+        refreshed = refresh_dataset_health(health, mode="live", now=now)
+
+        assert refreshed["state"] == persistent_state
+        assert refreshed["ready"] is False
 
 
 def test_refresh_dataset_health_preserves_scraper_degradation():

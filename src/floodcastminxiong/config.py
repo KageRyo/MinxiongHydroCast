@@ -13,7 +13,10 @@ class Settings:
     log_level: str
     operations_store: Path
     operations_max_age_minutes: float
+    operations_flood_max_age_minutes: float
     wra_base_url: str
+    wra_api_url: str
+    wra_open_data_api_url: str
     wra_api_key: str
     cwa_codis_url: str
     cwa_api_key: str
@@ -37,7 +40,15 @@ def get_settings() -> Settings:
         operations_max_age_minutes=float(
             os.getenv("FLOODCASTMINXIONG_MAX_AGE_MINUTES", "30")
         ),
+        operations_flood_max_age_minutes=float(
+            os.getenv("FLOODCASTMINXIONG_FLOOD_MAX_AGE_MINUTES", "90")
+        ),
         wra_base_url=os.getenv("WRA_BASE_URL", "https://fhy.wra.gov.tw/fhyv2"),
+        wra_api_url=os.getenv("WRA_API_URL", "https://fhy.wra.gov.tw/OpenApiv3"),
+        wra_open_data_api_url=os.getenv(
+            "WRA_OPEN_DATA_API_URL",
+            "https://opendata.wra.gov.tw/api/v2",
+        ),
         wra_api_key=os.getenv("WRA_API_KEY", ""),
         cwa_codis_url=os.getenv("CWA_CODIS_URL", "https://codis.cwa.gov.tw/StationData"),
         cwa_api_key=os.getenv("CWA_API_KEY", ""),

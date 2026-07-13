@@ -13,7 +13,9 @@ model-ready datasets, and files containing contact details or credentials must s
 
 Each generated folder is ignored by `.gitignore` except for `.gitkeep`.
 
-Tracked samples include hydrology rows, location references, and starter WGS84 grid specs.
+Tracked samples include demo rainfall-warning, rain-gauge, flood-sensor, location-reference, and
+starter WGS84 grid rows. Demo records use the current operational schemas but never count as live
+official observations or satisfy readiness.
 Radar event manifests, event split manifests, and weather-context manifests are also tracked under
 `samples/`. `weather_context_source_review.json` tracks official CWA source-review status and
 pending historical chart probes. `qpe_gauge_validation_status.json` tracks aggregate availability

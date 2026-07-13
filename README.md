@@ -4,19 +4,22 @@
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Style: Ruff](https://img.shields.io/badge/style-ruff-46a6ff)](https://docs.astral.sh/ruff/)
-[![Data](https://img.shields.io/badge/data-demo%20safe-orange)](data/README.md)
+[![Service](https://img.shields.io/badge/service-observation%20service-blue)](docs/operational_use.md)
+[![Operational Gate](https://img.shields.io/badge/operational%20gate-pending-orange)](docs/operational_use.md#production-gates)
 
 Minxiong-first flood-risk data pipeline and rainfall-nowcasting toolkit.
 
 FloodCastMinxiong is a Minxiong-first flood-risk data and rainfall-nowcasting toolkit. Its
 operational target is Minxiong Township, while Taiwan-wide radar data is used as upstream training
-and context data. The current release is a research and data-engineering toolkit, not an official
-warning system.
+and context data. The repository now includes a live official-source observation service and is no
+longer demo-only. It is still an internal research and data-engineering system, not an official
+warning system or a production-ready public service.
 
 ## What This Repo Does
 
-- Collect WRA rainfall alert thresholds for Chiayi County.
-- Ingest live rain-gauge and flood-sensor observations with explicit demo fixtures for tests.
+- Collect active WRA rainfall warnings for Chiayi County from the official OpenApiv3 endpoint.
+- Ingest live CWA rain-gauge observations and WRA IoW flood-depth snapshots with strict schemas.
+- Keep explicit demo fixtures for installation checks and deterministic tests.
 - Parse shelter DOCX files into structured CSV without committing source documents.
 - Keep raw, interim, processed, and sample data separate.
 - Build stable location references for gauges, sensors, shelters, pumping stations, and risk areas.
@@ -28,7 +31,7 @@ warning system.
 
 Today the repository is useful for four concrete workflows:
 
-- ingest and validate live WRA rainfall-alert, rain-gauge, and flood-sensor observations;
+- ingest and validate live WRA rainfall warnings, CWA rain gauges, and WRA IoW flood sensors;
 - collect reproducible CWA radar event windows and convert them to model-ready tensors;
 - benchmark persistence and Tiny U-Net nowcasting with common lead-time metrics;
 - assemble Minxiong/Chiayi location references and flood-risk features for downstream systems.
@@ -66,23 +69,48 @@ Create a versioned demo snapshot without contacting live sources:
 floodcast-minxiong-operations --mode demo --once
 ```
 
-Run one live collection. Live is the default mode:
+Run one live collection. Live is the default mode. Store both keys in an ignored local `.env`
+created from `env.example`, then export it into the process environment:
 
 ```bash
-export CWA_API_KEY  # set locally; never commit the value
-floodcast-minxiong-operations --once --rain-source auto
+set -a
+source .env
+set +a
+
+floodcast-minxiong-operations --once \
+  --alert-source auto \
+  --rain-source auto \
+  --flood-source auto \
+  --flood-max-age-minutes 90
 ```
 
-`auto` uses the official CWA `O-A0002-001` API for rain gauges. Authentication, transport, HTTP,
-or rate-limit failures may use the WRA page scraper as a degraded fallback; schema drift and
-unexpected empty data always reject the collection. Use `--rain-source api` to prohibit fallback
-or `--rain-source scraper` only during a documented source incident. Scraper-backed datasets are
-published as `degraded` and never satisfy readiness.
+The primary sources are:
 
-Smoke-test only the official CWA rain contract without installing a Playwright browser:
+- WRA OpenApiv3 `GET /v2/Rainfall/Warning`, authenticated with `WRA_API_KEY` in the `apikey`
+  request header, for active rainfall warnings;
+- CWA `O-A0002-001`, authenticated with `CWA_API_KEY`, for rain gauges;
+- WRA IoW government Open Data [142980](https://data.gov.tw/dataset/142980) joined with
+  [142979](https://data.gov.tw/dataset/142979) for flood-depth sensors.
+
+Each `--alert-source`, `--rain-source`, and `--flood-source` selector accepts `api`, `auto`, or
+`scraper`. `auto` uses the official source and falls back to the corresponding WRA page only for
+authentication, timeout, transport, HTTP, or rate-limit failures. The fallback is recorded as
+`scraper_fallback`, published as `degraded`, and never satisfies readiness. Strict Pydantic schema
+drift, invalid timestamps/units, broken IoW joins, and unexpected empty observation sets fail the
+attempt without fallback. Use `api` to fail on any request error, and reserve `scraper` for a
+documented source incident.
+
+The WRA warning endpoint reports only active warnings. A validated `Data=[]` response is therefore
+a healthy zero-row `outcome=empty`, not a collection error. The IoW feed is an official public
+snapshot published approximately hourly, not the bearer-protected station-origin real-time feed;
+the collector applies a separate 90-minute freshness limit.
+
+Smoke-test all three official observation contracts without installing a Playwright browser:
 
 ```bash
 floodcast-minxiong-cwa-rain-smoke --county 10010 --county-name 嘉義縣
+floodcast-minxiong-wra-alert-smoke --county 10010
+floodcast-minxiong-wra-flood-smoke --county 10010
 ```
 
 Run the collector every 10 minutes and retain 30 days of snapshots:
@@ -92,6 +120,10 @@ floodcast-minxiong-operations \
   --interval-seconds 600 \
   --retention-days 30 \
   --max-age-minutes 30 \
+  --flood-max-age-minutes 90 \
+  --alert-source auto \
+  --rain-source auto \
+  --flood-source auto \
   --pumping-stations data/processed/pumping_stations.csv \
   --shelters data/processed/shelters.csv \
   --flood-risk-areas data/processed/flood_risk_areas.csv
@@ -107,7 +139,7 @@ Open <http://127.0.0.1:8080/> for the operator view. The service exposes:
 
 - `GET /healthz` for process liveness;
 - `GET /readyz` for data readiness, with HTTP 503 for demo, stale, invalid, or failed data;
-- `GET /metrics` for Prometheus-compatible readiness, attempt, age, and state metrics;
+- `GET /metrics` for Prometheus-compatible readiness, attempt, age, state, and source metrics;
 - `GET /api/v1/status` for the latest attempt, snapshot, and dataset health;
 - `GET /api/v1/official-alerts/rainfall`;
 - `GET /api/v1/observations/rain-gauges`;
@@ -122,8 +154,11 @@ Snapshots are immutable under `data/processed/operations/snapshots/`. A failed c
 `latest_attempt.json` but does not replace the last readable `latest.json` snapshot.
 Each dataset manifest and API response includes source kind, authority, dataset ID, redacted URL,
 fetch time, adapter schema version, content SHA-256, outcome, and any fallback reason.
-For a Linux host, hardened collector timer and API service templates are provided under
-`deploy/systemd/`.
+For a Linux host, basic system service templates are provided under `deploy/systemd/`. The complete
+single-host profile, including durable storage, monitoring, alert auditing, backup/restore, and
+optional Discord delivery, and shadow scheduling, is under `deploy/systemd-user/` and
+`deploy/single-host/`; see
+[docs/single_host_operations.md](docs/single_host_operations.md).
 
 Evaluate accumulated live snapshots against a reviewed heavy-rain period:
 
@@ -150,7 +185,9 @@ deliberately rejected. The default training gate requires at least 10 confirmed 
 20 confirmed non-flood events with non-overlapping windows and source/reviewer provenance.
 
 Each successful operational snapshot also contains `minxiong_features.csv`. It aggregates only
-validated Minxiong records and links gauges/sensors to stable location IDs. QPE and experimental
+validated Minxiong records and links gauges/sensors to stable location IDs. Readiness requires at
+least one Minxiong rain gauge and one enabled Minxiong flood-depth sensor; `coverage_ready` and
+`coverage_gaps` make missing target coverage explicit. QPE and experimental
 forecast fields remain explicitly unavailable until their upstream products pass validation.
 The same snapshot contains `location_reference.csv`; current gauges and sensors are always
 included, while shelters, pumping stations, and risk areas are included only from explicitly
@@ -162,23 +199,27 @@ Run the local demo pipeline for installation and schema checks only:
 python scripts/run_demo.py
 ```
 
-Run rainfall alerts:
+The standalone rainfall-alert and hydrology CLIs below exercise the legacy page parsers. Keep them
+for fixture generation and managed fallback diagnostics; use `floodcast-minxiong-operations` for
+the official-source operational path.
+
+Run rainfall-alert parser diagnostics:
 
 ```bash
 # Demo data
 floodcast-minxiong-rainfall-alerts --mode demo
 
-# Live WRA page for Chiayi County, county=10010
+# Direct WRA page parser for Chiayi County, county=10010
 floodcast-minxiong-rainfall-alerts --mode live --county 10010
 ```
 
-Run rain gauge and flood-sensor ingestion:
+Run rain-gauge and flood-sensor parser diagnostics:
 
 ```bash
 # Demo data
 floodcast-minxiong-hydrology --mode demo
 
-# Live WRA monitor pages for Chiayi County
+# Direct WRA monitor-page parsers for Chiayi County
 floodcast-minxiong-hydrology --mode live --county 10010 \
   --debug-dir data/raw/debug \
   --summary-output data/processed/hydrology_run_summary.json
@@ -416,8 +457,10 @@ floodcast-minxiong-torch-baseline-evaluate \
   --output data/processed/tiny_unet_cwa_comparison.json
 ```
 
-For non-demo operation, use only explicit `--mode live` commands and reject any run summary whose
-`mode` is `demo`. Every command-line pipeline writes a JSON run summary under
+For non-demo operation, use the live operational collector and reject any run summary whose `mode`
+is `demo`. A fresh official rainfall-warning result may legitimately have zero rows when its source
+outcome is `empty`; zero rain-gauge or flood-sensor rows remain an error. Every command-line
+pipeline writes a JSON run summary under
 `data/processed/run_summaries/` and appends a compact JSONL event to
 `data/processed/run_logs.jsonl` by default. Override these with `--summary-output` and
 `--log-output`, or pass `--summary-output /tmp/example.json --log-output /tmp/runs.jsonl`
@@ -434,7 +477,10 @@ FloodCastMinxiong/
 │   ├── external/     # ignored radar/model/checkpoint assets
 │   └── samples/      # tracked demo-safe samples
 ├── deploy/
-│   └── systemd/      # collector timer and localhost API service templates
+│   ├── prometheus/   # scrape, alert rules, and Alertmanager routing
+│   ├── single-host/  # pinned installation and runner scripts
+│   ├── systemd/      # system service templates
+│   └── systemd-user/ # complete single-host user services and timers
 ├── docs/
 ├── scripts/
 ├── src/floodcastminxiong/
@@ -472,5 +518,9 @@ Radar event windows are documented in [docs/radar_event_windows.md](docs/radar_e
 Radar tensor conversion is documented in [docs/radar_tensor_conversion.md](docs/radar_tensor_conversion.md).
 Radar source adapters are documented in [docs/radar_source_adapters.md](docs/radar_source_adapters.md).
 The project completion plan is documented in [docs/completion_plan.md](docs/completion_plan.md).
+The Linux deployment and operations runbook is documented in
+[docs/single_host_operations.md](docs/single_host_operations.md).
+Current verified rollout evidence and remaining gates are recorded in
+[docs/deployment_status.md](docs/deployment_status.md).
 The current baseline model card is documented in
 [docs/model_cards/minxiong_chiayi_baseline.md](docs/model_cards/minxiong_chiayi_baseline.md).

@@ -68,12 +68,19 @@ def flood_sensor_location(record: dict[str, str]) -> dict[str, str]:
     township = record.get("鄉鎮", "") or address_admin["township"]
     village = address_admin["village"]
     source_name = record.get("感測器名稱", "")
+    sensor_id = record.get("感測器代碼", "")
     latitude, longitude, crs = normalize_coordinates(
         record.get("latitude") or record.get("緯度"),
         record.get("longitude") or record.get("經度"),
     )
     return {
-        "location_id": stable_location_id("flood_sensor", county, township, source_name, address),
+        "location_id": stable_location_id(
+            "flood_sensor",
+            sensor_id or county,
+            "" if sensor_id else township,
+            "" if sensor_id else source_name,
+            "" if sensor_id else address,
+        ),
         "source_type": "flood_sensor",
         "source_name": source_name,
         "county": county,

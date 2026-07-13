@@ -283,6 +283,18 @@ def metrics_payload(status: StatusResponse) -> str:
                 "floodcastminxiong_dataset_source_kind"
                 f'{{dataset="{name}",source_kind="{details.source.source_kind}"}} 1'
             )
+    lines.extend(
+        [
+            "# HELP floodcastminxiong_dataset_source_outcome Active source collection outcome.",
+            "# TYPE floodcastminxiong_dataset_source_outcome gauge",
+        ]
+    )
+    for name, details in sorted(status.datasets.items()):
+        if details.source is not None:
+            lines.append(
+                "floodcastminxiong_dataset_source_outcome"
+                f'{{dataset="{name}",outcome="{details.source.outcome}"}} 1'
+            )
     return "\n".join(lines) + "\n"
 
 

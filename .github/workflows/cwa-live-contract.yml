@@ -1,4 +1,4 @@
-name: CWA Live Contract
+name: Official Live Contracts
 
 on:
   workflow_dispatch:
@@ -9,9 +9,9 @@ permissions:
   contents: read
 
 jobs:
-  cwa-rainfall:
+  public-official-observations:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
 
@@ -25,7 +25,7 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - name: Require CWA API secret
+      - name: Require official API secrets
         run: |
           if [ -z "$CWA_API_KEY" ]; then
             echo "::error::Repository secret CWA_API_KEY is required"
@@ -35,5 +35,37 @@ jobs:
       - name: Install service
         run: python -m pip install .
 
-      - name: Validate live rain-gauge contract
+      - name: Validate CWA rain-gauge contract
         run: floodcast-minxiong-cwa-rain-smoke --county 10010 --county-name 嘉義縣
+
+      - name: Validate WRA IoW flood-sensor contracts
+        run: floodcast-minxiong-wra-flood-smoke --county 10010
+
+  host-bound-wra-warning:
+    runs-on: [self-hosted, linux, x64, floodcast-minxiong]
+    timeout-minutes: 10
+    env:
+      WRA_API_KEY: ${{ secrets.WRA_API_KEY }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Require WRA API secret and host runtime
+        run: |
+          if [ -z "$WRA_API_KEY" ]; then
+            echo "::error::Repository secret WRA_API_KEY is required"
+            exit 1
+          fi
+          test -x "$HOME/.local/share/floodcast-minxiong/venv/bin/python" || {
+            echo "::error::FloodCastMinxiong host runtime is not installed"
+            exit 1
+          }
+
+      - name: Validate WRA rainfall-warning contract
+        env:
+          PYTHONPATH: src
+        run: |
+          "$HOME/.local/share/floodcast-minxiong/venv/bin/python" \
+            -m floodcastminxiong.ingestion.wra_rainfall_alert_api \
+            --county 10010
