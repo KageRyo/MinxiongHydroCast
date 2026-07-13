@@ -19,6 +19,20 @@ artifact paths, byte sizes, SHA-256, provenance, event time ranges, and aggregat
 metrics. Artifact resolution rejects absolute research paths and attempts to escape the configured
 research root. See [research_dataset.md](research_dataset.md).
 
+## Event Evidence Catalog
+
+`EventEvidenceCatalog` is the strict boundary for continuous radar discovery. It stores the
+incremental cursor, immutable discovery configuration, checksummed history indexes, candidate
+trigger metrics, full radar-window artifacts, and synchronized QPE/gauge/warning captures. Unknown
+fields, naive timestamps, duplicate candidates or trigger times, inconsistent frame counts, and
+artifact paths outside the research root fail validation.
+
+Every candidate is constrained to `candidate_only` with `formal_split_membership=not_added`.
+Catalogs require `automatic_formal_split_updates=false` and
+`retraining_policy=only_after_human_approved_new_events`. A complete frame window can only become
+`awaiting_review`; it cannot become a formal dataset event through discovery. See
+[continuous_event_evidence.md](continuous_event_evidence.md).
+
 ## Rainfall Alerts
 
 Required fields:

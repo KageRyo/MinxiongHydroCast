@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
@@ -15,6 +16,7 @@ from urllib3.exceptions import InsecureRequestWarning
 from urllib3 import disable_warnings
 
 from minxionghydrocast.config import get_settings
+from minxionghydrocast.io.research_store import atomic_write_bytes
 from minxionghydrocast.io.run_summary import (
     DEFAULT_RUN_LOG_PATH,
     build_run_summary,
@@ -142,35 +144,48 @@ def download_cwa_file(
     http_get: HttpGet = requests.get,
     overwrite: bool = False,
     verify_tls: bool = True,
+    retry_attempts: int = 3,
+    retry_backoff_seconds: float = 1.0,
 ) -> DownloadResult:
     request.validate()
     if not authorization:
         raise ValueError("missing CWA API key")
     if output_path.exists() and not overwrite:
         raise FileExistsError(f"output already exists: {output_path}")
+    if retry_attempts < 1:
+        raise ValueError("retry attempts must be at least one")
+    if retry_backoff_seconds < 0:
+        raise ValueError("retry backoff must not be negative")
 
     if not verify_tls:
         disable_warnings(InsecureRequestWarning)
 
-    try:
-        response = http_get(
-            request.endpoint,
-            params=request.params(authorization=authorization),
-            timeout=timeout,
-            verify=verify_tls,
-        )
-        response.raise_for_status()
-    except Exception as exc:
-        raise RuntimeError(
-            f"CWA request failed for {request.redacted_url()}: {type(exc).__name__}"
-        ) from exc
+    response = None
+    for attempt in range(1, retry_attempts + 1):
+        try:
+            response = http_get(
+                request.endpoint,
+                params=request.params(authorization=authorization),
+                timeout=timeout,
+                verify=verify_tls,
+            )
+            response.raise_for_status()
+            break
+        except Exception as exc:
+            if attempt == retry_attempts:
+                raise RuntimeError(
+                    "CWA request failed after "
+                    f"{attempt} attempts for {request.redacted_url()}: {type(exc).__name__}"
+                ) from exc
+            time.sleep(retry_backoff_seconds * (2 ** (attempt - 1)))
+    if response is None:
+        raise AssertionError("CWA file retry loop terminated unexpectedly")
     if looks_like_cwa_auth_error(response.content):
         raise RuntimeError("CWA rejected the Authorization key")
     if not response.content:
         raise RuntimeError("CWA returned an empty response")
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_bytes(response.content)
+    atomic_write_bytes(output_path, response.content)
     return DownloadResult(
         data_id=request.data_id,
         output_path=output_path,

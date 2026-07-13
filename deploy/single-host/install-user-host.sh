@@ -87,7 +87,25 @@ git -C "$REPOSITORY_ROOT" rev-parse HEAD \
   > "$DURABLE_ROOT/config/installed-revision.txt"
 
 mkdir -p "$HOME/.config/minxiong-hydrocast" "$HOME/.config/systemd/user"
+research_config_count="$(grep -Ec \
+  '^[[:space:]]*MINXIONGHYDROCAST_RESEARCH_ROOT=' "$ENV_FILE" || true)"
+if [[ "$research_config_count" -gt 1 ]]; then
+  echo "[ERROR] MINXIONGHYDROCAST_RESEARCH_ROOT must not be defined more than once" >&2
+  exit 1
+fi
+if [[ "$research_config_count" -eq 1 ]] && \
+  ! grep -Eq '^[[:space:]]*MINXIONGHYDROCAST_RESEARCH_ROOT=.+$' "$ENV_FILE"; then
+  echo "[ERROR] MINXIONGHYDROCAST_RESEARCH_ROOT must not be blank when defined" >&2
+  exit 1
+fi
 install -m 0600 "$ENV_FILE" "$HOME/.config/minxiong-hydrocast/env"
+if [[ "$research_config_count" -eq 0 ]]; then
+  RESEARCH_ROOT="${DURABLE_ROOT}-research"
+  mkdir -p "$RESEARCH_ROOT"
+  chmod 0700 "$RESEARCH_ROOT"
+  printf '\nMINXIONGHYDROCAST_RESEARCH_ROOT=%s\n' "$RESEARCH_ROOT" \
+    >> "$HOME/.config/minxiong-hydrocast/env"
+fi
 discord_config_count="$(grep -Ec '^[[:space:]]*MINXIONGHYDROCAST_DISCORD_WEBHOOK_URL=' "$ENV_FILE" || true)"
 if [[ "$discord_config_count" -gt 1 ]]; then
   echo "[ERROR] MINXIONGHYDROCAST_DISCORD_WEBHOOK_URL must not be defined more than once" >&2
@@ -129,9 +147,11 @@ systemctl --user restart \
   minxiong-hydrocast-prometheus.service
 systemctl --user enable --now \
   minxiong-hydrocast-collector.timer \
+  minxiong-hydrocast-event-discover.timer \
   minxiong-hydrocast-backup.timer \
   minxiong-hydrocast-shadow.timer
 systemctl --user start minxiong-hydrocast-collector.service
+systemctl --user start minxiong-hydrocast-event-discover.service
 systemctl --user start minxiong-hydrocast-shadow.service
 
 echo "[OK] MinxiongHydroCast installed at $DURABLE_ROOT"

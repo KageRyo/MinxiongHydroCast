@@ -115,6 +115,38 @@ def test_download_cwa_file_writes_response_and_redacts_url(tmp_path: Path):
     ]
 
 
+def test_download_cwa_file_retries_and_writes_atomically(tmp_path: Path):
+    calls = 0
+
+    def flaky_get(
+        url: str,
+        *,
+        params: dict[str, str],
+        timeout: int,
+        verify: bool,
+    ) -> FakeResponse:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise RuntimeError("temporary failure")
+        return FakeResponse(b'{"complete": true}', url=url)
+
+    output = tmp_path / "download.json"
+    result = download_cwa_file(
+        CwaDownloadRequest(data_id="O-B0045-001"),
+        authorization="real-key",
+        output_path=output,
+        http_get=flaky_get,
+        retry_attempts=2,
+        retry_backoff_seconds=0,
+    )
+
+    assert calls == 2
+    assert result.bytes_written == len(b'{"complete": true}')
+    assert output.read_bytes() == b'{"complete": true}'
+    assert list(tmp_path.glob(".*.tmp")) == []
+
+
 def test_download_requires_local_authorization_key(tmp_path: Path):
     request = CwaDownloadRequest(data_id="O-A0059-001")
 

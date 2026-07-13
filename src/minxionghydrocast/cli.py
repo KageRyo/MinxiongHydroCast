@@ -18,6 +18,7 @@ COMMANDS = {
     "dataset-build": "minxionghydrocast.pipelines.dataset_build:main",
     "demo": "minxionghydrocast.pipelines.demo:main",
     "evaluate-baselines": "minxionghydrocast.pipelines.baseline_evaluation:main",
+    "event-discover": "minxionghydrocast.pipelines.event_discovery:main",
     "event-split-check": "minxionghydrocast.models.event_splits:main",
     "hydrology": "minxionghydrocast.ingestion.hydrological_data:main",
     "label-audit": "minxionghydrocast.validation.flood_labels:main",

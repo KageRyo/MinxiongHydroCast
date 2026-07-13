@@ -16,12 +16,14 @@ The build creates this layout:
 
 ```text
 research-root/
-├── raw/       # CWA history indexes and downloaded frames
+├── raw/       # downloaded formal and candidate-event frames
 ├── events/    # event plans and collection manifests
 ├── tensors/   # per-event and combined split archives
 ├── models/    # checkpoints and training results
 ├── reports/   # persistence and Tiny U-Net evaluations
-└── catalog/   # dataset catalog and checksum verification report
+├── catalog/   # formal dataset catalog and checksum verification report
+├── discovery/ # incremental cursor, history indexes, frame metrics, and temporary scan cache
+└── evidence/  # candidate-aligned QPE, gauge, and warning captures
 ```
 
 Do not place the root inside the repository. Do not commit `.env`, raw official data, generated
@@ -56,6 +58,10 @@ and test events, writes the catalog, and verifies every cataloged checksum. Use
 `--history-index <path>` to reproduce from a saved index and `--skip-download` to reuse an already
 complete external collection. `--insecure-tls` is an explicit host workaround only when the local
 CA chain cannot verify the CWA endpoint.
+
+Run `mhc event-discover` every 10 to 30 minutes to preserve new candidate events before the CWA
+history window expires. Its separate `EventEvidenceCatalog` is candidate-only and cannot modify the
+formal event manifest. See [continuous_event_evidence.md](continuous_event_evidence.md).
 
 ## Data Contract
 

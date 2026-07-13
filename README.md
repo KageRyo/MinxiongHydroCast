@@ -26,6 +26,8 @@ not an official warning system or a production-ready public service.
 - Provide baseline models before deep-learning training is justified.
 - Prepare a `NowcastNetAdapter` boundary for future SOTA migration.
 - Track official CWA radar/QPE candidate sources without committing raw downloads or API keys.
+- Incrementally discover `35 dBZ` radar candidates and preserve complete, synchronized evidence
+  outside Git for human review.
 
 ## What You Can Use Today
 
@@ -68,6 +70,7 @@ mhc --help
 mhc operations --help
 mhc serve --help
 mhc dataset-build --help
+mhc event-discover --help
 ```
 
 Every existing `minxiong-hydrocast-<command>` entry point is available as `mhc <command>`.
@@ -103,6 +106,18 @@ testing, catalog generation, and SHA-256 verification. The current five-event bu
 one validation, and two held-out Minxiong/Chiayi test events. The learned model improves aggregate
 RMSE but does not consistently beat Persistence on CSI and lead-time gates, so forecast
 publication remains disabled. See [docs/research_dataset.md](docs/research_dataset.md).
+
+Continuously preserve new short-retention event candidates without changing the formal split:
+
+```bash
+mhc event-discover --repository-root "$PWD"
+```
+
+The command incrementally scans `O-A0059-001`, calculates Minxiong and Taiwan-wide `35 dBZ`
+coverage, resumes complete event-window downloads, and synchronizes `O-B0045-001` QPE,
+`O-A0002-001` gauges, and WRA rainfall warnings. Candidates remain pending human review and cannot
+automatically enter train, validation, or test splits. See
+[docs/continuous_event_evidence.md](docs/continuous_event_evidence.md).
 
 ## Operational Observation Service
 

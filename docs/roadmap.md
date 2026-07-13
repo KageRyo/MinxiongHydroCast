@@ -63,6 +63,10 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Track per-event QPE/gauge validation availability without committing raw official data.
 - [ ] Add gauge/QPE validation reports for each dataset build after event-time QPE grids are
       captured or an official historical QPE archive is confirmed.
+- [x] Add continuous 20-minute `O-A0059-001` event discovery with local and Taiwan-wide `35 dBZ`
+      coverage, resumable candidate windows, and synchronized QPE/gauge/warning evidence.
+- [x] Enforce a Pydantic candidate queue that requires human review and cannot update formal splits.
+- [ ] Accumulate reviewed typhoon, frontal, Mei-yu, and convective candidates before retraining.
 
 ## Milestone 7: Train And Compare Models
 
@@ -76,7 +80,8 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Train with train-only normalization and an independent event validation archive.
 - [x] Evaluate weighted Tiny U-Net against Persistence on two held-out Minxiong/Chiayi events and
       fail closed when the promotion gate does not pass.
-- [ ] Collect longer event datasets for meaningful neural training.
+- [ ] Promote newly reviewed, weather-diverse candidates into formal splits, then retrain and rerun
+      the unchanged Persistence gate.
 - [ ] Migrate NowcastNet only after license and tensor compatibility are reviewed.
 
 ## Milestone 8: Operationalize

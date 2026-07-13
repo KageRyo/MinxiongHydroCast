@@ -43,13 +43,15 @@ dedicated virtual environment, and starts:
 - Prometheus on `127.0.0.1:9090`;
 - Alertmanager on `127.0.0.1:9093`;
 - the local alert audit receiver on `127.0.0.1:9087`;
-- collection every ten minutes, shadow evaluation hourly, and backup daily.
+- observation collection every ten minutes, radar-event discovery every twenty minutes, shadow
+  evaluation hourly, and backup daily.
 
 Inspect the deployment without exposing credentials:
 
 ```bash
 systemctl --user list-timers 'minxiong-hydrocast-*'
 systemctl --user --no-pager --full status minxiong-hydrocast-api.service
+systemctl --user --no-pager --full status minxiong-hydrocast-event-discover.service
 curl --fail http://127.0.0.1:8180/healthz
 curl --fail http://127.0.0.1:8180/readyz
 curl --fail http://127.0.0.1:9090/-/ready
@@ -59,6 +61,11 @@ curl --fail http://127.0.0.1:9093/-/ready
 Use `journalctl --user -u UNIT` for service logs. The API, Prometheus, Alertmanager, and receiver
 bind to loopback intentionally. Put authentication and TLS at a reverse proxy before allowing
 network access.
+
+Event discovery writes only to the external `MINXIONGHYDROCAST_RESEARCH_ROOT`. Its candidate queue
+requires human review and never edits the formal dataset split. Inspect the structured summary at
+`~/.local/share/minxiong-hydrocast/run_summaries/event_discover.json`; see
+[continuous_event_evidence.md](continuous_event_evidence.md) for the artifact and review contract.
 
 ## Alert routing and drill
 

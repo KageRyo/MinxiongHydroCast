@@ -1,0 +1,11 @@
+[Unit]
+Description=Discover MinxiongHydroCast radar events every 20 minutes
+
+[Timer]
+OnCalendar=*-*-* *:0/20:00
+Persistent=true
+RandomizedDelaySec=60
+Unit=minxiong-hydrocast-event-discover.service
+
+[Install]
+WantedBy=timers.target

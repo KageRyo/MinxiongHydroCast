@@ -55,6 +55,13 @@ through a focused pull request. The end-to-end target is defined in
 - [x] Validate persisted dataset, training, and evaluation JSON through strict Pydantic schemas.
 - [x] Train weighted Tiny U-Net with train-only normalization and a separate validation event.
 - [x] Verify 251 cataloged external artifacts and retain the failed forecast-promotion blockers.
+- [x] Add `mhc event-discover` with an incremental history cursor and both Minxiong-local and
+      Taiwan-wide `35 dBZ` coverage metrics.
+- [x] Preserve candidate radar windows with retry, resume, SHA-256, atomic writes, and bounded
+      temporary scan-cache retention under the external research root.
+- [x] Capture synchronized `O-B0045-001` QPE, `O-A0002-001` gauges, and WRA rainfall warnings in a
+      strict Pydantic `EventEvidenceCatalog`.
+- [x] Schedule candidate discovery every 20 minutes while preventing automatic formal-split edits.
 
 ## Next
 
@@ -100,8 +107,8 @@ through a focused pull request. The end-to-end target is defined in
 - [x] Produce a checksummed dataset catalog and verification report under the external research
       root, with source provenance, time ranges, and lead-time metrics.
 - [x] Add a next-batch event expansion queue from the existing CWA hourly discovery scan.
-- [ ] Add more train events across typhoon, frontal, Mei-yu, and convective regimes before SOTA
-      model migration.
+- [ ] Human-review and accumulate typhoon, frontal, Mei-yu, and convective candidates before SOTA
+      model migration; retrain only after approved events enter the formal manifest.
 
 ### Phase 3: Tensor Conversion
 

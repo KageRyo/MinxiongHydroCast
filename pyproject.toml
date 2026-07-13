@@ -37,6 +37,7 @@ model = [
 mhc = "minxionghydrocast.cli:main"
 minxiong-hydrocast-demo = "minxionghydrocast.pipelines.demo:main"
 minxiong-hydrocast-dataset-build = "minxionghydrocast.pipelines.dataset_build:main"
+minxiong-hydrocast-event-discover = "minxionghydrocast.pipelines.event_discovery:main"
 minxiong-hydrocast-event-split-check = "minxionghydrocast.models.event_splits:main"
 minxiong-hydrocast-evaluate-baselines = "minxionghydrocast.pipelines.baseline_evaluation:main"
 minxiong-hydrocast-rainfall-alerts = "minxionghydrocast.ingestion.rainfall_alerts:main"

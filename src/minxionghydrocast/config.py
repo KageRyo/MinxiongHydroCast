@@ -35,7 +35,7 @@ def get_settings() -> Settings:
         research_root=Path(
             os.getenv(
                 "MINXIONGHYDROCAST_RESEARCH_ROOT",
-                "~/.local/share/minxiong-hydrocast/research",
+                "~/.local/share/minxiong-hydrocast-research",
             )
         ).expanduser(),
         operations_max_age_minutes=float(os.getenv("MINXIONGHYDROCAST_MAX_AGE_MINUTES", "30")),
