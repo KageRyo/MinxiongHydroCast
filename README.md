@@ -67,11 +67,42 @@ Use the concise `mhc` dispatcher for interactive commands:
 mhc --help
 mhc operations --help
 mhc serve --help
+mhc dataset-build --help
 ```
 
 Every existing `minxiong-hydrocast-<command>` entry point is available as `mhc <command>`.
 `mhc collect` aliases `mhc operations`, and `mhc shadow` aliases `mhc shadow-report`. The full
 entry points remain available for explicit service definitions and automation.
+
+## Reproducible Radar Research
+
+The formal CWA radar dataset is built in a durable root outside Git. Set
+`MINXIONGHYDROCAST_RESEARCH_ROOT` in the ignored `.env`, load the environment, and run:
+
+```bash
+set -a
+source .env
+set +a
+
+mhc dataset-build \
+  --manifest data/samples/event_split_manifest.json \
+  --root "$MINXIONGHYDROCAST_RESEARCH_ROOT" \
+  --train-weighted-unet \
+  --epochs 20 \
+  --hidden-channels 8 \
+  --batch-size 2 \
+  --event-weight 4 \
+  --early-stopping-patience 5 \
+  --device cuda \
+  --multi-gpu
+```
+
+The command orchestrates CWA history discovery, event download, sequence validation, tensor
+conversion, Persistence evaluation, independent validation, weighted Tiny U-Net training and
+testing, catalog generation, and SHA-256 verification. The current five-event build has two train,
+one validation, and two held-out Minxiong/Chiayi test events. The learned model improves aggregate
+RMSE but does not consistently beat Persistence on CSI and lead-time gates, so forecast
+publication remains disabled. See [docs/research_dataset.md](docs/research_dataset.md).
 
 ## Operational Observation Service
 
@@ -384,10 +415,11 @@ minxiong-hydrocast-qpe-gauge-validate \
   --output data/processed/qpe_gauge_validation_<event_id>.json
 ```
 
-Current selected-event status is tracked in
+Earlier three-event source-review status is tracked in
 `data/samples/qpe_gauge_validation_status.json`: `O-A0002-001` gauge captures parse for the three
 events, but event-time `O-B0045-001` history `getData` probes return HTTP 404, so the actual
 gauge-vs-QPE reports remain blocked until QPE grids are captured or an official archive is found.
+This status file is supporting historical evidence, not the active formal split manifest.
 
 Check event-based train/validation/test splits:
 
@@ -454,10 +486,9 @@ minxiong-hydrocast-train-torch-baseline \
   --epochs 1
 ```
 
-The training command masks CWA nodata values and z-score normalizes valid pixels before computing
-loss. For the next strong-echo experiment, add `--loss-function weighted_mse`,
-`--event-threshold 35`, `--event-weight 4`, `--validation-fraction 0.2`, and
-`--early-stopping-patience 3`.
+The low-level training command masks CWA nodata values and z-score normalizes valid pixels before
+computing loss. Formal experiments should use `mhc dataset-build --train-weighted-unet`, which
+uses a separate validation event instead of holding out random sliding windows.
 
 Compare the Tiny U-Net checkpoint against persistence on the same valid pixels:
 
@@ -487,7 +518,7 @@ MinxiongHydroCast/
 │   ├── interim/      # ignored cleaned intermediates
 │   ├── processed/    # ignored validated outputs
 │   ├── external/     # ignored radar/model/checkpoint assets
-│   └── samples/      # tracked demo-safe samples
+│   └── samples/      # tracked fixtures, manifests, and source-review evidence
 ├── deploy/
 │   ├── prometheus/   # scrape, alert rules, and Alertmanager routing
 │   ├── single-host/  # pinned installation and runner scripts
@@ -523,6 +554,8 @@ event splits, checkpoints, and licensing are clear. See [docs/model_strategy.md]
 
 Spatial alignment is documented in [docs/spatial_alignment.md](docs/spatial_alignment.md).
 Baseline evaluation results are documented in [docs/baseline_results.md](docs/baseline_results.md).
+The reproducible external research dataset is documented in
+[docs/research_dataset.md](docs/research_dataset.md).
 NowcastNet migration is documented in [docs/nowcastnet_migration.md](docs/nowcastnet_migration.md).
 Radar source review is documented in [docs/radar_data_sources.md](docs/radar_data_sources.md).
 Event split rules are documented in [docs/event_splits.md](docs/event_splits.md).

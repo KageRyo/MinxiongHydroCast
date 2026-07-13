@@ -10,6 +10,8 @@ from typing import Protocol
 
 import numpy as np
 
+from minxionghydrocast.ingestion.cwa_event_collector import CwaEventCollection
+
 from minxionghydrocast.ingestion.cwa_grid import (
     CwaGridInspection,
     check_cwa_grid_sequence,
@@ -212,15 +214,17 @@ def resolve_cwa_grid_paths(input_path: Path) -> tuple[list[Path], str]:
 
     if input_path.is_file():
         try:
-            payload = json.loads(input_path.read_text(encoding="utf-8"))
+            content = input_path.read_text(encoding="utf-8")
+            payload = json.loads(content)
         except (UnicodeDecodeError, json.JSONDecodeError):
             return [input_path], input_path.stem
         if _looks_like_collection_manifest(payload):
+            collection = CwaEventCollection.model_validate_json(content)
             base_dir = input_path.parent
-            event_id = str(payload.get("event_id") or input_path.stem)
+            event_id = collection.event_id
             paths = []
-            for frame in payload["frames"]:
-                candidate = Path(str(frame["output_path"]))
+            for frame in collection.frames:
+                candidate = Path(frame.output_path)
                 if candidate.is_absolute() or candidate.exists():
                     paths.append(candidate)
                 else:

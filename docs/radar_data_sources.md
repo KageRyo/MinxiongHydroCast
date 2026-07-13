@@ -119,11 +119,12 @@ The report uses nearest-grid lookup for the first pass and records station-level
 rainfall, difference, absolute error, MAE, RMSE, bias, correlation, and excluded stations. Treat
 the report as validation evidence, not as a replacement for hydrology labels.
 
-Current status is tracked in `data/samples/qpe_gauge_validation_status.json`. As of 2026-07-09,
+Historical three-event status is tracked in `data/samples/qpe_gauge_validation_status.json`. As of 2026-07-09,
 event-time `O-A0002-001` rain-gauge captures are available and parse as CWA XML, but event-time
 `O-B0045-001` history `getData` probes return HTTP 404 for all three selected radar windows. The
 per-event gauge-vs-QPE reports are therefore blocked until event-time QPE grids are captured
-locally or an official historical QPE archive is confirmed.
+locally or an official historical QPE archive is confirmed. This status is supporting source
+evidence and does not define the current formal five-event split.
 
 ## Official Weather Context
 

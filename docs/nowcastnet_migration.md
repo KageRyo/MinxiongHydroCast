@@ -53,17 +53,19 @@ Do not migrate NowcastNet until all of these are true:
   event splits.
 - The target NowcastNet implementation, license, dependency stack, checkpoint format, and expected
   tensor shape are reviewed.
-- External code, checkpoints, and datasets stay under ignored `data/external/` paths unless a
-  license review explicitly permits tracked source integration.
+- External code, checkpoints, and datasets stay under the configured durable research root or
+  other ignored external paths unless a license review explicitly permits tracked integration.
 
-Current status: not ready. The repository now has three complete CWA radar event windows,
-full-event lead-time baselines, and per-event QPE/gauge availability tracking. However, event
-diversity is still too thin, official weather labels are still pending, and gauge-vs-QPE reports
-are blocked until event-time `O-B0045-001` QPE grids are available.
+Current status: not ready. The reproducible build now has five complete CWA radar events, an
+independent validation event, two held-out Minxiong/Chiayi test events, checksummed lead-time
+baselines, and a fail-closed model promotion gate. However, event diversity is still too thin, the
+weighted Tiny U-Net does not consistently beat Persistence, official weather labels are pending,
+and gauge-vs-QPE reports are blocked until event-time `O-B0045-001` QPE grids are available.
 
 ## External Assets
 
-Keep these outside git under ignored folders such as `data/external/`:
+Keep these outside Git under the configured durable research root or another ignored external
+location:
 
 - NowcastNet source code
 - Taiwan radar tensor dataset

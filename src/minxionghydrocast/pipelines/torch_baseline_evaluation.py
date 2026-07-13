@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -17,6 +16,7 @@ from minxionghydrocast.io.run_summary import (
     record_run,
     start_run,
 )
+from minxionghydrocast.models.evaluation_schemas import TorchBaselineComparisonSchema
 from minxionghydrocast.models.metrics import binary_event_metrics, rmse
 from minxionghydrocast.models.radar_tensor import nodata_values_from_metadata, valid_value_mask
 from minxionghydrocast.pipelines.radar_tensor_conversion import load_tensor_archive
@@ -275,9 +275,13 @@ def evaluate_torch_baseline_comparison(
     }
 
 
-def write_evaluation_result(result: dict[str, object], output_path: Path) -> None:
+def write_evaluation_result(
+    result: dict[str, object] | TorchBaselineComparisonSchema,
+    output_path: Path,
+) -> None:
+    schema = TorchBaselineComparisonSchema.model_validate(result)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    output_path.write_text(schema.model_dump_json(indent=2) + "\n", encoding="utf-8")
 
 
 def main() -> None:

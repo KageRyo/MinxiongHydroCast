@@ -47,6 +47,14 @@ through a focused pull request. The end-to-end target is defined in
 - [x] Train and evaluate the Tiny U-Net/RainNet-style baseline on full CWA event windows.
 - [x] Define a NowcastNet readiness gate so SOTA migration waits for stable data and license
       review.
+- [x] Add `mhc dataset-build` to orchestrate history discovery, resilient downloads, validation,
+      tensor conversion, Persistence evaluation, catalog generation, and checksum verification.
+- [x] Move formal research artifacts to a configurable durable root outside Git.
+- [x] Replace formal demo split entries with two real train, one independent validation, and two
+      held-out Minxiong/Chiayi test events.
+- [x] Validate persisted dataset, training, and evaluation JSON through strict Pydantic schemas.
+- [x] Train weighted Tiny U-Net with train-only normalization and a separate validation event.
+- [x] Verify 251 cataloged external artifacts and retain the failed forecast-promotion blockers.
 
 ## Next
 
@@ -89,7 +97,8 @@ through a focused pull request. The end-to-end target is defined in
       `data/samples/qpe_gauge_validation_status.json`.
 - [ ] Run live QPE/gauge validation reports for each selected event after event-time
       `O-B0045-001` QPE grids are captured or an official historical QPE archive is confirmed.
-- [ ] Produce reproducible dataset summaries under ignored `data/processed/run_summaries/`.
+- [x] Produce a checksummed dataset catalog and verification report under the external research
+      root, with source provenance, time ranges, and lead-time metrics.
 - [x] Add a next-batch event expansion queue from the existing CWA hourly discovery scan.
 - [ ] Add more train events across typhoon, frontal, Mei-yu, and convective regimes before SOTA
       model migration.
@@ -115,6 +124,10 @@ through a focused pull request. The end-to-end target is defined in
 - [x] Add threshold-weighted Tiny U-Net loss options, validation split support, and early stopping
       metadata for stronger-event experiments.
 - [x] Run the weighted Tiny U-Net experiment on two RTX 4090 GPUs and compare full-event metrics.
+- [x] Compare the weighted Tiny U-Net with Persistence on one independent validation event and two
+      held-out Minxiong/Chiayi test events.
+- [ ] Improve the learned model until it consistently beats Persistence on aggregate and
+      lead-time RMSE and CSI without weakening the promotion gate.
 - [ ] Wire NowcastNet inference only after event diversity, code, checkpoint, tensor shape, and
       license are reviewed.
 

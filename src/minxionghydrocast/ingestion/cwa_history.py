@@ -12,6 +12,7 @@ from typing import Any, Protocol
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import requests
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 
@@ -89,8 +90,16 @@ class CwaHistoryRequest:
         return append_query(self.endpoint, {"Authorization": "REDACTED"})
 
 
-@dataclass(frozen=True)
-class CwaHistoryFile:
+class CwaHistorySchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        strict=True,
+        frozen=True,
+        allow_inf_nan=False,
+    )
+
+
+class CwaHistoryFile(CwaHistorySchema):
     data_time: str
     url: str
     filename: str
@@ -98,34 +107,20 @@ class CwaHistoryFile:
     size: str
     raw: dict[str, object]
 
-    def to_dict(self) -> dict[str, object]:
-        return {
-            "data_time": self.data_time,
-            "url": self.url,
-            "filename": self.filename,
-            "file_format": self.file_format,
-            "size": self.size,
-            "raw": self.raw,
-        }
 
-
-@dataclass(frozen=True)
-class CwaHistoryIndex:
+class CwaHistoryIndex(CwaHistorySchema):
     data_id: str
     source_url: str
     files: tuple[CwaHistoryFile, ...]
     raw: dict[str, object]
     dry_run: bool = False
+    file_count: int = Field(ge=0)
 
-    def to_dict(self) -> dict[str, object]:
-        return {
-            "data_id": self.data_id,
-            "source_url": self.source_url,
-            "dry_run": self.dry_run,
-            "file_count": len(self.files),
-            "files": [file.to_dict() for file in self.files],
-            "raw": self.raw,
-        }
+    @model_validator(mode="after")
+    def validate_file_count(self) -> "CwaHistoryIndex":
+        if self.file_count != len(self.files):
+            raise ValueError("file_count does not match files")
+        return self
 
 
 def append_query(url: str, params: dict[str, str]) -> str:
@@ -234,6 +229,7 @@ def fetch_history_index(
         source_url=redact_authorization_url(response.url),
         files=files,
         raw=sanitize_cwa_payload(payload),
+        file_count=len(files),
     )
 
 
@@ -245,12 +241,15 @@ def dry_run_index(request: CwaHistoryRequest) -> CwaHistoryIndex:
         files=(),
         raw={},
         dry_run=True,
+        file_count=0,
     )
 
 
 def write_history_index(path: Path, index: CwaHistoryIndex) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(index.to_dict(), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary = path.with_name(f".{path.name}.tmp")
+    temporary.write_text(index.model_dump_json(indent=2) + "\n", encoding="utf-8")
+    temporary.replace(path)
 
 
 def build_history_summary(

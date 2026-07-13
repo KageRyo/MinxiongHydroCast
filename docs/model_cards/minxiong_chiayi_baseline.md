@@ -1,61 +1,64 @@
 # Minxiong/Chiayi Baseline Model Card
 
-## Model
+## Model Family
 
-- Name: MinxiongHydroCast persistence baseline
-- Model type: `PersistenceNowcaster`
-- Task: radar echo nowcasting smoke baseline
-- Intended region: Taiwan-wide radar grid, with downstream checks for Chiayi County and Minxiong
+- Primary benchmark: `PersistenceNowcaster`
+- Learned diagnostic: weighted `TinyUNetNowcaster`
+- Task: 10-to-60-minute CWA radar-echo nowcasting
+- Grid: Taiwan-wide `881 x 921`, `dBZ`, TWD67, 10-minute cadence
+- Local evaluation target: Minxiong Township and Chiayi County
+- Publication status: blocked
 
-## Data Sources
+## Data
 
-- CWA `O-A0059-001` radar echo history sample.
-- Live-verified sample window: `2026-07-07T08:40:00+08:00` to
-  `2026-07-07T09:00:00+08:00`.
-- Local raw frames are stored under ignored `data/external/` paths and are not committed.
-- Tensor archive metadata preserves `dBZ`, `TWD67`, 10-minute cadence, grid origin, resolution,
-  nodata values, and source timestamps.
+The formal dataset contains five real CWA `O-A0059-001` events: two Taiwan-wide training events,
+one separate Taiwan-wide validation event, and two held-out Minxiong/Chiayi test events. Each
+sample has six input and six target frames. Raw frames, tensor archives, reports, and checkpoints
+remain in the configured external research root.
 
-## Evaluation
+Training uses 88 sliding windows. Validation uses a separate 26-window event archive and does not
+contribute to training normalization or gradients. The two local test events contain 26 windows
+each and remain independent of training and model selection.
 
-The current results are pipeline smoke tests, not scientific performance claims.
+## Training
 
-- Input shape: `2 x 881 x 921 x 1`
-- Target shape: `1 x 881 x 921 x 1`
-- Event threshold: `35.0 dBZ`
-- Valid pixels: `1946`
-- Ignored nodata pixels: `809455`
-- RMSE: `11.676495 dBZ`
-- CSI: `0.302741`
-- POD: `0.455197`
-- FAR: `0.525234`
+- Loss: threshold-weighted MSE at `35 dBZ`, event weight `4`
+- Hardware: two RTX 4090 GPUs through PyTorch `DataParallel`
+- Configured epochs: 20
+- Completed epochs: 12
+- Best epoch: 7
+- Best independent validation loss: `1.433344`
+- Early stopping: enabled and triggered
 
-Tiny U-Net training infrastructure smoke result:
+## Independent Evaluation
 
-- Device: two RTX 4090 GPUs through PyTorch `DataParallel`
-- Batch repeats: 2
-- Epochs: 1
-- Normalization: z-score over valid input/target pixels
-- Final masked loss: `0.997039`
-- Checkpoint: ignored local path under `data/external/checkpoints/`
+| Event | Split | Persistence RMSE | Tiny U-Net RMSE | Persistence CSI | Tiny U-Net CSI |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Taiwan 2026-07-09 | validation | `9.654280` | `8.053179` | `0.188989` | `0.205842` |
+| Minxiong/Chiayi 2026-07-03 | test | `10.421478` | `9.186911` | `0.315475` | `0.294527` |
+| Minxiong/Chiayi 2026-07-11 | test | `9.154027` | `8.218313` | `0.119412` | `0.122282` |
 
-Tiny U-Net versus persistence smoke comparison on the same valid pixels:
+Tiny U-Net improves aggregate RMSE for all three independent events, but CSI regresses on the
+2026-07-03 local test event and some 10-to-60-minute lead-time gates regress. It therefore does
+not consistently beat Persistence.
 
-- Persistence RMSE/CSI/POD/FAR: `11.676495`, `0.302741`, `0.455197`, `0.525234`
-- Tiny U-Net RMSE/CSI/POD/FAR: `10.878726`, `0.0`, `0.0`, `0.0`
-- Interpretation: the smoke checkpoint improves RMSE but fails event detection at `35 dBZ`.
+## Intended Use
+
+Use Persistence as the required benchmark and the weighted Tiny U-Net as a research diagnostic
+for architecture, loss, and dataset changes. Use the checksummed external catalog to reproduce
+comparisons and detect artifact drift.
+
+Do not expose the current neural output through the operational forecast endpoint, use it as an
+official warning, or claim calibrated rainfall/flood prediction performance.
 
 ## Limitations
 
-- This baseline repeats the latest frame and has no learned dynamics.
-- The sample is too short for training or benchmark reporting.
-- Radar echo is not the same as surface rainfall or flood depth.
-- The neural-training smoke run masks CWA nodata values, but the dataset is far too short for
-  model selection.
-- Minxiong flood-risk evaluation still requires labels, local gauges, sensors, and QPE/gauge
-  validation.
+- Five events do not cover enough typhoon, frontal, Mei-yu, and convective regimes.
+- Radar reflectivity is not surface rainfall or flood depth.
+- Official event-time weather context remains incomplete.
+- Historical QPE grids are not yet available for gauge validation across every event.
+- Reviewed Minxiong flood outcomes and local calibration are still missing.
+- The promotion gate remains fail-closed with `forecast_publication_ready=false`.
 
-## Use
-
-Use this baseline to verify ingestion, tensor conversion, metrics, and run summaries before
-training ConvLSTM/U-Net or migrating NowcastNet.
+Dataset construction and complete evidence are documented in
+[research_dataset.md](../research_dataset.md).

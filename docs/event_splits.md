@@ -1,63 +1,59 @@
 # Event Splits
 
-MinxiongHydroCast should split model data by weather event, not by random rows or radar frames. Random
-splits leak storm structure across train, validation, and test sets, which makes nowcasting scores
-look better than they are.
+MinxiongHydroCast splits radar data by weather event, never by random frames or sliding windows.
+Random splits leak storm structure across train, validation, and test sets and overstate
+nowcasting performance.
 
-## Manifest
+## Formal Manifest
 
-The sample manifest is `data/samples/event_split_manifest.json`. It contains demo-safe placeholder
-events, one live-verified CWA `O-A0059-001` radar sequence sample for pipeline smoke tests, and
-radar-derived candidate windows selected from a CWA hourly discovery scan:
+The formal manifest is `data/samples/event_split_manifest.json`. Schema version `2.0` contains
+only real CWA `O-A0059-001` sequences:
 
-- `split_strategy`: must be `event_based`
-- `target`: model or task family
-- `events`: event ID, type, region, start/end time, source, and notes
-- `splits`: event IDs assigned to `train`, `validation`, and `test`
+| Event ID | Split | Region | Window |
+| --- | --- | --- | --- |
+| `cwa_o_a0059_taiwan_candidate_20260707_morning` | train | Taiwan | `2026-07-07T04:00:00+08:00` to `2026-07-07T12:00:00+08:00` |
+| `cwa_o_a0059_taiwan_widespread_20260710_daytime` | train | Taiwan | `2026-07-10T10:00:00+08:00` to `2026-07-10T20:00:00+08:00` |
+| `cwa_o_a0059_taiwan_widespread_20260709_evening` | validation | Taiwan | `2026-07-09T16:00:00+08:00` to `2026-07-09T22:00:00+08:00` |
+| `cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon` | test | Minxiong, Chiayi County | `2026-07-03T13:00:00+08:00` to `2026-07-03T19:00:00+08:00` |
+| `cwa_o_a0059_chiayi_minxiong_heavyrain_20260711_early_morning` | test | Minxiong, Chiayi County | `2026-07-11T00:00:00+08:00` to `2026-07-11T06:00:00+08:00` |
 
-The current tracked radar candidates are:
+The Pydantic manifest gate requires exactly `train`, `validation`, and `test`; minimum counts of
+2/1/2; two Minxiong test events; unique IDs; complete split assignment; ordered timestamps; and
+no `demo` source or ID. Candidate weather types remain radar-derived until official CWA weather
+context is attached.
 
-| Event ID | Split | Region | Window | Basis |
-| --- | --- | --- | --- | --- |
-| `cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening` | train | Taiwan | `2026-06-28T13:00:00+08:00` to `2026-06-28T21:00:00+08:00` | largest Taiwan-wide 35 dBZ coverage in full sequence |
-| `cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon` | test | Minxiong, Chiayi | `2026-07-02T12:00:00+08:00` to `2026-07-02T18:00:00+08:00` | highest local-focus dBZ in hourly scan |
-| `cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon` | test | Minxiong, Chiayi | `2026-07-03T13:00:00+08:00` to `2026-07-03T19:00:00+08:00` | largest local-focus 35 dBZ coverage in hourly scan |
+## Independence Rules
 
-Candidate evidence is tracked in `data/samples/radar_event_windows.json`. These labels are
-radar-derived only; official context tracking is in `data/samples/event_weather_context.json`.
-Attach CWA weather maps, warnings, daily reports, or equivalent official evidence before calling a
-window typhoon, Mei-yu, frontal, or convective.
-The next uncollected candidates are queued in `data/samples/event_expansion_queue.json`; keep them
-out of this split manifest until complete sequences, tensors, QPE/gauge validation, and official
-weather context are available.
-Replace the remaining demo events before training or reporting scientific results. The 3-frame CWA
-sample verifies the pipeline only; it is not a benchmark event.
+- Training normalization is computed only from the combined training archive.
+- The validation event is a separate archive used for model selection and early stopping only.
+- Validation samples never contribute to gradients.
+- Both Minxiong/Chiayi events remain untouched until final model comparison.
+- Promotion requires the learned model to beat Persistence on aggregate and lead-time gates; a
+  lower RMSE alone is insufficient.
 
-## Check Command
+The current weighted Tiny U-Net fails that promotion gate, so forecast publication remains
+disabled. See [research_dataset.md](research_dataset.md) for the build, metrics, catalog, and
+verification evidence.
+
+## Commands
+
+Validate the general event-split contract:
 
 ```bash
-minxiong-hydrocast-event-split-check \
+mhc event-split-check \
   --manifest data/samples/event_split_manifest.json \
-  --output data/processed/event_split_check.json
+  --output data/processed/event_split_check.json \
+  --require-ok
 ```
 
-Use `--require-ok` in training automation:
+Build and validate the stronger formal dataset contract:
 
 ```bash
-minxiong-hydrocast-event-split-check --require-ok
+mhc dataset-build \
+  --manifest data/samples/event_split_manifest.json \
+  --root "$MINXIONGHYDROCAST_RESEARCH_ROOT"
 ```
 
-The checker verifies:
-
-- required split names exist and are non-empty
-- event IDs are unique
-- an event does not appear in more than one split
-- split references point to known events
-- event start/end times are valid and ordered
-- the strategy is explicitly event-based
-
-## Local Model Guidance
-
-For a Minxiong-specific model, keep at least one Minxiong or Chiayi flood-producing event entirely
-out of training. Train on broader Taiwan/Chiayi events, then evaluate the local event split
-separately. A tiny Minxiong-only training set is likely to overfit.
+Historical candidate evidence may remain in `data/samples/radar_event_windows.json` and
+`data/samples/event_expansion_queue.json`, but it does not belong to an active split until the
+formal manifest includes it and the complete build succeeds.

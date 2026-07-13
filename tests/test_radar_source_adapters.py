@@ -71,13 +71,22 @@ def test_cwa_open_data_grid_adapter_loads_collection_manifest(tmp_path: Path):
     ):
         path = tmp_path / f"frame_{index}.json"
         write_cwa_grid(path, data_time=data_time, values=f"{index},1,2,3")
-        frames.append({"output_path": str(path)})
+        frames.append(
+            {
+                "data_time": data_time,
+                "source_url": f"https://example.test/{path.name}",
+                "output_path": str(path),
+                "bytes_written": path.stat().st_size,
+            }
+        )
     manifest = tmp_path / "collection.json"
     manifest.write_text(
         json.dumps(
             {
                 "event_id": "sample_cwa_event",
                 "data_id": "O-A0059-001",
+                "frame_count": len(frames),
+                "bytes_written": sum(frame["bytes_written"] for frame in frames),
                 "frames": frames,
             }
         ),

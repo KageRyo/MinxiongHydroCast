@@ -10,11 +10,9 @@ def test_sample_event_split_manifest_is_ok():
 
     assert result["status"] == "ok"
     assert result["split_strategy"] == "event_based"
-    assert result["split_counts"] == {"train": 3, "validation": 2, "test": 3}
-    assert any(
-        event["event_id"] == "cwa_o_a0059_recent_sample_20260707"
-        for event in result["events"]
-    )
+    assert result["split_counts"] == {"train": 2, "validation": 1, "test": 2}
+    assert all(not event["event_id"].startswith("demo_") for event in result["events"])
+    assert all(event["source"] != "demo" for event in result["events"])
     assert result["errors"] == []
 
 
@@ -35,8 +33,13 @@ def test_radar_event_windows_are_registered_in_event_splits():
     }
 
     assert candidate_ids
-    assert candidate_ids <= event_ids
-    for candidate in radar_windows["candidate_windows"]:
+    active_candidates = [
+        candidate
+        for candidate in radar_windows["candidate_windows"]
+        if candidate["event_id"] in event_ids
+    ]
+    assert active_candidates
+    for candidate in active_candidates:
         assert split_by_event_id[candidate["event_id"]] == candidate["model_split"]
         assert candidate["collection_status"] == "full_sequence_collected_locally_ignored"
         assert candidate["tensor_status"] == "sliding_window_tensor_collected_locally_ignored"

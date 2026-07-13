@@ -3,13 +3,16 @@ from minxionghydrocast.config import get_settings
 
 def test_settings_load_canonical_operational_prefix(monkeypatch, tmp_path):
     store = tmp_path / "operations"
+    research_root = tmp_path / "research"
     monkeypatch.setenv("MINXIONGHYDROCAST_OPERATIONS_STORE", str(store))
+    monkeypatch.setenv("MINXIONGHYDROCAST_RESEARCH_ROOT", str(research_root))
     monkeypatch.setenv("MINXIONGHYDROCAST_MAX_AGE_MINUTES", "45")
     monkeypatch.setenv("MINXIONGHYDROCAST_FLOOD_MAX_AGE_MINUTES", "120")
 
     settings = get_settings()
 
     assert settings.operations_store == store
+    assert settings.research_root == research_root
     assert settings.operations_max_age_minutes == 45
     assert settings.operations_flood_max_age_minutes == 120
 

@@ -1,8 +1,12 @@
-# Radar Event Windows
+# Historical Radar Event Windows
 
-This document tracks CWA `O-A0059-001` radar windows selected for dataset building. Raw CWA frames,
-collections, summaries, tensor archives, and checkpoints stay in ignored `data/external/` and
-`data/processed/` paths.
+This document preserves the earlier three-event discovery and experiment record. It is not the
+active formal split. The current five-event manifest, durable external research layout, build
+command, checksums, and independent validation/test results are documented in
+[research_dataset.md](research_dataset.md) and [event_splits.md](event_splits.md).
+
+The historical raw CWA frames, collections, summaries, tensor archives, and checkpoints stay in
+ignored paths and must not be committed.
 
 ## Discovery Scan
 
@@ -157,8 +161,8 @@ PYTHONPATH=src conda run -n VLM python -m minxionghydrocast.pipelines.torch_base
   --epochs 1
 ```
 
-For the next strong-echo experiment, add weighted loss and validation flags shown in
-[model_strategy.md](model_strategy.md).
+The later formal weighted experiment and independent validation workflow supersede this command;
+see [model_strategy.md](model_strategy.md).
 
 Evaluate with mini-batch inference:
 
