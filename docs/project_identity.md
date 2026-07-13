@@ -21,6 +21,7 @@ contract.
 | Brand and repository | `MinxiongHydroCast` |
 | Python distribution | `minxiong-hydrocast` |
 | Python import package | `minxionghydrocast` |
+| Concise command dispatcher | `mhc` |
 | Command prefix | `minxiong-hydrocast-` |
 | systemd and runtime prefix | `minxiong-hydrocast-` |
 | Environment prefix | `MINXIONGHYDROCAST_` |
