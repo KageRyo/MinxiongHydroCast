@@ -5,6 +5,20 @@ modeling, and product usage. Every live dataset includes source metadata and an 
 `資料模式` value. Operational collection prefers official machine-readable sources; a page scraper
 is only a degraded request-failure fallback.
 
+## Research Dataset Artifacts
+
+The formal radar research manifest is validated by a strict Pydantic schema before any event is
+downloaded. It requires exactly event-based train, validation, and test splits with minimum real
+event counts of 2/1/2, including two held-out Minxiong test events. Demo IDs and sources,
+unassigned events, duplicate assignment, invalid timestamps, and unknown fields fail the build.
+
+CWA history indexes, event plans, collection manifests, Persistence evaluations, Tiny U-Net
+training and comparison reports, the dataset catalog, and the checksum verification report are
+also validated through Pydantic before JSON serialization. The external catalog records relative
+artifact paths, byte sizes, SHA-256, provenance, event time ranges, and aggregate and lead-time
+metrics. Artifact resolution rejects absolute research paths and attempts to escape the configured
+research root. See [research_dataset.md](research_dataset.md).
+
 ## Rainfall Alerts
 
 Required fields:

@@ -121,31 +121,30 @@ latest-input validity mask.
 The Tiny U-Net smoke checkpoint lowers RMSE by `0.797769 dBZ` but predicts no threshold events at
 `35 dBZ`. Do not treat it as a usable model until trained on longer event splits.
 
-## Full CWA Event Lead-Time Baselines
+## Reproducible Five-Event CWA Baseline
 
-The first longer CWA benchmark uses three complete `O-A0059-001` 10-minute radar windows. Each
-archive uses 6 input frames and predicts 6 lead frames, so lead-time metrics cover 10 to 60
-minutes. The Taiwan-wide event is used for Tiny U-Net training; the two Chiayi/Minxiong events are
-local test windows.
+The formal build uses five complete `O-A0059-001` 10-minute radar events. Each archive uses six
+input frames and predicts six target frames, producing 10-to-60-minute lead-time metrics. Splits
+are event-based: two train events, one independent validation event, and two held-out
+Minxiong/Chiayi test events.
 
-| Event | Split | Windows | Persistence RMSE | Persistence CSI | Tiny U-Net RMSE | Tiny U-Net CSI | Weighted Tiny U-Net RMSE | Weighted Tiny U-Net CSI |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Taiwan-wide 2026-06-28 | train | 38 | `8.311872` | `0.214701` | `8.100073` | `0.048339` | `6.820217` | `0.210941` |
-| Chiayi/Minxiong 2026-07-02 | test | 26 | `11.465393` | `0.278248` | `9.914263` | `0.086701` | `9.564780` | `0.246535` |
-| Chiayi/Minxiong 2026-07-03 | test | 26 | `10.421478` | `0.315475` | `9.496191` | `0.121837` | `8.719508` | `0.286868` |
+| Event | Split | Windows | Persistence RMSE | Persistence CSI | Weighted Tiny U-Net RMSE | Weighted Tiny U-Net CSI |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Taiwan 2026-07-07 | train | 38 | `12.958233` | `0.236446` | not scored for promotion | not scored for promotion |
+| Taiwan 2026-07-10 | train | 50 | `8.704656` | `0.191180` | not scored for promotion | not scored for promotion |
+| Taiwan 2026-07-09 | validation | 26 | `9.654280` | `0.188989` | `8.053179` | `0.205842` |
+| Minxiong/Chiayi 2026-07-03 | test | 26 | `10.421478` | `0.315475` | `9.186911` | `0.294527` |
+| Minxiong/Chiayi 2026-07-11 | test | 26 | `9.154027` | `0.119412` | `8.218313` | `0.122282` |
 
-Persistence lead-time CSI drops as horizon increases. On the Taiwan-wide train event it moves from
-`0.347882` at 10 minutes to `0.148771` at 60 minutes. On the two Chiayi/Minxiong test events it
-moves from `0.424883` to `0.164930`, and from `0.477052` to `0.221392`.
+The weighted Tiny U-Net used 88 training windows and a separate 26-window validation archive.
+Training normalization was computed from training data only. The two-GPU run selected epoch 7,
+with best validation loss `1.433344`, and stopped after 12 completed epochs.
 
-The first 1-epoch Tiny U-Net/RainNet-style baseline used the CUDA-enabled `VLM` environment, two
-RTX 4090 GPUs via `DataParallel`, `hidden_channels=8`, and `batch_size=2`. It lowers aggregate
-RMSE but has much worse CSI than persistence.
-
-The weighted Tiny U-Net run used `--loss-function weighted_mse`, `--event-threshold 35`,
-`--event-weight 4`, `--validation-fraction 0.2`, 20 epochs, and the same two RTX 4090 GPUs. It
-improves RMSE and recovers much of the CSI gap, but persistence still has better CSI on all three
-events. Keep persistence as the primary benchmark until more event diversity is available.
+The learned model lowers aggregate RMSE on validation and both test events. It does not pass the
+promotion gate because CSI regresses on the 2026-07-03 local test event and some lead-time RMSE or
+CSI values regress. Persistence remains the required benchmark and
+`forecast_publication_ready=false`. Complete checksummed evidence is documented in
+[research_dataset.md](research_dataset.md).
 
 ## Threshold Flood Risk
 

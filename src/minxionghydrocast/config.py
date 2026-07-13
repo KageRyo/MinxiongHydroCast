@@ -10,6 +10,7 @@ from pathlib import Path
 @dataclass(frozen=True)
 class Settings:
     operations_store: Path
+    research_root: Path
     operations_max_age_minutes: float
     operations_flood_max_age_minutes: float
     wra_base_url: str
@@ -31,6 +32,12 @@ def get_settings() -> Settings:
                 "data/processed/operations",
             )
         ),
+        research_root=Path(
+            os.getenv(
+                "MINXIONGHYDROCAST_RESEARCH_ROOT",
+                "~/.local/share/minxiong-hydrocast/research",
+            )
+        ).expanduser(),
         operations_max_age_minutes=float(os.getenv("MINXIONGHYDROCAST_MAX_AGE_MINUTES", "30")),
         operations_flood_max_age_minutes=float(
             os.getenv("MINXIONGHYDROCAST_FLOOD_MAX_AGE_MINUTES", "90")

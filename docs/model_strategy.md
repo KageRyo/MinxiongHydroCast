@@ -95,51 +95,30 @@ PYTHONPATH=src conda run -n VLM python -m minxionghydrocast.pipelines.torch_base
 The current smoke checkpoint lowers RMSE but has CSI/POD/FAR of zero at `35 dBZ`, so it is not a
 useful nowcaster yet.
 
-For full-event testing, use 6 input frames and 6 prediction frames with sliding windows. The first
-full-event run trained on the Taiwan-wide 2026-06-28 event with two RTX 4090 GPUs:
+For formal event testing, use the reproducible dataset command. It builds six-input/six-target
+sliding tensors, trains only on the two training events, and uses a completely separate validation
+event:
 
 ```bash
-PYTHONPATH=src conda run -n VLM python -m minxionghydrocast.pipelines.torch_baseline_training \
-  --archive data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz \
-  --output-dir data/external/checkpoints/tiny_unet_cwa_taiwan_widespread_20260628_6in_6out \
-  --device cuda \
-  --multi-gpu \
-  --hidden-channels 8 \
-  --batch-size 2 \
-  --epochs 1
-```
-
-The full-event Tiny U-Net checkpoint lowers aggregate RMSE against persistence on the current
-events, but CSI remains worse. It should be treated as a diagnostic baseline while persistence
-remains the primary benchmark.
-
-For the next Tiny U-Net experiment, keep the same tensor archives but upweight strong echoes and
-hold out sliding windows for validation:
-
-```bash
-PYTHONPATH=src conda run -n VLM python -m minxionghydrocast.pipelines.torch_baseline_training \
-  --archive data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz \
-  --output-dir data/external/checkpoints/tiny_unet_cwa_weighted_validation \
+PYTHONPATH=src conda run -n VLM mhc dataset-build \
+  --manifest data/samples/event_split_manifest.json \
+  --root "$MINXIONGHYDROCAST_RESEARCH_ROOT" \
+  --train-weighted-unet \
   --device cuda \
   --multi-gpu \
   --hidden-channels 8 \
   --batch-size 2 \
   --epochs 20 \
-  --loss-function weighted_mse \
-  --event-threshold 35 \
   --event-weight 4 \
-  --validation-fraction 0.2 \
-  --early-stopping-patience 3
+  --early-stopping-patience 5
 ```
 
-Use `threshold_focal_mse` only after the weighted run is stable. These options are meant to improve
-threshold-event detection; judge them by CSI/POD/FAR and lead-time metrics, not RMSE alone.
-
-The first weighted run completed on two RTX 4090 GPUs in the `VLM` environment with 30 training
-windows, 8 validation windows, 20 epochs, and best validation loss `0.848734`. It reduced RMSE on
-all three full events and improved Tiny U-Net CSI compared with the 1-epoch unweighted diagnostic,
-but persistence still has better CSI. The next modeling work should add more weather-diverse
-events before increasing architecture complexity.
+The current run used 88 training windows and 26 independent validation windows. It selected epoch
+7 with best validation loss `1.433344`. Aggregate RMSE improved on validation and both local test
+events, but CSI regressed on one Minxiong test event and several lead-time gates failed. Keep
+Persistence as the primary benchmark and forecast publication disabled. The next modeling work
+should add weather-regime diversity, QPE/gauge validation, official context, and local labels
+before increasing architecture complexity. See [research_dataset.md](research_dataset.md).
 
 ## Recommended Roadmap
 

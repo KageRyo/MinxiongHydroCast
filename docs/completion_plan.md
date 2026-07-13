@@ -13,8 +13,9 @@ credentials, raw official data, or model weights.
    localhost API/operator view, monitoring, local alert audit, backup/restore, and supervised
    scheduling are implemented and deployed. Public operational promotion still requires the real
    shadow gate, off-host recovery, named operators, and exercised incident paths.
-2. **Experimental rainfall nowcast:** event diversity, QPE/gauge validation, local labels,
-   independent-event evaluation, calibration, and model promotion evidence remain incomplete.
+2. **Experimental rainfall nowcast:** reproducible independent-event evaluation is implemented;
+   event diversity, QPE/gauge validation, local labels, calibration, and passing model-promotion
+   evidence remain incomplete.
 3. **Public operational service:** authenticated/TLS ingress, approved SLOs and data rights, named
    decision authority, human override, and communication gates are required before any external
    operational use.
@@ -51,17 +52,25 @@ credentials, raw official data, or model weights.
   captures.
 - Completed: direct CWA history `getData` downloader for event-time products, plus XML parsing for
   `O-A0002-001` rain-gauge captures.
-- Completed: per-event QPE/gauge availability status manifest. CWA `O-A0002-001` gauge captures
-  parse for the three selected events, but event-time `O-B0045-001` QPE history probes return HTTP
-  404.
+- Completed: historical three-event QPE/gauge availability status manifest. CWA `O-A0002-001`
+  gauge captures parse, but event-time `O-B0045-001` QPE history probes return HTTP 404. This is
+  supporting source evidence rather than the active five-event split.
 - Completed: event weather-context manifest that prevents radar-only windows from being mislabeled
   before official CWA evidence is attached.
 - Completed: CWA official weather-context source review manifest listing reviewed CWA pages,
   current coverage, and next historical chart probe URLs.
-- Completed: Tiny U-Net threshold-weighted loss options, validation split support, and early
-  stopping metadata for the next strong-echo experiment.
-- Completed: weighted Tiny U-Net full-event run on two RTX 4090 GPUs; RMSE improved, but CSI still
-  trails persistence.
+- Completed: `mhc dataset-build` orchestration for CWA history, resilient event download, sequence
+  validation, tensor conversion, Persistence evaluation, weighted Tiny U-Net evaluation, catalog
+  generation, and checksum verification in an external durable research root.
+- Completed: formal five-event split with two real train, one independent validation, and two
+  held-out Minxiong/Chiayi test events; all formal demo placeholders are prohibited by schema.
+- Completed: weighted Tiny U-Net run on two RTX 4090 GPUs using 88 training windows and a separate
+  26-window validation event. It improves aggregate RMSE but fails the independent promotion gate
+  on CSI and lead-time regressions, so forecast publication remains disabled.
+- Completed: Pydantic contracts for dataset manifests, CWA history and collection artifacts,
+  training/evaluation results, catalog records, and checksum verification reports.
+- Completed: verified 251 external artifacts totaling 2,410,640,934 bytes with no checksum or size
+  mismatches.
 - Completed: baseline model card for Minxiong/Chiayi-oriented smoke testing.
 - Completed: local WRA API key configuration; real key stays in ignored `.env`.
 - Completed: locked one-shot/interval observation collection, immutable checksummed snapshots,
@@ -92,9 +101,10 @@ credentials, raw official data, or model weights.
   weather-map source is still needed before assigning labels.
 - Pending validation work: run live QPE/gauge reports for each selected event after matching
   event-time QPE grids are captured or an official historical QPE archive is confirmed.
-- Next technical focus: collect weather-diverse event windows, create reproducible dataset
-  summaries, and backtest persistence and Tiny U-Net on independent events before considering
-  NowcastNet or forecast publication.
+- Next technical focus: expand weather-regime diversity, attach official event context, obtain
+  event-time QPE/gauge evidence and reviewed local labels, then improve the learned model until it
+  passes the unchanged independent-event gate. Do not consider NowcastNet or forecast publication
+  before those evidence gaps close.
 
 ## Phase 1: Data Source Finalization
 
@@ -107,8 +117,8 @@ credentials, raw official data, or model weights.
 
 ## Phase 2: Dataset Build
 
-- Build a CWA radar event collector that writes ignored raw frames and tracked summaries.
-- Populate `data/samples/event_split_manifest.json` with real historical events.
+- Maintain `mhc dataset-build` as the canonical checksummed external-dataset workflow.
+- Expand `data/samples/event_split_manifest.json` with weather-diverse real historical events.
 - Add event manifests for Chiayi/Minxiong heavy-rain windows and Taiwan-wide typhoon/front events.
 - Add gauge/QPE validation reports so QPE is not treated as ground truth without checks.
 - Track QPE/gauge availability separately from completed validation reports when an official

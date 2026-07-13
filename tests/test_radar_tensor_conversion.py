@@ -122,13 +122,22 @@ def test_convert_cwa_collection_to_sliding_window_tensors(tmp_path: Path):
             data_time=f"2026-07-06T19:{minute:02d}:00+08:00",
             values=f"{index},1,2,3",
         )
-        frames.append({"output_path": str(path)})
+        frames.append(
+            {
+                "data_time": f"2026-07-06T19:{minute:02d}:00+08:00",
+                "source_url": f"https://example.test/{path.name}",
+                "output_path": str(path),
+                "bytes_written": path.stat().st_size,
+            }
+        )
     manifest = tmp_path / "collection.json"
     manifest.write_text(
         json.dumps(
             {
                 "event_id": "sample_cwa_event",
                 "data_id": "O-A0059-001",
+                "frame_count": len(frames),
+                "bytes_written": sum(frame["bytes_written"] for frame in frames),
                 "frames": frames,
             }
         ),

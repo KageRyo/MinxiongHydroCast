@@ -141,12 +141,11 @@ def test_evaluate_persistence_tensor_archive_reports_lead_times_for_sliding_wind
 
 
 def test_write_tensor_baseline_evaluation_result(tmp_path: Path):
+    archive_path = tmp_path / "radar_tensor_sample.npz"
+    build_sample_archive(archive_path)
     output = tmp_path / "tensor_baseline_evaluation.json"
-    result = {
-        "model": "PersistenceNowcaster",
-        "rmse_mm": 4.0,
-    }
+    result = evaluate_persistence_tensor_archive(archive_path=archive_path)
 
     write_evaluation_result(result, output)
 
-    assert '"rmse_mm": 4.0' in output.read_text(encoding="utf-8")
+    assert '"model": "PersistenceNowcaster"' in output.read_text(encoding="utf-8")

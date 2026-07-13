@@ -3,23 +3,23 @@
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Protocol
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import requests
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 
 from minxionghydrocast.config import get_settings
 from minxionghydrocast.ingestion.cwa_file_api import looks_like_cwa_auth_error
-from minxionghydrocast.ingestion.cwa_history import redact_authorization_url
+from minxionghydrocast.ingestion.cwa_history import CwaHistoryIndex, redact_authorization_url
 from minxionghydrocast.io.run_summary import (
     DEFAULT_RUN_LOG_PATH,
     build_run_summary,
@@ -47,74 +47,58 @@ class UrlGet(Protocol):
     def __call__(self, url: str, *, timeout: int, verify: bool) -> HttpResponse: ...
 
 
-@dataclass(frozen=True)
-class CwaEventFrame:
+class CwaEventSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        strict=True,
+        frozen=True,
+        allow_inf_nan=False,
+    )
+
+
+class CwaEventFrame(CwaEventSchema):
     data_time: str
     url: str
     filename: str
     file_format: str
 
-    def to_dict(self) -> dict[str, str]:
-        return {
-            "data_time": self.data_time,
-            "url": self.url,
-            "filename": self.filename,
-            "file_format": self.file_format,
-        }
 
-
-@dataclass(frozen=True)
-class CwaEventPlan:
+class CwaEventPlan(CwaEventSchema):
     event_id: str
     data_id: str
     start_time: str
     end_time: str
-    frame_count: int
+    frame_count: int = Field(ge=0)
     frames: tuple[CwaEventFrame, ...]
 
-    def to_dict(self) -> dict[str, object]:
-        return {
-            "event_id": self.event_id,
-            "data_id": self.data_id,
-            "start_time": self.start_time,
-            "end_time": self.end_time,
-            "frame_count": self.frame_count,
-            "frames": [frame.to_dict() for frame in self.frames],
-        }
+    @model_validator(mode="after")
+    def validate_frame_count(self) -> "CwaEventPlan":
+        if self.frame_count != len(self.frames):
+            raise ValueError("frame_count does not match frames")
+        return self
 
 
-@dataclass(frozen=True)
-class CwaCollectedFrame:
+class CwaCollectedFrame(CwaEventSchema):
     data_time: str
     source_url: str
     output_path: str
-    bytes_written: int
-
-    def to_dict(self) -> dict[str, object]:
-        return {
-            "data_time": self.data_time,
-            "source_url": self.source_url,
-            "output_path": self.output_path,
-            "bytes_written": self.bytes_written,
-        }
+    bytes_written: int = Field(ge=1)
 
 
-@dataclass(frozen=True)
-class CwaEventCollection:
+class CwaEventCollection(CwaEventSchema):
     event_id: str
     data_id: str
-    frame_count: int
-    bytes_written: int
+    frame_count: int = Field(ge=1)
+    bytes_written: int = Field(ge=1)
     frames: tuple[CwaCollectedFrame, ...]
 
-    def to_dict(self) -> dict[str, object]:
-        return {
-            "event_id": self.event_id,
-            "data_id": self.data_id,
-            "frame_count": self.frame_count,
-            "bytes_written": self.bytes_written,
-            "frames": [frame.to_dict() for frame in self.frames],
-        }
+    @model_validator(mode="after")
+    def validate_collection_totals(self) -> "CwaEventCollection":
+        if self.frame_count != len(self.frames):
+            raise ValueError("frame_count does not match frames")
+        if self.bytes_written != sum(frame.bytes_written for frame in self.frames):
+            raise ValueError("bytes_written does not match frame total")
+        return self
 
 
 def parse_iso_datetime(value: str) -> datetime:
@@ -122,10 +106,12 @@ def parse_iso_datetime(value: str) -> datetime:
 
 
 def load_history_index(path: Path) -> dict[str, Any]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(payload, dict):
-        raise ValueError("history index must be a JSON object")
-    return payload
+    index = CwaHistoryIndex.model_validate_json(path.read_text(encoding="utf-8"))
+    return index.model_dump(mode="json")
+
+
+def load_event_collection(path: Path) -> CwaEventCollection:
+    return CwaEventCollection.model_validate_json(path.read_text(encoding="utf-8"))
 
 
 def build_event_plan(
@@ -178,7 +164,9 @@ def build_event_plan(
 
 def write_event_plan(path: Path, plan: CwaEventPlan) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(plan.to_dict(), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary = path.with_name(f".{path.name}.tmp")
+    temporary.write_text(plan.model_dump_json(indent=2) + "\n", encoding="utf-8")
+    temporary.replace(path)
 
 
 def authorize_url(url: str, *, authorization: str) -> str:
@@ -225,6 +213,8 @@ def download_event_frames(
     skip_existing: bool = False,
     verify_tls: bool = True,
     max_workers: int = 1,
+    retry_attempts: int = 3,
+    retry_backoff_seconds: float = 1.0,
 ) -> CwaEventCollection:
     if not plan.frames:
         raise ValueError("event plan has no frames")
@@ -232,6 +222,10 @@ def download_event_frames(
         raise ValueError("missing CWA API key")
     if max_workers < 1:
         raise ValueError("max_workers must be at least 1")
+    if retry_attempts < 1:
+        raise ValueError("retry_attempts must be at least 1")
+    if retry_backoff_seconds < 0:
+        raise ValueError("retry_backoff_seconds must not be negative")
     if not verify_tls:
         disable_warnings(InsecureRequestWarning)
 
@@ -251,20 +245,30 @@ def download_event_frames(
             )
         if output_path.exists() and not overwrite:
             raise FileExistsError(f"output already exists: {output_path}")
-        try:
-            response = http_get(authorized_url, timeout=timeout, verify=verify_tls)
-            response.raise_for_status()
-        except Exception as exc:
-            raise RuntimeError(
-                f"CWA frame request failed for {redacted_source_url}: {type(exc).__name__}"
-            ) from exc
+        response = None
+        for attempt in range(1, retry_attempts + 1):
+            try:
+                response = http_get(authorized_url, timeout=timeout, verify=verify_tls)
+                response.raise_for_status()
+                break
+            except Exception as exc:
+                if attempt == retry_attempts:
+                    raise RuntimeError(
+                        "CWA frame request failed after "
+                        f"{attempt} attempts for {redacted_source_url}: {type(exc).__name__}"
+                    ) from exc
+                time.sleep(retry_backoff_seconds * (2 ** (attempt - 1)))
+        if response is None:
+            raise AssertionError("CWA frame retry loop terminated unexpectedly")
         if looks_like_cwa_auth_error(response.content):
             raise RuntimeError("CWA rejected the Authorization key")
         if not response.content:
             raise RuntimeError(f"CWA returned an empty frame for {redacted_source_url}")
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_bytes(response.content)
+        temporary_path = output_path.with_name(f".{output_path.name}.part")
+        temporary_path.write_bytes(response.content)
+        temporary_path.replace(output_path)
         return CwaCollectedFrame(
             data_time=frame.data_time,
             source_url=redact_authorization_url(response.url),
@@ -286,10 +290,9 @@ def download_event_frames(
 
 def write_event_collection(path: Path, collection: CwaEventCollection) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(collection.to_dict(), ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    temporary = path.with_name(f".{path.name}.tmp")
+    temporary.write_text(collection.model_dump_json(indent=2) + "\n", encoding="utf-8")
+    temporary.replace(path)
 
 
 def main() -> None:
@@ -308,6 +311,8 @@ def main() -> None:
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--skip-existing", action="store_true")
     parser.add_argument("--max-workers", type=int, default=1)
+    parser.add_argument("--retry-attempts", type=int, default=3)
+    parser.add_argument("--retry-backoff-seconds", type=float, default=1.0)
     parser.add_argument("--api-key-env", default="CWA_API_KEY")
     parser.add_argument(
         "--insecure-tls",
@@ -345,6 +350,8 @@ def main() -> None:
             skip_existing=args.skip_existing,
             verify_tls=not args.insecure_tls,
             max_workers=args.max_workers,
+            retry_attempts=args.retry_attempts,
+            retry_backoff_seconds=args.retry_backoff_seconds,
         )
         write_event_collection(args.collection_output, collection)
 
@@ -378,6 +385,8 @@ def main() -> None:
             "overwrite": args.overwrite,
             "skip_existing": args.skip_existing,
             "max_workers": args.max_workers,
+            "retry_attempts": args.retry_attempts,
+            "retry_backoff_seconds": args.retry_backoff_seconds,
             "verify_tls": not args.insecure_tls,
         },
     )

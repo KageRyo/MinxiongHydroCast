@@ -56,6 +56,10 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
       candidate events.
 - [x] Populate tracked event split manifests with real historical event metadata.
 - [x] Produce reproducible dataset summaries without committing official raw data.
+- [x] Add a durable external research root and a single `mhc dataset-build` orchestration command.
+- [x] Build a formal 2-train/1-validation/2-local-test dataset with no demo placeholders.
+- [x] Catalog and verify every dataset artifact with provenance, time ranges, SHA-256, and
+      lead-time metrics.
 - [x] Track per-event QPE/gauge validation availability without committing raw official data.
 - [ ] Add gauge/QPE validation reports for each dataset build after event-time QPE grids are
       captured or an official historical QPE archive is confirmed.
@@ -69,6 +73,9 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Run the Tiny U-Net smoke baseline on two RTX 4090 GPUs.
 - [x] Add nodata masking and radar tensor normalization for neural smoke training.
 - [x] Compare persistence and Tiny U-Net smoke outputs with the same metrics and mask.
+- [x] Train with train-only normalization and an independent event validation archive.
+- [x] Evaluate weighted Tiny U-Net against Persistence on two held-out Minxiong/Chiayi events and
+      fail closed when the promotion gate does not pass.
 - [ ] Collect longer event datasets for meaningful neural training.
 - [ ] Migrate NowcastNet only after license and tensor compatibility are reviewed.
 

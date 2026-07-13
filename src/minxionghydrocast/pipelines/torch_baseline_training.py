@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -18,6 +17,7 @@ from minxionghydrocast.io.run_summary import (
     start_run,
 )
 from minxionghydrocast.models.radar_tensor import nodata_values_from_metadata, valid_value_mask
+from minxionghydrocast.models.training_schemas import TinyUnetTrainingResultSchema
 from minxionghydrocast.pipelines.radar_tensor_conversion import load_tensor_archive
 
 PIPELINE_NAME = "torch_baseline_training"
@@ -27,6 +27,7 @@ PIPELINE_NAME = "torch_baseline_training"
 class TorchTrainingConfig:
     archive_path: Path
     output_dir: Path
+    validation_archive_path: Path | None = None
     epochs: int = 3
     learning_rate: float = 1e-3
     hidden_channels: int = 16
@@ -144,6 +145,24 @@ def normalize_training_arrays(
         "input_ignored_pixel_count": int(input_mask.size - int(input_mask.sum())),
         "target_ignored_pixel_count": int(target_mask.size - int(target_mask.sum())),
     }
+
+
+def apply_training_normalization(
+    model_input: np.ndarray,
+    model_target: np.ndarray,
+    input_mask: np.ndarray,
+    target_mask: np.ndarray,
+    normalization: dict[str, object],
+) -> tuple[np.ndarray, np.ndarray]:
+    mean = float(normalization["mean"])
+    std = float(normalization["std"])
+    if std == 0.0:
+        raise ValueError("training normalization standard deviation must be non-zero")
+    normalized_input = ((model_input - mean) / std).astype(np.float32)
+    normalized_target = ((model_target - mean) / std).astype(np.float32)
+    normalized_input[~input_mask] = 0.0
+    normalized_target[~target_mask] = 0.0
+    return normalized_input, normalized_target
 
 
 def build_loss_weights(
@@ -272,7 +291,7 @@ def build_tiny_unet(nn: Any, *, input_channels: int, output_channels: int, hidde
     return TinyUNetNowcaster()
 
 
-def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
+def train_tiny_unet_archive(config: TorchTrainingConfig) -> TinyUnetTrainingResultSchema:
     torch, nn = require_torch()
     if config.batch_size < 1:
         raise ValueError("batch_size must be at least 1")
@@ -303,6 +322,43 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
         input_mask,
         target_mask,
     )
+    external_validation = config.validation_archive_path is not None
+    if external_validation and config.validation_fraction != 0.0:
+        raise ValueError(
+            "validation_fraction must be zero when validation_archive_path is provided"
+        )
+    validation_archive = None
+    validation_input = None
+    validation_target = None
+    validation_target_mask = None
+    validation_loss_weights = None
+    validation_metadata: dict[str, object] = {}
+    if config.validation_archive_path is not None:
+        validation_archive = load_tensor_archive(config.validation_archive_path)
+        if validation_archive["spec"] != archive["spec"]:
+            raise ValueError("training and validation tensor specs must match")
+        validation_input, validation_target = prepare_channels_first_arrays(validation_archive)
+        validation_input_mask, validation_target_mask, _validation_nodata = (
+            prepare_channels_first_masks(validation_archive)
+        )
+        validation_loss_weights = build_loss_weights(
+            validation_target,
+            validation_target_mask,
+            loss_function=config.loss_function,
+            event_threshold=config.event_threshold,
+            event_weight=config.event_weight,
+            focal_gamma=config.focal_gamma,
+        )
+        validation_input, validation_target = apply_training_normalization(
+            validation_input,
+            validation_target,
+            validation_input_mask,
+            validation_target_mask,
+            normalization,
+        )
+        validation_metadata = validation_archive.get("metadata", {})
+        if not isinstance(validation_metadata, dict):
+            validation_metadata = {}
     device = select_device(torch, config.device)
     torch.manual_seed(config.seed)
     if torch.cuda.is_available():
@@ -313,6 +369,14 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
     y = torch.from_numpy(model_target).to(device)
     y_mask = torch.from_numpy(target_mask).to(device)
     y_weights = torch.from_numpy(loss_weights).to(device)
+    validation_tensors = None
+    if validation_input is not None:
+        validation_tensors = (
+            torch.from_numpy(validation_input).to(device),
+            torch.from_numpy(validation_target).to(device),
+            torch.from_numpy(validation_target_mask).to(device),
+            torch.from_numpy(validation_loss_weights).to(device),
+        )
     model = build_tiny_unet(
         nn,
         input_channels=model_input.shape[1],
@@ -364,6 +428,24 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
                 losses_for_indices.append(float(loss.detach().cpu().item()))
         return round(float(np.mean(losses_for_indices)), 6)
 
+    def evaluate_external_validation() -> float:
+        if validation_tensors is None:
+            raise ValueError("external validation tensors are unavailable")
+        validation_x, validation_y, validation_mask, validation_weights = validation_tensors
+        losses_for_batches = []
+        with torch.no_grad():
+            for start in range(0, int(validation_x.shape[0]), config.batch_size):
+                stop = min(start + config.batch_size, int(validation_x.shape[0]))
+                prediction = model(validation_x[start:stop])
+                loss = masked_mse_loss(
+                    prediction,
+                    validation_y[start:stop],
+                    validation_mask[start:stop],
+                    validation_weights[start:stop],
+                )
+                losses_for_batches.append(float(loss.detach().cpu().item()))
+        return round(float(np.mean(losses_for_batches)), 6)
+
     losses: list[float] = []
     validation_losses: list[float] = []
     best_validation_loss: float | None = None
@@ -388,9 +470,13 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
             optimizer.step()
             batch_losses.append(float(loss.detach().cpu().item()))
         losses.append(round(float(np.mean(batch_losses)), 6))
-        if validation_indices:
+        if validation_indices or validation_tensors is not None:
             model.eval()
-            validation_loss = evaluate_indices(validation_indices)
+            validation_loss = (
+                evaluate_external_validation()
+                if validation_tensors is not None
+                else evaluate_indices(validation_indices)
+            )
             validation_losses.append(validation_loss)
             model.train()
             if best_validation_loss is None or validation_loss < best_validation_loss:
@@ -432,6 +518,7 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
             "event_weight": config.event_weight,
             "focal_gamma": config.focal_gamma,
             "validation_fraction": config.validation_fraction,
+            "validation_archive": str(config.validation_archive_path or ""),
             "early_stopping_patience": config.early_stopping_patience,
         },
         "normalization": normalization,
@@ -442,49 +529,54 @@ def train_tiny_unet_archive(config: TorchTrainingConfig) -> dict[str, object]:
         "metadata": archive["metadata"],
     }
     torch.save(checkpoint, checkpoint_path)
-    result = {
-        "model": "TinyUNetNowcaster",
-        "archive": str(config.archive_path),
-        "checkpoint": str(checkpoint_path),
-        "epochs": config.epochs,
-        "device": device,
-        "seed": config.seed,
-        "resume_checkpoint": str(config.resume_checkpoint or ""),
-        "multi_gpu": config.multi_gpu,
-        "data_parallel": use_data_parallel,
-        "cuda_device_count": cuda_count,
-        "cuda_device_names": cuda_device_names(torch),
-        "used_cuda_device_count": cuda_count if use_data_parallel else int(device == "cuda"),
-        "batch_repeats": config.batch_repeats,
-        "batch_size": config.batch_size,
-        "loss_function": config.loss_function,
-        "event_threshold": config.event_threshold,
-        "event_weight": config.event_weight,
-        "focal_gamma": config.focal_gamma,
-        "validation_fraction": config.validation_fraction,
-        "early_stopping_patience": config.early_stopping_patience,
-        "training_sample_count": len(training_indices),
-        "validation_sample_count": len(validation_indices),
-        "input_shape": list(model_input.shape),
-        "target_shape": list(model_target.shape),
-        "normalization": normalization,
-        "nodata_values": list(nodata_values),
-        "loss_history": losses,
-        "validation_loss_history": validation_losses,
-        "final_loss": losses[-1] if losses else None,
-        "best_validation_loss": best_validation_loss,
-        "best_epoch": best_epoch,
-        "early_stopped": early_stopped,
-        "tensor_spec": archive["spec"],
-        "metadata": archive["metadata"],
-    }
-    result_path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    result = TinyUnetTrainingResultSchema(
+        model="TinyUNetNowcaster",
+        archive=str(config.archive_path),
+        validation_archive=str(config.validation_archive_path or ""),
+        checkpoint=str(checkpoint_path),
+        epochs=config.epochs,
+        device=device,
+        seed=config.seed,
+        resume_checkpoint=str(config.resume_checkpoint or ""),
+        multi_gpu=config.multi_gpu,
+        data_parallel=use_data_parallel,
+        cuda_device_count=cuda_count,
+        cuda_device_names=cuda_device_names(torch),
+        used_cuda_device_count=cuda_count if use_data_parallel else int(device == "cuda"),
+        batch_repeats=config.batch_repeats,
+        batch_size=config.batch_size,
+        loss_function=config.loss_function,
+        event_threshold=config.event_threshold,
+        event_weight=config.event_weight,
+        focal_gamma=config.focal_gamma,
+        validation_fraction=config.validation_fraction,
+        early_stopping_patience=config.early_stopping_patience,
+        training_sample_count=len(training_indices),
+        validation_sample_count=(
+            int(validation_input.shape[0]) if validation_input is not None else len(validation_indices)
+        ),
+        validation_event_ids=validation_metadata.get("event_ids", []),
+        input_shape=list(model_input.shape),
+        target_shape=list(model_target.shape),
+        normalization=normalization,
+        nodata_values=list(nodata_values),
+        loss_history=losses,
+        validation_loss_history=validation_losses,
+        final_loss=losses[-1],
+        best_validation_loss=best_validation_loss,
+        best_epoch=best_epoch,
+        early_stopped=early_stopped,
+        tensor_spec=archive["spec"],
+        metadata=archive["metadata"],
+    )
+    result_path.write_text(result.model_dump_json(indent=2) + "\n", encoding="utf-8")
     return result
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train a small PyTorch nowcasting baseline.")
     parser.add_argument("--archive", type=Path, required=True)
+    parser.add_argument("--validation-archive", type=Path, default=None)
     parser.add_argument("--output-dir", type=Path, default=Path("data/external/checkpoints/tiny_unet"))
     parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--learning-rate", type=float, default=1e-3)
@@ -517,6 +609,7 @@ def main() -> None:
     config = TorchTrainingConfig(
         archive_path=args.archive,
         output_dir=args.output_dir,
+        validation_archive_path=args.validation_archive,
         epochs=args.epochs,
         learning_rate=args.learning_rate,
         hidden_channels=args.hidden_channels,
@@ -540,13 +633,16 @@ def main() -> None:
             status="ok",
             started_at=started_at,
             start_timer=start_timer,
-            inputs={"archive": str(args.archive)},
-            outputs={"checkpoint": result["checkpoint"]},
+            inputs={
+                "archive": str(args.archive),
+                "validation_archive": str(args.validation_archive or ""),
+            },
+            outputs={"checkpoint": result.checkpoint},
             row_counts={"epochs": args.epochs},
-            metrics={"final_loss": result["final_loss"]},
+            metrics={"final_loss": result.final_loss},
             metadata={
-                "model": result["model"],
-                "device": result["device"],
+                "model": result.model,
+                "device": result.device,
                 "hidden_channels": args.hidden_channels,
                 "seed": args.seed,
                 "resume_checkpoint": str(args.resume_checkpoint or ""),
@@ -558,20 +654,21 @@ def main() -> None:
                 "event_weight": args.event_weight,
                 "focal_gamma": args.focal_gamma,
                 "validation_fraction": args.validation_fraction,
+                "validation_archive": str(args.validation_archive or ""),
                 "early_stopping_patience": args.early_stopping_patience,
-                "used_cuda_device_count": result["used_cuda_device_count"],
-                "cuda_device_names": result["cuda_device_names"],
-                "normalization": result["normalization"],
-                "nodata_values": result["nodata_values"],
-                "training_sample_count": result["training_sample_count"],
-                "validation_sample_count": result["validation_sample_count"],
-                "best_validation_loss": result["best_validation_loss"],
-                "best_epoch": result["best_epoch"],
-                "early_stopped": result["early_stopped"],
+                "used_cuda_device_count": result.used_cuda_device_count,
+                "cuda_device_names": result.cuda_device_names,
+                "normalization": result.normalization.model_dump(),
+                "nodata_values": result.nodata_values,
+                "training_sample_count": result.training_sample_count,
+                "validation_sample_count": result.validation_sample_count,
+                "best_validation_loss": result.best_validation_loss,
+                "best_epoch": result.best_epoch,
+                "early_stopped": result.early_stopped,
             },
         )
         record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)
-        print(f"[OK] Trained TinyUNetNowcaster -> {result['checkpoint']}")
+        print(f"[OK] Trained TinyUNetNowcaster -> {result.checkpoint}")
     except Exception as exc:
         summary = build_run_summary(
             pipeline=PIPELINE_NAME,
@@ -579,7 +676,10 @@ def main() -> None:
             failure_reason=str(exc),
             started_at=started_at,
             start_timer=start_timer,
-            inputs={"archive": str(args.archive)},
+            inputs={
+                "archive": str(args.archive),
+                "validation_archive": str(args.validation_archive or ""),
+            },
             outputs={"checkpoint": ""},
             metadata={
                 "device": args.device,
@@ -594,6 +694,7 @@ def main() -> None:
                 "event_weight": args.event_weight,
                 "focal_gamma": args.focal_gamma,
                 "validation_fraction": args.validation_fraction,
+                "validation_archive": str(args.validation_archive or ""),
                 "early_stopping_patience": args.early_stopping_patience,
             },
         )

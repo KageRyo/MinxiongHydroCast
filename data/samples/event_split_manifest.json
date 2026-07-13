@@ -1,108 +1,93 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "split_strategy": "event_based",
-  "target": "radar_nowcasting_and_flood_risk",
+  "target": "cwa_radar_nowcasting",
+  "dataset": {
+    "data_id": "O-A0059-001",
+    "source_format": "cwa_opendata_grid",
+    "input_length": 6,
+    "prediction_length": 6,
+    "cadence_minutes": 10,
+    "units": "dBZ",
+    "crs": "TWD67",
+    "window_stride_frames": 1,
+    "event_threshold": 35.0,
+    "minimum_counts": {
+      "train": 2,
+      "validation": 1,
+      "test": 2,
+      "minxiong_test": 2
+    }
+  },
   "events": [
     {
-      "event_id": "demo_typhoon_train_2024",
-      "name": "Demo typhoon training event",
-      "event_type": "typhoon",
+      "event_id": "cwa_o_a0059_taiwan_candidate_20260707_morning",
+      "name": "Taiwan radar candidate, 2026-07-07 morning",
+      "event_type": "widespread_radar_candidate",
       "region": "Taiwan",
-      "start_time": "2024-07-23T00:00:00+08:00",
-      "end_time": "2024-07-26T23:59:00+08:00",
-      "source": "demo",
-      "notes": "Demo-safe placeholder; replace with confirmed historical event metadata."
+      "start_time": "2026-07-07T04:00:00+08:00",
+      "end_time": "2026-07-07T12:00:00+08:00",
+      "source": "CWA historyAPI O-A0059-001 discovery scan verified 2026-07-13",
+      "notes": "Training event selected from the current retention window; official weather context remains pending."
     },
     {
-      "event_id": "demo_meiyu_train_2024",
-      "name": "Demo Mei-yu training event",
-      "event_type": "meiyu_front",
-      "region": "Chiayi County",
-      "start_time": "2024-06-01T00:00:00+08:00",
-      "end_time": "2024-06-03T23:59:00+08:00",
-      "source": "demo",
-      "notes": "Demo-safe placeholder; replace with confirmed historical event metadata."
-    },
-    {
-      "event_id": "demo_convective_validation_2025",
-      "name": "Demo convective validation event",
-      "event_type": "afternoon_convection",
-      "region": "Chiayi County",
-      "start_time": "2025-07-10T12:00:00+08:00",
-      "end_time": "2025-07-10T20:00:00+08:00",
-      "source": "demo",
-      "notes": "Demo-safe placeholder; replace with confirmed historical event metadata."
-    },
-    {
-      "event_id": "demo_extreme_test_2025",
-      "name": "Demo extreme rainfall test event",
-      "event_type": "extreme_rainfall",
-      "region": "Minxiong, Chiayi County",
-      "start_time": "2025-08-12T00:00:00+08:00",
-      "end_time": "2025-08-13T23:59:00+08:00",
-      "source": "demo",
-      "notes": "Demo-safe placeholder; replace with confirmed historical event metadata."
-    },
-    {
-      "event_id": "cwa_o_a0059_recent_sample_20260707",
-      "name": "CWA O-A0059 recent radar sequence sample",
-      "event_type": "radar_sequence_sample",
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260710_daytime",
+      "name": "Taiwan widespread radar candidate, 2026-07-10 daytime",
+      "event_type": "widespread_radar_candidate",
       "region": "Taiwan",
-      "start_time": "2026-07-07T08:40:00+08:00",
-      "end_time": "2026-07-07T09:00:00+08:00",
-      "source": "CWA historyAPI O-A0059-001 live verification",
-      "notes": "Three-frame live-verified radar echo sequence; use for pipeline smoke tests, not model benchmarking."
+      "start_time": "2026-07-10T10:00:00+08:00",
+      "end_time": "2026-07-10T20:00:00+08:00",
+      "source": "CWA historyAPI O-A0059-001 discovery scan verified 2026-07-13",
+      "notes": "Training event containing the largest Taiwan-wide 35 dBZ coverage in the discovery scan; official weather context remains pending."
     },
     {
-      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon",
-      "name": "Chiayi/Minxiong radar heavy-rain candidate, 2026-07-02 afternoon",
-      "event_type": "extreme_rainfall_radar_candidate",
-      "region": "Minxiong, Chiayi County",
-      "start_time": "2026-07-02T12:00:00+08:00",
-      "end_time": "2026-07-02T18:00:00+08:00",
-      "source": "CWA O-A0059 hourly discovery scan",
-      "notes": "Full 10-minute sequence collected locally; local peak reached 58.8 dBZ at 2026-07-02T15:30:00+08:00."
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260709_evening",
+      "name": "Taiwan widespread radar candidate, 2026-07-09 evening",
+      "event_type": "widespread_radar_candidate",
+      "region": "Taiwan",
+      "start_time": "2026-07-09T16:00:00+08:00",
+      "end_time": "2026-07-09T22:00:00+08:00",
+      "source": "CWA historyAPI O-A0059-001 discovery scan verified 2026-07-13",
+      "notes": "Independent validation event; it is never used for training normalization or gradient updates."
     },
     {
       "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon",
-      "name": "Chiayi/Minxiong radar heavy-rain coverage candidate, 2026-07-03 afternoon",
-      "event_type": "extreme_rainfall_radar_candidate",
+      "name": "Chiayi/Minxiong radar heavy-rain candidate, 2026-07-03 afternoon",
+      "event_type": "chiayi_minxiong_heavy_rain_radar_candidate",
       "region": "Minxiong, Chiayi County",
       "start_time": "2026-07-03T13:00:00+08:00",
       "end_time": "2026-07-03T19:00:00+08:00",
-      "source": "CWA O-A0059 hourly discovery scan",
-      "notes": "Full 10-minute sequence collected locally; largest local 35 dBZ coverage remains at 2026-07-03T17:00:00+08:00."
+      "source": "CWA historyAPI O-A0059-001 discovery scan verified 2026-07-13",
+      "notes": "Independent local test event; hourly discovery peak reached 55.7 dBZ near Minxiong."
     },
     {
-      "event_id": "cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening",
-      "name": "Taiwan-wide widespread radar candidate, 2026-06-28 afternoon-evening",
-      "event_type": "widespread_radar_candidate",
-      "region": "Taiwan",
-      "start_time": "2026-06-28T13:00:00+08:00",
-      "end_time": "2026-06-28T21:00:00+08:00",
-      "source": "CWA O-A0059 hourly discovery scan",
-      "notes": "Full 10-minute sequence collected locally; largest Taiwan-wide 35 dBZ coverage occurred at 2026-06-28T13:30:00+08:00. Attach official weather context before labeling as typhoon or frontal."
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260711_early_morning",
+      "name": "Chiayi/Minxiong radar heavy-rain candidate, 2026-07-11 early morning",
+      "event_type": "chiayi_minxiong_heavy_rain_radar_candidate",
+      "region": "Minxiong, Chiayi County",
+      "start_time": "2026-07-11T00:00:00+08:00",
+      "end_time": "2026-07-11T06:00:00+08:00",
+      "source": "CWA historyAPI O-A0059-001 discovery scan verified 2026-07-13",
+      "notes": "Independent local test event; hourly discovery coverage peaked at 108 local pixels at or above 35 dBZ."
     }
   ],
   "splits": {
     "train": [
-      "demo_typhoon_train_2024",
-      "demo_meiyu_train_2024",
-      "cwa_o_a0059_taiwan_widespread_20260628_afternoon_evening"
+      "cwa_o_a0059_taiwan_candidate_20260707_morning",
+      "cwa_o_a0059_taiwan_widespread_20260710_daytime"
     ],
     "validation": [
-      "demo_convective_validation_2025",
-      "cwa_o_a0059_recent_sample_20260707"
+      "cwa_o_a0059_taiwan_widespread_20260709_evening"
     ],
     "test": [
-      "demo_extreme_test_2025",
-      "cwa_o_a0059_chiayi_minxiong_heavyrain_20260702_afternoon",
-      "cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon"
+      "cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon",
+      "cwa_o_a0059_chiayi_minxiong_heavyrain_20260711_early_morning"
     ]
   },
   "notes": [
-    "Do not random-split radar frames from the same storm across train, validation, and test.",
-    "Replace demo events with confirmed historical events before reporting model performance.",
-    "Keep Minxiong evaluation events isolated from training when measuring local performance."
+    "All active split entries are real CWA O-A0059-001 events; demo placeholders are prohibited by schema.",
+    "Events are split by non-overlapping weather windows, never by random frames.",
+    "Weather-regime labels remain radar candidates until official CWA context is attached.",
+    "Minxiong/Chiayi test events remain isolated from training and validation."
   ]
 }

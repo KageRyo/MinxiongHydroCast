@@ -15,6 +15,7 @@ COMMANDS = {
     "cwa-history-data-download": "minxionghydrocast.ingestion.cwa_history_data:main",
     "cwa-history-list": "minxionghydrocast.ingestion.cwa_history:main",
     "cwa-rain-smoke": "minxionghydrocast.ingestion.cwa_rainfall_api:main",
+    "dataset-build": "minxionghydrocast.pipelines.dataset_build:main",
     "demo": "minxionghydrocast.pipelines.demo:main",
     "evaluate-baselines": "minxionghydrocast.pipelines.baseline_evaluation:main",
     "event-split-check": "minxionghydrocast.models.event_splits:main",

@@ -170,3 +170,35 @@ def test_download_event_frames_can_skip_existing_outputs(tmp_path: Path):
     assert collection.frame_count == 1
     assert collection.frames[0].bytes_written == len(b'{"cached": true}')
     assert "real-key" not in collection.frames[0].source_url
+
+
+def test_download_event_frames_retries_and_writes_atomically(tmp_path: Path):
+    calls = 0
+
+    def flaky_get(url: str, *, timeout: int, verify: bool) -> FakeResponse:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise RuntimeError("temporary failure")
+        return FakeResponse(b'{"complete": true}', url)
+
+    plan = build_event_plan(
+        sample_history_index(),
+        event_id="retry_event",
+        start_time="2026-07-06T19:20:00+08:00",
+        end_time="2026-07-06T19:20:00+08:00",
+    )
+
+    collection = download_event_frames(
+        plan,
+        output_dir=tmp_path,
+        authorization="real-key",
+        http_get=flaky_get,
+        retry_attempts=2,
+        retry_backoff_seconds=0,
+    )
+
+    output = Path(collection.frames[0].output_path)
+    assert calls == 2
+    assert output.read_bytes() == b'{"complete": true}'
+    assert not output.with_name(f".{output.name}.part").exists()
