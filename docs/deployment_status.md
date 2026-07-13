@@ -18,6 +18,7 @@ Verified runtime components:
 - Alertmanager 0.33.1 on `127.0.0.1:9093`;
 - Pydantic-validated alert audit receiver on `127.0.0.1:9087`;
 - daily backup and hourly shadow-evaluation timers;
+- concise `mhc` command dispatcher available through the stable user path;
 - dedicated runner `RTX4090-minxiong-hydrocast`, online with the `minxiong-hydrocast` label, for
   source contracts that require host credentials.
 
@@ -42,7 +43,7 @@ The manually dispatched Official Live Contracts run `29219192303` passed both jo
 GitHub-hosted CWA/IoW contracts and the host-bound WRA rainfall-warning contract on the renamed
 self-hosted runner.
 
-The complete local suite passed with 233 tests, and Ruff reported no issues.
+The complete local suite passed with 237 tests, and Ruff reported no issues.
 
 ## Canonical identifier rollout
 
@@ -66,9 +67,10 @@ the migration.
 
 ## Active shadow gate
 
-The shadow deployment started on 2026-07-12. At the migration verification point it retained 68
-successful and ready live attempts with 100% success and readiness and no gap over 10.283 minutes.
-The gate remains blocked by design until all of the following are observed rather than simulated:
+The shadow deployment started on 2026-07-12. At the post-merge verification point it retained 70
+successful and ready live attempts over 10.894 hours, with 100% success and readiness and no gap
+over 10.283 minutes. The gate remains blocked by design until all of the following are observed
+rather than simulated:
 
 - at least 168 hours between the first and last retained live attempt;
 - at least 900 attempts in the eight-day audit window;
@@ -83,8 +85,8 @@ merge independently when their own review and CI checks pass.
 
 ## Remaining promotion work
 
-- Configure the implemented Discord backend with an organization-owned channel, name its on-call
-  owner, and exercise its incident path.
+- Explicitly activate the implemented Discord backend only after naming its primary and backup
+  on-call owners, then exercise its incident path.
 - Replicate backups to another device or remote system; the current backup protects snapshots from
   application-level corruption but not loss of the whole host or volume.
 - Assign incident ownership and exercise acknowledgement, override, and rollback responsibilities.

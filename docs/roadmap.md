@@ -94,9 +94,12 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [ ] Add forecast publication to the scheduled operational flow after model gates pass.
 - [x] Add snapshot-native Minxiong observation/alert features with stable location IDs.
 - [ ] Add validated QPE and experimental forecast fields to the feature contract.
-- [ ] Add a remote durable-storage backend and deployment backups.
+- [x] Add scheduled checksummed local backups and verify isolated restore.
+- [ ] Replicate verified backups to a different device or remote system.
 - [x] Export readiness, age, state, and shadow-gate metrics.
-- [ ] Scrape metrics and route failed/stale/degraded/schema alerts to named maintainers.
+- [x] Scrape metrics with Prometheus and route failed/stale/degraded/schema alerts to the durable
+      local audit receiver.
+- [ ] Route operational alerts to named primary and backup maintainers.
 - [x] Emit structured logs and run summaries for every pipeline execution.
 - [x] Add CI for tests and linting.
 - [x] Maintain a repo task list for unchecked roadmap items.
@@ -110,8 +113,9 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Add systemd templates for a persistent collector timer and supervised localhost API.
 - [x] Deploy the localhost single-host profile with persistent services and least-privilege secret
       delivery on durable storage.
-- [ ] Deploy the supplied units on a managed host with least-privilege secrets, authenticated/TLS
-      access, and a documented rollback.
+- [x] Deploy the supplied units on the managed host with least-privilege secrets, localhost-only
+      access, and documented rollback.
+- [ ] Add authenticated TLS ingress only before making the service network-accessible.
 - [x] Add an auditable seven-day shadow gate requiring reviewed heavy-rain coverage.
 - [x] Add a provenance-backed Minxiong flood-label audit and minimum class-coverage gate.
 - [ ] Publish forecast grids and risk features after their model/data gates pass.

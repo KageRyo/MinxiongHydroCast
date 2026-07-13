@@ -1,14 +1,28 @@
 # Completion Plan
 
-MinxiongHydroCast is production-ready when it can continuously ingest and validate official data,
-produce versioned Minxiong risk inputs and nowcasts, expose them through a monitored service, and
-publish a documented Minxiong model without committing credentials, raw official data, or model
-weights. Building datasets and training models are necessary milestones, but are not by themselves
-a production release.
+MinxiongHydroCast has separate completion levels. The internal observation service may be usable
+before an experimental nowcast is scientifically credible, and neither state makes the project an
+official warning system. A full forecast product is production-ready only when it can continuously
+ingest and validate official data, produce versioned Minxiong risk inputs and nowcasts, expose them
+through a monitored service, and publish a documented Minxiong model without committing
+credentials, raw official data, or model weights.
 
-## Definition Of Done
+## Completion Levels
 
-- CWA radar/QPE and WRA/NCDR auxiliary ingestion runs from documented local configuration.
+1. **Internal observation service:** official-source collection, immutable snapshots, readiness,
+   localhost API/operator view, monitoring, local alert audit, backup/restore, and supervised
+   scheduling are implemented and deployed. Promotion still requires the real shadow gate,
+   off-host recovery, named operators, and exercised incident paths.
+2. **Experimental rainfall nowcast:** event diversity, QPE/gauge validation, local labels,
+   independent-event evaluation, calibration, and model promotion evidence remain incomplete.
+3. **Public operational service:** authenticated/TLS ingress, approved SLOs and data rights, named
+   decision authority, human override, and communication gates are required before any external
+   operational use.
+
+## Forecast Product Definition Of Done
+
+- CWA radar/QPE research ingestion and CWA/WRA operational ingestion run from documented local
+  configuration.
 - Multi-frame CWA radar events can be collected, inspected, converted, and evaluated.
 - Event-based train/validation/test splits are populated with real historical weather events.
 - A persistence baseline, a small trainable neural baseline, and a SOTA migration candidate are
@@ -16,7 +30,8 @@ a production release.
 - A Minxiong/Chiayi model card documents data sources, limitations, metrics, and attribution.
 - CI covers unit tests, linting, dry-run contract checks, and production configuration validation.
 - A scheduler retries ingestion idempotently and raises alerts for stale, missing, or invalid data.
-- Versioned outputs are stored durably and served through an authenticated API or operator surface.
+- Versioned outputs are stored durably and served through a localhost-only operator surface or an
+  authenticated network API.
 - Service-level objectives cover data freshness, pipeline success, and forecast availability.
 - Raw data, API keys, checkpoints, and generated artifacts remain outside git.
 
@@ -58,8 +73,15 @@ a production release.
 - Completed: official WRA OpenApiv3 rainfall-warning adapter and WRA IoW flood-depth Open Data
   adapter, including strict Pydantic contracts, healthy empty-warning semantics, paginated
   measurement/metadata joins, provenance, and request-only degraded fallback.
-- Pending deployment work: durable remote storage, process supervision, metrics export,
-  authentication, backups, and alert routing to named maintainers.
+- Completed: the canonical single-host runtime with user-systemd supervision, Prometheus scraping,
+  Alertmanager routing to a durable local audit receiver, scheduled local backup/restore, hourly
+  shadow evaluation, and an online host-bound GitHub Actions runner. See
+  [deployment_status.md](deployment_status.md) for dated evidence.
+- Pending operations promotion: replicate backups off-host, assign primary and backup operators,
+  route alerts to a named human receiver, exercise incident/override/rollback procedures, and
+  complete the real shadow gate.
+- Pending public exposure work: define SLOs and add authenticated TLS ingress only if the service
+  must become reachable beyond localhost.
 - Pending optional hydrology work: define a separate operational use case and contract before
   integrating river/regional-drainage water levels; never substitute them for flood-depth sensors.
 - Pending official-label work: attach CWA weather maps, warnings, daily reports, or equivalent
