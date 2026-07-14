@@ -197,12 +197,37 @@ class SynchronizedEvidenceCapture(EventEvidenceSchema):
         return self
 
 
+class OfficialContextArtifact(EventEvidenceSchema):
+    publisher: str = Field(min_length=1, max_length=200)
+    source_url: str = Field(min_length=1, max_length=2000)
+    published_at: str
+    fetched_at: str
+    artifact: ArtifactRecord
+
+    @model_validator(mode="after")
+    def validate_official_context(self) -> "OfficialContextArtifact":
+        published = aware_datetime(self.published_at, field="published_at")
+        fetched = aware_datetime(self.fetched_at, field="fetched_at")
+        if self.publisher != self.publisher.strip():
+            raise ValueError("official context publisher must be trimmed")
+        if not self.source_url.startswith("https://"):
+            raise ValueError("official context source_url must use HTTPS")
+        if fetched < published:
+            raise ValueError("official context fetched_at cannot precede published_at")
+        if self.artifact.kind != "official_weather_context":
+            raise ValueError("official context artifact kind is invalid")
+        if self.artifact.bytes == 0:
+            raise ValueError("official context artifact must not be empty")
+        return self
+
+
 class EventReviewRecord(EventEvidenceSchema):
     decision: Literal["approved", "rejected"]
     reviewer: str = Field(min_length=1, max_length=200)
     reviewed_at: str
     weather_regime: WeatherRegime
     official_context_references: tuple[str, ...] = ()
+    official_context_artifacts: tuple[OfficialContextArtifact, ...] = ()
     notes: str = Field(default="", max_length=2000)
 
     @model_validator(mode="after")
@@ -219,6 +244,19 @@ class EventReviewRecord(EventEvidenceSchema):
             for reference in self.official_context_references
         ):
             raise ValueError("official context references must use HTTPS URLs")
+        if self.official_context_artifacts:
+            artifact_references = tuple(
+                context.source_url for context in self.official_context_artifacts
+            )
+            if artifact_references != self.official_context_references:
+                raise ValueError(
+                    "official context artifacts must match references in order"
+                )
+            artifact_paths = tuple(
+                context.artifact.path for context in self.official_context_artifacts
+            )
+            if len(artifact_paths) != len(set(artifact_paths)):
+                raise ValueError("official context artifact paths must be unique")
         if self.decision == "approved":
             if self.weather_regime == "unclassified":
                 raise ValueError("approved review requires a classified weather regime")

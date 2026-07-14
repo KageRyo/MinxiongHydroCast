@@ -122,8 +122,9 @@ automatically enter train, validation, or test splits. See
 
 After a candidate window is complete, record a provenance-backed human decision with
 `mhc event-review`. Approval requires a classified weather regime and at least one official HTTPS
-context source. A later formal manifest change must reference the candidate through
-`evidence_candidate_id`; both `mhc event-split-check --event-evidence-catalog ...` and
+context source preserved as a checksummed external artifact with publisher and publication time.
+A later formal manifest change must reference the candidate through `evidence_candidate_id`; both
+`mhc event-split-check --event-evidence-catalog ...` and
 `mhc dataset-build --event-evidence-catalog ...` reject unapproved, incomplete, checksum-invalid,
 time-mismatched, or regime-mismatched promotions.
 

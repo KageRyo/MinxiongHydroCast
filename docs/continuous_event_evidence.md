@@ -43,10 +43,13 @@ research-root/
 │   └── scan_cache/
 ├── raw/event_evidence/<candidate-id>/
 ├── events/<candidate-id>_{plan,collection}.json
-└── evidence/<candidate-id>/<capture-id>/
-    ├── O-B0045-001.json
-    ├── O-A0002-001.json
-    └── WRA-Rainfall-Warning.json
+└── evidence/<candidate-id>/
+    ├── <capture-id>/
+    │   ├── O-B0045-001.json
+    │   ├── O-A0002-001.json
+    │   └── WRA-Rainfall-Warning.json
+    └── official_context/
+        └── <index>_<sha256-prefix>_<source-name>
 ```
 
 Candidate frames, event plans, collection manifests, and synchronized evidence are durable and
@@ -83,14 +86,25 @@ mhc event-review \
   --reviewer <reviewer-identity> \
   --weather-regime convective \
   --official-context https://www.cwa.gov.tw/<official-source> \
+  --official-context-file /path/to/captured-official-report.pdf \
+  --official-context-publisher "Central Weather Administration, Taiwan" \
+  --official-context-published-at 2026-07-14T11:00:00+08:00 \
   --notes "Reviewed radar, QPE, gauges, warnings, and official context."
 ```
 
 Approval requires a complete window, at least one capture with synchronized QPE/gauge/warning
 evidence, a named reviewer, timezone-aware review time, a non-`unclassified` regime, and at least
-one official HTTPS context reference. A repeated identical review is idempotent; a conflicting
-second decision is rejected. Rejection also requires a complete window and reviewer identity, but
-may remain `unclassified` when the candidate is a false positive.
+one official HTTPS context reference paired with a non-empty local file, publisher, and
+timezone-aware publication time. Repeat all four options in the same order for multiple sources.
+The command records its fetch time, atomically copies each file under the candidate evidence
+directory, and catalogs its relative path, byte size, and SHA-256. The shared catalog verifier
+therefore rejects missing or modified official context just like damaged radar/QPE/gauge/warning
+evidence. A repeated identical review is idempotent; a conflicting second decision is rejected.
+Rejection also requires a complete window and reviewer identity, but may remain `unclassified`
+when the candidate is a false positive.
+
+Catalogs containing earlier URL-only review records remain readable. New approval decisions require
+the checksummed artifact fields and must not treat a mutable web URL as permanent evidence.
 
 `mhc event-review` still does not edit `data/samples/event_split_manifest.json`. Adding an approved
 event is a separate tracked change with an explicit train/validation/test decision. The manifest

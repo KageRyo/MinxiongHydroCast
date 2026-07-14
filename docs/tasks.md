@@ -65,6 +65,8 @@ through a focused pull request. The end-to-end target is defined in
 - [x] Add auditable `mhc event-review` decisions and make `event-split-check` plus `dataset-build`
       reject incomplete, unapproved, checksum-invalid, time-mismatched, or regime-mismatched
       candidate promotions.
+- [x] Preserve official review context as Pydantic-validated, atomically written, checksummed
+      external artifacts while retaining URL-only catalog read compatibility.
 - [x] Deploy the event-discovery timer from `main`, verify the installed revision, and validate the
       live external catalog with zero artifact checksum or size errors.
 

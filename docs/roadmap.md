@@ -68,6 +68,8 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Enforce a Pydantic candidate queue that requires human review and cannot update formal splits.
 - [x] Record reviewer, review time, regime, and official context through `mhc event-review`, and
       reject unapproved promotion in both `event-split-check` and `dataset-build`.
+- [x] Catalog exact official-context files with publisher and publication/fetch times, byte size,
+      SHA-256, atomic external storage, and tamper verification.
 - [x] Deploy continuous discovery on the managed host and verify its installed revision, 20-minute
       timer, incremental live run, and external catalog checksums.
 - [ ] Complete an official-context-backed human review of the first finished continuous candidate
