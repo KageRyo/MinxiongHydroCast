@@ -47,6 +47,7 @@ class DiscoveryConfig(EventEvidenceSchema):
     merge_gap_minutes: int = Field(default=60, ge=10)
     before_minutes: int = Field(default=60, ge=10)
     after_minutes: int = Field(default=60, ge=10)
+    max_candidate_window_minutes: int = Field(default=480, ge=20)
     evidence_max_alignment_minutes: int = Field(default=20, ge=0)
 
     @model_validator(mode="after")
@@ -56,9 +57,16 @@ class DiscoveryConfig(EventEvidenceSchema):
             "merge_gap_minutes",
             "before_minutes",
             "after_minutes",
+            "max_candidate_window_minutes",
         ):
             if getattr(self, field) % self.cadence_minutes:
                 raise ValueError(f"{field} must align to cadence_minutes")
+        minimum_window = self.before_minutes + self.after_minutes
+        if self.max_candidate_window_minutes < minimum_window:
+            raise ValueError(
+                "max_candidate_window_minutes must cover before_minutes and "
+                "after_minutes"
+            )
         return self
 
 

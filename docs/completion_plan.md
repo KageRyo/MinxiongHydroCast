@@ -69,6 +69,8 @@ credentials, raw official data, or model weights.
 - Completed: checksummed official-context artifacts for `mhc event-review`, including publisher,
   source URL, published/fetched times, atomic external preservation, catalog verification, and
   backward-compatible reading of URL-only reviews.
+- Completed: cadence-aligned maximum candidate windows that split sustained trigger sequences while
+  preserving existing candidate identifiers, evidence, and older catalog compatibility.
 - Completed: formal five-event split with two real train, one independent validation, and two
   held-out Minxiong/Chiayi test events; all formal demo placeholders are prohibited by schema.
 - Completed: weighted Tiny U-Net run on two RTX 4090 GPUs using 88 training windows and a separate

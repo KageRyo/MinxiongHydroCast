@@ -67,6 +67,8 @@ through a focused pull request. The end-to-end target is defined in
       candidate promotions.
 - [x] Preserve official review context as Pydantic-validated, atomically written, checksummed
       external artifacts while retaining URL-only catalog read compatibility.
+- [x] Bound continuous candidates to cadence-aligned windows and start a new candidate instead of
+      extending a sustained Taiwan-wide trigger without limit.
 - [x] Deploy the event-discovery timer from `main`, verify the installed revision, and validate the
       live external catalog with zero artifact checksum or size errors.
 

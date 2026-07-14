@@ -116,8 +116,10 @@ mhc event-discover --repository-root "$PWD"
 
 The command incrementally scans `O-A0059-001`, calculates Minxiong and Taiwan-wide `35 dBZ`
 coverage, resumes complete event-window downloads, and synchronizes `O-B0045-001` QPE,
-`O-A0002-001` gauges, and WRA rainfall warnings. Candidates remain pending human review and cannot
-automatically enter train, validation, or test splits. See
+`O-A0002-001` gauges, and WRA rainfall warnings. A candidate window is bounded to 480 minutes by
+default; a later qualifying frame starts another candidate instead of extending the window without
+limit. Candidates remain pending human review and cannot automatically enter train, validation, or
+test splits. See
 [docs/continuous_event_evidence.md](docs/continuous_event_evidence.md).
 
 After a candidate window is complete, record a provenance-backed human decision with

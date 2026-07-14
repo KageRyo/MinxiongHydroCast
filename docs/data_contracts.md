@@ -27,6 +27,11 @@ trigger metrics, full radar-window artifacts, and synchronized QPE/gauge/warning
 fields, naive timestamps, duplicate candidates or trigger times, inconsistent frame counts, and
 artifact paths outside the research root fail validation.
 
+Discovery configuration includes a cadence-aligned maximum candidate window, defaulting to 480
+minutes and including the before/after context. A trigger that would exceed the bound starts a new
+candidate. Older catalogs without the field parse with that default; an already overlong candidate
+is preserved instead of being rewritten.
+
 Every candidate is constrained to `candidate_only` with `formal_split_membership=not_added`.
 Catalogs require `automatic_formal_split_updates=false` and
 `retraining_policy=only_after_human_approved_new_events`. A complete frame window can only become

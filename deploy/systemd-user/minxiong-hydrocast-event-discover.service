@@ -12,6 +12,7 @@ ExecStart=%h/.local/share/minxiong-hydrocast/venv/bin/minxiong-hydrocast-event-d
   --initial-lookback-minutes 120 \
   --before-minutes 60 \
   --after-minutes 60 \
+  --max-candidate-window-minutes 480 \
   --event-threshold-dbz 35 \
   --summary-output %h/.local/share/minxiong-hydrocast/run_summaries/event_discover.json \
   --log-output %h/.local/share/minxiong-hydrocast/run_logs.jsonl
