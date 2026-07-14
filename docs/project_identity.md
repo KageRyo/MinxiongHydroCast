@@ -4,7 +4,7 @@
 
 **MinxiongHydroCast** is the canonical project and product name.
 
-- **Minxiong** identifies the operational target: Minxiong Township, Chiayi County.
+- **Minxiong** identifies the fixed geographic scope: Minxiong Township, Chiayi County.
 - **Hydro** covers the water-related chain represented in the repository: rainfall, rainfall
   warnings, flood-depth observations, drainage context, and future flood-risk features.
 - **Cast** describes the research direction toward short-horizon rainfall nowcasting. It does not
@@ -13,6 +13,9 @@
 The name intentionally does not use a general weather term. Temperature, wind, air quality,
 typhoon-track prediction, and broad public weather forecasting are outside the current product
 contract.
+
+Minxiong is the product boundary, not a priority label or a staged expansion promise. County-wide
+observations and Taiwan-wide radar are upstream context, not a broader service scope.
 
 ## Technical identifiers
 

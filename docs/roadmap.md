@@ -68,6 +68,10 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Enforce a Pydantic candidate queue that requires human review and cannot update formal splits.
 - [x] Record reviewer, review time, regime, and official context through `mhc event-review`, and
       reject unapproved promotion in both `event-split-check` and `dataset-build`.
+- [x] Deploy continuous discovery on the managed host and verify its installed revision, 20-minute
+      timer, incremental live run, and external catalog checksums.
+- [ ] Complete an official-context-backed human review of the first finished continuous candidate
+      while keeping formal split selection as a separate tracked decision.
 - [ ] Accumulate reviewed typhoon, frontal, Mei-yu, and convective candidates before retraining.
 
 ## Milestone 7: Train And Compare Models
@@ -109,8 +113,8 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [x] Add snapshot-native Minxiong observation/alert features with stable location IDs.
 - [ ] Add validated QPE and experimental forecast fields to the feature contract.
 - [x] Add scheduled checksummed local backups and verify isolated restore.
-- [ ] Replicate verified backups to a different device or remote system before public operational
-      promotion; deferred while the service remains internal and localhost-only.
+- [ ] Replicate verified backups to a different device or remote system before external operational
+      use; the current local backup does not cover loss of the host or storage volume.
 - [x] Export readiness, age, state, and shadow-gate metrics.
 - [x] Scrape metrics with Prometheus and route failed/stale/degraded/schema alerts to the durable
       local audit receiver.

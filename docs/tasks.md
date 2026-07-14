@@ -65,6 +65,8 @@ through a focused pull request. The end-to-end target is defined in
 - [x] Add auditable `mhc event-review` decisions and make `event-split-check` plus `dataset-build`
       reject incomplete, unapproved, checksum-invalid, time-mismatched, or regime-mismatched
       candidate promotions.
+- [x] Deploy the event-discovery timer from `main`, verify the installed revision, and validate the
+      live external catalog with zero artifact checksum or size errors.
 
 ## Next
 
@@ -110,8 +112,13 @@ through a focused pull request. The end-to-end target is defined in
 - [x] Produce a checksummed dataset catalog and verification report under the external research
       root, with source provenance, time ranges, and lead-time metrics.
 - [x] Add a next-batch event expansion queue from the existing CWA hourly discovery scan.
+- [ ] Let the active continuously collected candidate finish its post-trigger window, inspect
+      official context and synchronized evidence, and record the first `mhc event-review`
+      decision without automatically changing a formal split.
 - [ ] Human-review and accumulate typhoon, frontal, Mei-yu, and convective candidates before SOTA
-      model migration; retrain only after approved events enter the formal manifest.
+      model migration.
+- [ ] After sufficient reviewed diversity exists, propose a tracked formal-split change, rebuild
+      the dataset, retrain, and rerun the unchanged Persistence promotion gate.
 
 ### Phase 3: Tensor Conversion
 
@@ -160,7 +167,7 @@ through a focused pull request. The end-to-end target is defined in
 - [ ] Evaluate `RainfallThresholdRiskScorer` on real event windows.
 - [ ] Add LightGBM/XGBoost only after labels and feature tables are stable.
 
-### Phase 6: Release And Operations
+### Phase 6: Operations
 
 - [x] Publish the Minxiong/Chiayi baseline smoke-test model card.
 - [ ] Publish model cards for any future Taiwan-wide or promoted Minxiong/Chiayi checkpoints.
@@ -190,8 +197,8 @@ through a focused pull request. The end-to-end target is defined in
 
 - [x] Schedule stable observation collection, shadow evaluation, backups, and official live
       contracts.
-- [ ] Replicate verified backups to a different device or remote system before public operational
-      promotion; deferred while the service remains internal and localhost-only.
+- [ ] Replicate verified backups to a different device or remote system before external operational
+      use; the current local backup does not cover loss of the host or storage volume.
 - [ ] Schedule radar/model workflows only after their data and model gates are stable.
 - [ ] Extend the operator view with experimental forecast products only after model outputs pass
       their gates.

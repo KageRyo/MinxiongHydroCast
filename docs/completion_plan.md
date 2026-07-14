@@ -11,7 +11,7 @@ credentials, raw official data, or model weights.
 
 1. **Internal observation service:** official-source collection, immutable snapshots, readiness,
    localhost API/operator view, monitoring, local alert audit, backup/restore, and supervised
-   scheduling are implemented and deployed. Public operational promotion still requires the real
+   scheduling are implemented and deployed. External operational use still requires the real
    shadow gate, off-host recovery, named operators, and exercised incident paths.
 2. **Experimental rainfall nowcast:** reproducible independent-event evaluation is implemented;
    event diversity, QPE/gauge validation, local labels, calibration, and passing model-promotion
@@ -62,6 +62,10 @@ credentials, raw official data, or model weights.
 - Completed: `mhc dataset-build` orchestration for CWA history, resilient event download, sequence
   validation, tensor conversion, Persistence evaluation, weighted Tiny U-Net evaluation, catalog
   generation, and checksum verification in an external durable research root.
+- Completed: deployed `mhc event-discover` on a 20-minute user-systemd timer with incremental
+  `O-A0059-001` scanning, local/Taiwan `35 dBZ` metrics, resumable checksummed event windows, and
+  synchronized QPE/gauge/warning evidence. The Pydantic catalog and `mhc event-review` gate keep
+  discovery candidates out of formal splits until an auditable human decision.
 - Completed: formal five-event split with two real train, one independent validation, and two
   held-out Minxiong/Chiayi test events; all formal demo placeholders are prohibited by schema.
 - Completed: weighted Tiny U-Net run on two RTX 4090 GPUs using 88 training windows and a separate
@@ -87,8 +91,8 @@ credentials, raw official data, or model weights.
   shadow evaluation, and an online host-bound GitHub Actions runner. See
   [deployment_status.md](deployment_status.md) for dated evidence.
 - Deferred for the current internal localhost stage: replicate backups to another device or remote
-  system. The accepted risk must be revisited before public operational promotion.
-- Pending operations promotion: assign primary and backup operators, route alerts to a named human
+  system. The accepted risk must be resolved before external operational use.
+- Pending operational safeguards: assign primary and backup operators, route alerts to a named human
   receiver, exercise incident/override/rollback procedures, and complete the real shadow gate.
 - Pending public exposure work: define SLOs and add authenticated TLS ingress only if the service
   must become reachable beyond localhost.
@@ -101,9 +105,12 @@ credentials, raw official data, or model weights.
   weather-map source is still needed before assigning labels.
 - Pending validation work: run live QPE/gauge reports for each selected event after matching
   event-time QPE grids are captured or an official historical QPE archive is confirmed.
-- Next technical focus: expand weather-regime diversity, attach official event context, obtain
-  event-time QPE/gauge evidence and reviewed local labels, then improve the learned model until it
-  passes the unchanged independent-event gate. Do not consider NowcastNet or forecast publication
+- Active evidence work: the first continuously collected candidate was still extending at the
+  2026-07-14 12:00 snapshot and therefore remained pending review and outside the formal split.
+- Next technical focus: complete that first candidate window and official-context-backed human
+  review, then accumulate reviewed typhoon, frontal, Mei-yu, and convective regimes. Only after the
+  dataset becomes meaningfully more diverse should the formal split change, the model retrain, and
+  the unchanged independent-event gate rerun. Do not consider NowcastNet or forecast publication
   before those evidence gaps close.
 
 ## Phase 1: Data Source Finalization
@@ -151,7 +158,7 @@ credentials, raw official data, or model weights.
   township/village context.
 - Evaluate `RainfallThresholdRiskScorer`, then add LightGBM/XGBoost only after labels are ready.
 
-## Phase 6: Release And Operations
+## Phase 6: Operations
 
 - Publish model cards for Taiwan-wide and Minxiong/Chiayi-specific checkpoints.
 - Add scheduled jobs only after manual ingestion and validation are repeatable.

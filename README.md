@@ -7,13 +7,13 @@
 [![Service](https://img.shields.io/badge/service-observation%20service-blue)](docs/operational_use.md)
 [![Operational Gate](https://img.shields.io/badge/operational%20gate-pending-orange)](docs/operational_use.md#production-gates)
 
-Minxiong-first hydrometeorological observation and rainfall-nowcasting toolkit.
+Hydrometeorological observation and rainfall-nowcasting toolkit for Minxiong Township.
 
-MinxiongHydroCast is a Minxiong-first hydrometeorological observation and rainfall-nowcasting
-toolkit. Its operational target is Minxiong Township, while Taiwan-wide radar data is used as
-upstream training and context data. The repository includes a live official-source observation
-service and is no longer demo-only. It is still an internal research and data-engineering system,
-not an official warning system or a production-ready public service.
+MinxiongHydroCast is built specifically for Minxiong Township, Chiayi County. Chiayi County
+observations and Taiwan-wide radar data provide upstream context and research inputs without
+expanding the service's geographic claim. The repository includes a live official-source
+observation service and is no longer demo-only. It is still an internal research and
+data-engineering system, not an official warning system or a production-ready public service.
 
 ## What This Repo Does
 
@@ -126,6 +126,12 @@ context source. A later formal manifest change must reference the candidate thro
 `evidence_candidate_id`; both `mhc event-split-check --event-evidence-catalog ...` and
 `mhc dataset-build --event-evidence-catalog ...` reject unapproved, incomplete, checksum-invalid,
 time-mismatched, or regime-mismatched promotions.
+
+The managed internal host runs discovery every 20 minutes from the deployed `main` revision.
+Current rollout evidence and the active candidate state are recorded in
+[docs/deployment_status.md](docs/deployment_status.md). The next task is to finish and human-review
+the first continuous candidate, then accumulate weather-regime diversity before any split change
+or retraining.
 
 ## Operational Observation Service
 

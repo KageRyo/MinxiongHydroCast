@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "minxiong-hydrocast"
 version = "0.1.0"
-description = "Minxiong-first hydrometeorological observation and rainfall-nowcasting toolkit."
+description = "Hydrometeorological observation and rainfall-nowcasting toolkit for Minxiong Township."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }

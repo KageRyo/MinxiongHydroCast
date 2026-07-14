@@ -137,6 +137,31 @@ systemctl --user status minxiong-hydrocast-event-discover.service
 journalctl --user -u minxiong-hydrocast-event-discover.service
 ```
 
+## Deployed Status And Next Task
+
+The managed single-host profile installed this timer from `main` revision `7f8fccc` on
+2026-07-14. The installed revision matched Git, the first service run succeeded, and subsequent
+20-minute runs continued advancing the same candidate without editing the formal split.
+
+The 12:00 catalog snapshot had one active `collecting` candidate with 82 of 88 frames, 76 triggers,
+18 synchronized `ok/ok/empty` QPE/gauge/warning captures, and zero artifact-verification errors.
+It remained `review_status=pending`, `weather_regime=unclassified`, and
+`formal_split_membership=not_added`. See [deployment_status.md](deployment_status.md) for the dated
+evidence; inspect the live catalog for current counts because an active event can keep extending
+its window.
+
+The next task is data curation, not model tuning:
+
+1. wait until the rolling post-trigger window is complete and the candidate reaches
+   `operational_status=awaiting_review`;
+2. inspect its radar frames, synchronized evidence timing, and an official CWA/WRA weather-context
+   source;
+3. record an approved or rejected `mhc event-review` decision without changing the formal split;
+4. repeat this process until reviewed typhoon, frontal, Mei-yu, and convective regimes are
+   represented;
+5. only then propose a tracked split change, rebuild the dataset, retrain, and rerun the unchanged
+   Persistence promotion gate.
+
 Accumulating all target weather regimes is an ongoing observational requirement. The collector can
 preserve and classify future evidence, but no regime should be claimed until a human review attaches
 official weather context.
