@@ -74,7 +74,7 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
       previously cataloged evidence.
 - [x] Deploy continuous discovery on the managed host and verify its installed revision, 20-minute
       timer, incremental live run, and external catalog checksums.
-- [ ] Complete an official-context-backed human review of the first finished continuous candidate
+- [x] Complete an official-context-backed human review of the first finished continuous candidate
       while keeping formal split selection as a separate tracked decision.
 - [ ] Accumulate reviewed typhoon, frontal, Mei-yu, and convective candidates before retraining.
 

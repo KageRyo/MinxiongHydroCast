@@ -69,6 +69,8 @@ through a focused pull request. The end-to-end target is defined in
       external artifacts while retaining URL-only catalog read compatibility.
 - [x] Bound continuous candidates to cadence-aligned windows and start a new candidate instead of
       extending a sustained Taiwan-wide trigger without limit.
+- [x] Complete the first checksummed official-context-backed `approved/convective` candidate review
+      while keeping formal split membership `not_added`.
 - [x] Deploy the event-discovery timer from `main`, verify the installed revision, and validate the
       live external catalog with zero artifact checksum or size errors.
 
