@@ -46,10 +46,35 @@ At the 2026-07-14 12:00 evidence snapshot, the strict catalog contained one acti
 - full catalog artifact verification reported zero checksum or size errors;
 - review state remained `collecting`, `pending`, `unclassified`, and `not_added`.
 
-These counts are a dated operational snapshot, not a completion claim. The rolling window must
-first stop extending and reach `awaiting_review`. A reviewer must then attach official weather
-context before assigning a regime. The formal five-event split remained unchanged with SHA-256
+These counts are a dated operational snapshot. The candidate later completed and received the
+review recorded below. The formal five-event split remained unchanged with SHA-256
 `953b8b0d85b0269adcc7468288332e039d01512a0ac626090efbf56b12a6a6e1`.
+
+## Bounded candidate rollout and first review verified on 2026-07-14
+
+Revision `607ceee994fe15f77ee6a82eb1382f60f9df4b04` deployed a 480-minute maximum total
+candidate window. The installed revision matched `main`; the installed CLI, systemd unit, and run
+summary all recorded the new bound. The rollout preserved the existing candidate's identifier,
+trigger set, and window end, while a qualifying 16:40 frame started a second candidate. The first
+post-deploy run reported two candidates, no evidence errors, and zero catalog artifact verification
+errors. The localhost API remained healthy and ready, and Prometheus and Alertmanager remained
+ready.
+
+Candidate `cwa_o_a0059_candidate_20260713t2320` then completed its fixed 22:20-17:30
+window with 116 of 116 radar frames, 104 qualifying triggers, and 32 synchronized
+QPE/gauge/warning captures, all `ok/ok/empty`. Only the 12:20 frame met the Minxiong-local trigger:
+37.8 dBZ across three local pixels. The configured Minxiong QPE point peaked at 0.5 mm, the four
+latest Minxiong gauges each reported 0 mm over one hour, and WRA returned no active rainfall
+warning.
+
+The review recorded `approved`, `convective`, and reviewer `KageRyo (Codex-assisted)` at 17:42.
+It preserved the CWA W01 report issued at 11:00 as a 74,278-byte external artifact with SHA-256
+`7010c4e498a95b99a2746f20a89fe6f4f49b78e7c5b20351dc18ef22b27f9d90`. The report's
+southern-cloud-system and localized shower/thunderstorm description supported the classification;
+the review explicitly did not treat the candidate as flood or warning evidence. Full verification
+reported zero errors after the review, and an identical review command returned
+`catalog_changed=false`. Formal membership remained `not_added`, and the formal manifest retained
+the same SHA-256 recorded above.
 
 ## Operational drills
 
@@ -111,9 +136,6 @@ merge independently when their own review and CI checks pass.
 
 ## Outstanding safeguards
 
-- Let the active candidate finish its post-trigger window, review its radar/QPE/gauge/warning
-  evidence and official weather context, and record the first auditable `mhc event-review`
-  decision. Approval alone must not add it to a formal split.
 - Continue collecting reviewed typhoon, frontal, Mei-yu, and convective regimes. Retraining and
   formal split expansion remain blocked until the dataset is meaningfully more diverse.
 - Explicitly activate the implemented Discord backend only after naming its primary and backup

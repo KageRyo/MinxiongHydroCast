@@ -110,13 +110,14 @@ credentials, raw official data, or model weights.
   weather-map source is still needed before assigning labels.
 - Pending validation work: run live QPE/gauge reports for each selected event after matching
   event-time QPE grids are captured or an official historical QPE archive is confirmed.
-- Active evidence work: the first continuously collected candidate was still extending at the
-  2026-07-14 12:00 snapshot and therefore remained pending review and outside the formal split.
-- Next technical focus: complete that first candidate window and official-context-backed human
-  review, then accumulate reviewed typhoon, frontal, Mei-yu, and convective regimes. Only after the
-  dataset becomes meaningfully more diverse should the formal split change, the model retrain, and
-  the unchanged independent-event gate rerun. Do not consider NowcastNet or forecast publication
-  before those evidence gaps close.
+- Completed evidence work: the first continuously collected candidate reached 116 of 116 frames,
+  passed full artifact verification, received a checksummed official-context-backed
+  `approved/convective` review, and remained outside the formal split. Repeating the same review was
+  idempotent.
+- Next technical focus: accumulate reviewed typhoon, frontal, Mei-yu, and convective regimes. Only
+  after the dataset becomes meaningfully more diverse should the formal split change, the model
+  retrain, and the unchanged independent-event gate rerun. Do not consider NowcastNet or forecast
+  publication before those evidence gaps close.
 
 ## Phase 1: Data Source Finalization
 
