@@ -513,7 +513,16 @@ def apply_trigger_metrics(
                 candidate.last_trigger_time,
                 field="last_trigger_time",
             )
-            if timedelta(0) < gap <= timedelta(minutes=config.merge_gap_minutes):
+            proposed_end = metric_time + timedelta(minutes=config.after_minutes)
+            proposed_window = proposed_end - aware_datetime(
+                candidate.window_start_time,
+                field="window_start_time",
+            )
+            if (
+                timedelta(0) < gap <= timedelta(minutes=config.merge_gap_minutes)
+                and proposed_window
+                <= timedelta(minutes=config.max_candidate_window_minutes)
+            ):
                 target_index = index
                 break
         if target_index is None:
@@ -1277,6 +1286,7 @@ def main() -> None:
     parser.add_argument("--merge-gap-minutes", type=int, default=60)
     parser.add_argument("--before-minutes", type=int, default=60)
     parser.add_argument("--after-minutes", type=int, default=60)
+    parser.add_argument("--max-candidate-window-minutes", type=int, default=480)
     parser.add_argument("--evidence-max-alignment-minutes", type=int, default=20)
     parser.add_argument("--event-threshold-dbz", type=float, default=35.0)
     parser.add_argument("--local-radius-pixels", type=int, default=8)
@@ -1313,6 +1323,7 @@ def main() -> None:
                 merge_gap_minutes=args.merge_gap_minutes,
                 before_minutes=args.before_minutes,
                 after_minutes=args.after_minutes,
+                max_candidate_window_minutes=args.max_candidate_window_minutes,
                 event_threshold_dbz=args.event_threshold_dbz,
                 local_radius_pixels=args.local_radius_pixels,
                 local_min_pixels=args.local_min_pixels,
@@ -1370,6 +1381,7 @@ def main() -> None:
         metadata={
             "catalog_changed": result.catalog_changed,
             "event_threshold_dbz": args.event_threshold_dbz,
+            "max_candidate_window_minutes": args.max_candidate_window_minutes,
             "candidate_queue_only": True,
             "automatic_formal_split_updates": False,
             "human_review_required": True,

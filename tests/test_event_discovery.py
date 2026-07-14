@@ -11,11 +11,15 @@ from pydantic import ValidationError
 from minxionghydrocast.ingestion.cwa_history import CwaHistoryFile, CwaHistoryIndex
 from minxionghydrocast.ingestion.source_adapter import SourceProvenance, SourceResult
 from minxionghydrocast.models.event_evidence_schemas import (
+    CoverageMetric,
     DiscoveryConfig,
     EventEvidenceCatalog,
+    RadarFrameMetric,
+    aware_datetime,
 )
 from minxionghydrocast.io.research_store import ResearchLayout, sha256_file
 from minxionghydrocast.pipelines.event_discovery import (
+    apply_trigger_metrics,
     run_event_discovery,
     verify_event_evidence_catalog,
 )
@@ -116,6 +120,24 @@ def source_result(
             schema_version="test-v1",
             content_sha256="a" * 64,
         ),
+    )
+
+
+def trigger_metric(data_time: str) -> RadarFrameMetric:
+    coverage = CoverageMetric(
+        valid_pixel_count=100,
+        pixels_ge_threshold=10,
+        fraction_ge_threshold=0.1,
+        max_value=45.0,
+    )
+    return RadarFrameMetric(
+        data_time=data_time,
+        source_sha256="a" * 64,
+        source_bytes=100,
+        threshold_dbz=35.0,
+        local=coverage,
+        taiwan=coverage,
+        candidate_labels=("minxiong_35dbz", "taiwan_wide_35dbz"),
     )
 
 
@@ -350,6 +372,90 @@ def test_catalog_contract_rejects_automatic_formal_split_updates():
 
     with pytest.raises(ValidationError):
         EventEvidenceCatalog.model_validate(payload)
+
+
+def test_trigger_metrics_split_at_maximum_candidate_window():
+    config = DiscoveryConfig(
+        merge_gap_minutes=60,
+        before_minutes=60,
+        after_minutes=60,
+        max_candidate_window_minutes=240,
+    )
+    metrics = tuple(
+        trigger_metric(f"2026-07-14T{hour:02d}:00:00+08:00")
+        for hour in range(10, 14)
+    )
+
+    candidates = apply_trigger_metrics((), metrics=metrics, config=config)
+    repeated = apply_trigger_metrics(candidates, metrics=metrics, config=config)
+
+    assert repeated == candidates
+    assert len(candidates) == 2
+    first, second = candidates
+    assert first.first_trigger_time == "2026-07-14T10:00:00+08:00"
+    assert first.last_trigger_time == "2026-07-14T12:00:00+08:00"
+    assert first.window_start_time == "2026-07-14T09:00:00+08:00"
+    assert first.window_end_time == "2026-07-14T13:00:00+08:00"
+    assert len(first.triggers) == 3
+    assert second.first_trigger_time == "2026-07-14T13:00:00+08:00"
+    assert second.window_start_time == "2026-07-14T12:00:00+08:00"
+    assert second.window_end_time == "2026-07-14T14:00:00+08:00"
+    assert len(second.triggers) == 1
+    assert all(
+        (
+            aware_datetime(candidate.window_end_time, field="window_end")
+            - aware_datetime(candidate.window_start_time, field="window_start")
+        ).total_seconds()
+        <= config.max_candidate_window_minutes * 60
+        for candidate in candidates
+    )
+
+
+def test_existing_overlong_candidate_stops_extending_without_migration():
+    old_config = DiscoveryConfig(
+        merge_gap_minutes=60,
+        before_minutes=60,
+        after_minutes=60,
+        max_candidate_window_minutes=600,
+    )
+    old_metrics = tuple(
+        trigger_metric(f"2026-07-14T{hour:02d}:00:00+08:00")
+        for hour in range(10, 15)
+    )
+    existing = apply_trigger_metrics((), metrics=old_metrics, config=old_config)
+    assert len(existing) == 1
+    original = existing[0]
+
+    current_config = old_config.model_copy(
+        update={"max_candidate_window_minutes": 240}
+    )
+    updated = apply_trigger_metrics(
+        existing,
+        metrics=(trigger_metric("2026-07-14T15:00:00+08:00"),),
+        config=current_config,
+    )
+
+    assert len(updated) == 2
+    assert updated[0] == original
+    assert updated[1].first_trigger_time == "2026-07-14T15:00:00+08:00"
+    assert updated[1].last_trigger_time == "2026-07-14T15:00:00+08:00"
+
+
+def test_discovery_config_defaults_old_catalogs_and_validates_window_limit():
+    legacy_payload = DiscoveryConfig().model_dump(mode="json")
+    legacy_payload.pop("max_candidate_window_minutes")
+
+    parsed = DiscoveryConfig.model_validate(legacy_payload)
+
+    assert parsed.max_candidate_window_minutes == 480
+    with pytest.raises(ValidationError, match="must cover"):
+        DiscoveryConfig(
+            before_minutes=60,
+            after_minutes=60,
+            max_candidate_window_minutes=110,
+        )
+    with pytest.raises(ValidationError, match="must align"):
+        DiscoveryConfig(max_candidate_window_minutes=485)
 
 
 def test_event_discovery_retries_failed_synchronized_evidence(tmp_path: Path):

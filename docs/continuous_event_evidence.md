@@ -11,7 +11,8 @@ Each successful run:
 2. scans only frames newer than the persisted cursor, using a 120-minute lookback on first run;
 3. computes Minxiong-local and Taiwan-wide coverage at `35 dBZ`;
 4. groups qualifying frames into candidate windows and preserves 60 minutes before the first
-   trigger and 60 minutes after the latest trigger at the 10-minute source cadence;
+   trigger and 60 minutes after the latest trigger at the 10-minute source cadence, with a
+   480-minute maximum total window;
 5. captures current `O-B0045-001` QPE, `O-A0002-001` Chiayi gauges, and WRA
    `Rainfall/Warning` evidence for the latest trigger of each new or extended candidate;
 6. atomically updates the Pydantic-validated `EventEvidenceCatalog` only when source state changes.
@@ -19,6 +20,15 @@ Each successful run:
 The default local threshold is one Minxiong-area pixel at or above `35 dBZ`. The default
 Taiwan-wide threshold is 1,000 pixels. Both coverage values are retained for every scanned frame,
 including frames that do not create a candidate.
+
+The maximum covers the complete window, including its before/after context. With the defaults, one
+candidate can therefore contain at most six hours between its first and last trigger. A qualifying
+frame that would exceed the limit starts a new candidate, while the preceding candidate retains
+its original identifier and evidence. Context at a boundary may overlap; formal split curation
+must keep overlapping candidate windows out of independent train, validation, and test splits.
+Catalogs written before this setting was introduced parse with the 480-minute default. If an
+existing candidate is already longer, its window remains unchanged, and the next qualifying frame
+starts a new candidate.
 
 Run one cycle after loading the ignored `.env`:
 
@@ -29,6 +39,10 @@ set +a
 
 mhc event-discover --repository-root "$PWD"
 ```
+
+Use `--max-candidate-window-minutes` to select another cadence-aligned bound. It must cover at least
+the configured before/after context. Changing the bound affects future trigger grouping, so do not
+change it while a candidate is collecting without an explicit catalog rollout decision.
 
 ## External Layout
 

@@ -70,6 +70,8 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
       reject unapproved promotion in both `event-split-check` and `dataset-build`.
 - [x] Catalog exact official-context files with publisher and publication/fetch times, byte size,
       SHA-256, atomic external storage, and tamper verification.
+- [x] Bound continuous candidate windows and split sustained trigger sequences without rewriting
+      previously cataloged evidence.
 - [x] Deploy continuous discovery on the managed host and verify its installed revision, 20-minute
       timer, incremental live run, and external catalog checksums.
 - [ ] Complete an official-context-backed human review of the first finished continuous candidate

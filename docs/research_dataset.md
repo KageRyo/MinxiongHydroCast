@@ -60,8 +60,10 @@ complete external collection. `--insecure-tls` is an explicit host workaround on
 CA chain cannot verify the CWA endpoint.
 
 Run `mhc event-discover` every 10 to 30 minutes to preserve new candidate events before the CWA
-history window expires. Its separate `EventEvidenceCatalog` is candidate-only and cannot modify the
-formal event manifest. See [continuous_event_evidence.md](continuous_event_evidence.md).
+history window expires. Candidate windows are bounded to 480 minutes by default so sustained
+Taiwan-wide echoes cannot create an indefinitely growing event. Its separate
+`EventEvidenceCatalog` is candidate-only and cannot modify the formal event manifest. See
+[continuous_event_evidence.md](continuous_event_evidence.md).
 
 When a formal manifest deliberately references a reviewed discovery candidate through
 `evidence_candidate_id`, pass `--event-evidence-catalog` to both `event-split-check` and
