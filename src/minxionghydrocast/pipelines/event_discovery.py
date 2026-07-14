@@ -265,6 +265,11 @@ def event_catalog_artifacts(catalog: EventEvidenceCatalog) -> tuple[ArtifactReco
             for source in (capture.qpe, capture.gauges, capture.warnings):
                 if source.artifact is not None:
                     artifacts.append(source.artifact)
+        if candidate.review is not None:
+            artifacts.extend(
+                context.artifact
+                for context in candidate.review.official_context_artifacts
+            )
     return tuple(artifacts)
 
 

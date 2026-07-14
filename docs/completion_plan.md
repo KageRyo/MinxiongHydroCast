@@ -66,6 +66,9 @@ credentials, raw official data, or model weights.
   `O-A0059-001` scanning, local/Taiwan `35 dBZ` metrics, resumable checksummed event windows, and
   synchronized QPE/gauge/warning evidence. The Pydantic catalog and `mhc event-review` gate keep
   discovery candidates out of formal splits until an auditable human decision.
+- Completed: checksummed official-context artifacts for `mhc event-review`, including publisher,
+  source URL, published/fetched times, atomic external preservation, catalog verification, and
+  backward-compatible reading of URL-only reviews.
 - Completed: formal five-event split with two real train, one independent validation, and two
   held-out Minxiong/Chiayi test events; all formal demo placeholders are prohibited by schema.
 - Completed: weighted Tiny U-Net run on two RTX 4090 GPUs using 88 training windows and a separate

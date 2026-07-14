@@ -34,11 +34,13 @@ Catalogs require `automatic_formal_split_updates=false` and
 [continuous_event_evidence.md](continuous_event_evidence.md).
 
 An `approved` candidate additionally requires a Pydantic `EventReviewRecord` with reviewer identity,
-timezone-aware review time, a classified weather regime, official HTTPS context references, and a
-complete synchronized QPE/gauge/warning capture. The formal manifest must reference its origin with
-`evidence_candidate_id`. `event-split-check` and `dataset-build` share one gate that verifies the
-external catalog checksums and rejects any candidate whose approval, source data ID, time window,
-or reviewed regime does not match the formal event. The build runs this gate before source
+timezone-aware review time, a classified weather regime, official HTTPS context references,
+checksummed `OfficialContextArtifact` records, and a complete synchronized QPE/gauge/warning
+capture. Each official-context record preserves publisher, source URL, published and fetched times,
+and an external artifact path, byte size, and SHA-256. The formal manifest must reference its origin
+with `evidence_candidate_id`. `event-split-check` and `dataset-build` share one gate that verifies
+all external catalog checksums and rejects any candidate whose approval, source data ID, time
+window, or reviewed regime does not match the formal event. The build runs this gate before source
 downloads or model training.
 
 ## Rainfall Alerts

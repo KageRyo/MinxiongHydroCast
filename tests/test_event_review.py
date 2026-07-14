@@ -31,6 +31,9 @@ CANDIDATE_ID = "cwa_o_a0059_candidate_20260714t1010"
 WINDOW_START = "2026-07-14T10:00:00+08:00"
 TRIGGER_TIME = "2026-07-14T10:10:00+08:00"
 WINDOW_END = "2026-07-14T10:20:00+08:00"
+CONTEXT_URL = "https://www.cwa.gov.tw/Data/fcst_pdf/W01.pdf"
+CONTEXT_PUBLISHER = "Central Weather Administration, Taiwan"
+CONTEXT_PUBLISHED_AT = "2026-07-14T11:00:00+08:00"
 
 
 def write_artifact(layout: ResearchLayout, relative: str, content: str, kind: str):
@@ -256,6 +259,18 @@ def formal_manifest(*, event_type: str = "convective") -> RadarDatasetManifest:
     )
 
 
+def context_kwargs(repository: Path) -> dict[str, object]:
+    context_file = repository / "CWA_W01_20260714T1100+0800.pdf"
+    if not context_file.exists():
+        context_file.write_bytes(b"%PDF-1.3\nOfficial CWA weather report\n")
+    return {
+        "official_context_references": (CONTEXT_URL,),
+        "official_context_files": (context_file,),
+        "official_context_publishers": (CONTEXT_PUBLISHER,),
+        "official_context_published_at": (CONTEXT_PUBLISHED_AT,),
+    }
+
+
 def approve_candidate(catalog_path: Path, repository: Path) -> None:
     review_event_candidate(
         catalog_path=catalog_path,
@@ -264,7 +279,7 @@ def approve_candidate(catalog_path: Path, repository: Path) -> None:
         decision="approved",
         reviewer="data-contract-reviewer@example.test",
         weather_regime="convective",
-        official_context_references=("https://www.cwa.gov.tw/official-context",),
+        **context_kwargs(repository),
         notes="Reviewed radar, QPE, gauges, warnings, and official context.",
         now=datetime(2026, 7, 14, 12, 0, tzinfo=TAIPEI_TZ),
     )
@@ -282,7 +297,7 @@ def test_event_review_records_provenance_and_is_idempotent(tmp_path: Path):
         decision="approved",
         reviewer="data-contract-reviewer@example.test",
         weather_regime="convective",
-        official_context_references=("https://www.cwa.gov.tw/official-context",),
+        **context_kwargs(repository),
         notes="Reviewed radar, QPE, gauges, warnings, and official context.",
         now=datetime(2026, 7, 14, 12, 5, tzinfo=TAIPEI_TZ),
     )
@@ -296,6 +311,16 @@ def test_event_review_records_provenance_and_is_idempotent(tmp_path: Path):
     assert candidate.review is not None
     assert candidate.review.reviewer == "data-contract-reviewer@example.test"
     assert candidate.review.reviewed_at == "2026-07-14T12:00:00+08:00"
+    assert len(candidate.review.official_context_artifacts) == 1
+    context = candidate.review.official_context_artifacts[0]
+    assert context.publisher == CONTEXT_PUBLISHER
+    assert context.source_url == CONTEXT_URL
+    assert context.published_at == CONTEXT_PUBLISHED_AT
+    assert context.fetched_at == "2026-07-14T12:00:00+08:00"
+    assert context.artifact.kind == "official_weather_context"
+    assert context.artifact.path.startswith(
+        f"evidence/{CANDIDATE_ID}/official_context/00_"
+    )
     assert candidate.formal_split_membership == "not_added"
 
 
@@ -325,6 +350,43 @@ def test_event_review_approval_requires_official_context(tmp_path: Path):
             decision="approved",
             reviewer="reviewer@example.test",
             weather_regime="convective",
+            now=datetime(2026, 7, 14, 12, 0, tzinfo=TAIPEI_TZ),
+        )
+
+
+def test_event_review_requires_matching_official_context_inputs(tmp_path: Path):
+    catalog_path, repository, _layout = write_complete_catalog(tmp_path)
+    context = context_kwargs(repository)
+    context["official_context_publishers"] = ()
+
+    with pytest.raises(ValueError, match="must have matching counts"):
+        review_event_candidate(
+            catalog_path=catalog_path,
+            repository_root=repository,
+            candidate_id=CANDIDATE_ID,
+            decision="approved",
+            reviewer="reviewer@example.test",
+            weather_regime="convective",
+            **context,
+            now=datetime(2026, 7, 14, 12, 0, tzinfo=TAIPEI_TZ),
+        )
+
+
+def test_event_review_rejects_missing_official_context_file(tmp_path: Path):
+    catalog_path, repository, _layout = write_complete_catalog(tmp_path)
+
+    with pytest.raises(ValueError, match="file is missing or empty"):
+        review_event_candidate(
+            catalog_path=catalog_path,
+            repository_root=repository,
+            candidate_id=CANDIDATE_ID,
+            decision="approved",
+            reviewer="reviewer@example.test",
+            weather_regime="convective",
+            official_context_references=(CONTEXT_URL,),
+            official_context_files=(repository / "missing.pdf",),
+            official_context_publishers=(CONTEXT_PUBLISHER,),
+            official_context_published_at=(CONTEXT_PUBLISHED_AT,),
             now=datetime(2026, 7, 14, 12, 0, tzinfo=TAIPEI_TZ),
         )
 
@@ -368,6 +430,27 @@ def test_dataset_candidate_promotion_rejects_corrupt_evidence(tmp_path: Path):
     qpe_artifact = catalog.candidates[0].evidence_captures[0].qpe.artifact
     assert qpe_artifact is not None
     (layout.root / qpe_artifact.path).write_text("tampered\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="failed checksum verification"):
+        validate_candidate_promotion_gate(
+            manifest=formal_manifest(),
+            event_evidence_catalog_path=catalog_path,
+            repository_root=repository,
+        )
+
+
+def test_dataset_candidate_promotion_rejects_corrupt_official_context(
+    tmp_path: Path,
+):
+    catalog_path, repository, layout = write_complete_catalog(tmp_path)
+    approve_candidate(catalog_path, repository)
+    catalog = EventEvidenceCatalog.model_validate_json(
+        catalog_path.read_text(encoding="utf-8")
+    )
+    review = catalog.candidates[0].review
+    assert review is not None
+    context_path = layout.root / review.official_context_artifacts[0].artifact.path
+    context_path.write_bytes(b"tampered\n")
 
     with pytest.raises(ValueError, match="failed checksum verification"):
         validate_candidate_promotion_gate(
@@ -449,6 +532,47 @@ def test_review_catalog_json_has_no_untyped_manual_fields(tmp_path: Path):
         "reviewer": "data-contract-reviewer@example.test",
         "reviewed_at": "2026-07-14T12:00:00+08:00",
         "weather_regime": "convective",
-        "official_context_references": ["https://www.cwa.gov.tw/official-context"],
+        "official_context_references": [CONTEXT_URL],
+        "official_context_artifacts": [
+            {
+                "publisher": CONTEXT_PUBLISHER,
+                "source_url": CONTEXT_URL,
+                "published_at": CONTEXT_PUBLISHED_AT,
+                "fetched_at": "2026-07-14T12:00:00+08:00",
+                "artifact": {
+                    "kind": "official_weather_context",
+                    "path": (
+                        f"evidence/{CANDIDATE_ID}/official_context/"
+                        "00_ef6e95fffc6a_CWA_W01_20260714T1100_0800.pdf"
+                    ),
+                    "sha256": (
+                        "ef6e95fffc6adba90ddf08a14482dc8cd9909c3a07bba13a"
+                        "728819a4055346dc"
+                    ),
+                    "bytes": 37,
+                },
+            }
+        ],
         "notes": "Reviewed radar, QPE, gauges, warnings, and official context.",
     }
+
+
+def test_legacy_review_without_context_artifacts_remains_readable(tmp_path: Path):
+    catalog_path, _repository, _layout = write_complete_catalog(tmp_path)
+    payload = json.loads(catalog_path.read_text(encoding="utf-8"))
+    candidate = payload["candidates"][0]
+    candidate["review_status"] = "approved"
+    candidate["weather_regime"] = "convective"
+    candidate["review"] = {
+        "decision": "approved",
+        "reviewer": "legacy-reviewer@example.test",
+        "reviewed_at": "2026-07-14T12:00:00+08:00",
+        "weather_regime": "convective",
+        "official_context_references": [CONTEXT_URL],
+        "notes": "Legacy URL-only review.",
+    }
+
+    catalog = EventEvidenceCatalog.model_validate_json(json.dumps(payload))
+
+    assert catalog.candidates[0].review is not None
+    assert catalog.candidates[0].review.official_context_artifacts == ()

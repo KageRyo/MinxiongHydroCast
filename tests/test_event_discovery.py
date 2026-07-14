@@ -284,6 +284,8 @@ def test_event_discovery_resumes_window_and_is_idempotent(tmp_path: Path):
     assert sha256_file(frame_path) == frame_artifact.sha256
     assert fourth.catalog_path.read_bytes() == second_bytes
 
+    official_context = repository / "CWA_W01_20260714T1000+0800.pdf"
+    official_context.write_bytes(b"%PDF-1.3\nOfficial CWA weather report\n")
     review_event_candidate(
         catalog_path=fourth.catalog_path,
         repository_root=repository,
@@ -291,7 +293,14 @@ def test_event_discovery_resumes_window_and_is_idempotent(tmp_path: Path):
         decision="approved",
         reviewer="reviewer@example.test",
         weather_regime="convective",
-        official_context_references=("https://www.cwa.gov.tw/official-context",),
+        official_context_references=(
+            "https://www.cwa.gov.tw/Data/fcst_pdf/W01.pdf",
+        ),
+        official_context_files=(official_context,),
+        official_context_publishers=(
+            "Central Weather Administration, Taiwan",
+        ),
+        official_context_published_at=("2026-07-14T10:00:00+08:00",),
         now=datetime(2026, 7, 14, 10, 27, tzinfo=TAIPEI_TZ),
     )
     gauge_artifact = capture.gauges.artifact
