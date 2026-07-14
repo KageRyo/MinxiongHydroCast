@@ -167,7 +167,7 @@ through a focused pull request. The end-to-end target is defined in
 - [ ] Evaluate `RainfallThresholdRiskScorer` on real event windows.
 - [ ] Add LightGBM/XGBoost only after labels and feature tables are stable.
 
-### Phase 6: Release And Operations
+### Phase 6: Operations
 
 - [x] Publish the Minxiong/Chiayi baseline smoke-test model card.
 - [ ] Publish model cards for any future Taiwan-wide or promoted Minxiong/Chiayi checkpoints.
@@ -197,8 +197,8 @@ through a focused pull request. The end-to-end target is defined in
 
 - [x] Schedule stable observation collection, shadow evaluation, backups, and official live
       contracts.
-- [ ] Replicate verified backups to a different device or remote system before public operational
-      promotion; deferred while the service remains internal and localhost-only.
+- [ ] Replicate verified backups to a different device or remote system before external operational
+      use; the current local backup does not cover loss of the host or storage volume.
 - [ ] Schedule radar/model workflows only after their data and model gates are stable.
 - [ ] Extend the operator view with experimental forecast products only after model outputs pass
       their gates.

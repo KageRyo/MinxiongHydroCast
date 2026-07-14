@@ -1,7 +1,7 @@
 # Deployment status
 
-This page records verified deployment evidence. It is not a release approval or a claim that
-MinxiongHydroCast is an official warning system.
+This page records verified deployment evidence. It does not claim that MinxiongHydroCast is an
+official warning system or authorize external operational use.
 
 ## Verified on 2026-07-13
 
@@ -104,12 +104,12 @@ rather than simulated:
 - no ready-data gap over 30 minutes and no storage-integrity error;
 - continuous ready coverage during at least one reviewed, confirmed heavy-rain period.
 
-Promotion to public service or automated risk notification must remain blocked while those
+External operational use and automated risk notification must remain disabled while those
 conditions are incomplete. A qualifying heavy-rain period may require the shadow deployment to
 run longer than seven calendar days. Internal code, documentation, and identifier changes may
 merge independently when their own review and CI checks pass.
 
-## Remaining promotion work
+## Outstanding safeguards
 
 - Let the active candidate finish its post-trigger window, review its radar/QPE/gauge/warning
   evidence and official weather context, and record the first auditable `mhc event-review`
@@ -118,9 +118,9 @@ merge independently when their own review and CI checks pass.
   formal split expansion remain blocked until the dataset is meaningfully more diverse.
 - Explicitly activate the implemented Discord backend only after naming its primary and backup
   on-call owners, then exercise its incident path.
-- Before public operational promotion, replicate backups to another device or remote system. This
-  is deferred for the current internal localhost stage; the current backup protects snapshots from
-  application-level corruption but not loss of the whole host or volume.
+- Before any external operational use, replicate backups to another device or remote system. The
+  current backup protects snapshots from application-level corruption but not loss of the whole
+  host or volume.
 - Assign incident ownership and exercise acknowledgement, override, and rollback responsibilities.
 - Complete the real shadow gate and local model/label gates before enabling risk notifications.
 - Add authenticated TLS ingress only if the localhost service must become network-accessible.

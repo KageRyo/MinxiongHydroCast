@@ -315,9 +315,9 @@ Prometheus metrics endpoint, read API, operator view, monitoring configs, local 
 checksummed backup/restore tooling, and single-host installation scripts are implemented. The
 single-host profile has been deployed and its live sources, Prometheus target, local alert routing,
 and backup restore have been exercised. See [deployment_status.md](deployment_status.md) for dated
-evidence. Public operational promotion still requires a named human alert channel, an off-host
-backup, authenticated network exposure if needed, and completion of the shadow and model evidence
-gates.
+evidence. External operational use remains disabled until a named human alert channel, off-host
+recovery, any required authenticated network exposure, and the shadow and model evidence gates are
+complete.
 
 ## Production Gates
 
@@ -344,15 +344,8 @@ The immediate blockers are concrete:
 - assign decision owners and exercise the documented incident, human-override, and rollback paths
   before enabling any external operational notification.
 
-Off-host backup replication is deferred while the first release remains internal and
-localhost-only. It is still required before public operational promotion because the current local
-backup does not protect against loss of the host or storage volume.
-
-## Recommended First Release
-
-The first credible release remains an internal **Minxiong observation and data-quality service**,
-not an automated warning product. The repository supplies the runnable service and operations
-foundation. The immediate promotion work is to add a named human alert route, assign decision
-owners, exercise incident/override procedures, and complete the real shadow run. Add experimental
-radar nowcasts only after the observation service is reliable; add public risk notifications only
-after local backtesting, operator review, and off-host recovery are complete.
+Off-host backup replication is not part of the current localhost deployment. External operational
+use remains disabled because the current local backup does not protect against loss of the host or
+storage volume. This is a product-safety boundary, not a release schedule. The repository documents
+implemented behavior and the evidence required to use it safely; release timing and publication
+planning are intentionally kept outside public technical documentation.

@@ -11,7 +11,7 @@ credentials, raw official data, or model weights.
 
 1. **Internal observation service:** official-source collection, immutable snapshots, readiness,
    localhost API/operator view, monitoring, local alert audit, backup/restore, and supervised
-   scheduling are implemented and deployed. Public operational promotion still requires the real
+   scheduling are implemented and deployed. External operational use still requires the real
    shadow gate, off-host recovery, named operators, and exercised incident paths.
 2. **Experimental rainfall nowcast:** reproducible independent-event evaluation is implemented;
    event diversity, QPE/gauge validation, local labels, calibration, and passing model-promotion
@@ -91,8 +91,8 @@ credentials, raw official data, or model weights.
   shadow evaluation, and an online host-bound GitHub Actions runner. See
   [deployment_status.md](deployment_status.md) for dated evidence.
 - Deferred for the current internal localhost stage: replicate backups to another device or remote
-  system. The accepted risk must be revisited before public operational promotion.
-- Pending operations promotion: assign primary and backup operators, route alerts to a named human
+  system. The accepted risk must be resolved before external operational use.
+- Pending operational safeguards: assign primary and backup operators, route alerts to a named human
   receiver, exercise incident/override/rollback procedures, and complete the real shadow gate.
 - Pending public exposure work: define SLOs and add authenticated TLS ingress only if the service
   must become reachable beyond localhost.
@@ -158,7 +158,7 @@ credentials, raw official data, or model weights.
   township/village context.
 - Evaluate `RainfallThresholdRiskScorer`, then add LightGBM/XGBoost only after labels are ready.
 
-## Phase 6: Release And Operations
+## Phase 6: Operations
 
 - Publish model cards for Taiwan-wide and Minxiong/Chiayi-specific checkpoints.
 - Add scheduled jobs only after manual ingestion and validation are repeatable.
