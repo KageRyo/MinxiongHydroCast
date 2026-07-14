@@ -62,6 +62,10 @@ credentials, raw official data, or model weights.
 - Completed: `mhc dataset-build` orchestration for CWA history, resilient event download, sequence
   validation, tensor conversion, Persistence evaluation, weighted Tiny U-Net evaluation, catalog
   generation, and checksum verification in an external durable research root.
+- Completed: deployed `mhc event-discover` on a 20-minute user-systemd timer with incremental
+  `O-A0059-001` scanning, local/Taiwan `35 dBZ` metrics, resumable checksummed event windows, and
+  synchronized QPE/gauge/warning evidence. The Pydantic catalog and `mhc event-review` gate keep
+  discovery candidates out of formal splits until an auditable human decision.
 - Completed: formal five-event split with two real train, one independent validation, and two
   held-out Minxiong/Chiayi test events; all formal demo placeholders are prohibited by schema.
 - Completed: weighted Tiny U-Net run on two RTX 4090 GPUs using 88 training windows and a separate
@@ -101,9 +105,12 @@ credentials, raw official data, or model weights.
   weather-map source is still needed before assigning labels.
 - Pending validation work: run live QPE/gauge reports for each selected event after matching
   event-time QPE grids are captured or an official historical QPE archive is confirmed.
-- Next technical focus: expand weather-regime diversity, attach official event context, obtain
-  event-time QPE/gauge evidence and reviewed local labels, then improve the learned model until it
-  passes the unchanged independent-event gate. Do not consider NowcastNet or forecast publication
+- Active evidence work: the first continuously collected candidate was still extending at the
+  2026-07-14 12:00 snapshot and therefore remained pending review and outside the formal split.
+- Next technical focus: complete that first candidate window and official-context-backed human
+  review, then accumulate reviewed typhoon, frontal, Mei-yu, and convective regimes. Only after the
+  dataset becomes meaningfully more diverse should the formal split change, the model retrain, and
+  the unchanged independent-event gate rerun. Do not consider NowcastNet or forecast publication
   before those evidence gaps close.
 
 ## Phase 1: Data Source Finalization

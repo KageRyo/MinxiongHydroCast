@@ -127,6 +127,12 @@ context source. A later formal manifest change must reference the candidate thro
 `mhc dataset-build --event-evidence-catalog ...` reject unapproved, incomplete, checksum-invalid,
 time-mismatched, or regime-mismatched promotions.
 
+The managed internal host runs discovery every 20 minutes from the deployed `main` revision.
+Current rollout evidence and the active candidate state are recorded in
+[docs/deployment_status.md](docs/deployment_status.md). The next task is to finish and human-review
+the first continuous candidate, then accumulate weather-regime diversity before any split change
+or retraining.
+
 ## Operational Observation Service
 
 Create a versioned demo snapshot without contacting live sources:

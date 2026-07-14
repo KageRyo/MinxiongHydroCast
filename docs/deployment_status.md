@@ -26,6 +26,31 @@ The post-migration live snapshot was healthy and ready. It contained a valid emp
 rainfall-warning product, 82 CWA rain-gauge observations, 150 WRA IoW flood-sensor observations,
 and a ready Minxiong feature row.
 
+## Continuous event evidence rollout verified on 2026-07-14
+
+PR #12 deployed the continuous event-evidence workflow from merge revision
+`7f8fccc8f93a5261dab6be47550b9b11d5f9b25a`. The recorded installed revision matched `main`, the
+private systemd environment remained mode `0600`, and
+`MINXIONGHYDROCAST_RESEARCH_ROOT` resolved to the external durable research volume.
+
+The `minxiong-hydrocast-event-discover.timer` was enabled and active on a 20-minute schedule. Its
+first installed oneshot completed successfully after scanning 33 new frames and triggers. The
+12:00 run summary was also `status=ok`, reported no evidence errors, and incrementally scanned two
+new trigger frames without changing any formal dataset split.
+
+At the 2026-07-14 12:00 evidence snapshot, the strict catalog contained one active candidate:
+
+- 82 of 88 required 10-minute radar frames were captured;
+- 76 trigger frames extended the candidate through 11:50, with a provisional window end at 12:50;
+- 18 synchronized evidence captures each reported QPE/gauge/warning states `ok/ok/empty`;
+- full catalog artifact verification reported zero checksum or size errors;
+- review state remained `collecting`, `pending`, `unclassified`, and `not_added`.
+
+These counts are a dated operational snapshot, not a completion claim. The rolling window must
+first stop extending and reach `awaiting_review`. A reviewer must then attach official weather
+context before assigning a regime. The formal five-event split remained unchanged with SHA-256
+`953b8b0d85b0269adcc7468288332e039d01512a0ac626090efbf56b12a6a6e1`.
+
 ## Operational drills
 
 The original `MinxiongHydroCastDrill` and post-migration `MinxiongHydroCastMigrationDrill`
@@ -43,7 +68,8 @@ The manually dispatched Official Live Contracts run `29219192303` passed both jo
 GitHub-hosted CWA/IoW contracts and the host-bound WRA rainfall-warning contract on the renamed
 self-hosted runner.
 
-The complete local suite passed with 237 tests, and Ruff reported no issues.
+The original deployment suite passed with 237 tests. The continuous event-evidence rollout later
+passed 268 tests in PR CI, and Ruff reported no issues.
 
 ## Canonical identifier rollout
 
@@ -85,6 +111,11 @@ merge independently when their own review and CI checks pass.
 
 ## Remaining promotion work
 
+- Let the active candidate finish its post-trigger window, review its radar/QPE/gauge/warning
+  evidence and official weather context, and record the first auditable `mhc event-review`
+  decision. Approval alone must not add it to a formal split.
+- Continue collecting reviewed typhoon, frontal, Mei-yu, and convective regimes. Retraining and
+  formal split expansion remain blocked until the dataset is meaningfully more diverse.
 - Explicitly activate the implemented Discord backend only after naming its primary and backup
   on-call owners, then exercise its incident path.
 - Before public operational promotion, replicate backups to another device or remote system. This
