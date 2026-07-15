@@ -43,6 +43,7 @@ class DiscoveryConfig(EventEvidenceSchema):
     local_radius_pixels: int = Field(default=8, ge=0)
     local_min_pixels: int = Field(default=1, ge=1)
     taiwan_min_pixels: int = Field(default=1000, ge=1)
+    candidate_trigger_label: Literal["minxiong_35dbz"] = "minxiong_35dbz"
     initial_lookback_minutes: int = Field(default=120, ge=10)
     merge_gap_minutes: int = Field(default=60, ge=10)
     before_minutes: int = Field(default=60, ge=10)

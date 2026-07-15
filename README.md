@@ -116,10 +116,11 @@ mhc event-discover --repository-root "$PWD"
 
 The command incrementally scans `O-A0059-001`, calculates Minxiong and Taiwan-wide `35 dBZ`
 coverage, resumes complete event-window downloads, and synchronizes `O-B0045-001` QPE,
-`O-A0002-001` gauges, and WRA rainfall warnings. A candidate window is bounded to 480 minutes by
-default; a later qualifying frame starts another candidate instead of extending the window without
-limit. Candidates remain pending human review and cannot automatically enter train, validation, or
-test splits. See
+`O-A0002-001` gauges, and WRA rainfall warnings. Only a Minxiong-local threshold frame creates or
+extends a review candidate; Taiwan-wide-only threshold frames remain available as persisted context
+metrics. A candidate window is bounded to 480 minutes by default; a later qualifying local frame
+starts another candidate instead of extending the window without limit. Candidates remain pending
+human review and cannot automatically enter train, validation, or test splits. See
 [docs/continuous_event_evidence.md](docs/continuous_event_evidence.md).
 
 After a candidate window is complete, record a provenance-backed human decision with
@@ -132,9 +133,8 @@ time-mismatched, or regime-mismatched promotions.
 
 The managed internal host runs discovery every 20 minutes from the deployed `main` revision.
 Current rollout evidence and the active candidate state are recorded in
-[docs/deployment_status.md](docs/deployment_status.md). The next task is to finish and human-review
-the first continuous candidate, then accumulate weather-regime diversity before any split change
-or retraining.
+[docs/deployment_status.md](docs/deployment_status.md). Reviewed local candidates must accumulate
+meaningful weather-regime diversity before any split change or retraining.
 
 ## Operational Observation Service
 

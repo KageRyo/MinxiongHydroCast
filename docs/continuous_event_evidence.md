@@ -10,16 +10,18 @@ Each successful run:
 1. fetches the official `O-A0059-001` history index over verified TLS;
 2. scans only frames newer than the persisted cursor, using a 120-minute lookback on first run;
 3. computes Minxiong-local and Taiwan-wide coverage at `35 dBZ`;
-4. groups qualifying frames into candidate windows and preserves 60 minutes before the first
-   trigger and 60 minutes after the latest trigger at the 10-minute source cadence, with a
-   480-minute maximum total window;
+4. persists both coverage metrics, but groups only Minxiong-local qualifying frames into candidate
+   windows and preserves 60 minutes before the first local trigger and 60 minutes after the latest
+   local trigger at the 10-minute source cadence, with a 480-minute maximum total window;
 5. captures current `O-B0045-001` QPE, `O-A0002-001` Chiayi gauges, and WRA
    `Rainfall/Warning` evidence for the latest trigger of each new or extended candidate;
 6. atomically updates the Pydantic-validated `EventEvidenceCatalog` only when source state changes.
 
 The default local threshold is one Minxiong-area pixel at or above `35 dBZ`. The default
-Taiwan-wide threshold is 1,000 pixels. Both coverage values are retained for every scanned frame,
-including frames that do not create a candidate.
+Taiwan-wide threshold is 1,000 pixels. `minxiong_35dbz` is the fixed review-queue trigger;
+`taiwan_wide_35dbz` is context only. Both coverage values and labels are retained under
+`discovery/frame_metrics/` for every scanned frame, including Taiwan-wide-only frames that do not
+create or extend a candidate.
 
 The maximum covers the complete window, including its before/after context. With the defaults, one
 candidate can therefore contain at most six hours between its first and last trigger. A qualifying
@@ -77,6 +79,10 @@ capture, rewrite the catalog, or duplicate a candidate. Failed evidence sources 
 absolute alignment delta from the radar trigger so a reviewer can identify late or mismatched
 evidence. A non-empty source more than 20 minutes from the target is retained as `stale`, not
 silently treated as synchronized.
+
+The structured run summary reports `trigger_frames` as Minxiong-local candidate triggers and
+`context_trigger_frames` as all frames carrying either the local or Taiwan-wide context label.
+This keeps queue growth observable without discarding broader radar conditions.
 
 ## Human Review Boundary
 
@@ -180,6 +186,13 @@ no active WRA warning. The decision therefore records a reviewable convective ra
 a flood or warning event. Full artifact verification passed, a repeated identical review was
 idempotent, and formal membership remained `not_added`. See
 [deployment_status.md](deployment_status.md) for the dated evidence.
+
+Two later complete windows contained six Taiwan-wide triggers each but no Minxiong-local trigger.
+Their synchronized QPE/gauge/warning captures were respectively four and three sets of
+`ok/ok/empty`, with no Minxiong rain or active WRA warning evidence. Human review therefore
+recorded both as `rejected/unclassified` for the Minxiong-local queue while leaving formal split
+membership `not_added`. Discovery now prevents this Taiwan-wide-only context from creating future
+review candidates; existing catalog records remain intact and readable.
 
 Ongoing data curation must:
 

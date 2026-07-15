@@ -240,6 +240,7 @@ def test_event_discovery_resumes_window_and_is_idempotent(tmp_path: Path):
     )
     assert first.scanned_frame_count == 2
     assert first.trigger_frame_count == 1
+    assert first.context_trigger_frame_count == 1
     assert first.candidate_count == 1
     assert first_catalog.candidates[0].operational_status == "collecting"
     assert first_catalog.candidates[0].radar_collection.captured_frame_count == 2
@@ -374,6 +375,78 @@ def test_catalog_contract_rejects_automatic_formal_split_updates():
         EventEvidenceCatalog.model_validate(payload)
 
 
+def test_taiwan_context_metric_does_not_enter_or_extend_minxiong_queue():
+    config = DiscoveryConfig()
+    local = trigger_metric("2026-07-14T10:00:00+08:00")
+    context = trigger_metric("2026-07-14T10:10:00+08:00").model_copy(
+        update={
+            "local": CoverageMetric(
+                valid_pixel_count=100,
+                pixels_ge_threshold=0,
+                fraction_ge_threshold=0.0,
+                max_value=10.0,
+            ),
+            "candidate_labels": ("taiwan_wide_35dbz",),
+        }
+    )
+
+    assert apply_trigger_metrics((), metrics=(context,), config=config) == ()
+
+    candidates = apply_trigger_metrics((), metrics=(local,), config=config)
+    updated = apply_trigger_metrics(candidates, metrics=(context,), config=config)
+
+    assert updated == candidates
+    assert updated[0].last_trigger_time == local.data_time
+    assert updated[0].triggers == (local,)
+
+
+def test_taiwan_context_frame_is_persisted_without_creating_candidate(tmp_path: Path):
+    repository = tmp_path / "repository"
+    repository.mkdir()
+    research = tmp_path / "external-research"
+    data_time = "2026-07-14T10:10:00+08:00"
+    radar = grid_bytes(
+        data_id="O-A0059-001",
+        data_time=data_time,
+        values=[40, 40, 40, 40, 1, 40, 40, 40, 40],
+        units="dBZ",
+    )
+
+    result = run_event_discovery(
+        repository_root=repository,
+        research_root=research,
+        cwa_api_key="cwa-secret",
+        wra_api_key="wra-secret",
+        config=DiscoveryConfig(
+            local_radius_pixels=0,
+            taiwan_min_pixels=2,
+            initial_lookback_minutes=10,
+            merge_gap_minutes=10,
+            before_minutes=10,
+            after_minutes=10,
+        ),
+        history_index=history_index([data_time]),
+        timeout=1,
+        retry_backoff_seconds=0.0,
+        frame_http_get=lambda url, *, timeout, verify: FakeResponse(radar, url),
+        now=datetime(2026, 7, 14, 10, 12, tzinfo=TAIPEI_TZ),
+    )
+
+    metric_paths = tuple(ResearchLayout(research).discovery_metrics.glob("*.json"))
+    metric = RadarFrameMetric.model_validate_json(metric_paths[0].read_text(encoding="utf-8"))
+    catalog = EventEvidenceCatalog.model_validate_json(
+        result.catalog_path.read_text(encoding="utf-8")
+    )
+
+    assert result.scanned_frame_count == 1
+    assert result.context_trigger_frame_count == 1
+    assert result.trigger_frame_count == 0
+    assert result.candidate_count == 0
+    assert len(metric_paths) == 1
+    assert metric.candidate_labels == ("taiwan_wide_35dbz",)
+    assert catalog.candidates == ()
+
+
 def test_trigger_metrics_split_at_maximum_candidate_window():
     config = DiscoveryConfig(
         merge_gap_minutes=60,
@@ -444,10 +517,12 @@ def test_existing_overlong_candidate_stops_extending_without_migration():
 def test_discovery_config_defaults_old_catalogs_and_validates_window_limit():
     legacy_payload = DiscoveryConfig().model_dump(mode="json")
     legacy_payload.pop("max_candidate_window_minutes")
+    legacy_payload.pop("candidate_trigger_label")
 
     parsed = DiscoveryConfig.model_validate(legacy_payload)
 
     assert parsed.max_candidate_window_minutes == 480
+    assert parsed.candidate_trigger_label == "minxiong_35dbz"
     with pytest.raises(ValidationError, match="must cover"):
         DiscoveryConfig(
             before_minutes=60,

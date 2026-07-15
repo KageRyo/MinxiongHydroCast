@@ -76,6 +76,35 @@ reported zero errors after the review, and an identical review command returned
 `catalog_changed=false`. Formal membership remained `not_added`, and the formal manifest retained
 the same SHA-256 recorded above.
 
+## Follow-up candidate reviews verified on 2026-07-15
+
+The 09:00 discovery cycle reported four candidates, three complete windows, and zero evidence
+errors. Full Pydantic and artifact checksum verification also reported zero errors. Two complete
+windows were Taiwan-wide context rather than Minxiong-local events:
+
+- `cwa_o_a0059_candidate_20260714t1640` contained 18 of 18 frames, six Taiwan-wide triggers, zero
+  Minxiong-local triggers, and four synchronized `ok/ok/empty` captures. Its local radar peak was
+  8.0 dBZ.
+- `cwa_o_a0059_candidate_20260715t0020` contained 18 of 18 frames, six Taiwan-wide triggers, zero
+  Minxiong-local triggers, and three synchronized `ok/ok/empty` captures. It had no valid local
+  reflectivity peak.
+
+Both reviews recorded `rejected/unclassified` for the Minxiong-local queue and explicitly did not
+classify the broader Taiwan weather state. Their formal membership remained `not_added`; the
+formal manifest SHA-256 remained
+`953b8b0d85b0269adcc7468288332e039d01512a0ac626090efbf56b12a6a6e1`.
+
+At the same dated snapshot, the fourth pre-policy candidate remained collecting with 28 of 34
+frames, 21 Taiwan-wide triggers, and zero Minxiong-local triggers. It remains preserved as existing
+evidence and can finish its already-defined window; it does not justify creating more local review
+work.
+
+The candidate policy retains Taiwan-wide labels and coverage in persisted frame metrics but allows
+only `minxiong_35dbz` frames to create or extend future review candidates. Compatibility tests
+and a direct read of the live catalog confirm that the older config parses with this default, all
+four candidate records remain readable, and artifact verification still reports zero errors. No
+destructive catalog migration is required.
+
 ## Operational drills
 
 The original `MinxiongHydroCastDrill` and post-migration `MinxiongHydroCastMigrationDrill`
@@ -118,10 +147,10 @@ the migration.
 
 ## Active shadow gate
 
-The shadow deployment started on 2026-07-12. At the post-merge verification point it retained 70
-successful and ready live attempts over 10.894 hours, with 100% success and readiness and no gap
-over 10.283 minutes. The gate remains blocked by design until all of the following are observed
-rather than simulated:
+The shadow deployment started on 2026-07-12. At the 2026-07-15 09:01 verification point it retained
+353 live attempts over 57.435 hours: 350 succeeded and 347 were ready, for 99.1501% success and
+98.3003% readiness, with a 20-minute maximum gap. The gate remains blocked by design until all of
+the following are observed rather than simulated:
 
 - at least 168 hours between the first and last retained live attempt;
 - at least 900 attempts in the eight-day audit window;
