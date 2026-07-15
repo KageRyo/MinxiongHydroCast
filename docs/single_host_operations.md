@@ -131,8 +131,10 @@ test ! -f ~/.local/share/minxiong-hydrocast/notifications/discord-deliveries.jso
 
 The daily timer creates a compressed archive beside a Pydantic-validated metadata sidecar. Backup
 creation holds the collector lock and verifies every retained manifest and dataset checksum before
-writing the archive. Restore rejects links, path traversal, checksum mismatches, existing targets,
-and snapshots that fail integrity verification.
+writing the archive. If a collection run owns the lock, the installed unit retries at most five
+times with exponential delays of 15, 30, 60, and 120 seconds. Other failures are not retried, and a
+lock held beyond the 225-second bound fails the backup visibly. Restore rejects links, path
+traversal, checksum mismatches, existing targets, and snapshots that fail integrity verification.
 
 Create, verify, and restore a fresh backup:
 

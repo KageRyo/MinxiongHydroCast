@@ -1,6 +1,8 @@
 import json
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Iterator
 from zoneinfo import ZoneInfo
 
 import pytest
@@ -12,7 +14,11 @@ from minxionghydrocast.operations.backup import (
     restore_backup,
     verify_backup,
 )
-from minxionghydrocast.operations.snapshot_store import DatasetPayload, SnapshotStore
+from minxionghydrocast.operations.snapshot_store import (
+    DatasetPayload,
+    RunLockError,
+    SnapshotStore,
+)
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 
@@ -112,13 +118,104 @@ def test_backup_refuses_destination_inside_store(tmp_path):
         create_backup(store, store.root / "backups", now=now)
 
 
+def test_backup_retries_transient_collection_lock(tmp_path, monkeypatch):
+    now = datetime(2026, 7, 12, 10, 0, tzinfo=TAIPEI_TZ)
+    store = source_store(tmp_path, now)
+    real_collection_lock = store.collection_lock
+    lock_attempts = 0
+    sleep_delays: list[float] = []
+
+    @contextmanager
+    def flaky_collection_lock() -> Iterator[None]:
+        nonlocal lock_attempts
+        lock_attempts += 1
+        if lock_attempts < 3:
+            raise RunLockError("collection already running")
+        with real_collection_lock():
+            yield
+
+    monkeypatch.setattr(store, "collection_lock", flaky_collection_lock)
+
+    archive, metadata = create_backup(
+        store,
+        tmp_path / "backups",
+        now=now,
+        lock_retry_attempts=4,
+        lock_retry_backoff_seconds=2,
+        sleep=sleep_delays.append,
+    )
+
+    assert archive.is_file()
+    assert metadata.snapshot_count == 1
+    assert lock_attempts == 3
+    assert sleep_delays == [2, 4]
+
+
+def test_backup_fails_after_bounded_collection_lock_retries(tmp_path, monkeypatch):
+    now = datetime(2026, 7, 12, 10, 0, tzinfo=TAIPEI_TZ)
+    store = source_store(tmp_path, now)
+    lock_attempts = 0
+    sleep_delays: list[float] = []
+
+    @contextmanager
+    def locked_collection() -> Iterator[None]:
+        nonlocal lock_attempts
+        lock_attempts += 1
+        raise RunLockError("collection already running")
+        yield
+
+    monkeypatch.setattr(store, "collection_lock", locked_collection)
+
+    with pytest.raises(RunLockError, match="collection already running"):
+        create_backup(
+            store,
+            tmp_path / "backups",
+            now=now,
+            lock_retry_attempts=3,
+            lock_retry_backoff_seconds=2,
+            sleep=sleep_delays.append,
+        )
+
+    assert lock_attempts == 3
+    assert sleep_delays == [2, 4]
+    assert list((tmp_path / "backups").iterdir()) == []
+
+
+@pytest.mark.parametrize(
+    ("attempts", "backoff", "message"),
+    [
+        (0, 1, "attempts must be at least one"),
+        (1, -1, "backoff seconds cannot be negative"),
+    ],
+)
+def test_backup_rejects_invalid_lock_retry_configuration(
+    tmp_path, attempts, backoff, message
+):
+    now = datetime(2026, 7, 12, 10, 0, tzinfo=TAIPEI_TZ)
+
+    with pytest.raises(BackupError, match=message):
+        create_backup(
+            source_store(tmp_path, now),
+            tmp_path / "backups",
+            now=now,
+            lock_retry_attempts=attempts,
+            lock_retry_backoff_seconds=backoff,
+            sleep=lambda _delay: None,
+        )
+
+
 def test_backup_refuses_unsupported_member_types(tmp_path):
     now = datetime(2026, 7, 12, 10, 0, tzinfo=TAIPEI_TZ)
     store = source_store(tmp_path, now)
     (store.root / "unexpected-link").symlink_to(store.root / "latest.json")
 
     with pytest.raises(BackupError, match="member type is not allowed"):
-        create_backup(store, tmp_path / "backups", now=now)
+        create_backup(
+            store,
+            tmp_path / "backups",
+            now=now,
+            sleep=lambda _delay: pytest.fail("non-lock errors must not be retried"),
+        )
 
     assert list((tmp_path / "backups").iterdir()) == []
 

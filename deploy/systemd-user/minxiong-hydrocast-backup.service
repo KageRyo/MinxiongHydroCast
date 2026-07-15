@@ -6,6 +6,8 @@ Type=oneshot
 ExecStart=%h/.local/share/minxiong-hydrocast/venv/bin/minxiong-hydrocast-backup create \
   --store %h/.local/share/minxiong-hydrocast/operations \
   --backup-dir %h/.local/share/minxiong-hydrocast/backups \
-  --retention-days 30
+  --retention-days 30 \
+  --lock-retry-attempts 5 \
+  --lock-retry-backoff-seconds 15
 NoNewPrivileges=true
 PrivateTmp=true
