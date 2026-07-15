@@ -71,6 +71,8 @@ credentials, raw official data, or model weights.
   backward-compatible reading of URL-only reviews.
 - Completed: cadence-aligned maximum candidate windows that split sustained trigger sequences while
   preserving existing candidate identifiers, evidence, and older catalog compatibility.
+- Completed: Minxiong-local candidate eligibility. Taiwan-wide threshold labels remain persisted
+  frame context, but cannot create or extend the human-review queue without `minxiong_35dbz`.
 - Completed: formal five-event split with two real train, one independent validation, and two
   held-out Minxiong/Chiayi test events; all formal demo placeholders are prohibited by schema.
 - Completed: weighted Tiny U-Net run on two RTX 4090 GPUs using 88 training windows and a separate
@@ -113,7 +115,9 @@ credentials, raw official data, or model weights.
 - Completed evidence work: the first continuously collected candidate reached 116 of 116 frames,
   passed full artifact verification, received a checksummed official-context-backed
   `approved/convective` review, and remained outside the formal split. Repeating the same review was
-  idempotent.
+  idempotent. Two subsequent complete Taiwan-wide-only candidates were reviewed as
+  `rejected/unclassified`; catalog verification remained clean and the formal split checksum did
+  not change.
 - Next technical focus: accumulate reviewed typhoon, frontal, Mei-yu, and convective regimes. Only
   after the dataset becomes meaningfully more diverse should the formal split change, the model
   retrain, and the unchanged independent-event gate rerun. Do not consider NowcastNet or forecast

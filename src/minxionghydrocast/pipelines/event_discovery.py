@@ -108,6 +108,7 @@ class EventDiscoveryResult:
     catalog_path: Path
     catalog_changed: bool
     scanned_frame_count: int
+    context_trigger_frame_count: int
     trigger_frame_count: int
     candidate_count: int
     complete_candidate_count: int
@@ -501,7 +502,10 @@ def apply_trigger_metrics(
     updated = list(candidates)
     known_times = {trigger.data_time for candidate in updated for trigger in candidate.triggers}
     for metric in sorted(metrics, key=lambda item: aware_datetime(item.data_time, field="metric")):
-        if not metric.candidate_labels or metric.data_time in known_times:
+        if (
+            config.candidate_trigger_label not in metric.candidate_labels
+            or metric.data_time in known_times
+        ):
             continue
         metric_time = aware_datetime(metric.data_time, field="metric data_time")
         target_index = None
@@ -1265,7 +1269,10 @@ def run_event_discovery(
             catalog_path=catalog_path,
             catalog_changed=changed,
             scanned_frame_count=len(metrics),
-            trigger_frame_count=sum(bool(metric.candidate_labels) for metric in metrics),
+            context_trigger_frame_count=sum(bool(metric.candidate_labels) for metric in metrics),
+            trigger_frame_count=sum(
+                config.candidate_trigger_label in metric.candidate_labels for metric in metrics
+            ),
             candidate_count=len(candidate_catalog.candidates),
             complete_candidate_count=sum(
                 candidate.radar_collection.complete for candidate in candidate_catalog.candidates
@@ -1372,6 +1379,7 @@ def main() -> None:
         row_counts={
             "scanned_frames": result.scanned_frame_count,
             "trigger_frames": result.trigger_frame_count,
+            "context_trigger_frames": result.context_trigger_frame_count,
             "candidates": result.candidate_count,
             "complete_candidates": result.complete_candidate_count,
             "evidence_errors": result.evidence_error_count,
@@ -1382,6 +1390,7 @@ def main() -> None:
             "catalog_changed": result.catalog_changed,
             "event_threshold_dbz": args.event_threshold_dbz,
             "max_candidate_window_minutes": args.max_candidate_window_minutes,
+            "candidate_trigger_label": "minxiong_35dbz",
             "candidate_queue_only": True,
             "automatic_formal_split_updates": False,
             "human_review_required": True,
@@ -1389,9 +1398,11 @@ def main() -> None:
     )
     record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)
     LOGGER.info(
-        "event discovery complete: scanned=%d triggers=%d candidates=%d catalog_changed=%s",
+        "event discovery complete: scanned=%d candidate_triggers=%d context_triggers=%d "
+        "candidates=%d catalog_changed=%s",
         result.scanned_frame_count,
         result.trigger_frame_count,
+        result.context_trigger_frame_count,
         result.candidate_count,
         result.catalog_changed,
     )

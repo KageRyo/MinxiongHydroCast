@@ -76,6 +76,8 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
       timer, incremental live run, and external catalog checksums.
 - [x] Complete an official-context-backed human review of the first finished continuous candidate
       while keeping formal split selection as a separate tracked decision.
+- [x] Reject complete Taiwan-wide-only windows without Minxiong-local evidence and restrict future
+      review-queue candidates to local triggers while retaining Taiwan-wide frame context.
 - [ ] Accumulate reviewed typhoon, frontal, Mei-yu, and convective candidates before retraining.
 
 ## Milestone 7: Train And Compare Models

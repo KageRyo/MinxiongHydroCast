@@ -71,6 +71,10 @@ through a focused pull request. The end-to-end target is defined in
       extending a sustained Taiwan-wide trigger without limit.
 - [x] Complete the first checksummed official-context-backed `approved/convective` candidate review
       while keeping formal split membership `not_added`.
+- [x] Review and reject two complete Taiwan-wide-only candidates with no Minxiong-local trigger,
+      while preserving their evidence and leaving formal split membership `not_added`.
+- [x] Keep Taiwan-wide threshold frames as persisted context metrics while limiting new candidate
+      creation and extension to `minxiong_35dbz` triggers.
 - [x] Deploy the event-discovery timer from `main`, verify the installed revision, and validate the
       live external catalog with zero artifact checksum or size errors.
 
@@ -118,9 +122,9 @@ through a focused pull request. The end-to-end target is defined in
 - [x] Produce a checksummed dataset catalog and verification report under the external research
       root, with source provenance, time ranges, and lead-time metrics.
 - [x] Add a next-batch event expansion queue from the existing CWA hourly discovery scan.
-- [ ] Let the active continuously collected candidate finish its post-trigger window, inspect
-      official context and synchronized evidence, and record the first `mhc event-review`
-      decision without automatically changing a formal split.
+- [x] Let the first continuously collected candidate finish its post-trigger window, inspect
+      official context and synchronized evidence, and record its `mhc event-review` decision
+      without automatically changing a formal split.
 - [ ] Human-review and accumulate typhoon, frontal, Mei-yu, and convective candidates before SOTA
       model migration.
 - [ ] After sufficient reviewed diversity exists, propose a tracked formal-split change, rebuild
