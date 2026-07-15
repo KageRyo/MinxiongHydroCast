@@ -5,10 +5,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import logging
 import os
 import shutil
 import tarfile
+import time
 import uuid
+from collections.abc import Callable, Iterator
+from contextlib import ExitStack, contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -17,10 +21,17 @@ from zoneinfo import ZoneInfo
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from minxionghydrocast.operations.collector import DEFAULT_STORE
-from minxionghydrocast.operations.snapshot_store import SnapshotStore, SnapshotStoreError
+from minxionghydrocast.operations.snapshot_store import (
+    RunLockError,
+    SnapshotStore,
+    SnapshotStoreError,
+)
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 BACKUP_SCHEMA_VERSION = 1
+DEFAULT_LOCK_RETRY_ATTEMPTS = 5
+DEFAULT_LOCK_RETRY_BACKOFF_SECONDS = 15.0
+LOGGER = logging.getLogger(__name__)
 
 
 class BackupError(RuntimeError):
@@ -84,11 +95,46 @@ def _tar_filter(info: tarfile.TarInfo) -> tarfile.TarInfo | None:
     return info
 
 
+@contextmanager
+def _collection_lock_with_retry(
+    store: SnapshotStore,
+    *,
+    attempts: int,
+    backoff_seconds: float,
+    sleep: Callable[[float], None],
+) -> Iterator[None]:
+    if attempts < 1:
+        raise BackupError("lock retry attempts must be at least one")
+    if backoff_seconds < 0:
+        raise BackupError("lock retry backoff seconds cannot be negative")
+
+    with ExitStack() as stack:
+        for attempt in range(1, attempts + 1):
+            try:
+                stack.enter_context(store.collection_lock())
+                break
+            except RunLockError:
+                if attempt == attempts:
+                    raise
+                delay = backoff_seconds * (2 ** (attempt - 1))
+                LOGGER.warning(
+                    "backup lock unavailable; retrying attempt=%d/%d delay_seconds=%.1f",
+                    attempt,
+                    attempts,
+                    delay,
+                )
+                sleep(delay)
+        yield
+
+
 def create_backup(
     store: SnapshotStore,
     backup_dir: Path,
     *,
     now: datetime | None = None,
+    lock_retry_attempts: int = DEFAULT_LOCK_RETRY_ATTEMPTS,
+    lock_retry_backoff_seconds: float = DEFAULT_LOCK_RETRY_BACKOFF_SECONDS,
+    sleep: Callable[[float], None] = time.sleep,
 ) -> tuple[Path, BackupMetadata]:
     now = (now or datetime.now(TAIPEI_TZ)).astimezone(TAIPEI_TZ)
     source_root = store.root.resolve()
@@ -103,7 +149,12 @@ def create_backup(
         raise BackupError(f"backup already exists: {archive}")
 
     try:
-        with store.collection_lock():
+        with _collection_lock_with_retry(
+            store,
+            attempts=lock_retry_attempts,
+            backoff_seconds=lock_retry_backoff_seconds,
+            sleep=sleep,
+        ):
             latest, snapshot_count = _verify_store(store)
             with tarfile.open(temporary, mode="w:gz") as bundle:
                 bundle.add(source_root, arcname="operations", filter=_tar_filter)
@@ -259,6 +310,7 @@ def prune_backups(
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     parser = argparse.ArgumentParser(
         description="Back up or restore the operational snapshot store."
     )
@@ -268,6 +320,16 @@ def main() -> None:
     backup_parser.add_argument("--store", type=Path, default=DEFAULT_STORE)
     backup_parser.add_argument("--backup-dir", type=Path, required=True)
     backup_parser.add_argument("--retention-days", type=int, default=30)
+    backup_parser.add_argument(
+        "--lock-retry-attempts",
+        type=int,
+        default=DEFAULT_LOCK_RETRY_ATTEMPTS,
+    )
+    backup_parser.add_argument(
+        "--lock-retry-backoff-seconds",
+        type=float,
+        default=DEFAULT_LOCK_RETRY_BACKOFF_SECONDS,
+    )
 
     verify_parser = subparsers.add_parser("verify")
     verify_parser.add_argument("--archive", type=Path, required=True)
@@ -282,6 +344,8 @@ def main() -> None:
             archive, metadata = create_backup(
                 SnapshotStore(args.store),
                 args.backup_dir,
+                lock_retry_attempts=args.lock_retry_attempts,
+                lock_retry_backoff_seconds=args.lock_retry_backoff_seconds,
             )
             removed = prune_backups(
                 args.backup_dir,
