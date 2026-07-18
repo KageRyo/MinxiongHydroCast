@@ -80,6 +80,47 @@ through a focused pull request. The end-to-end target is defined in
 
 ## Next
 
+### Immediate Operational Queue (Verified 2026-07-18)
+
+Complete these items in order unless candidate review and code work are being handled independently.
+Each code change should remain a focused pull request with its own tests and rollout evidence.
+
+- [ ] **P0 - Harden transient WRA payload handling.** Classify and retry bounded, transient
+      invalid/empty JSON and inconsistent paginated reads with explicit backoff and structured
+      logging. Preserve strict Pydantic validation and fail closed after retries are exhausted;
+      repeatable schema changes must still surface as `schema_drift`. Add tests for recovery,
+      exhaustion, non-retryable authentication errors, and genuine schema drift, then verify the
+      installed collector against live sources.
+- [ ] **P0 - Close the pre-policy context-only review item.** Review and reject
+      `cwa_o_a0059_candidate_20260715t0520`, which completed 35 of 35 frames with 22 Taiwan-wide
+      triggers, zero Minxiong-local triggers, and formal membership `not_added`. Preserve all
+      checksummed evidence and record the named reviewer.
+- [ ] **P0 - Review the four complete Minxiong-local candidates.** Inspect radar frames,
+      synchronized QPE/gauge/warning artifacts, and preserved official weather context for
+      `cwa_o_a0059_candidate_20260715t1840`, `cwa_o_a0059_candidate_20260716t1730`,
+      `cwa_o_a0059_candidate_20260717t1330`, and
+      `cwa_o_a0059_candidate_20260718t1140`. Record an auditable approval or rejection and weather
+      regime for each candidate without changing the formal split.
+- [ ] **P0 - Finish and review the active 2026-07-18 candidate.** Allow
+      `cwa_o_a0059_candidate_20260718t1400` to complete its fixed window, verify all expected radar
+      frames and evidence artifacts, and apply the same human-review procedure. Do not classify a
+      radar threshold crossing as heavy rain without supporting official and gauge evidence.
+- [ ] **P1 - Record shadow heavy-rain evidence only when review supports it.** If a reviewed local
+      candidate establishes a bounded heavy-rain period, add its event ID, start/end times,
+      official source, reviewer, and confirmation to the private deployed shadow-evidence file.
+      Otherwise leave the count at zero and continue observation.
+- [ ] **P1 - Recover and re-evaluate the rolling shadow gate.** Keep the scheduled collector and
+      hourly evaluation running until there are at least 168 hours, 900 attempts, 99% success, 95%
+      readiness, no ready gap over 30 minutes in the 192-hour window, intact storage, and one
+      reviewed heavy-rain period. With no new gaps, the latest recorded over-30-minute gap remains
+      in the window until approximately 2026-07-25 23:21 Asia/Taipei.
+- [ ] **P1 - Publish follow-up operational evidence.** After the reliability rollout and candidate
+      reviews, update the dated deployment status, task checkboxes, catalog counts, shadow metrics,
+      installed revision, tests, and backup verification in the same focused documentation change.
+- [ ] **P2 - Close external-use safeguards.** Replicate verified backups off-host, assign primary
+      and backup human receivers, and exercise incident acknowledgement, override, rollback, and
+      recovery before considering external operational use or notification delivery.
+
 ### Phase 1: Data Source Finalization
 
 - [x] Confirm local WRA API key storage without committing the key.

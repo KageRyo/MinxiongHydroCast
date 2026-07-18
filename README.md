@@ -135,6 +135,8 @@ The managed internal host runs discovery every 20 minutes from the deployed `mai
 Current rollout evidence and the active candidate state are recorded in
 [docs/deployment_status.md](docs/deployment_status.md). Reviewed local candidates must accumulate
 meaningful weather-regime diversity before any split change or retraining.
+The prioritized operational work queue and its acceptance checks are maintained in
+[docs/tasks.md](docs/tasks.md).
 
 ## Operational Observation Service
 

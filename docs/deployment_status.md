@@ -105,6 +105,42 @@ and a direct read of the live catalog confirm that the older config parses with 
 four candidate records remain readable, and artifact verification still reports zero errors. No
 destructive catalog migration is required.
 
+## Runtime and review queue verified on 2026-07-18
+
+The repository, `origin/main`, and installed single-host revision all matched
+`536a7a5e087b3e793011d318fb7d2f63d3bd4b43`. There were no open pull requests. CI for the merge and
+the scheduled Official Live Contracts runs from July 15 through July 18 passed. The API,
+Prometheus, Alertmanager, and alert audit receiver were active; collector, event-discovery, shadow,
+and backup timers were scheduled and their latest oneshot results succeeded.
+
+The 14:20 live observation run was healthy and ready. It preserved a valid empty rainfall-warning
+product, 81 CWA rain-gauge observations, 150 WRA flood-sensor observations, 231 location-reference
+rows, and one ready Minxiong feature row. The July 18 daily backup contained 748 snapshots and
+passed archive SHA-256 verification with digest
+`3438ee41b5aa5fd8d2703691e633789c3b43c7d650fd067cf20d3495e338a06e`.
+
+The 14:20 event-discovery run used `candidate_trigger_label=minxiong_35dbz`, scanned two local
+trigger frames, and left the strict catalog at nine candidates with zero artifact errors. Eight
+candidates were complete. The five complete pending reviews were:
+
+- the preserved pre-policy context-only candidate
+  `cwa_o_a0059_candidate_20260715t0520`, with 35 of 35 frames, 22 Taiwan-wide triggers, zero local
+  triggers, and a 31.5 dBZ local peak;
+- `cwa_o_a0059_candidate_20260715t1840`, with 16 of 16 frames, three local triggers, and a
+  42.8 dBZ local peak;
+- `cwa_o_a0059_candidate_20260716t1730`, with 20 of 20 frames, eight local triggers, and a
+  55.5 dBZ local peak;
+- `cwa_o_a0059_candidate_20260717t1330`, with 47 of 47 frames, 29 local triggers, and a
+  55.0 dBZ local peak;
+- `cwa_o_a0059_candidate_20260718t1140`, with 18 of 18 frames, six local triggers, and a
+  47.5 dBZ local peak.
+
+Candidate `cwa_o_a0059_candidate_20260718t1400` remained collecting with 8 of 14 frames and two
+local triggers at the verification point. All new local candidates had synchronized evidence with
+valid QPE and gauge artifacts and empty WRA warning products. These reflectivity thresholds are
+review candidates, not proof of heavy rain, flooding, or an official warning. Formal split
+membership remained `not_added` for every discovery candidate.
+
 ## Operational drills
 
 The original `MinxiongHydroCastDrill` and post-migration `MinxiongHydroCastMigrationDrill`
@@ -147,10 +183,18 @@ the migration.
 
 ## Active shadow gate
 
-The shadow deployment started on 2026-07-12. At the 2026-07-15 09:01 verification point it retained
-353 live attempts over 57.435 hours: 350 succeeded and 347 were ready, for 99.1501% success and
-98.3003% readiness, with a 20-minute maximum gap. The gate remains blocked by design until all of
-the following are observed rather than simulated:
+The shadow deployment started on 2026-07-12. A read-only evaluation at 2026-07-18 14:29 retained
+819 live attempts over 134.760 hours. Of those attempts, 803 succeeded and 792 were ready, for
+98.0464% success and 96.7033% readiness. Storage integrity and evidence-file validation passed,
+but the maximum ready-data gap was 50.017 minutes and there was no reviewed heavy-rain period.
+
+The 16 failed attempts were WRA responses that returned invalid JSON or transiently failed strict
+response validation. Eleven additional successful snapshots were not ready because official CWA
+rain gauges or WRA flood sensors were stale. The current feeds had recovered and the latest
+snapshot was healthy. This evidence requires a bounded transient-response reliability change; it
+does not justify weakening Pydantic contracts or treating a repeatable schema change as healthy.
+
+The gate remains blocked by design until all of the following are observed rather than simulated:
 
 - at least 168 hours between the first and last retained live attempt;
 - at least 900 attempts in the eight-day audit window;
@@ -160,8 +204,10 @@ the following are observed rather than simulated:
 
 External operational use and automated risk notification must remain disabled while those
 conditions are incomplete. A qualifying heavy-rain period may require the shadow deployment to
-run longer than seven calendar days. Internal code, documentation, and identifier changes may
-merge independently when their own review and CI checks pass.
+run longer than seven calendar days. Even if no new gap occurs, the latest recorded gap over 30
+minutes remains inside the 192-hour audit window until approximately 2026-07-25 23:21
+Asia/Taipei. Internal code, documentation, evidence review, and reliability changes may merge
+independently when their own review and CI checks pass.
 
 ## Outstanding safeguards
 

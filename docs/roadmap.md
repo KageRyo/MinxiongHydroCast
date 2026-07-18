@@ -78,6 +78,9 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
       while keeping formal split selection as a separate tracked decision.
 - [x] Reject complete Taiwan-wide-only windows without Minxiong-local evidence and restrict future
       review-queue candidates to local triggers while retaining Taiwan-wide frame context.
+- [ ] Review the complete Minxiong-local candidates collected from July 15 through July 18, attach
+      checksummed official context, and keep each decision outside the formal split until a
+      separate promotion change is reviewed.
 - [ ] Accumulate reviewed typhoon, frontal, Mei-yu, and convective candidates before retraining.
 
 ## Milestone 7: Train And Compare Models
@@ -108,6 +111,9 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
       a 90-minute freshness limit for the approximately hourly public snapshot.
 - [x] Fail closed on official-source schema drift and permit scraper fallback only for request
       failures.
+- [ ] Retry bounded, demonstrably transient WRA invalid/empty JSON and inconsistent pagination,
+      while preserving strict fail-closed behavior for repeatable schema changes and exhausted
+      retries.
 - [x] Review WRA river/regional-drainage water-level dataset 25768 and prohibit substituting it for
       `flood_sensors`.
 - [ ] Add a separate `river_water_levels` contract only after an operational use case is defined;
