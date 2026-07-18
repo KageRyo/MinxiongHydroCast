@@ -97,10 +97,24 @@ credentials, raw official data, or model weights.
   Alertmanager routing to a durable local audit receiver, scheduled local backup/restore, hourly
   shadow evaluation, and an online host-bound GitHub Actions runner. See
   [deployment_status.md](deployment_status.md) for dated evidence.
+- Completed: deployed bounded backup lock retry. A live collector/backup collision waited and
+  recovered, then the resulting archive passed checksum verification.
+- Active operational evidence: at 2026-07-18 14:29 the current snapshot was healthy, all supervised
+  services and timers were operating, and the latest verified daily backup contained 748
+  snapshots. The rolling shadow window contained 819 attempts over 134.760 hours, with 98.0464%
+  success, 96.7033% readiness, a 50.017-minute maximum gap, intact storage, and no confirmed
+  heavy-rain period.
+- Active candidate evidence: the strict catalog contained nine candidates and zero artifact
+  errors. Five complete candidates awaited review, including four created by Minxiong-local
+  triggers; one additional local candidate was still collecting. All remain outside the formal
+  split.
 - Deferred for the current internal localhost stage: replicate backups to another device or remote
   system. The accepted risk must be resolved before external operational use.
 - Pending operational safeguards: assign primary and backup operators, route alerts to a named human
   receiver, exercise incident/override/rollback procedures, and complete the real shadow gate.
+- Pending reliability work: add bounded retries for demonstrably transient invalid WRA payloads or
+  inconsistent pagination while retaining strict Pydantic fail-closed behavior for persistent
+  schema changes. The current rolling window contains 16 WRA-related failed attempts.
 - Pending public exposure work: define SLOs and add authenticated TLS ingress only if the service
   must become reachable beyond localhost.
 - Pending optional hydrology work: define a separate operational use case and contract before
@@ -118,10 +132,12 @@ credentials, raw official data, or model weights.
   idempotent. Two subsequent complete Taiwan-wide-only candidates were reviewed as
   `rejected/unclassified`; catalog verification remained clean and the formal split checksum did
   not change.
-- Next technical focus: accumulate reviewed typhoon, frontal, Mei-yu, and convective regimes. Only
-  after the dataset becomes meaningfully more diverse should the formal split change, the model
-  retrain, and the unchanged independent-event gate rerun. Do not consider NowcastNet or forecast
-  publication before those evidence gaps close.
+- Next technical focus: harden transient WRA response handling, close the preserved context-only
+  review item, and review the complete Minxiong-local candidates collected from July 15 through
+  July 18. Record a shadow heavy-rain period only when the reviewed radar, gauge, QPE, warning, and
+  official context evidence supports it. Only after the dataset becomes meaningfully more diverse
+  should the formal split change, the model retrain, and the unchanged independent-event gate
+  rerun. Do not consider NowcastNet or forecast publication before those evidence gaps close.
 
 ## Phase 1: Data Source Finalization
 
