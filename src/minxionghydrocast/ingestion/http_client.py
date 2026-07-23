@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import ssl
 import time
 from dataclasses import dataclass
@@ -16,6 +17,8 @@ from minxionghydrocast.ingestion.source_adapter import (
     SourceRequestError,
     SourceSchemaError,
 )
+
+LOGGER = logging.getLogger(__name__)
 
 
 class HttpResponse(Protocol):
@@ -139,6 +142,18 @@ class ReliableJsonClient:
                 now = self._monotonic()
         self._last_request_at = now
 
+    def _retry(self, *, kind: str, attempt: int, redacted_url: str) -> None:
+        delay = self._retry_policy.backoff_seconds * (2 ** (attempt - 1))
+        LOGGER.warning(
+            "official_source_retry kind=%s attempt=%d attempts=%d backoff_seconds=%.3f url=%s",
+            kind,
+            attempt,
+            self._retry_policy.attempts,
+            delay,
+            redacted_url,
+        )
+        self._sleep(delay)
+
     def get_json(
         self,
         url: str,
@@ -181,20 +196,28 @@ class ReliableJsonClient:
                         f"official source request failed after {attempt} attempts: "
                         f"{redacted_url} ({type(exc).__name__})",
                     ) from exc
-                self._sleep(self._retry_policy.backoff_seconds * (2 ** (attempt - 1)))
+                self._retry(kind=last_error_kind, attempt=attempt, redacted_url=redacted_url)
                 continue
 
             if not response.content:
+                if attempt < self._retry_policy.attempts:
+                    self._retry(kind="empty_body", attempt=attempt, redacted_url=redacted_url)
+                    continue
                 raise SourceSchemaError(
                     "schema_drift",
-                    f"official source returned an empty body: {redacted_url}",
+                    "official source returned an empty body after "
+                    f"{attempt} attempts: {redacted_url}",
                 )
             try:
                 payload = json.loads(response.content.decode("utf-8"))
             except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                if attempt < self._retry_policy.attempts:
+                    self._retry(kind="invalid_json", attempt=attempt, redacted_url=redacted_url)
+                    continue
                 raise SourceSchemaError(
                     "schema_drift",
-                    f"official source returned invalid JSON: {redacted_url}",
+                    "official source returned invalid JSON after "
+                    f"{attempt} attempts: {redacted_url}",
                 ) from exc
             expected_type = dict if expected_root == "object" else list
             if not isinstance(payload, expected_type):
