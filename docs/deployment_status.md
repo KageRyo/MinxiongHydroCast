@@ -105,6 +105,30 @@ and a direct read of the live catalog confirm that the older config parses with 
 four candidate records remain readable, and artifact verification still reports zero errors. No
 destructive catalog migration is required.
 
+## Reliability branch and review queue snapshot on 2026-07-23
+
+The deployed host remains on `536a7a5`. PR #23 merged the first WRA transient-response change to
+`main` at `ea0ecef`, but it is not installed yet; the join-transaction and retry-telemetry follow-up
+is on `feature/wra-join-transaction-retries`. The combined change adds bounded retry for
+empty/invalid JSON, repeated pages, and malformed or inconsistent measurement/catalog joins while
+preserving `schema_drift` exhaustion. Retry count, layer, and reason are included in snapshot
+metadata, run-summary metrics, and Prometheus.
+
+The live strict catalog contained 15 complete candidates: one approved, two rejected, and 12
+pending. The read-only `mhc event-review-queue` verified every candidate artifact and ranked the
+pending backlog without editing the catalog or formal split. The first three were:
+
+- `cwa_o_a0059_candidate_20260717t1330`: 29 local triggers, 55.0 dBZ local peak, 9.5 mm
+  Minxiong-point QPE peak, 14.0 mm Minxiong one-hour gauge peak, and 100/100 artifacts;
+- `cwa_o_a0059_candidate_20260716t1730`: eight local triggers, 55.5 dBZ, 13.0 mm QPE,
+  6.0 mm one-hour gauge peak, and 37/37 artifacts;
+- `cwa_o_a0059_candidate_20260723t1130`: 17 local triggers, 54.9 dBZ, 11.8 mm QPE,
+  4.0 mm one-hour gauge peak, and 63/63 artifacts.
+
+All 12 pending candidates retained `formal_split_membership=not_added`; no review decision or
+weather regime was inferred by the report. The 2026-07-19 candidate ranked last because its sole
+QPE and gauge capture was stale. Notification and external-service gates remain blocked.
+
 ## Runtime and review queue verified on 2026-07-18
 
 The repository, `origin/main`, and installed single-host revision all matched

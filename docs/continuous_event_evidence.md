@@ -95,8 +95,21 @@ Discovery always writes:
 - `automatic_formal_split_updates=false` at catalog level.
 
 A complete radar window moves only to `operational_status=awaiting_review`. A reviewer must inspect
-the radar frames, source timing, QPE, gauges, warnings, and official synoptic context. Record the
-decision through the schema-validated command rather than editing JSON directly:
+the radar frames, source timing, QPE, gauges, warnings, and official synoptic context. Generate the
+read-only priority queue first:
+
+```bash
+mhc event-review-queue \
+  --catalog "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json"
+```
+
+The table includes local peak dBZ, local/total trigger counts, Minxiong-point QPE peak, Minxiong
+one-hour gauge peak and station count, warning status, official-context count, verified artifact
+count, and review readiness. Ranking puts artifact-complete synchronized candidates first, retains
+Taiwan-wide-only context candidates for manual rejection, and never edits the catalog or formal
+split. `--format json` exposes the same fields for operator tooling.
+
+Record the decision through the schema-validated command rather than editing JSON directly:
 
 ```bash
 mhc event-review \

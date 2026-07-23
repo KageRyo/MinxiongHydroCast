@@ -7,6 +7,8 @@ import hashlib
 import logging
 import re
 import time
+from collections import Counter
+from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from html import unescape
@@ -22,6 +24,7 @@ from minxionghydrocast.ingestion.http_client import ReliableJsonClient
 from minxionghydrocast.ingestion.source_adapter import (
     SourceAdapterError,
     SourceProvenance,
+    SourceRetryMetrics,
     SourceResult,
     SourceSchemaError,
 )
@@ -37,6 +40,14 @@ UUID_PATTERN = re.compile(
     r"[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
 )
 LOGGER = logging.getLogger(__name__)
+
+
+class WraJoinTransactionError(SourceSchemaError):
+    """A schema failure that can result from two changing paginated snapshots."""
+
+    def __init__(self, reason: str, message: str) -> None:
+        self.retry_reason = reason
+        super().__init__("schema_drift", message)
 
 
 class WraIowSchema(BaseModel):
@@ -172,8 +183,13 @@ def _validated_records(
     except ValidationError as exc:
         first_error = exc.errors()[0]
         location = ".".join(str(part) for part in first_error["loc"])
-        raise SourceSchemaError(
-            "schema_drift",
+        reason = (
+            "malformed_measurements"
+            if dataset_id == LATEST_DATASET_ID
+            else "malformed_catalog"
+        )
+        raise WraJoinTransactionError(
+            reason,
             f"WRA IoW {dataset_id} response contract changed at {location}: {first_error['msg']}",
         ) from exc
 
@@ -186,12 +202,21 @@ def _unique_by_sensor_id(
     indexed: dict[str, RecordT] = {}
     for record in records:
         if record.sensor_id in indexed:
-            raise SourceSchemaError(
-                "schema_drift",
+            raise WraJoinTransactionError(
+                "duplicate_sensor_id",
                 f"WRA IoW {dataset_id} returned duplicate sensorid {record.sensor_id}",
             )
         indexed[record.sensor_id] = record
     return indexed
+
+
+@dataclass(frozen=True)
+class WraJoinTransaction:
+    joined: list[tuple[WraIowLatestMeasurement, WraIowSensorMetadata]]
+    active_joined: list[tuple[WraIowLatestMeasurement, WraIowSensorMetadata]]
+    latest_contents: list[bytes]
+    catalog_contents: list[bytes]
+    source_url: str
 
 
 class WraFloodSensorAdapter:
@@ -210,6 +235,8 @@ class WraFloodSensorAdapter:
         page_size: int = 1000,
         page_retry_attempts: int = 3,
         page_retry_backoff_seconds: float = 0.5,
+        transaction_retry_attempts: int = 3,
+        transaction_retry_backoff_seconds: float = 0.5,
         client: ReliableJsonClient | None = None,
         now: datetime | None = None,
         sleep: Callable[[float], None] = time.sleep,
@@ -230,6 +257,10 @@ class WraFloodSensorAdapter:
             raise ValueError("page_retry_attempts must be at least one")
         if page_retry_backoff_seconds < 0:
             raise ValueError("page_retry_backoff_seconds must not be negative")
+        if transaction_retry_attempts < 1:
+            raise ValueError("transaction_retry_attempts must be at least one")
+        if transaction_retry_backoff_seconds < 0:
+            raise ValueError("transaction_retry_backoff_seconds must not be negative")
         self.county_code = county_code
         self.town_code = town_code
         self.base_url = base_url.rstrip("/")
@@ -238,9 +269,12 @@ class WraFloodSensorAdapter:
         self.page_size = page_size
         self.page_retry_attempts = page_retry_attempts
         self.page_retry_backoff_seconds = page_retry_backoff_seconds
+        self.transaction_retry_attempts = transaction_retry_attempts
+        self.transaction_retry_backoff_seconds = transaction_retry_backoff_seconds
         self.client = client or ReliableJsonClient()
         self.now = now
         self._sleep = sleep
+        self._retry_counts: Counter[tuple[str, str]] = Counter()
 
     @property
     def latest_endpoint(self) -> str:
@@ -296,6 +330,7 @@ class WraFloodSensorAdapter:
                         f"{attempt} attempts: {endpoint}",
                     )
                 delay = self.page_retry_backoff_seconds * (2 ** (attempt - 1))
+                self._retry_counts[("wra_pagination", "repeated_full_page")] += 1
                 LOGGER.warning(
                     "wra_pagination_retry reason=repeated_full_page page=%d attempt=%d "
                     "attempts=%d backoff_seconds=%.3f url=%s",
@@ -315,19 +350,10 @@ class WraFloodSensorAdapter:
                 return records, contents, source_url
             page += 1
 
-    def _matches_target(self, measurement: WraIowLatestMeasurement) -> bool:
-        if measurement.county_code != self.county_code:
-            return False
-        return self.town_code is None or measurement.area_code == self.town_code
-
-    def collect(self) -> SourceResult:
-        now = self.now or datetime.now(TAIPEI_TZ)
-        if now.tzinfo is None:
-            raise ValueError("now must include a timezone")
-        now = now.astimezone(TAIPEI_TZ)
-        fetched_at = now.isoformat(timespec="seconds")
-
-        raw_measurements, latest_contents, source_url = self._fetch_pages(self.latest_endpoint)
+    def _fetch_join_transaction(self) -> WraJoinTransaction:
+        raw_measurements, latest_contents, source_url = self._fetch_pages(
+            self.latest_endpoint
+        )
         raw_catalog, catalog_contents, _ = self._fetch_pages(self.catalog_endpoint)
         measurements = _validated_records(
             raw_measurements,
@@ -361,16 +387,16 @@ class WraFloodSensorAdapter:
                 )
             metadata = metadata_by_id.get(measurement.sensor_id)
             if metadata is None:
-                raise SourceSchemaError(
-                    "schema_drift",
+                raise WraJoinTransactionError(
+                    "missing_sensor_metadata",
                     f"WRA IoW measurement sensorid {measurement.sensor_id} is missing metadata",
                 )
             if (
                 measurement.county_code != metadata.county_code
                 or measurement.area_code != metadata.area_code
             ):
-                raise SourceSchemaError(
-                    "schema_drift",
+                raise WraJoinTransactionError(
+                    "sensor_metadata_mismatch",
                     f"WRA IoW location codes disagree for sensorid {measurement.sensor_id}",
                 )
             joined.append((measurement, metadata))
@@ -382,6 +408,75 @@ class WraFloodSensorAdapter:
                 "empty_unexpected",
                 f"WRA IoW returned no enabled flood-depth sensors for target {target}",
             )
+        return WraJoinTransaction(
+            joined=joined,
+            active_joined=active_joined,
+            latest_contents=latest_contents,
+            catalog_contents=catalog_contents,
+            source_url=source_url,
+        )
+
+    def _collect_join_transaction(self) -> WraJoinTransaction:
+        for attempt in range(1, self.transaction_retry_attempts + 1):
+            try:
+                return self._fetch_join_transaction()
+            except WraJoinTransactionError as exc:
+                if attempt == self.transaction_retry_attempts:
+                    raise SourceSchemaError(
+                        "schema_drift",
+                        "WRA IoW measurement/catalog transaction remained inconsistent "
+                        f"after {attempt} attempts: {exc}",
+                    ) from exc
+                delay = self.transaction_retry_backoff_seconds * (2 ** (attempt - 1))
+                self._retry_counts[
+                    ("wra_join_transaction", exc.retry_reason)
+                ] += 1
+                LOGGER.warning(
+                    "wra_join_transaction_retry reason=%s attempt=%d attempts=%d "
+                    "backoff_seconds=%.3f",
+                    exc.retry_reason,
+                    attempt,
+                    self.transaction_retry_attempts,
+                    delay,
+                )
+                self._sleep(delay)
+        raise AssertionError("WRA join transaction retry loop terminated unexpectedly")
+
+    def _retry_metrics_since(
+        self,
+        *,
+        adapter_before: Counter[tuple[str, str]],
+        client_before: Counter[tuple[str, str]],
+    ) -> SourceRetryMetrics:
+        counts = self._retry_counts - adapter_before
+        counts.update(self.client.retry_counts - client_before)
+        return SourceRetryMetrics.from_counter(counts)
+
+    def _matches_target(self, measurement: WraIowLatestMeasurement) -> bool:
+        if measurement.county_code != self.county_code:
+            return False
+        return self.town_code is None or measurement.area_code == self.town_code
+
+    def collect(self) -> SourceResult:
+        adapter_retries_before = self._retry_counts.copy()
+        client_retries_before = self.client.retry_counts
+        now = self.now or datetime.now(TAIPEI_TZ)
+        if now.tzinfo is None:
+            raise ValueError("now must include a timezone")
+        now = now.astimezone(TAIPEI_TZ)
+        fetched_at = now.isoformat(timespec="seconds")
+
+        try:
+            transaction = self._collect_join_transaction()
+        except SourceAdapterError as exc:
+            exc.dataset = self.dataset
+            exc.retry_metrics = self._retry_metrics_since(
+                adapter_before=adapter_retries_before,
+                client_before=client_retries_before,
+            )
+            raise
+        joined = transaction.joined
+        active_joined = transaction.active_joined
 
         joined.sort(
             key=lambda item: (
@@ -422,7 +517,7 @@ class WraFloodSensorAdapter:
                     "資料產出時間ISO": observed_at,
                     "抓取時間": fetched_at,
                     "資料模式": "live",
-                    "資料來源": source_url,
+                    "資料來源": transaction.source_url,
                 }
             )
 
@@ -433,7 +528,10 @@ class WraFloodSensorAdapter:
         age_minutes = max(0.0, (now - latest_observation).total_seconds() / 60)
         outcome: Literal["ok", "stale"] = "stale" if age_minutes > self.max_age_minutes else "ok"
         content_hash = hashlib.sha256()
-        for content in [*latest_contents, *catalog_contents]:
+        for content in [
+            *transaction.latest_contents,
+            *transaction.catalog_contents,
+        ]:
             content_hash.update(content)
 
         return SourceResult(
@@ -444,10 +542,14 @@ class WraFloodSensorAdapter:
                 outcome=outcome,
                 authority="Water Resources Agency, Taiwan",
                 dataset_id=f"{LATEST_DATASET_ID}+{CATALOG_DATASET_ID}",
-                source_url=source_url,
+                source_url=transaction.source_url,
                 fetched_at=fetched_at,
                 schema_version=SCHEMA_VERSION,
                 content_sha256=content_hash.hexdigest(),
+            ),
+            retry_metrics=self._retry_metrics_since(
+                adapter_before=adapter_retries_before,
+                client_before=client_retries_before,
             ),
         )
 

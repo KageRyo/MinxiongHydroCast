@@ -171,6 +171,10 @@ def test_reliable_client_recovers_from_transient_empty_and_invalid_json(caplog):
     assert sleeps == [0.5, 1.0]
     assert "official_source_retry kind=empty_body attempt=1 attempts=3" in caplog.text
     assert "official_source_retry kind=invalid_json attempt=2 attempts=3" in caplog.text
+    assert client.retry_counts == {
+        ("official_http", "empty_body"): 1,
+        ("official_http", "invalid_json"): 1,
+    }
 
 
 def test_reliable_client_does_not_retry_a_wrong_json_root():

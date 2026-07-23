@@ -6,7 +6,10 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from minxionghydrocast.ingestion.source_adapter import SourceProvenance
+from minxionghydrocast.ingestion.source_adapter import (
+    SourceProvenance,
+    SourceRetryMetrics,
+)
 
 Mode = Literal["demo", "live"]
 ProductType = Literal[
@@ -106,6 +109,7 @@ class StatusResponse(ResponseSchema):
     latest_snapshot: SnapshotSummary | None
     latest_attempt: AttemptSummary | None
     datasets: dict[str, DatasetStatus]
+    source_retries: dict[str, SourceRetryMetrics] = Field(default_factory=dict)
 
 
 class DatasetResponse(ResponseSchema):

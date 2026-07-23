@@ -91,6 +91,23 @@ def test_metrics_payload_exposes_readiness_attempt_and_dataset_age():
                     },
                 }
             },
+            source_retries={
+                "flood_sensors": {
+                    "total": 2,
+                    "counts": [
+                        {
+                            "source": "official_http",
+                            "reason": "invalid_json",
+                            "count": 1,
+                        },
+                        {
+                            "source": "wra_join_transaction",
+                            "reason": "missing_sensor_metadata",
+                            "count": 1,
+                        },
+                    ],
+                }
+            },
         )
     )
 
@@ -100,6 +117,15 @@ def test_metrics_payload_exposes_readiness_attempt_and_dataset_age():
     assert 'dataset="rain_gauges",state="healthy"} 1' in metrics
     assert 'dataset="rain_gauges",source_kind="api"} 1' in metrics
     assert 'dataset="rain_gauges",outcome="ok"} 1' in metrics
+    assert (
+        'dataset="flood_sensors",source="official_http",reason="invalid_json"} 1'
+        in metrics
+    )
+    assert (
+        'dataset="flood_sensors",source="wra_join_transaction",'
+        'reason="missing_sensor_metadata"} 1'
+        in metrics
+    )
 
 
 def test_shadow_payload_defaults_to_blocked_and_exports_metrics(tmp_path):

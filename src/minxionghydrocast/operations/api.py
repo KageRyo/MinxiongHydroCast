@@ -60,6 +60,18 @@ PRODUCT_NOTICES = {
 }
 
 
+def _source_retries(manifest: dict[str, Any] | None) -> dict[str, object]:
+    if manifest is None:
+        return {}
+    metadata = manifest.get("metadata", {})
+    if not isinstance(metadata, dict):
+        raise TypeError("snapshot metadata must be an object")
+    source_retries = metadata.get("source_retries", {})
+    if not isinstance(source_retries, dict):
+        raise TypeError("source retry metrics must be an object")
+    return source_retries
+
+
 def status_payload(
     store: SnapshotStore,
     *,
@@ -103,6 +115,7 @@ def _validated_status_payload(store: SnapshotStore, *, now: datetime) -> StatusR
             latest_snapshot=None,
             latest_attempt=attempt,
             datasets={},
+            source_retries=_source_retries(attempt),
         )
 
     integrity_errors = store.verify_snapshot(latest)
@@ -126,6 +139,7 @@ def _validated_status_payload(store: SnapshotStore, *, now: datetime) -> StatusR
             if attempt
             else None,
             datasets=latest.get("datasets", {}),
+            source_retries=_source_retries(attempt or latest),
         )
 
     refreshed_datasets: dict[str, Any] = {}
@@ -165,6 +179,7 @@ def _validated_status_payload(store: SnapshotStore, *, now: datetime) -> StatusR
         if attempt
         else None,
         datasets=refreshed_datasets,
+        source_retries=_source_retries(attempt or latest),
     )
 
 
@@ -294,6 +309,20 @@ def metrics_payload(status: StatusResponse) -> str:
             lines.append(
                 "minxionghydrocast_dataset_source_outcome"
                 f'{{dataset="{name}",outcome="{details.source.outcome}"}} 1'
+            )
+    lines.extend(
+        [
+            "# HELP minxionghydrocast_last_attempt_source_retries "
+            "Bounded retries made by the latest collection attempt.",
+            "# TYPE minxionghydrocast_last_attempt_source_retries gauge",
+        ]
+    )
+    for dataset, retry_metrics in sorted(status.source_retries.items()):
+        for counter in retry_metrics.counts:
+            lines.append(
+                "minxionghydrocast_last_attempt_source_retries"
+                f'{{dataset="{dataset}",source="{counter.source}",'
+                f'reason="{counter.reason}"}} {counter.count}'
             )
     return "\n".join(lines) + "\n"
 
