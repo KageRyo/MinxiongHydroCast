@@ -1,4 +1,5 @@
 import json
+import logging
 
 import pytest
 
@@ -121,10 +122,18 @@ def test_reliable_client_enforces_minimum_request_interval():
     assert sleeps == [0.2]
 
 
-@pytest.mark.parametrize("content", [b"", b"not-json", json.dumps([1, 2]).encode()])
-def test_reliable_client_rejects_invalid_json_contract(content: bytes):
+@pytest.mark.parametrize("content", [b"", b"not-json"])
+def test_reliable_client_fails_closed_after_repeated_invalid_json(content: bytes):
+    calls = 0
+
+    def fake_get(_url: str, **_kwargs: object) -> FakeResponse:
+        nonlocal calls
+        calls += 1
+        return FakeResponse(content)
+
     client = ReliableJsonClient(
-        http_get=lambda _url, **_kwargs: FakeResponse(content),
+        http_get=fake_get,
+        retry_policy=RetryPolicy(attempts=2, backoff_seconds=0),
         minimum_interval_seconds=0,
     )
 
@@ -137,6 +146,57 @@ def test_reliable_client_rejects_invalid_json_contract(content: bytes):
         )
 
     assert exc_info.value.kind == "schema_drift"
+    assert calls == 2
+
+
+def test_reliable_client_recovers_from_transient_empty_and_invalid_json(caplog):
+    responses = [FakeResponse(b""), FakeResponse(b"not-json"), FakeResponse(b'{"ok": true}')]
+    sleeps: list[float] = []
+    client = ReliableJsonClient(
+        http_get=lambda _url, **_kwargs: responses.pop(0),
+        retry_policy=RetryPolicy(attempts=3, backoff_seconds=0.5),
+        minimum_interval_seconds=0,
+        sleep=sleeps.append,
+    )
+
+    with caplog.at_level(logging.WARNING, logger="minxionghydrocast.ingestion.http_client"):
+        response = client.get_json(
+            "https://example.test/data",
+            params={},
+            timeout_seconds=10,
+            redacted_url="https://example.test/data?Authorization=REDACTED",
+        )
+
+    assert response.payload == {"ok": True}
+    assert sleeps == [0.5, 1.0]
+    assert "official_source_retry kind=empty_body attempt=1 attempts=3" in caplog.text
+    assert "official_source_retry kind=invalid_json attempt=2 attempts=3" in caplog.text
+
+
+def test_reliable_client_does_not_retry_a_wrong_json_root():
+    calls = 0
+
+    def fake_get(_url: str, **_kwargs: object) -> FakeResponse:
+        nonlocal calls
+        calls += 1
+        return FakeResponse(json.dumps([1, 2]).encode())
+
+    client = ReliableJsonClient(
+        http_get=fake_get,
+        retry_policy=RetryPolicy(attempts=3, backoff_seconds=0),
+        minimum_interval_seconds=0,
+    )
+
+    with pytest.raises(SourceSchemaError) as exc_info:
+        client.get_json(
+            "https://example.test/data",
+            params={},
+            timeout_seconds=10,
+            redacted_url="https://example.test/data",
+        )
+
+    assert exc_info.value.kind == "schema_drift"
+    assert calls == 1
 
 
 def test_reliable_client_passes_secret_header_without_adding_it_to_errors():

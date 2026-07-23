@@ -1,5 +1,6 @@
 import hashlib
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -173,11 +174,64 @@ def test_adapter_rejects_repeated_full_page_instead_of_looping_forever():
     adapter = WraFloodSensorAdapter(
         county_code="10010",
         page_size=1,
+        page_retry_backoff_seconds=0,
         client=ReliableJsonClient(http_get=repeating_get, minimum_interval_seconds=0),
     )
 
     with pytest.raises(SourceSchemaError, match="repeated a full page"):
         adapter.collect()
+
+
+def test_adapter_recovers_from_a_transient_repeated_page(caplog):
+    latest, catalog = fixture_payloads()
+    calls: list[tuple[str, int]] = []
+    page_two_attempts = 0
+    sleeps: list[float] = []
+
+    def flaky_get(
+        url: str,
+        *,
+        params: dict[str, str],
+        headers: dict[str, str] | None,
+        timeout: float,
+    ) -> FakeResponse:
+        nonlocal page_two_attempts
+        del headers, timeout
+        dataset_id = url.rsplit("/", maxsplit=1)[-1]
+        page = int(params["page"])
+        size = int(params["size"])
+        calls.append((dataset_id, page))
+        if dataset_id == LATEST_DATASET_ID and page == 2:
+            page_two_attempts += 1
+            start = 0 if page_two_attempts == 1 else (page - 1) * size
+        else:
+            start = (page - 1) * size
+        payloads = {LATEST_DATASET_ID: latest, CATALOG_DATASET_ID: catalog}
+        content = json.dumps(payloads[dataset_id][start : start + size], ensure_ascii=False).encode(
+            "utf-8"
+        )
+        return FakeResponse(content, f"{url}?{urlencode(params)}")
+
+    adapter = WraFloodSensorAdapter(
+        county_code="10010",
+        town_code="10010050",
+        page_size=1,
+        page_retry_backoff_seconds=0.5,
+        client=ReliableJsonClient(http_get=flaky_get, minimum_interval_seconds=0),
+        now=datetime(2026, 7, 12, 12, 15, tzinfo=TAIPEI_TZ),
+        sleep=sleeps.append,
+    )
+
+    with caplog.at_level(
+        logging.WARNING,
+        logger="minxionghydrocast.ingestion.wra_flood_sensor_api",
+    ):
+        result = adapter.collect()
+
+    assert len(result.records) == 1
+    assert calls.count((LATEST_DATASET_ID, 2)) == 2
+    assert sleeps == [0.5]
+    assert "wra_pagination_retry reason=repeated_full_page page=2 attempt=1 attempts=3" in caplog.text
 
 
 def test_adapter_marks_target_feed_stale_after_default_ninety_minutes():

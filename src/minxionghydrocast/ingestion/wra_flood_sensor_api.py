@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import logging
 import re
+import time
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from html import unescape
-from typing import Any, Literal, TypeVar
+from typing import Any, Callable, Literal, TypeVar
 from urllib.parse import urlencode
 from uuid import UUID
 from zoneinfo import ZoneInfo
@@ -34,6 +36,7 @@ UUID_PATTERN = re.compile(
     r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-"
     r"[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
 )
+LOGGER = logging.getLogger(__name__)
 
 
 class WraIowSchema(BaseModel):
@@ -205,8 +208,11 @@ class WraFloodSensorAdapter:
         timeout_seconds: float = 30,
         max_age_minutes: float = 90,
         page_size: int = 1000,
+        page_retry_attempts: int = 3,
+        page_retry_backoff_seconds: float = 0.5,
         client: ReliableJsonClient | None = None,
         now: datetime | None = None,
+        sleep: Callable[[float], None] = time.sleep,
     ) -> None:
         if not re.fullmatch(r"\d{5}", county_code):
             raise ValueError("county_code must contain five digits")
@@ -220,14 +226,21 @@ class WraFloodSensorAdapter:
             raise ValueError("max_age_minutes must be positive")
         if page_size < 1 or page_size > 1000:
             raise ValueError("page_size must be between 1 and 1000")
+        if page_retry_attempts < 1:
+            raise ValueError("page_retry_attempts must be at least one")
+        if page_retry_backoff_seconds < 0:
+            raise ValueError("page_retry_backoff_seconds must not be negative")
         self.county_code = county_code
         self.town_code = town_code
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
         self.max_age_minutes = max_age_minutes
         self.page_size = page_size
+        self.page_retry_attempts = page_retry_attempts
+        self.page_retry_backoff_seconds = page_retry_backoff_seconds
         self.client = client or ReliableJsonClient()
         self.now = now
+        self._sleep = sleep
 
     @property
     def latest_endpoint(self) -> str:
@@ -254,30 +267,45 @@ class WraFloodSensorAdapter:
         while True:
             params = self._params(page)
             request_url = f"{endpoint}?{urlencode(params)}"
-            response = self.client.get_json(
-                endpoint,
-                params=params,
-                timeout_seconds=self.timeout_seconds,
-                redacted_url=request_url,
-                expected_root="array",
-            )
-            page_records = response.payload
-            if not isinstance(page_records, list):
-                raise SourceSchemaError(
-                    "schema_drift",
-                    f"WRA IoW endpoint returned a non-array page: {endpoint}",
+            for attempt in range(1, self.page_retry_attempts + 1):
+                response = self.client.get_json(
+                    endpoint,
+                    params=params,
+                    timeout_seconds=self.timeout_seconds,
+                    redacted_url=request_url,
+                    expected_root="array",
                 )
-            if len(page_records) > self.page_size:
-                raise SourceSchemaError(
-                    "schema_drift",
-                    f"WRA IoW endpoint exceeded requested page size: {endpoint}",
+                page_records = response.payload
+                if not isinstance(page_records, list):
+                    raise SourceSchemaError(
+                        "schema_drift",
+                        f"WRA IoW endpoint returned a non-array page: {endpoint}",
+                    )
+                if len(page_records) > self.page_size:
+                    raise SourceSchemaError(
+                        "schema_drift",
+                        f"WRA IoW endpoint exceeded requested page size: {endpoint}",
+                    )
+                page_hash = hashlib.sha256(response.content).hexdigest()
+                if not page_records or page_hash not in page_hashes:
+                    break
+                if attempt == self.page_retry_attempts:
+                    raise SourceSchemaError(
+                        "schema_drift",
+                        "WRA IoW endpoint repeated a full page after "
+                        f"{attempt} attempts: {endpoint}",
+                    )
+                delay = self.page_retry_backoff_seconds * (2 ** (attempt - 1))
+                LOGGER.warning(
+                    "wra_pagination_retry reason=repeated_full_page page=%d attempt=%d "
+                    "attempts=%d backoff_seconds=%.3f url=%s",
+                    page,
+                    attempt,
+                    self.page_retry_attempts,
+                    delay,
+                    request_url,
                 )
-            page_hash = hashlib.sha256(response.content).hexdigest()
-            if page_records and page_hash in page_hashes:
-                raise SourceSchemaError(
-                    "schema_drift",
-                    f"WRA IoW endpoint repeated a full page: {endpoint}",
-                )
+                self._sleep(delay)
             page_hashes.add(page_hash)
             if page == 1:
                 source_url = response.url
