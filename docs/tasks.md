@@ -85,12 +85,10 @@ through a focused pull request. The end-to-end target is defined in
 Complete these items in order unless candidate review and code work are being handled independently.
 Each code change should remain a focused pull request with its own tests and rollout evidence.
 
-- [ ] **P0 - Deploy and verify the WRA reliability change.** The working branch now retries bounded
-      invalid/empty JSON, repeated pages, and malformed or inconsistent full measurement/catalog
-      joins. Retry count, layer, and reason reach snapshot metadata, run-summary metrics, and
-      Prometheus; exhaustion remains `schema_drift`. Complete the full test suite, merge and
-      install the revision, then verify three live contracts, one collector run, backup, and the
-      rolling shadow report without deleting old failures.
+- [x] **P0 - Deploy and verify the WRA reliability change.** PR #24 installed revision `d6b770a`
+      after 287 tests and two passing CI runs. Three live contracts, a healthy collector snapshot,
+      the Prometheus retry metric, a 1,505-snapshot verified backup, and the unchanged rolling
+      shadow evidence all passed their rollout checks. Retry exhaustion remains `schema_drift`.
 - [x] **P0 - Add a read-only event review queue.** `mhc event-review-queue` verifies artifacts and
       ranks candidates using local radar, QPE, Minxiong gauges, warnings, official context, and
       evidence readiness. It does not edit the evidence catalog or formal split.
@@ -113,9 +111,9 @@ Each code change should remain a focused pull request with its own tests and rol
       readiness, no ready gap over 30 minutes in the 192-hour window, intact storage, and one
       reviewed heavy-rain period. With no new gaps, the latest recorded over-30-minute gap remains
       in the window until approximately 2026-07-25 23:21 Asia/Taipei.
-- [ ] **P1 - Publish follow-up operational evidence.** After the reliability rollout and candidate
-      reviews, update the dated deployment status, task checkboxes, catalog counts, shadow metrics,
-      installed revision, tests, and backup verification in the same focused documentation change.
+- [ ] **P1 - Publish candidate-review follow-up evidence.** After the pending reviews, update the
+      dated deployment status, task checkboxes, catalog counts, reviewed regimes, and any
+      evidence-backed shadow heavy-rain record.
 - [ ] **P2 - Close external-use safeguards.** Replicate verified backups off-host, assign primary
       and backup human receivers, and exercise incident acknowledgement, override, rollback, and
       recovery before considering external operational use or notification delivery.

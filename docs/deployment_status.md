@@ -105,14 +105,28 @@ and a direct read of the live catalog confirm that the older config parses with 
 four candidate records remain readable, and artifact verification still reports zero errors. No
 destructive catalog migration is required.
 
-## Reliability branch and review queue snapshot on 2026-07-23
+## WRA reliability rollout and review queue verified on 2026-07-23
 
-The deployed host remains on `536a7a5`. PR #23 merged the first WRA transient-response change to
-`main` at `ea0ecef`, but it is not installed yet; the join-transaction and retry-telemetry follow-up
-is on `feature/wra-join-transaction-retries`. The combined change adds bounded retry for
-empty/invalid JSON, repeated pages, and malformed or inconsistent measurement/catalog joins while
-preserving `schema_drift` exhaustion. Retry count, layer, and reason are included in snapshot
-metadata, run-summary metrics, and Prometheus.
+PR #23 merged the first WRA transient-response change at `ea0ecef`; PR #24 added the bounded full
+measurement/catalog join retry, retry telemetry, and read-only review queue. The repository,
+`origin/main`, and installed single-host revision matched
+`d6b770af25645bb6d6b361d354247220d366c076`. Ruff, compileall, all 287 tests, and both PR #24 CI
+runs passed.
+
+The three installed live contract checks returned a valid empty WRA warning product, 82 CWA rain
+gauges, and 150 WRA flood sensors. The installer-triggered collector published healthy/ready
+snapshot `20260723T171605777507+0800-7df3fe54` with 232 location-reference rows and one ready
+Minxiong feature. Its structured summary and immutable manifest exposed zero retries for the clean
+attempt while preserving the new per-source retry schema. `/metrics` exposed
+`minxionghydrocast_last_attempt_source_retries`; API readiness was healthy.
+
+The post-rollout backup included 1,505 snapshots and 8,893 files. Independent verification passed
+with archive SHA-256
+`8fbff360feefe7ee0934f355858adaefbd167705ccbad0024a7b639d5c5ee44d`.
+The refreshed 192-hour shadow report retained all old failures: 1,101 attempts, 97.7293% success,
+96.2761% readiness, a 539.833-minute maximum gap, and zero confirmed heavy-rain periods. The gate
+therefore remained blocked on success rate, maximum gap, and heavy-rain evidence; notifications
+remained disabled.
 
 The live strict catalog contained 15 complete candidates: one approved, two rejected, and 12
 pending. The read-only `mhc event-review-queue` verified every candidate artifact and ranked the
