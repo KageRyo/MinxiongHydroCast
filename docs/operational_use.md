@@ -53,6 +53,12 @@ for an explicitly managed source incident. Strict upstream Pydantic schema drift
 timestamps or units, broken IoW joins, and unexpected empty observation sets always fail closed
 without scraper fallback.
 
+The IoW adapter retries transient empty/invalid JSON responses and repeated pages, then reruns the
+complete measurement/catalog join a bounded number of times when a valid paginated snapshot is
+malformed or internally inconsistent. Retry exhaustion remains `schema_drift`. Retry layer and
+reason are persisted in snapshot/run-summary metrics and exported on `/metrics`; they are not
+limited to journal warnings.
+
 The rainfall-warning API publishes only active warnings. A schema-valid `Data=[]` response means
 that no matching warning is in effect: it produces zero rows with `outcome=empty`, uses the fetch
 time for freshness, and is healthy while fresh. Rain-gauge and flood-sensor empty sets are not
@@ -145,7 +151,7 @@ The following endpoints are available:
 | --- | --- |
 | `GET /healthz` | Process liveness |
 | `GET /readyz` | Data readiness; returns 503 when not ready |
-| `GET /metrics` | Prometheus readiness, attempt, age, state, source-kind, and outcome metrics |
+| `GET /metrics` | Prometheus readiness, attempt, age, state, source, outcome, and retry metrics |
 | `GET /api/v1/status` | Latest attempt, snapshot, freshness, and schema health |
 | `GET /api/v1/official-alerts/rainfall` | WRA rainfall-alert source product |
 | `GET /api/v1/observations/rain-gauges` | Validated CWA rain-gauge observations |

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass
+from collections import Counter
+from dataclasses import dataclass, field
 from typing import Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -51,11 +52,52 @@ class SourceProvenance(BaseModel):
         return self
 
 
+class SourceRetryCount(BaseModel):
+    """One bounded retry counter safe to expose in summaries and metrics."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    source: str = Field(min_length=1, pattern=r"^[a-z0-9_]+$")
+    reason: str = Field(min_length=1, pattern=r"^[a-z0-9_]+$")
+    count: int = Field(ge=1)
+
+
+class SourceRetryMetrics(BaseModel):
+    """Retry counts for one source adapter collection attempt."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    total: int = Field(default=0, ge=0)
+    counts: list[SourceRetryCount] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_counts(self) -> SourceRetryMetrics:
+        keys = [(item.source, item.reason) for item in self.counts]
+        if keys != sorted(keys) or len(keys) != len(set(keys)):
+            raise ValueError("retry counters must be unique and sorted")
+        if self.total != sum(item.count for item in self.counts):
+            raise ValueError("retry total must match retry counters")
+        return self
+
+    @classmethod
+    def from_counter(
+        cls,
+        counter: Counter[tuple[str, str]] | dict[tuple[str, str], int],
+    ) -> SourceRetryMetrics:
+        counts = [
+            SourceRetryCount(source=source, reason=reason, count=count)
+            for (source, reason), count in sorted(counter.items())
+            if count > 0
+        ]
+        return cls(total=sum(item.count for item in counts), counts=counts)
+
+
 @dataclass(frozen=True)
 class SourceResult:
     dataset: str
     records: list[dict[str, str]]
     provenance: SourceProvenance
+    retry_metrics: SourceRetryMetrics = field(default_factory=SourceRetryMetrics)
 
     def __post_init__(self) -> None:
         if self.provenance.outcome == "empty" and self.records:
@@ -76,8 +118,17 @@ class SourceAdapter(Protocol):
 class SourceAdapterError(RuntimeError):
     """Typed source failure safe to persist in run metadata."""
 
-    def __init__(self, kind: SourceErrorKind, message: str) -> None:
+    def __init__(
+        self,
+        kind: SourceErrorKind,
+        message: str,
+        *,
+        dataset: str | None = None,
+        retry_metrics: SourceRetryMetrics | None = None,
+    ) -> None:
         self.kind = kind
+        self.dataset = dataset
+        self.retry_metrics = retry_metrics or SourceRetryMetrics()
         super().__init__(message)
 
 

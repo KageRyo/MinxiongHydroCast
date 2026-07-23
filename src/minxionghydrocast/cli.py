@@ -20,6 +20,7 @@ COMMANDS = {
     "evaluate-baselines": "minxionghydrocast.pipelines.baseline_evaluation:main",
     "event-discover": "minxionghydrocast.pipelines.event_discovery:main",
     "event-review": "minxionghydrocast.pipelines.event_review:main",
+    "event-review-queue": "minxionghydrocast.pipelines.event_review_queue:main",
     "event-split-check": "minxionghydrocast.pipelines.event_split_check:main",
     "hydrology": "minxionghydrocast.ingestion.hydrological_data:main",
     "label-audit": "minxionghydrocast.validation.flood_labels:main",

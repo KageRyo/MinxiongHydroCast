@@ -123,6 +123,18 @@ starts another candidate instead of extending the window without limit. Candidat
 human review and cannot automatically enter train, validation, or test splits. See
 [docs/continuous_event_evidence.md](docs/continuous_event_evidence.md).
 
+Rank the human-review backlog without changing the evidence catalog or formal split:
+
+```bash
+mhc event-review-queue \
+  --catalog "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json"
+```
+
+The report verifies candidate artifacts and summarizes local radar peak, local/total trigger counts,
+Minxiong-point QPE, Minxiong gauge rainfall, warnings, official context, and synchronized-evidence
+readiness. Use `--format json` for structured output. Review decisions still require
+`mhc event-review`.
+
 After a candidate window is complete, record a provenance-backed human decision with
 `mhc event-review`. Approval requires a classified weather regime and at least one official HTTPS
 context source preserved as a checksummed external artifact with publisher and publication time.

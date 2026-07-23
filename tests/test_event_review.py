@@ -24,6 +24,10 @@ from minxionghydrocast.models.event_evidence_schemas import (
 )
 from minxionghydrocast.pipelines.event_promotion import validate_candidate_promotion_gate
 from minxionghydrocast.pipelines.event_review import review_event_candidate
+from minxionghydrocast.pipelines.event_review_queue import (
+    build_event_review_queue,
+    render_event_review_queue_table,
+)
 from minxionghydrocast.pipelines.event_split_check import check_event_split_manifest
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
@@ -322,6 +326,42 @@ def test_event_review_records_provenance_and_is_idempotent(tmp_path: Path):
         f"evidence/{CANDIDATE_ID}/official_context/00_"
     )
     assert candidate.formal_split_membership == "not_added"
+
+
+def test_event_review_queue_is_read_only_and_surfaces_evidence_completeness(
+    tmp_path: Path,
+):
+    catalog_path, _repository, _layout = write_complete_catalog(tmp_path)
+    original = catalog_path.read_bytes()
+
+    report = build_event_review_queue(
+        catalog_path=catalog_path,
+        now=datetime(2026, 7, 14, 12, 0, tzinfo=TAIPEI_TZ),
+    )
+
+    assert catalog_path.read_bytes() == original
+    assert report.candidate_count == 1
+    assert report.automatic_formal_split_updates is False
+    item = report.candidates[0]
+    assert item.rank == 1
+    assert item.candidate_id == CANDIDATE_ID
+    assert item.local_peak_dbz == 42.0
+    assert item.trigger_count == 1
+    assert item.local_trigger_count == 1
+    assert item.synchronized_capture_count == 1
+    assert item.qpe.status_counts == {"ok": 1}
+    assert item.gauges.status_counts == {"ok": 1}
+    assert item.warnings.status_counts == {"empty": 1}
+    assert item.official_context_count == 0
+    assert item.artifacts.expected_count == 8
+    assert item.artifacts.verified_count == 8
+    assert item.artifacts.complete is False
+    assert len(item.artifacts.data_errors) == 3
+    assert item.review_ready is False
+    assert item.formal_split_membership == "not_added"
+    table = render_event_review_queue_table(report)
+    assert "local_dBZ" in table
+    assert CANDIDATE_ID in table
 
 
 def test_event_review_rejects_incomplete_window(tmp_path: Path):

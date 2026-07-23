@@ -128,6 +128,12 @@ In `auto` source mode, only authentication, transport, HTTP, timeout, and rate-l
 failures can invoke a scraper fallback. Upstream Pydantic schema drift, invalid timestamps, unit
 changes, join failures, and unexpected empty observation sets fail closed.
 
+The flood-sensor adapter retries transient empty/invalid JSON inside each request, repeated full
+pages inside pagination, and malformed or inconsistent measurement/catalog joins by rerunning the
+bounded join transaction. Exhausted retries still fail closed as `schema_drift`. Each collection
+attempt records retry count, retry layer, and reason in immutable snapshot metadata, run summary
+metrics, and the `minxionghydrocast_last_attempt_source_retries` Prometheus gauge.
+
 ## Flood Sensors
 
 Required fields:
@@ -164,6 +170,8 @@ dataset [142980](https://data.gov.tw/dataset/142980) with sensor metadata from d
 official observatory identifiers, WGS84 coordinates, enabled state, category `淹水深度`, and unit
 `cm`. A measurement without matching metadata, duplicate sensor IDs, conflicting location codes,
 negative target depth, or an unexpected empty target set fails closed as an upstream contract
+error. A malformed page, duplicate ID, missing metadata, or metadata mismatch may trigger a bounded
+full measurement/catalog transaction retry first; a repeatable inconsistency remains a contract
 error. Dataset 142979 does
 not provide a street address, so official API records leave `地址` empty instead of fabricating one.
 Disabled sensors remain in the source dataset for auditability but do not contribute to the

@@ -80,31 +80,30 @@ through a focused pull request. The end-to-end target is defined in
 
 ## Next
 
-### Immediate Operational Queue (Verified 2026-07-18)
+### Immediate Operational Queue (Verified 2026-07-23)
 
 Complete these items in order unless candidate review and code work are being handled independently.
 Each code change should remain a focused pull request with its own tests and rollout evidence.
 
-- [ ] **P0 - Harden transient WRA payload handling.** Classify and retry bounded, transient
-      invalid/empty JSON and inconsistent paginated reads with explicit backoff and structured
-      logging. Preserve strict Pydantic validation and fail closed after retries are exhausted;
-      repeatable schema changes must still surface as `schema_drift`. Add tests for recovery,
-      exhaustion, non-retryable authentication errors, and genuine schema drift, then verify the
-      installed collector against live sources.
+- [ ] **P0 - Deploy and verify the WRA reliability change.** The working branch now retries bounded
+      invalid/empty JSON, repeated pages, and malformed or inconsistent full measurement/catalog
+      joins. Retry count, layer, and reason reach snapshot metadata, run-summary metrics, and
+      Prometheus; exhaustion remains `schema_drift`. Complete the full test suite, merge and
+      install the revision, then verify three live contracts, one collector run, backup, and the
+      rolling shadow report without deleting old failures.
+- [x] **P0 - Add a read-only event review queue.** `mhc event-review-queue` verifies artifacts and
+      ranks candidates using local radar, QPE, Minxiong gauges, warnings, official context, and
+      evidence readiness. It does not edit the evidence catalog or formal split.
 - [ ] **P0 - Close the pre-policy context-only review item.** Review and reject
       `cwa_o_a0059_candidate_20260715t0520`, which completed 35 of 35 frames with 22 Taiwan-wide
       triggers, zero Minxiong-local triggers, and formal membership `not_added`. Preserve all
       checksummed evidence and record the named reviewer.
-- [ ] **P0 - Review the four complete Minxiong-local candidates.** Inspect radar frames,
-      synchronized QPE/gauge/warning artifacts, and preserved official weather context for
-      `cwa_o_a0059_candidate_20260715t1840`, `cwa_o_a0059_candidate_20260716t1730`,
-      `cwa_o_a0059_candidate_20260717t1330`, and
-      `cwa_o_a0059_candidate_20260718t1140`. Record an auditable approval or rejection and weather
-      regime for each candidate without changing the formal split.
-- [ ] **P0 - Finish and review the active 2026-07-18 candidate.** Allow
-      `cwa_o_a0059_candidate_20260718t1400` to complete its fixed window, verify all expected radar
-      frames and evidence artifacts, and apply the same human-review procedure. Do not classify a
-      radar threshold crossing as heavy rain without supporting official and gauge evidence.
+- [ ] **P0 - Review the 11 complete Minxiong-local pending candidates.** The strict catalog now
+      contains 15 complete candidates: one approved, two rejected, and 12 pending including the
+      context-only item above. Start with the queue's 2026-07-17, 2026-07-16, and 2026-07-23
+      candidates, then work through the remaining local candidates. Record an auditable approval
+      or rejection and weather regime for each without changing the formal split. Do not classify
+      a radar threshold crossing as heavy rain without official and gauge support.
 - [ ] **P1 - Record shadow heavy-rain evidence only when review supports it.** If a reviewed local
       candidate establishes a bounded heavy-rain period, add its event ID, start/end times,
       official source, reviewer, and confirmation to the private deployed shadow-evidence file.

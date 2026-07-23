@@ -6,6 +6,7 @@ import json
 import logging
 import ssl
 import time
+from collections import Counter
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Callable, Literal, Protocol
@@ -132,6 +133,13 @@ class ReliableJsonClient:
         self._sleep = sleep
         self._monotonic = monotonic
         self._last_request_at: float | None = None
+        self._retry_counts: Counter[tuple[str, str]] = Counter()
+
+    @property
+    def retry_counts(self) -> Counter[tuple[str, str]]:
+        """Return a copy of retry counters accumulated by this client."""
+
+        return self._retry_counts.copy()
 
     def _rate_limit(self) -> None:
         now = self._monotonic()
@@ -144,6 +152,7 @@ class ReliableJsonClient:
 
     def _retry(self, *, kind: str, attempt: int, redacted_url: str) -> None:
         delay = self._retry_policy.backoff_seconds * (2 ** (attempt - 1))
+        self._retry_counts[("official_http", kind)] += 1
         LOGGER.warning(
             "official_source_retry kind=%s attempt=%d attempts=%d backoff_seconds=%.3f url=%s",
             kind,

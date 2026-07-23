@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -19,6 +19,8 @@ from minxionghydrocast.ingestion.source_adapter import (
     SourceAdapterError,
     SourceProvenance,
     SourceRequestError,
+    SourceResult,
+    SourceRetryMetrics,
     SourceSchemaError,
     records_sha256,
 )
@@ -80,6 +82,7 @@ DATASET_CONFIG = {
 class OperationalCollection:
     records: dict[str, list[dict[str, str]]]
     sources: dict[str, SourceProvenance]
+    source_retries: dict[str, SourceRetryMetrics] = field(default_factory=dict)
 
 
 def _record_fetched_at(records: list[dict[str, str]]) -> str:
@@ -159,13 +162,17 @@ def _derived_source(
     )
 
 
-def _check_adapter_result(result: Any, *, dataset: str) -> tuple[list[dict[str, str]], SourceProvenance]:
+def _check_adapter_result(
+    result: SourceResult,
+    *,
+    dataset: str,
+) -> tuple[list[dict[str, str]], SourceProvenance, SourceRetryMetrics]:
     if result.dataset != dataset:
         raise SourceSchemaError(
             "schema_drift",
             f"source adapter returned unexpected dataset: {result.dataset}",
         )
-    return result.records, result.provenance
+    return result.records, result.provenance, result.retry_metrics
 
 
 def _collect_alerts(
@@ -178,9 +185,10 @@ def _collect_alerts(
     max_age_minutes: float,
     adapter: SourceAdapter | None,
     now: datetime | None,
-) -> tuple[list[dict[str, str]], SourceProvenance]:
+) -> tuple[list[dict[str, str]], SourceProvenance, SourceRetryMetrics]:
     settings = get_settings()
     fallback_error: SourceRequestError | None = None
+    retry_metrics = SourceRetryMetrics()
     if source != "scraper":
         official_adapter = adapter or WraRainfallAlertAdapter(
             api_key=settings.wra_api_key,
@@ -196,6 +204,7 @@ def _collect_alerts(
             if source == "api":
                 raise
             fallback_error = exc
+            retry_metrics = exc.retry_metrics
 
     records = rainfall_alerts.scrape_with_playwright(
         county_value=county,
@@ -207,11 +216,15 @@ def _collect_alerts(
             "empty_unexpected",
             "WRA rainfall alert scraper returned no records",
         )
-    return records, _scraper_source(
-        "rainfall_alerts",
+    return (
         records,
-        source_url=f"{settings.wra_base_url.rstrip('/')}/service/alertQuery#",
-        fallback_error=fallback_error,
+        _scraper_source(
+            "rainfall_alerts",
+            records,
+            source_url=f"{settings.wra_base_url.rstrip('/')}/service/alertQuery#",
+            fallback_error=fallback_error,
+        ),
+        retry_metrics,
     )
 
 
@@ -226,9 +239,10 @@ def _collect_rain_gauges(
     max_age_minutes: float,
     adapter: SourceAdapter | None,
     now: datetime | None,
-) -> tuple[list[dict[str, str]], SourceProvenance]:
+) -> tuple[list[dict[str, str]], SourceProvenance, SourceRetryMetrics]:
     settings = get_settings()
     fallback_error: SourceRequestError | None = None
+    retry_metrics = SourceRetryMetrics()
     if source != "scraper":
         official_adapter = adapter or CwaRainGaugeAdapter(
             authorization=settings.cwa_api_key,
@@ -243,6 +257,7 @@ def _collect_rain_gauges(
             if source == "api":
                 raise
             fallback_error = exc
+            retry_metrics = exc.retry_metrics
 
     records = hydrological_data.scrape_rain_live(
         county=county,
@@ -255,11 +270,15 @@ def _collect_rain_gauges(
             "empty_unexpected",
             "WRA rain-gauge scraper returned no records",
         )
-    return records, _scraper_source(
-        "rain_gauges",
+    return (
         records,
-        source_url=f"{settings.wra_base_url}{hydrological_data.RAIN_PATH}",
-        fallback_error=fallback_error,
+        _scraper_source(
+            "rain_gauges",
+            records,
+            source_url=f"{settings.wra_base_url}{hydrological_data.RAIN_PATH}",
+            fallback_error=fallback_error,
+        ),
+        retry_metrics,
     )
 
 
@@ -274,9 +293,10 @@ def _collect_flood_sensors(
     max_age_minutes: float,
     adapter: SourceAdapter | None,
     now: datetime | None,
-) -> tuple[list[dict[str, str]], SourceProvenance]:
+) -> tuple[list[dict[str, str]], SourceProvenance, SourceRetryMetrics]:
     settings = get_settings()
     fallback_error: SourceRequestError | None = None
+    retry_metrics = SourceRetryMetrics()
     if source != "scraper":
         official_adapter = adapter or WraFloodSensorAdapter(
             county_code=county,
@@ -291,6 +311,7 @@ def _collect_flood_sensors(
             if source == "api":
                 raise
             fallback_error = exc
+            retry_metrics = exc.retry_metrics
 
     records = hydrological_data.scrape_flood_live(
         county=county,
@@ -303,11 +324,15 @@ def _collect_flood_sensors(
             "empty_unexpected",
             "WRA flood-sensor scraper returned no records",
         )
-    return records, _scraper_source(
-        "flood_sensors",
+    return (
         records,
-        source_url=f"{settings.wra_base_url}{hydrological_data.FLOOD_SENSOR_PATH}",
-        fallback_error=fallback_error,
+        _scraper_source(
+            "flood_sensors",
+            records,
+            source_url=f"{settings.wra_base_url}{hydrological_data.FLOOD_SENSOR_PATH}",
+            fallback_error=fallback_error,
+        ),
+        retry_metrics,
     )
 
 
@@ -347,8 +372,12 @@ def collect_records(
             "rain_gauges": _fixture_source("rain_gauges", rain),
             "flood_sensors": _fixture_source("flood_sensors", flood),
         }
+        source_retries = {
+            name: SourceRetryMetrics()
+            for name in ("rainfall_alerts", "rain_gauges", "flood_sensors")
+        }
     elif mode == "live":
-        alerts, alert_provenance = _collect_alerts(
+        alerts, alert_provenance, alert_retries = _collect_alerts(
             source=alert_source,
             county=county,
             headed=headed,
@@ -358,7 +387,7 @@ def collect_records(
             adapter=alert_adapter,
             now=now,
         )
-        rain, rain_provenance = _collect_rain_gauges(
+        rain, rain_provenance, rain_retries = _collect_rain_gauges(
             source=rain_source,
             county=county,
             headed=headed,
@@ -369,7 +398,7 @@ def collect_records(
             adapter=rain_adapter,
             now=now,
         )
-        flood, flood_provenance = _collect_flood_sensors(
+        flood, flood_provenance, flood_retries = _collect_flood_sensors(
             source=flood_source,
             county=county,
             headed=headed,
@@ -384,6 +413,11 @@ def collect_records(
             "rainfall_alerts": alert_provenance,
             "rain_gauges": rain_provenance,
             "flood_sensors": flood_provenance,
+        }
+        source_retries = {
+            "rainfall_alerts": alert_retries,
+            "rain_gauges": rain_retries,
+            "flood_sensors": flood_retries,
         }
     else:
         raise ValueError(f"unsupported mode: {mode}")
@@ -411,6 +445,7 @@ def collect_records(
             "flood_sensors": flood,
         },
         sources=sources,
+        source_retries=source_retries,
     )
 
 
@@ -579,6 +614,7 @@ def run_collection(
     now = now or datetime.now(TAIPEI_TZ)
     started_at, start_timer = start_run()
     with store.collection_lock():
+        source_retry_metrics: dict[str, dict[str, object]] = {}
         try:
             collection = collect_records(
                 mode=mode,
@@ -596,6 +632,14 @@ def run_collection(
                 rain_adapter=rain_adapter,
                 flood_adapter=flood_adapter,
                 now=now,
+            )
+            source_retry_metrics = {
+                name: retry_metrics.model_dump(mode="json")
+                for name, retry_metrics in sorted(collection.source_retries.items())
+            }
+            source_retry_total = sum(
+                retry_metrics.total
+                for retry_metrics in collection.source_retries.values()
             )
             records = collection.records
             records["location_reference"] = build_operational_locations(
@@ -651,6 +695,7 @@ def run_collection(
                         name: source.source_kind
                         for name, source in sorted(collection.sources.items())
                     },
+                    "source_retries": source_retry_metrics,
                     "experimental_forecast_included": False,
                     "static_location_inputs": {
                         "pumping_stations": str(pumping_stations)
@@ -679,6 +724,10 @@ def run_collection(
                     payload.name: len(payload.records)
                     for payload in payloads
                 },
+                metrics={
+                    "source_retry_total": source_retry_total,
+                    "source_retries": source_retry_metrics,
+                },
                 validation=health,
                 metadata={
                     "max_age_minutes": max_age_minutes,
@@ -699,6 +748,15 @@ def run_collection(
             )
             return manifest
         except Exception as exc:
+            if isinstance(exc, SourceAdapterError):
+                dataset = exc.dataset or "unknown"
+                source_retry_metrics = {
+                    dataset: exc.retry_metrics.model_dump(mode="json")
+                }
+            source_retry_total = sum(
+                int(metrics.get("total", 0))
+                for metrics in source_retry_metrics.values()
+            )
             completed_at = now_taipei_iso()
             manifest = store.publish_failure(
                 mode=mode,
@@ -713,6 +771,7 @@ def run_collection(
                     "alert_source": alert_source,
                     "rain_source": rain_source,
                     "flood_source": flood_source,
+                    "source_retries": source_retry_metrics,
                 },
                 now=now,
             )
@@ -727,6 +786,15 @@ def run_collection(
                 outputs={
                     "snapshot_id": manifest["snapshot_id"],
                     "store": str(store.root),
+                },
+                metrics={
+                    "source_retry_total": source_retry_total,
+                    "source_retries": source_retry_metrics,
+                },
+                metadata={
+                    "failure_kind": (
+                        exc.kind if isinstance(exc, SourceAdapterError) else "collection"
+                    ),
                 },
             )
             record_run(

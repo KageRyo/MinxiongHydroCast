@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -8,6 +9,7 @@ from minxionghydrocast.ingestion.source_adapter import (
     SourceProvenance,
     SourceRequestError,
     SourceResult,
+    SourceRetryMetrics,
     SourceSchemaError,
     records_sha256,
 )
@@ -92,15 +94,32 @@ def test_schema_drift_failure_kind_is_recorded(tmp_path, monkeypatch):
     now = datetime(2026, 7, 11, 10, 0, tzinfo=TAIPEI_TZ)
 
     def fail_collection(**_kwargs):
-        raise SourceSchemaError("schema_drift", "CWA contract changed")
+        raise SourceSchemaError(
+            "schema_drift",
+            "WRA contract changed",
+            dataset="flood_sensors",
+            retry_metrics=SourceRetryMetrics.from_counter(
+                {("wra_join_transaction", "malformed_catalog"): 2}
+            ),
+        )
 
     monkeypatch.setattr(collector, "collect_records", fail_collection)
     with pytest.raises(SourceSchemaError, match="contract changed"):
         run_demo(store, tmp_path, now)
 
     attempt = store.read_latest_attempt()
+    summary = json.loads((tmp_path / "summary.json").read_text(encoding="utf-8"))
     assert attempt["status"] == "error"
     assert attempt["metadata"]["failure_kind"] == "schema_drift"
+    assert attempt["metadata"]["source_retries"]["flood_sensors"]["total"] == 2
+    assert summary["metrics"]["source_retry_total"] == 2
+    assert summary["metrics"]["source_retries"]["flood_sensors"]["counts"] == [
+        {
+            "source": "wra_join_transaction",
+            "reason": "malformed_catalog",
+            "count": 2,
+        }
+    ]
 
 
 def test_live_payloads_use_official_product_classifications():
@@ -327,6 +346,14 @@ def test_live_snapshot_with_empty_official_alert_can_be_globally_ready(
             "rain_gauges": api_source(rain, now),
             "flood_sensors": wra_api_source("flood_sensors", flood, now),
         },
+        source_retries={
+            "flood_sensors": SourceRetryMetrics.from_counter(
+                {
+                    ("official_http", "invalid_json"): 1,
+                    ("wra_join_transaction", "missing_sensor_metadata"): 1,
+                }
+            )
+        },
     )
     monkeypatch.setattr(collector, "collect_records", lambda **_kwargs: collection)
     store = SnapshotStore(tmp_path / "operations")
@@ -352,6 +379,9 @@ def test_live_snapshot_with_empty_official_alert_can_be_globally_ready(
     assert alert["health"]["state"] == "healthy"
     assert alert["source"]["outcome"] == "empty"
     assert store.read_dataset(manifest, "rainfall_alerts") == []
+    assert manifest["metadata"]["source_retries"]["flood_sensors"]["total"] == 2
+    summary = json.loads((tmp_path / "summary.json").read_text(encoding="utf-8"))
+    assert summary["metrics"]["source_retry_total"] == 2
 
 
 def test_empty_observation_dataset_is_invalid_even_with_empty_source_outcome():

@@ -232,6 +232,158 @@ def test_adapter_recovers_from_a_transient_repeated_page(caplog):
     assert calls.count((LATEST_DATASET_ID, 2)) == 2
     assert sleeps == [0.5]
     assert "wra_pagination_retry reason=repeated_full_page page=2 attempt=1 attempts=3" in caplog.text
+    assert result.retry_metrics.model_dump(mode="json") == {
+        "total": 1,
+        "counts": [
+            {
+                "source": "wra_pagination",
+                "reason": "repeated_full_page",
+                "count": 1,
+            }
+        ],
+    }
+
+
+def test_adapter_recovers_when_a_malformed_page_is_replaced():
+    latest, catalog = fixture_payloads()
+    calls: list[str] = []
+    sleeps: list[float] = []
+
+    def changing_get(
+        url: str,
+        *,
+        params: dict[str, str],
+        headers: dict[str, str] | None,
+        timeout: float,
+    ) -> FakeResponse:
+        del headers, timeout
+        dataset_id = url.rsplit("/", maxsplit=1)[-1]
+        calls.append(dataset_id)
+        payload = latest if dataset_id == LATEST_DATASET_ID else catalog
+        if dataset_id == LATEST_DATASET_ID and calls.count(dataset_id) == 1:
+            payload = [{key: value for key, value in row.items() if key != "timestamp"} for row in payload]
+        content = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        return FakeResponse(content, f"{url}?{urlencode(params)}")
+
+    adapter = WraFloodSensorAdapter(
+        county_code="10010",
+        town_code="10010050",
+        transaction_retry_backoff_seconds=0.5,
+        client=ReliableJsonClient(http_get=changing_get, minimum_interval_seconds=0),
+        now=datetime(2026, 7, 12, 12, 15, tzinfo=TAIPEI_TZ),
+        sleep=sleeps.append,
+    )
+
+    result = adapter.collect()
+
+    assert len(result.records) == 1
+    assert calls == [
+        LATEST_DATASET_ID,
+        CATALOG_DATASET_ID,
+        LATEST_DATASET_ID,
+        CATALOG_DATASET_ID,
+    ]
+    assert sleeps == [0.5]
+    assert result.retry_metrics.model_dump(mode="json") == {
+        "total": 1,
+        "counts": [
+            {
+                "source": "wra_join_transaction",
+                "reason": "malformed_measurements",
+                "count": 1,
+            }
+        ],
+    }
+
+
+def test_adapter_repeated_malformed_payload_remains_schema_drift():
+    latest, catalog = fixture_payloads()
+    calls: list[str] = []
+
+    def malformed_get(
+        url: str,
+        *,
+        params: dict[str, str],
+        headers: dict[str, str] | None,
+        timeout: float,
+    ) -> FakeResponse:
+        del headers, timeout
+        dataset_id = url.rsplit("/", maxsplit=1)[-1]
+        calls.append(dataset_id)
+        payload = latest if dataset_id == LATEST_DATASET_ID else catalog
+        if dataset_id == LATEST_DATASET_ID:
+            payload = [{key: value for key, value in row.items() if key != "timestamp"} for row in payload]
+        content = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        return FakeResponse(content, f"{url}?{urlencode(params)}")
+
+    adapter = WraFloodSensorAdapter(
+        county_code="10010",
+        town_code="10010050",
+        transaction_retry_attempts=3,
+        transaction_retry_backoff_seconds=0,
+        client=ReliableJsonClient(http_get=malformed_get, minimum_interval_seconds=0),
+        sleep=lambda _seconds: None,
+    )
+
+    with pytest.raises(SourceSchemaError, match="remained inconsistent") as exc_info:
+        adapter.collect()
+
+    assert exc_info.value.kind == "schema_drift"
+    assert calls.count(LATEST_DATASET_ID) == 3
+    assert calls.count(CATALOG_DATASET_ID) == 3
+    assert exc_info.value.retry_metrics.model_dump(mode="json") == {
+        "total": 2,
+        "counts": [
+            {
+                "source": "wra_join_transaction",
+                "reason": "malformed_measurements",
+                "count": 2,
+            }
+        ],
+    }
+
+
+def test_adapter_retries_the_whole_join_when_catalog_changes_mid_transaction():
+    latest, catalog = fixture_payloads()
+    target_id = "00707a34-700c-4e01-b091-396378c234f6"
+    calls: list[str] = []
+
+    def changing_catalog_get(
+        url: str,
+        *,
+        params: dict[str, str],
+        headers: dict[str, str] | None,
+        timeout: float,
+    ) -> FakeResponse:
+        del headers, timeout
+        dataset_id = url.rsplit("/", maxsplit=1)[-1]
+        calls.append(dataset_id)
+        payload = latest if dataset_id == LATEST_DATASET_ID else catalog
+        if dataset_id == CATALOG_DATASET_ID and calls.count(dataset_id) == 1:
+            payload = [row for row in payload if row["sensorid"] != target_id]
+        content = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        return FakeResponse(content, f"{url}?{urlencode(params)}")
+
+    adapter = WraFloodSensorAdapter(
+        county_code="10010",
+        town_code="10010050",
+        transaction_retry_backoff_seconds=0,
+        client=ReliableJsonClient(http_get=changing_catalog_get, minimum_interval_seconds=0),
+        now=datetime(2026, 7, 12, 12, 15, tzinfo=TAIPEI_TZ),
+        sleep=lambda _seconds: None,
+    )
+
+    result = adapter.collect()
+
+    assert len(result.records) == 1
+    assert calls == [
+        LATEST_DATASET_ID,
+        CATALOG_DATASET_ID,
+        LATEST_DATASET_ID,
+        CATALOG_DATASET_ID,
+    ]
+    assert result.retry_metrics.counts[0].source == "wra_join_transaction"
+    assert result.retry_metrics.counts[0].reason == "missing_sensor_metadata"
 
 
 def test_adapter_marks_target_feed_stale_after_default_ninety_minutes():
