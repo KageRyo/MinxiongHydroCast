@@ -60,3 +60,24 @@ An incident is resolved only after the failing component is healthy, readiness s
 correct, missed data or alert gaps are documented, and a follow-up collection succeeds. For
 critical and high incidents, record root cause, detection gap, recovery evidence, and a concrete
 preventive action. Do not erase failed-attempt manifests or audit records after resolution.
+
+## Rolling gap incident report
+
+Generate a read-only queue for every ready-data gap above the shadow threshold:
+
+```bash
+mhc shadow-gap-incidents \
+  --store "${MINXIONGHYDROCAST_OPERATIONS_STORE}" \
+  --output /private/run-summaries/shadow-gap-incidents.json
+```
+
+The command mirrors the shadow gate's ready definition and 192-hour window. It records the gap
+boundaries, duration, affected source health, attempt outcomes, readable snapshot evidence,
+failure classifications, and recovery snapshot. It atomically writes
+`shadow_gap_incidents.json` in the operations store without deleting or modifying snapshot
+history.
+
+The snapshot store cannot prove whether an external alert fired or establish a final root cause.
+Those fields remain explicitly pending until an operator correlates the report with systemd,
+Prometheus/Alertmanager, upstream status, and deployment evidence. Final root cause, fix,
+reviewer, and test reproduction remain human decisions.

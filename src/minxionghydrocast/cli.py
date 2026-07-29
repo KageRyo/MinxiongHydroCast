@@ -33,6 +33,7 @@ COMMANDS = {
     "radar-tensor-convert": "minxionghydrocast.pipelines.radar_tensor_conversion:main",
     "rainfall-alerts": "minxionghydrocast.ingestion.rainfall_alerts:main",
     "serve": "minxionghydrocast.operations.api:main",
+    "shadow-gap-incidents": "minxionghydrocast.operations.gap_incidents:main",
     "shadow-report": "minxionghydrocast.operations.shadow:main",
     "shelters": "minxionghydrocast.ingestion.shelters:main",
     "tensor-baseline-evaluate": "minxionghydrocast.pipelines.tensor_baseline_evaluation:main",
