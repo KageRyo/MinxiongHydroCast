@@ -52,9 +52,9 @@ The recommended model order after CWA sample validation is:
 
 ## GPU Training Environment
 
-The target server has two RTX 4090 GPUs with 24 GB VRAM each and NVIDIA driver `570.133.07`.
-This is enough to test modern radar nowcasting models after the data pipeline is stable. Use the
-GPUs first for controlled experiments:
+The training pipeline has been verified with two CUDA GPUs through PyTorch `DataParallel`.
+Exact host hardware and driver inventory are deployment-private. Use accelerators first for
+controlled experiments:
 
 - Run persistence and threshold baselines on CPU.
 - Evaluate tensor archives with `minxiong-hydrocast-tensor-baseline-evaluate` before deep learning.
@@ -63,14 +63,14 @@ GPUs first for controlled experiments:
 - Use both GPUs only after data loading, checkpointing, and evaluation are repeatable.
 - Reserve NowcastNet-style training for gridded Taiwan radar tensors with event-based splits.
 
-The current default environment does not install PyTorch. Use a CUDA-compatible PyTorch environment
-for GPU jobs; on the target server, the `VLM` conda environment has been verified with two visible
-RTX 4090 GPUs. Checkpoints stay under ignored `data/external/checkpoints/` paths.
+The current default environment does not install PyTorch. Install the `model` extra in a
+CUDA-compatible PyTorch environment for GPU jobs. Checkpoints stay under ignored
+`data/external/checkpoints/` paths.
 
 The Tiny U-Net entrypoint supports a multi-GPU smoke run:
 
 ```bash
-PYTHONPATH=src conda run -n VLM python -m minxionghydrocast.pipelines.torch_baseline_training \
+python -m minxionghydrocast.pipelines.torch_baseline_training \
   --archive data/processed/cwa_recent_tensor_sample.npz \
   --output-dir data/external/checkpoints/tiny_unet_cwa_2gpu_masked_smoke \
   --device cuda \
@@ -84,7 +84,7 @@ z-score normalizes valid pixels, but real training still needs longer event-base
 Evaluate a trained smoke checkpoint against persistence with:
 
 ```bash
-PYTHONPATH=src conda run -n VLM python -m minxionghydrocast.pipelines.torch_baseline_evaluation \
+python -m minxionghydrocast.pipelines.torch_baseline_evaluation \
   --archive data/processed/cwa_recent_tensor_sample.npz \
   --checkpoint data/external/checkpoints/tiny_unet_cwa_2gpu_masked_smoke/tiny_unet_nowcaster.pt \
   --event-threshold 35 \
@@ -100,7 +100,7 @@ sliding tensors, trains only on the two training events, and uses a completely s
 event:
 
 ```bash
-PYTHONPATH=src conda run -n VLM mhc dataset-build \
+mhc dataset-build \
   --manifest data/samples/event_split_manifest.json \
   --root "$MINXIONGHYDROCAST_RESEARCH_ROOT" \
   --train-weighted-unet \

@@ -99,7 +99,7 @@ The current real CWA `O-A0059-001` build contains 221 frames and 166 sliding win
 
 The weighted Tiny U-Net used 88 training windows and a separate 26-window validation archive.
 Validation data was not used for training normalization or gradient updates. Training used two
-RTX 4090 GPUs, selected epoch 7 with best validation loss `1.433344`, and stopped early after 12
+CUDA GPUs, selected epoch 7 with best validation loss `1.433344`, and stopped early after 12
 completed epochs.
 
 | Independent event | Split | Persistence RMSE | Tiny U-Net RMSE | Persistence CSI | Tiny U-Net CSI |

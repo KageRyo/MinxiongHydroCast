@@ -4,6 +4,14 @@ This roadmap turns MinxiongHydroCast into a usable flood-risk data and nowcastin
 milestone small enough to track in [tasks.md](tasks.md). The completion definition and phase-by-phase
 exit criteria are maintained in [completion_plan.md](completion_plan.md).
 
+## Release line
+
+| Version | Product boundary | Exit condition |
+| --- | --- | --- |
+| `v0.1.0` | Observation Service | Official-source collection, strict readiness, immutable snapshots, API/operator view, monitoring, backup, and fail-closed shadow gate |
+| `v0.2.0` | Reproducible Radar Dataset | Broader human-reviewed weather-regime coverage, complete source rights record, and reproducible checksummed event catalog |
+| `v0.3.0` | Baseline Nowcasting | Learned model consistently beats Persistence on independent aggregate and lead-time gates; local label and shadow gates pass |
+
 ## Milestone 1: Stabilize Live Data Ingestion
 
 - [x] Retain WRA rain-gauge and flood-sensor page parsers for degraded fallback diagnostics.
@@ -87,9 +95,9 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 
 - [x] Convert CWA event sequences into tensor archives with CRS, timestamp, and nodata metadata.
 - [x] Evaluate persistence on real converted event tensors.
-- [x] Add a small U-Net baseline training entrypoint for one RTX 4090.
+- [x] Add a small U-Net baseline training entrypoint for one CUDA GPU.
 - [x] Add checkpoint save/resume and deterministic training summaries.
-- [x] Run the Tiny U-Net smoke baseline on two RTX 4090 GPUs.
+- [x] Run the Tiny U-Net smoke baseline on two CUDA GPUs.
 - [x] Add nodata masking and radar tensor normalization for neural smoke training.
 - [x] Compare persistence and Tiny U-Net smoke outputs with the same metrics and mask.
 - [x] Train with train-only normalization and an independent event validation archive.

@@ -33,7 +33,7 @@ through a focused pull request. The end-to-end target is defined in
 - [x] Evaluate persistence on a real converted CWA radar event tensor.
 - [x] Add an optional Tiny U-Net PyTorch training entrypoint with checkpoint save/resume and
       deterministic run summaries.
-- [x] Run Tiny U-Net smoke training on two RTX 4090 GPUs with PyTorch `DataParallel`.
+- [x] Run Tiny U-Net smoke training on two CUDA GPUs with PyTorch `DataParallel`.
 - [x] Mask CWA nodata values and z-score normalize tensors for Tiny U-Net smoke training.
 - [x] Add `WRA_API_KEY` to local configuration support and `env.example` without committing keys.
 - [x] Populate event split manifest with a live-verified historical CWA radar sequence sample.
@@ -80,28 +80,24 @@ through a focused pull request. The end-to-end target is defined in
 
 ## Next
 
-### Immediate Operational Queue (Verified 2026-07-23)
+### Immediate Operational Queue (Verified 2026-07-29)
 
 Complete these items in order unless candidate review and code work are being handled independently.
 Each code change should remain a focused pull request with its own tests and rollout evidence.
 
-- [x] **P0 - Deploy and verify the WRA reliability change.** PR #24 installed revision `d6b770a`
-      after 287 tests and two passing CI runs. Three live contracts, a healthy collector snapshot,
-      the Prometheus retry metric, a 1,505-snapshot verified backup, and the unchanged rolling
-      shadow evidence all passed their rollout checks. Retry exhaustion remains `schema_drift`.
+- [x] **P0 - Deploy and verify the WRA reliability change.** Empty/invalid/malformed page retries,
+      bounded full join-transaction retry, structured telemetry, live contracts, backup, and the
+      unchanged `schema_drift` exhaustion behavior passed rollout checks.
 - [x] **P0 - Add a read-only event review queue.** `mhc event-review-queue` verifies artifacts and
       ranks candidates using local radar, QPE, Minxiong gauges, warnings, official context, and
       evidence readiness. It does not edit the evidence catalog or formal split.
-- [ ] **P0 - Close the pre-policy context-only review item.** Review and reject
-      `cwa_o_a0059_candidate_20260715t0520`, which completed 35 of 35 frames with 22 Taiwan-wide
-      triggers, zero Minxiong-local triggers, and formal membership `not_added`. Preserve all
-      checksummed evidence and record the named reviewer.
-- [ ] **P0 - Review the 11 complete Minxiong-local pending candidates.** The strict catalog now
-      contains 15 complete candidates: one approved, two rejected, and 12 pending including the
-      context-only item above. Start with the queue's 2026-07-17, 2026-07-16, and 2026-07-23
-      candidates, then work through the remaining local candidates. Record an auditable approval
-      or rejection and weather regime for each without changing the formal split. Do not classify
-      a radar threshold crossing as heavy rain without official and gauge support.
+- [x] **P0 - Prepare the v0.1.0 public release.** Add a concise README, architecture, real
+      operator screenshot, results table, documentation index, changelog, security policy,
+      Python 3.11/3.13 CI, CodeQL, and public-safe deployment documentation.
+- [ ] **P0 - Close the private event-review backlog.** Use the external read-only queue to review
+      context-only and Minxiong-local candidates in evidence-ranked order. Preserve checksummed
+      evidence, record a named human decision and weather regime, and keep every candidate outside
+      the formal split until a separate reviewed split proposal.
 - [ ] **P1 - Record shadow heavy-rain evidence only when review supports it.** If a reviewed local
       candidate establishes a bounded heavy-rain period, add its event ID, start/end times,
       official source, reviewer, and confirmation to the private deployed shadow-evidence file.
@@ -109,11 +105,11 @@ Each code change should remain a focused pull request with its own tests and rol
 - [ ] **P1 - Recover and re-evaluate the rolling shadow gate.** Keep the scheduled collector and
       hourly evaluation running until there are at least 168 hours, 900 attempts, 99% success, 95%
       readiness, no ready gap over 30 minutes in the 192-hour window, intact storage, and one
-      reviewed heavy-rain period. With no new gaps, the latest recorded over-30-minute gap remains
-      in the window until approximately 2026-07-25 23:21 Asia/Taipei.
-- [ ] **P1 - Publish candidate-review follow-up evidence.** After the pending reviews, update the
-      dated deployment status, task checkboxes, catalog counts, reviewed regimes, and any
-      evidence-backed shadow heavy-rain record.
+      reviewed heavy-rain period. Do not delete old attempts; allow the rolling window to age them
+      out naturally.
+- [ ] **P1 - Publish only aggregate review follow-up evidence.** Keep raw candidate details,
+      identifiers, reviewer notes, and artifacts private. Update public docs only with dated,
+      rights-reviewed aggregate regime coverage and gate outcomes.
 - [ ] **P2 - Close external-use safeguards.** Replicate verified backups off-host, assign primary
       and backup human receivers, and exercise incident acknowledgement, override, rollback, and
       recovery before considering external operational use or notification delivery.
@@ -180,15 +176,15 @@ Each code change should remain a focused pull request with its own tests and rol
 ### Phase 4: Modeling
 
 - [x] Evaluate persistence on real converted radar event tensors.
-- [x] Add a small U-Net training entrypoint for one RTX 4090 before using both GPUs.
+- [x] Add a small U-Net training entrypoint for one CUDA GPU before using both GPUs.
 - [x] Add checkpoint save/resume and deterministic training run summaries.
-- [x] Use the CUDA-enabled `VLM` environment and run the Tiny U-Net baseline on two GPUs.
+- [x] Use a CUDA-enabled environment and run the Tiny U-Net baseline on two GPUs.
 - [x] Mask CWA nodata values and normalize radar tensors before neural smoke training.
 - [x] Compare CSI, POD, FAR, and RMSE across persistence and Tiny U-Net smoke outputs.
 - [x] Add lead-time metric breakdowns after collecting longer multi-step event windows.
 - [x] Add threshold-weighted Tiny U-Net loss options, validation split support, and early stopping
       metadata for stronger-event experiments.
-- [x] Run the weighted Tiny U-Net experiment on two RTX 4090 GPUs and compare full-event metrics.
+- [x] Run the weighted Tiny U-Net experiment on two CUDA GPUs and compare full-event metrics.
 - [x] Compare the weighted Tiny U-Net with Persistence on one independent validation event and two
       held-out Minxiong/Chiayi test events.
 - [ ] Improve the learned model until it consistently beats Persistence on aggregate and

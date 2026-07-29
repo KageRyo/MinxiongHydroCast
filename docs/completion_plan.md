@@ -43,7 +43,7 @@ credentials, raw official data, or model weights.
   baseline evaluation on a real CWA radar tensor.
 - Completed: optional Tiny U-Net training entrypoint with deterministic seed, checkpoint save, and
   resume support.
-- Completed: Tiny U-Net 2-GPU smoke training on the target server with two visible RTX 4090 GPUs.
+- Completed: Tiny U-Net smoke training with two visible CUDA GPUs.
 - Completed: CWA nodata masking and z-score normalization for baseline evaluation and Tiny U-Net
   smoke training.
 - Completed: persistence versus Tiny U-Net smoke comparison using the same valid-pixel mask and
@@ -75,7 +75,7 @@ credentials, raw official data, or model weights.
   frame context, but cannot create or extend the human-review queue without `minxiong_35dbz`.
 - Completed: formal five-event split with two real train, one independent validation, and two
   held-out Minxiong/Chiayi test events; all formal demo placeholders are prohibited by schema.
-- Completed: weighted Tiny U-Net run on two RTX 4090 GPUs using 88 training windows and a separate
+- Completed: weighted Tiny U-Net run on two CUDA GPUs using 88 training windows and a separate
   26-window validation event. It improves aggregate RMSE but fails the independent promotion gate
   on CSI and lead-time regressions, so forecast publication remains disabled.
 - Completed: Pydantic contracts for dataset manifests, CWA history and collection artifacts,
@@ -170,7 +170,7 @@ credentials, raw official data, or model weights.
 ## Phase 4: Modeling
 
 - Evaluate persistence on real converted radar events.
-- Train a small ConvLSTM or U-Net on one RTX 4090 first.
+- Train a small ConvLSTM or U-Net on one CUDA GPU first.
 - Add checkpoint save/resume and deterministic run summaries.
 - Use threshold-weighted or focal-style losses plus validation early stopping before increasing
   model complexity.

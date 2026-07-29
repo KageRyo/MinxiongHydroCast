@@ -104,5 +104,5 @@ Current smoke status:
 - Split train/validation/test by weather event.
 - Run persistence baselines on the same tensors.
 - Run Tiny U-Net/RainNet-style diagnostics on the same tensors.
-- Use one RTX 4090 first; use both GPUs only after data loading and checkpointing are repeatable.
+- Use one CUDA GPU first; use both GPUs only after data loading and checkpointing are repeatable.
 - Add license notices before copying any third-party source into this repository.

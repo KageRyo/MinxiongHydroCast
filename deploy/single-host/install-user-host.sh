@@ -6,10 +6,14 @@ usage() {
 }
 
 REPOSITORY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-DURABLE_ROOT="/mnt/8tb_hdd/ryo/minxiong-hydrocast"
 ENV_FILE=""
 PYTHON_BIN="python3"
 RUNTIME_LINK="$HOME/.local/share/minxiong-hydrocast"
+if [[ -L "$RUNTIME_LINK" ]]; then
+  DURABLE_ROOT="$(realpath -m "$RUNTIME_LINK")"
+else
+  DURABLE_ROOT="${XDG_STATE_HOME:-$HOME/.local/state}/minxiong-hydrocast"
+fi
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
