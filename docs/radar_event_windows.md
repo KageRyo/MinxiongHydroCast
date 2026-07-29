@@ -151,7 +151,7 @@ minxiong-hydrocast-qpe-gauge-validate \
 Train the current Tiny U-Net/RainNet-style baseline on the Taiwan-wide event:
 
 ```bash
-PYTHONPATH=src conda run -n VLM python -m minxionghydrocast.pipelines.torch_baseline_training \
+python -m minxionghydrocast.pipelines.torch_baseline_training \
   --archive data/processed/cwa_tensor_taiwan_widespread_20260628_6in_6out.npz \
   --output-dir data/external/checkpoints/tiny_unet_cwa_taiwan_widespread_20260628_6in_6out \
   --device cuda \
@@ -167,7 +167,7 @@ see [model_strategy.md](model_strategy.md).
 Evaluate with mini-batch inference:
 
 ```bash
-PYTHONPATH=src conda run -n VLM python -m minxionghydrocast.pipelines.torch_baseline_evaluation \
+python -m minxionghydrocast.pipelines.torch_baseline_evaluation \
   --archive data/processed/cwa_tensor_chiayi_minxiong_heavyrain_20260702_6in_6out.npz \
   --checkpoint data/external/checkpoints/tiny_unet_cwa_taiwan_widespread_20260628_6in_6out/tiny_unet_nowcaster.pt \
   --event-threshold 35 \

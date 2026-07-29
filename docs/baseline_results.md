@@ -78,13 +78,11 @@ selection or scientific reporting.
 
 ## Tiny U-Net 2-GPU Smoke Training
 
-The Tiny U-Net training entrypoint was smoke-tested on the target server with two RTX 4090 GPUs
-visible through PyTorch `DataParallel`.
+The Tiny U-Net training entrypoint was smoke-tested with two CUDA GPUs visible through PyTorch
+`DataParallel`. Exact host hardware and environment names are deployment-private.
 
-- Environment: `VLM`
 - Device: `cuda`
 - CUDA devices used: 2
-- GPU names: `NVIDIA GeForce RTX 4090`, `NVIDIA GeForce RTX 4090`
 - Source archive: `data/processed/cwa_recent_tensor_sample.npz`
 - Batch repeats: 2
 - Epochs: 1

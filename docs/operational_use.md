@@ -250,7 +250,7 @@ The executable single-host profile under `deploy/systemd-user/` and `deploy/sing
 
 The single-host installer uses:
 
-- `/mnt/8tb_hdd/ryo/minxiong-hydrocast` for durable mutable state;
+- a deployment-selected durable root for mutable state;
 - `~/.local/share/minxiong-hydrocast` as a stable runtime symlink;
 - `~/.config/minxiong-hydrocast/env` with mode `0600` for `CWA_API_KEY` and `WRA_API_KEY`;
 - user-level systemd supervision, with login linger enabled for service persistence.

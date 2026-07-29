@@ -11,7 +11,7 @@ The default installation uses:
 
 | Path | Purpose |
 | --- | --- |
-| `/mnt/8tb_hdd/ryo/minxiong-hydrocast` | Durable runtime, snapshots, TSDBs, backups, and runner |
+| `<durable-root>` | Durable runtime, snapshots, TSDBs, backups, and runner |
 | `~/.local/share/minxiong-hydrocast` | Stable symlink used by user units |
 | `~/.config/minxiong-hydrocast/env` | Mode `0600` collector API-key environment file |
 | `~/.config/minxiong-hydrocast/notifications.env` | Mode `0600` notification-only environment |
@@ -20,13 +20,18 @@ The default installation uses:
 The repository `.env` is an installation input only. It remains ignored by Git and is copied to
 private systemd environment paths without printing values. The installer separates the optional
 Discord URL from the collector credentials so the alert receiver cannot read CWA or WRA keys.
+For a new installation, the default durable root is
+`${XDG_STATE_HOME:-$HOME/.local/state}/minxiong-hydrocast`. Use `--durable-root` for a mounted
+volume. If the stable runtime symlink already exists, the installer preserves its current target.
 
 ## Install the host
 
 From the repository root, run:
 
 ```bash
-deploy/single-host/install-user-host.sh --env-file .env
+deploy/single-host/install-user-host.sh \
+  --env-file .env \
+  --durable-root /path/to/durable/minxiong-hydrocast
 sudo loginctl enable-linger "$USER"
 ```
 
@@ -74,7 +79,7 @@ resolved notifications to the durable local receiver. The receiver validates the
 and appends each delivery to:
 
 ```text
-/mnt/8tb_hdd/ryo/minxiong-hydrocast/notifications/alerts.jsonl
+<durable-root>/notifications/alerts.jsonl
 ```
 
 The local receiver proves alert generation, routing, and durable delivery. It is not a human
@@ -104,7 +109,7 @@ delivery returns HTTP 502 so Alertmanager can retry. Delivery results contain on
 redacted error code and are fsynced separately at:
 
 ```text
-/mnt/8tb_hdd/ryo/minxiong-hydrocast/notifications/discord-deliveries.jsonl
+<durable-root>/notifications/discord-deliveries.jsonl
 ```
 
 Treat the URL as a password and rotate it in Discord if it is exposed. It must not be committed or

@@ -23,7 +23,7 @@ each and remain independent of training and model selection.
 ## Training
 
 - Loss: threshold-weighted MSE at `35 dBZ`, event weight `4`
-- Hardware: two RTX 4090 GPUs through PyTorch `DataParallel`
+- Hardware: two CUDA GPUs through PyTorch `DataParallel` (exact host inventory private)
 - Configured epochs: 20
 - Completed epochs: 12
 - Best epoch: 7
