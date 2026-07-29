@@ -57,6 +57,7 @@ minxiong-hydrocast-label-audit = "minxionghydrocast.validation.flood_labels:main
 minxiong-hydrocast-nowcastnet-smoke = "minxionghydrocast.pipelines.nowcastnet_smoke:main"
 minxiong-hydrocast-operations = "minxionghydrocast.operations.collector:main"
 minxiong-hydrocast-serve = "minxionghydrocast.operations.api:main"
+minxiong-hydrocast-shadow-gap-incidents = "minxionghydrocast.operations.gap_incidents:main"
 minxiong-hydrocast-shadow-report = "minxionghydrocast.operations.shadow:main"
 minxiong-hydrocast-backup = "minxionghydrocast.operations.backup:main"
 minxiong-hydrocast-alert-receiver = "minxionghydrocast.operations.alert_receiver:main"

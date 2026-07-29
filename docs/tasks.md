@@ -107,6 +107,9 @@ Each code change should remain a focused pull request with its own tests and rol
       readiness, no ready gap over 30 minutes in the 192-hour window, intact storage, and one
       reviewed heavy-rain period. Do not delete old attempts; allow the rolling window to age them
       out naturally.
+- [x] **P1 - Add a read-only shadow gap incident report.** Preserve ready-gap boundaries, source
+      health, attempts, readable snapshots, recovery, and explicit pending fields for alert,
+      final root cause, fix, reviewer, and test reproduction without changing rolling history.
 - [ ] **P1 - Publish only aggregate review follow-up evidence.** Keep raw candidate details,
       identifiers, reviewer notes, and artifacts private. Update public docs only with dated,
       rights-reviewed aggregate regime coverage and gate outcomes.

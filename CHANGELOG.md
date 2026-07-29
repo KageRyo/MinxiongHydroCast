@@ -5,6 +5,11 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 
 ## [Unreleased]
 
+### Added
+
+- Read-only shadow gap incident reporting with source, attempt, snapshot, recovery, and pending
+  human-review evidence.
+
 ### Planned
 
 - Broader human-reviewed radar-event diversity and QPE/gauge validation for `v0.2.0`.
