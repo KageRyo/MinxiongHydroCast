@@ -1,0 +1,76 @@
+{
+  "manifest_schema_version": 1,
+  "name": "MinxiongHydroCast",
+  "version": "0.1.0",
+  "release_tag": "v0.1.0",
+  "release_name": "v0.1.0 — Observation Service",
+  "release_date": "2026-07-29",
+  "release_published_at": "2026-07-29T06:26:10Z",
+  "release_tag_object": "32936196eb075ffe6c6f18c10126593d96a1446b",
+  "source_commit": "e4cec9773d218ae427142082a0304f0beba07091",
+  "python_versions": [
+    "3.11",
+    "3.13"
+  ],
+  "test_count": 287,
+  "dataset_manifest_schema_version": "2.0",
+  "api_schema_version": "v1",
+  "contract_versions": {
+    "dataset_catalog": "1.0",
+    "event_evidence_catalog": "1.0",
+    "operations_snapshot": 1,
+    "shadow_report": 1
+  },
+  "model_status": "research_only_promotion_gate_failed",
+  "primary_benchmark": "PersistenceNowcaster",
+  "candidate_model": "weighted Tiny U-Net",
+  "forecast_publication_ready": false,
+  "release_evidence": {
+    "formal_radar_events": 5,
+    "independent_validation_events": 1,
+    "held_out_local_test_events": 2,
+    "shadow_live_attempts": 1150,
+    "shadow_success_rate": 0.993913,
+    "shadow_readiness_rate": 0.973913,
+    "shadow_maximum_gap_minutes": 50.983,
+    "shadow_confirmed_heavy_rain_periods": 0
+  },
+  "known_gate_blockers": [
+    {
+      "gate": "model_promotion",
+      "observed": "The candidate improves aggregate RMSE but does not consistently beat Persistence on CSI and lead-time metrics.",
+      "required": "Consistently beat Persistence on every required independent aggregate and lead-time gate."
+    },
+    {
+      "gate": "shadow_maximum_gap_minutes",
+      "observed": 50.983,
+      "required": "<= 30"
+    },
+    {
+      "gate": "shadow_confirmed_heavy_rain_periods",
+      "observed": 0,
+      "required": ">= 1 with continuous ready coverage"
+    },
+    {
+      "gate": "weather_regime_diversity",
+      "observed": "Five formal radar events; broader reviewed weather-regime evidence is incomplete.",
+      "required": "Multiple reviewed and independently evaluated weather regimes."
+    },
+    {
+      "gate": "qpe_gauge_validation",
+      "observed": "Incomplete",
+      "required": "Complete before forecast publication."
+    },
+    {
+      "gate": "reviewed_local_flood_labels",
+      "observed": "Incomplete",
+      "required": "Complete before forecast publication."
+    }
+  ],
+  "distribution_boundary": {
+    "code_license": "MIT",
+    "official_data_included": false,
+    "trained_weights_included": false,
+    "data_and_weight_rights_review_required": true
+  }
+}
