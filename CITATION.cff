@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: MinxiongHydroCast
+type: software
+authors:
+  - family-names: Chang
+    given-names: Chien-Hsun
+version: 0.1.0
+date-released: 2026-07-29
+repository-code: "https://github.com/KageRyo/MinxiongHydroCast"
+url: "https://github.com/KageRyo/MinxiongHydroCast"
+license: MIT
+abstract: >-
+  A fail-closed official-source hydrometeorological observation service and
+  reproducible rainfall-nowcasting research toolkit for Minxiong Township,
+  Taiwan.
+keywords:
+  - hydrology
+  - nowcasting
+  - open data
+  - reproducible research
+  - Taiwan
+  - weather
