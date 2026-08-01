@@ -6,8 +6,6 @@ import argparse
 from datetime import datetime
 from pathlib import Path
 
-from docx import Document
-
 from minxionghydrocast.io.csv_utils import write_csv
 from minxionghydrocast.io.run_summary import (
     DEFAULT_RUN_LOG_PATH,
@@ -85,6 +83,14 @@ def parse_table_row(cells: list[str], source: str, extracted_at: str) -> dict[st
 def extract_from_docx(docx_path: Path) -> list[dict[str, str]]:
     if not docx_path.exists():
         raise FileNotFoundError(f"Input file not found: {docx_path}")
+
+    try:
+        from docx import Document
+    except ImportError as exc:
+        raise RuntimeError(
+            "report support is not installed; install "
+            "'minxiong-hydrocast[report]'"
+        ) from exc
 
     document = Document(str(docx_path))
     extracted_at = datetime.now().isoformat(timespec="seconds")

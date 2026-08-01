@@ -1,0 +1,46 @@
+name: Bug report
+description: Report a reproducible problem using public-safe evidence.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include API keys, private event identifiers, unpublished source captures, production
+        paths, or material whose redistribution rights are unclear.
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+      description: What happened, and what public-safe output demonstrates it?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What contract or documented behavior did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Provide minimal commands or a synthetic fixture.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: "0.1.1 or commit SHA"
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Public-safety check
+      options:
+        - label: I removed secrets, private operational details, and restricted raw data.
+          required: true

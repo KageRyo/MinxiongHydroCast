@@ -20,7 +20,7 @@ from minxionghydrocast.operations.snapshot_store import SnapshotStore
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 REPORT_NAME = "shadow_gap_incidents.json"
-DERIVED_DATASETS = {"location_reference", "minxiong_features"}
+DERIVED_DATASETS = {"location_reference", "region_features"}
 
 
 @dataclass(frozen=True)

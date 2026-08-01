@@ -1,30 +1,44 @@
 [build-system]
-requires = ["setuptools>=69", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "minxiong-hydrocast"
-version = "0.1.0"
-description = "Hydrometeorological observation and rainfall-nowcasting toolkit for Minxiong Township."
+version = "0.1.1"
+description = "Official-source hydrometeorological data quality and reproducibility platform."
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
+license = "MIT"
 authors = [
   { name = "Chien-Hsun Chang" }
 ]
 dependencies = [
-  "beautifulsoup4>=4.12",
-  "lxml>=5.0",
   "numpy>=1.26",
-  "pandas>=2.2",
-  "playwright>=1.48",
   "pydantic>=2.9,<3",
-  "python-docx>=1.1",
   "requests>=2.31",
 ]
 
+[project.urls]
+Homepage = "https://github.com/KageRyo/MinxiongHydroCast"
+Documentation = "https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/index.md"
+Repository = "https://github.com/KageRyo/MinxiongHydroCast"
+Issues = "https://github.com/KageRyo/MinxiongHydroCast/issues"
+Changelog = "https://github.com/KageRyo/MinxiongHydroCast/blob/main/CHANGELOG.md"
+
 [project.optional-dependencies]
+scraper = [
+  "beautifulsoup4>=4.12",
+  "lxml>=5.0",
+  "playwright>=1.48",
+]
+report = [
+  "pandas>=2.2",
+  "python-docx>=1.1",
+]
 dev = [
+  "build>=1.2",
+  "coverage>=7.6",
+  "pyright>=1.1",
   "pytest>=8.0",
   "ruff>=0.6",
 ]
@@ -32,46 +46,27 @@ model = [
   "scikit-learn>=1.5",
   "torch>=2.2",
 ]
+all = [
+  "beautifulsoup4>=4.12",
+  "lxml>=5.0",
+  "pandas>=2.2",
+  "playwright>=1.48",
+  "python-docx>=1.1",
+  "scikit-learn>=1.5",
+  "torch>=2.2",
+]
 
 [project.scripts]
 mhc = "minxionghydrocast.cli:main"
-minxiong-hydrocast-demo = "minxionghydrocast.pipelines.demo:main"
-minxiong-hydrocast-dataset-build = "minxionghydrocast.pipelines.dataset_build:main"
-minxiong-hydrocast-event-discover = "minxionghydrocast.pipelines.event_discovery:main"
-minxiong-hydrocast-event-review = "minxionghydrocast.pipelines.event_review:main"
-minxiong-hydrocast-event-review-queue = "minxionghydrocast.pipelines.event_review_queue:main"
-minxiong-hydrocast-event-split-check = "minxionghydrocast.pipelines.event_split_check:main"
-minxiong-hydrocast-evaluate-baselines = "minxionghydrocast.pipelines.baseline_evaluation:main"
-minxiong-hydrocast-rainfall-alerts = "minxionghydrocast.ingestion.rainfall_alerts:main"
-minxiong-hydrocast-hydrology = "minxionghydrocast.ingestion.hydrological_data:main"
-minxiong-hydrocast-cwa-download = "minxionghydrocast.ingestion.cwa_file_api:main"
-minxiong-hydrocast-cwa-history-data-download = "minxionghydrocast.ingestion.cwa_history_data:main"
-minxiong-hydrocast-cwa-rain-smoke = "minxionghydrocast.ingestion.cwa_rainfall_api:main"
-minxiong-hydrocast-wra-alert-smoke = "minxionghydrocast.ingestion.wra_rainfall_alert_api:main"
-minxiong-hydrocast-wra-flood-smoke = "minxionghydrocast.ingestion.wra_flood_sensor_api:main"
-minxiong-hydrocast-cwa-event-plan = "minxionghydrocast.ingestion.cwa_event_collector:main"
-minxiong-hydrocast-cwa-grid-inspect = "minxionghydrocast.ingestion.cwa_grid:main"
-minxiong-hydrocast-cwa-history-list = "minxionghydrocast.ingestion.cwa_history:main"
-minxiong-hydrocast-locations = "minxionghydrocast.pipelines.location_reference:main"
-minxiong-hydrocast-label-audit = "minxionghydrocast.validation.flood_labels:main"
-minxiong-hydrocast-nowcastnet-smoke = "minxionghydrocast.pipelines.nowcastnet_smoke:main"
-minxiong-hydrocast-operations = "minxionghydrocast.operations.collector:main"
-minxiong-hydrocast-serve = "minxionghydrocast.operations.api:main"
-minxiong-hydrocast-shadow-gap-incidents = "minxionghydrocast.operations.gap_incidents:main"
-minxiong-hydrocast-shadow-report = "minxionghydrocast.operations.shadow:main"
-minxiong-hydrocast-backup = "minxionghydrocast.operations.backup:main"
-minxiong-hydrocast-alert-receiver = "minxionghydrocast.operations.alert_receiver:main"
-minxiong-hydrocast-qpe-gauge-validate = "minxionghydrocast.pipelines.qpe_gauge_validation:main"
-minxiong-hydrocast-radar-event-summary = "minxionghydrocast.pipelines.radar_event_summary:main"
-minxiong-hydrocast-radar-source-check = "minxionghydrocast.ingestion.radar_sources:main"
-minxiong-hydrocast-radar-tensor-convert = "minxionghydrocast.pipelines.radar_tensor_conversion:main"
-minxiong-hydrocast-shelters = "minxionghydrocast.ingestion.shelters:main"
-minxiong-hydrocast-tensor-baseline-evaluate = "minxionghydrocast.pipelines.tensor_baseline_evaluation:main"
-minxiong-hydrocast-torch-baseline-evaluate = "minxionghydrocast.pipelines.torch_baseline_evaluation:main"
-minxiong-hydrocast-train-torch-baseline = "minxionghydrocast.pipelines.torch_baseline_training:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+minxionghydrocast = [
+  "profiles/*.yaml",
+  "profiles/boundaries/*.geojson",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

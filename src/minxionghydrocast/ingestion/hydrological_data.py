@@ -6,9 +6,6 @@ import argparse
 import re
 from pathlib import Path
 
-from playwright.sync_api import TimeoutError as PlaywrightTimeout
-from playwright.sync_api import sync_playwright
-
 from minxionghydrocast.config import get_settings
 from minxionghydrocast.io.csv_utils import write_csv
 from minxionghydrocast.io.run_summary import (
@@ -97,6 +94,14 @@ FLOOD_NON_EMPTY_FIELDS = {
     "資料模式",
     "資料來源",
 }
+
+
+def _playwright_timeout_errors() -> tuple[type[BaseException], ...]:
+    try:
+        from playwright.sync_api import TimeoutError as PlaywrightTimeout
+    except ImportError:
+        return ()
+    return (PlaywrightTimeout,)
 
 SAMPLE_RAIN = [
     {
@@ -384,6 +389,14 @@ def scrape_live(
     timeout: int = 45_000,
     debug_dir: Path | None = None,
 ) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError as exc:
+        raise RuntimeError(
+            "scraper support is not installed; install "
+            "'minxiong-hydrocast[scraper]'"
+        ) from exc
+
     settings = get_settings()
     rain_url = f"{settings.wra_base_url}{RAIN_PATH}"
     flood_url = f"{settings.wra_base_url}{FLOOD_SENSOR_PATH}"
@@ -435,6 +448,14 @@ def scrape_flood_live(
 ) -> list[dict[str, str]]:
     """Collect only the WRA flood-sensor page when rain comes from the CWA API."""
 
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError as exc:
+        raise RuntimeError(
+            "scraper support is not installed; install "
+            "'minxiong-hydrocast[scraper]'"
+        ) from exc
+
     settings = get_settings()
     flood_url = f"{settings.wra_base_url}{FLOOD_SENSOR_PATH}"
     fetched_at = now_taipei_iso()
@@ -466,6 +487,14 @@ def scrape_rain_live(
     debug_dir: Path | None = None,
 ) -> list[dict[str, str]]:
     """Collect only the legacy WRA rain page for degraded API fallback."""
+
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError as exc:
+        raise RuntimeError(
+            "scraper support is not installed; install "
+            "'minxiong-hydrocast[scraper]'"
+        ) from exc
 
     settings = get_settings()
     rain_url = f"{settings.wra_base_url}{RAIN_PATH}"
@@ -587,6 +616,7 @@ def main() -> None:
     args = parser.parse_args()
 
     started_at, start_timer = start_run()
+    timeout_errors = _playwright_timeout_errors()
     try:
         if args.mode == "demo":
             rain_count, flood_count = run_demo(args.output_rain, args.output_flood)
@@ -620,7 +650,7 @@ def main() -> None:
                 started_at=started_at,
                 start_timer=start_timer,
             )
-    except PlaywrightTimeout as exc:
+    except timeout_errors as exc:
         summary = build_hydrology_summary(
             status="error",
             failure_reason=f"Browser timeout: {exc}",

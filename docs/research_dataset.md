@@ -38,7 +38,7 @@ set -a
 source .env
 set +a
 
-mhc dataset-build \
+mhc dataset build \
   --manifest data/samples/event_split_manifest.json \
   --root "$MINXIONGHYDROCAST_RESEARCH_ROOT" \
   --train-weighted-unet \
@@ -59,7 +59,7 @@ and test events, writes the catalog, and verifies every cataloged checksum. Use
 complete external collection. `--insecure-tls` is an explicit host workaround only when the local
 CA chain cannot verify the CWA endpoint.
 
-Run `mhc event-discover` every 10 to 30 minutes to preserve new candidate events before the CWA
+Run `mhc event discover` every 10 to 30 minutes to preserve new candidate events before the CWA
 history window expires. Candidate windows are bounded to 480 minutes by default so sustained
 Taiwan-wide echoes cannot create an indefinitely growing event. Its separate
 `EventEvidenceCatalog` is candidate-only and cannot modify the formal event manifest. See

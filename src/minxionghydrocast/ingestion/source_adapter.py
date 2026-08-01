@@ -6,7 +6,8 @@ import hashlib
 import json
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import Literal, Protocol
+from datetime import datetime
+from typing import Literal, Protocol, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -30,11 +31,11 @@ class SourceProvenance(BaseModel):
 
     source_kind: SourceKind
     outcome: SourceOutcome
-    authority: str
-    dataset_id: str
-    source_url: str
-    fetched_at: str
-    schema_version: str
+    authority: str = Field(min_length=1)
+    dataset_id: str = Field(min_length=1)
+    source_url: str = Field(min_length=1)
+    fetched_at: str = Field(min_length=1)
+    schema_version: str = Field(min_length=1)
     content_sha256: str = Field(min_length=64, max_length=64)
     fallback_reason_kind: SourceErrorKind | None = None
     fallback_reason: str | None = None
@@ -106,8 +107,12 @@ class SourceResult:
             raise ValueError("non-empty source outcome requires records")
 
 
+@runtime_checkable
 class SourceAdapter(Protocol):
-    """Collect and normalize one external source into operational records."""
+    """Public adapter contract for one atomic fetch-and-validate transaction."""
+
+    source_id: str
+    adapter_version: str
 
     @property
     def dataset(self) -> str: ...
@@ -148,3 +153,48 @@ def records_sha256(records: list[dict[str, str]]) -> str:
         sort_keys=True,
     ).encode("utf-8")
     return hashlib.sha256(payload).hexdigest()
+
+
+def validate_adapter_contract(
+    adapter: SourceAdapter,
+    result: SourceResult,
+) -> SourceResult:
+    """Validate adapter identity, provenance, timestamp, and checksum invariants.
+
+    Adapter authors can use this after ``collect()`` in contract tests. It intentionally performs
+    no network request itself, so a test can supply a deterministic fixture transport.
+    """
+
+    if not isinstance(adapter.source_id, str) or not adapter.source_id.strip():
+        raise ValueError("adapter source_id must be a non-empty string")
+    if not isinstance(adapter.adapter_version, str) or not adapter.adapter_version.strip():
+        raise ValueError("adapter adapter_version must be a non-empty string")
+    if not isinstance(adapter.dataset, str) or not adapter.dataset.strip():
+        raise ValueError("adapter dataset must be a non-empty string")
+    if result.dataset != adapter.dataset:
+        raise ValueError(
+            f"adapter dataset mismatch: expected {adapter.dataset}, got {result.dataset}"
+        )
+    if result.provenance.dataset_id != adapter.source_id:
+        raise ValueError(
+            "adapter source_id must match provenance dataset_id: "
+            f"{adapter.source_id} != {result.provenance.dataset_id}"
+        )
+    if result.provenance.schema_version != adapter.adapter_version:
+        raise ValueError(
+            "adapter_version must match provenance schema_version: "
+            f"{adapter.adapter_version} != {result.provenance.schema_version}"
+        )
+    try:
+        fetched_at = datetime.fromisoformat(result.provenance.fetched_at)
+    except ValueError as exc:
+        raise ValueError("adapter fetched_at must be an ISO-8601 timestamp") from exc
+    if fetched_at.tzinfo is None or fetched_at.utcoffset() is None:
+        raise ValueError("adapter fetched_at must include a UTC offset")
+    try:
+        checksum = bytes.fromhex(result.provenance.content_sha256)
+    except ValueError as exc:
+        raise ValueError("adapter content_sha256 must be hexadecimal") from exc
+    if len(checksum) != 32:
+        raise ValueError("adapter content_sha256 must contain 32 bytes")
+    return result

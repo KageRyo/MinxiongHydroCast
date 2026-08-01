@@ -12,7 +12,7 @@ WorkingDirectory=/opt/minxiong-hydrocast
 EnvironmentFile=-/etc/minxiong-hydrocast.env
 Environment=PLAYWRIGHT_BROWSERS_PATH=/opt/minxiong-hydrocast/.playwright
 StateDirectory=minxiong-hydrocast
-ExecStart=/opt/minxiong-hydrocast/.venv/bin/minxiong-hydrocast-operations \
+ExecStart=/opt/minxiong-hydrocast/.venv/bin/mhc collect \
   --mode live \
   --once \
   --alert-source auto \

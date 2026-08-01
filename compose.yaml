@@ -1,0 +1,54 @@
+name: minxiong-hydrocast-demo
+
+services:
+  demo-init:
+    build:
+      context: .
+    command:
+      - collect
+      - --region
+      - minxiong
+      - --mode
+      - demo
+      - --once
+      - --store
+      - /var/lib/minxiong-hydrocast/operations
+      - --summary-output
+      - /var/lib/minxiong-hydrocast/demo-summary.json
+      - --log-output
+      - /var/lib/minxiong-hydrocast/demo-runs.jsonl
+    environment:
+      MINXIONGHYDROCAST_OPERATIONS_STORE: /var/lib/minxiong-hydrocast/operations
+    read_only: true
+    tmpfs:
+      - /tmp
+    volumes:
+      - demo-data:/var/lib/minxiong-hydrocast
+
+  dashboard:
+    build:
+      context: .
+    command:
+      - serve
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8080"
+      - --store
+      - /var/lib/minxiong-hydrocast/operations
+    depends_on:
+      demo-init:
+        condition: service_completed_successfully
+    environment:
+      MINXIONGHYDROCAST_OPERATIONS_STORE: /var/lib/minxiong-hydrocast/operations
+    ports:
+      - "${MHC_DEMO_PORT:-8080}:8080"
+    read_only: true
+    restart: unless-stopped
+    tmpfs:
+      - /tmp
+    volumes:
+      - demo-data:/var/lib/minxiong-hydrocast:ro
+
+volumes:
+  demo-data:

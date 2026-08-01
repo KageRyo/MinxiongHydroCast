@@ -210,6 +210,8 @@ def station_record(
 
 class CwaRainGaugeAdapter:
     dataset = DATASET_NAME
+    source_id = DATA_ID
+    adapter_version = SCHEMA_VERSION
 
     def __init__(
         self,

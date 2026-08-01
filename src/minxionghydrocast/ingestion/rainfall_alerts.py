@@ -5,9 +5,6 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from playwright.sync_api import TimeoutError as PlaywrightTimeout
-from playwright.sync_api import sync_playwright
-
 from minxionghydrocast.config import get_settings
 from minxionghydrocast.io.csv_utils import write_csv
 from minxionghydrocast.io.run_summary import (
@@ -85,6 +82,14 @@ SAMPLE_DATA = [
 ]
 
 
+def _playwright_timeout_errors() -> tuple[type[BaseException], ...]:
+    try:
+        from playwright.sync_api import TimeoutError as PlaywrightTimeout
+    except ImportError:
+        return ()
+    return (PlaywrightTimeout,)
+
+
 def demo_records() -> list[dict[str, str]]:
     now = now_taipei_iso()
     return [{**record, "抓取時間": now, "資料模式": "demo"} for record in SAMPLE_DATA]
@@ -108,6 +113,14 @@ def scrape_with_playwright(
     headless: bool = True,
     timeout: int = 45_000,
 ) -> list[dict[str, str]]:
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError as exc:
+        raise RuntimeError(
+            "scraper support is not installed; install "
+            "'minxiong-hydrocast[scraper]'"
+        ) from exc
+
     settings = get_settings()
     url = f"{settings.wra_base_url}/service/alertQuery#"
     records: list[dict[str, str]] = []
@@ -256,6 +269,7 @@ def main() -> None:
     args = parser.parse_args()
 
     started_at, start_timer = start_run()
+    timeout_errors = _playwright_timeout_errors()
     try:
         count = run(args.output, args.mode, args.county, args.headed, args.timeout)
         summary = build_run_summary(
@@ -274,7 +288,7 @@ def main() -> None:
             log_output=args.log_output,
             summary=summary,
         )
-    except PlaywrightTimeout as exc:
+    except timeout_errors as exc:
         summary = build_run_summary(
             pipeline=PIPELINE_NAME,
             status="error",

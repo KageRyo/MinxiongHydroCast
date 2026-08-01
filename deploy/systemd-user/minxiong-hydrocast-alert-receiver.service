@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 EnvironmentFile=-%h/.config/minxiong-hydrocast/notifications.env
-ExecStart=%h/.local/share/minxiong-hydrocast/venv/bin/minxiong-hydrocast-alert-receiver \
+ExecStart=%h/.local/share/minxiong-hydrocast/venv/bin/mhc operations alert-receiver \
   --host 127.0.0.1 \
   --port 9087 \
   --output %h/.local/share/minxiong-hydrocast/notifications/alerts.jsonl \

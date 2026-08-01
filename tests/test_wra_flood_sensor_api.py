@@ -11,7 +11,10 @@ import pytest
 
 from minxionghydrocast.ingestion.http_client import ReliableJsonClient
 from minxionghydrocast.ingestion.hydrological_data import FLOOD_FIELDNAMES
-from minxionghydrocast.ingestion.source_adapter import SourceSchemaError
+from minxionghydrocast.ingestion.source_adapter import (
+    SourceSchemaError,
+    validate_adapter_contract,
+)
 from minxionghydrocast.ingestion.wra_flood_sensor_api import (
     CATALOG_DATASET_ID,
     LATEST_DATASET_ID,
@@ -98,6 +101,7 @@ def test_adapter_joins_official_feeds_and_emits_operational_flood_schema():
     adapter, http_get = adapter_for(latest, catalog)
 
     result = adapter.collect()
+    validate_adapter_contract(adapter, result)
 
     assert result.dataset == "flood_sensors"
     assert len(result.records) == 1

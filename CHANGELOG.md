@@ -5,15 +5,39 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 
 ## [Unreleased]
 
-### Added
-
-- Read-only shadow gap incident reporting with source, attempt, snapshot, recovery, and pending
-  human-review evidence.
-
 ### Planned
 
 - Broader human-reviewed radar-event diversity and QPE/gauge validation for `v0.2.0`.
 - Independent model, lead-time, label, and shadow-gate completion for `v0.3.0`.
+
+## [0.1.1] - 2026-08-01
+
+### Added
+
+- Credential-free Docker Compose demo with deterministic synthetic observations, a read-only
+  dashboard, health/readiness endpoints, metrics, and a fail-closed forecast gate.
+- Strict, packaged region profiles for Minxiong and an example region, with a documented adapter
+  contract and contract validation helpers.
+- Contributor guide, structured issue forms, pull-request template, clean-wheel smoke test, and
+  OIDC-based PyPI release workflow.
+- Read-only shadow gap incident reporting with source, attempt, snapshot, recovery, and pending
+  human-review evidence.
+
+### Changed
+
+- Reduced the base installation to NumPy, Pydantic, and Requests; scraping, reporting, modeling,
+  and development dependencies now use capability extras.
+- Consolidated installed command-line entry points under the single grouped `mhc` executable while
+  retaining transition aliases for legacy command tokens.
+- Generalized the Minxiong-only derived feature dataset to profile-driven `region_features` while
+  retaining the legacy read-only API route.
+
+### Safety
+
+- Synthetic demo data remains explicitly classified as `demo_fixture` and cannot satisfy
+  operational readiness or forecast publication.
+- Region-profile boundaries are labeled according to their authority and must not be inferred as
+  official administrative geometry.
 
 ## [0.1.0] - 2026-07-29
 
@@ -43,5 +67,6 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 - Radar candidates cannot automatically enter formal train/validation/test splits.
 - Forecast publication and automated notification remain disabled until all gates pass.
 
-[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.0

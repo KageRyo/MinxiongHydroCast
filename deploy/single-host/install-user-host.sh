@@ -84,7 +84,7 @@ fi
 if [[ ! -x "$DURABLE_ROOT/venv/bin/python" ]]; then
   "$PYTHON_BIN" -m venv "$DURABLE_ROOT/venv"
 fi
-"$DURABLE_ROOT/venv/bin/python" -m pip install --upgrade "$REPOSITORY_ROOT"
+"$DURABLE_ROOT/venv/bin/python" -m pip install --upgrade "$REPOSITORY_ROOT[scraper]"
 "$DURABLE_ROOT/venv/bin/python" -m pip freeze \
   > "$DURABLE_ROOT/config/installed-packages.txt"
 git -C "$REPOSITORY_ROOT" rev-parse HEAD \

@@ -6,7 +6,11 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from minxionghydrocast.ingestion.http_client import ReliableJsonClient, RetryPolicy
-from minxionghydrocast.ingestion.source_adapter import SourceRequestError, SourceSchemaError
+from minxionghydrocast.ingestion.source_adapter import (
+    SourceRequestError,
+    SourceSchemaError,
+    validate_adapter_contract,
+)
 from minxionghydrocast.ingestion.wra_rainfall_alert_api import (
     DEFAULT_ENDPOINT,
     WraRainfallAlertAdapter,
@@ -62,6 +66,7 @@ def test_wra_adapter_validates_fixture_filters_county_and_normalizes_records():
     )
 
     result = adapter.collect()
+    validate_adapter_contract(adapter, result)
 
     assert result.dataset == "rainfall_alerts"
     assert len(result.records) == 1

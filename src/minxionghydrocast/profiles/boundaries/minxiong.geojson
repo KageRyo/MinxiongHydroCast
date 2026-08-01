@@ -1,0 +1,26 @@
+{
+  "type": "FeatureCollection",
+  "name": "minxiong_operational_working_bounds",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "minxiong",
+        "boundary_type": "operational_working_bounds",
+        "notice": "Working bounds for data alignment; not an authoritative administrative boundary."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [120.38, 23.48],
+            [120.52, 23.48],
+            [120.52, 23.62],
+            [120.38, 23.62],
+            [120.38, 23.48]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -23,7 +23,7 @@ no `demo` source or ID. Candidate weather types remain radar-derived until offic
 context is attached.
 
 A newly discovered event must retain its `evidence_candidate_id`. Before it can enter this
-manifest, `mhc event-review` must record a complete, synchronized approval backed by a checksummed
+manifest, `mhc event review` must record a complete, synchronized approval backed by a checksummed
 official-context artifact. `event-split-check` and `dataset-build` accept
 `--event-evidence-catalog <path>` and share one gate that verifies the approval, all cataloged
 checksums, the source data ID, exact window, and reviewed regime. The build runs it before
@@ -48,7 +48,7 @@ verification evidence.
 Validate the general event-split contract:
 
 ```bash
-mhc event-split-check \
+mhc dataset split-check \
   --manifest data/samples/event_split_manifest.json \
   --event-evidence-catalog "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json" \
   --output data/processed/event_split_check.json \
@@ -58,7 +58,7 @@ mhc event-split-check \
 Build and validate the stronger formal dataset contract:
 
 ```bash
-mhc dataset-build \
+mhc dataset build \
   --manifest data/samples/event_split_manifest.json \
   --event-evidence-catalog "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json" \
   --root "$MINXIONGHYDROCAST_RESEARCH_ROOT"

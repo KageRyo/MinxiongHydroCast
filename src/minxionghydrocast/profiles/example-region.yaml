@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "region": {
+    "id": "example-region",
+    "name": "Example Region",
+    "county": "Example County",
+    "county_code": "99999",
+    "township": "Example District",
+    "township_code": "99999999",
+    "timezone": "Asia/Taipei"
+  },
+  "coverage": {
+    "required_rain_gauges": 1,
+    "required_flood_sensors": 1
+  },
+  "spatial": {
+    "boundary_file": "example-region.geojson",
+    "radar_grid_contract": "replace_with_official_grid_contract"
+  },
+  "freshness": {
+    "rain_gauge_minutes": 30,
+    "flood_sensor_minutes": 90
+  }
+}

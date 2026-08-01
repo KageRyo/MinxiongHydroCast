@@ -10,8 +10,8 @@ and shadow-operation evidence are defined and monitored.
 Use demo mode only to verify the installation and service contract:
 
 ```bash
-minxiong-hydrocast-operations --mode demo --once
-minxiong-hydrocast-serve --host 127.0.0.1 --port 8080
+mhc collect --mode demo --once
+mhc serve --host 127.0.0.1 --port 8080
 ```
 
 Demo snapshots are always marked `demo` and `ready=false`; every demo dataset uses the
@@ -26,7 +26,7 @@ set -a
 source .env
 set +a
 
-minxiong-hydrocast-operations --once \
+mhc collect --once \
   --alert-source auto \
   --rain-source auto \
   --flood-source auto \
@@ -79,15 +79,15 @@ freshness.
 Validate all three official observation contracts independently of Chromium:
 
 ```bash
-minxiong-hydrocast-cwa-rain-smoke --county 10010 --county-name 嘉義縣
-minxiong-hydrocast-wra-alert-smoke --county 10010
-minxiong-hydrocast-wra-flood-smoke --county 10010
+mhc source cwa-rain-smoke --county 10010 --county-name 嘉義縣
+mhc source wra-alert-smoke --county 10010
+mhc source wra-flood-smoke --county 10010
 ```
 
 Run continuously at a 10-minute interval:
 
 ```bash
-minxiong-hydrocast-operations \
+mhc collect \
   --interval-seconds 600 \
   --retention-days 30 \
   --max-age-minutes 30 \
@@ -118,7 +118,7 @@ operations/
             ├── rainfall_alerts.csv
             ├── rain_gauges.csv
             ├── flood_sensors.csv
-            ├── minxiong_features.csv
+            ├── region_features.csv
             └── location_reference.csv
 ```
 
@@ -142,7 +142,7 @@ backup and access control; the repository does not provide a remote object-store
 Start the localhost-only default server:
 
 ```bash
-minxiong-hydrocast-serve
+mhc serve
 ```
 
 The following endpoints are available:
@@ -156,7 +156,7 @@ The following endpoints are available:
 | `GET /api/v1/official-alerts/rainfall` | WRA rainfall-alert source product |
 | `GET /api/v1/observations/rain-gauges` | Validated CWA rain-gauge observations |
 | `GET /api/v1/observations/flood-sensors` | Validated WRA IoW flood-depth snapshots |
-| `GET /api/v1/features/minxiong` | Derived Minxiong township feature contract |
+| `GET /api/v1/features/region` | Profile-driven regional feature contract |
 | `GET /api/v1/locations` | Snapshot-aligned operational location reference |
 | `GET /api/v1/shadow-readiness` | Shadow criteria, metrics, and notification blockers |
 | `GET /api/v1/experimental-forecasts` | Explicit unavailable state until forecast gates pass |
@@ -171,17 +171,18 @@ The operator view at `/` presents official-source alerts, observations, and expe
 forecast availability in separate sections. The server binds to `127.0.0.1` by default. Put it
 behind an authenticated reverse proxy before exposing it to another host or network.
 
-## Minxiong Feature Contract
+## Region Feature Contract
 
-Every successful snapshot derives one Minxiong township feature row from the same immutable source
-records. It contains stable rain-gauge and flood-sensor location IDs, latest observation times,
-maximum 1-hour/24-hour station rainfall, normalized maximum sensor water level, rainfall-alert
-counts, and upstream health states.
+Every successful snapshot derives one feature row for the selected region profile from the same
+immutable source records. It contains the region identity, stable rain-gauge and flood-sensor
+location IDs, latest observation times, maximum 1-hour/24-hour station rainfall, normalized maximum
+sensor water level, rainfall-alert counts, and upstream health states.
 
-The feature is marked ready only when every upstream live dataset is healthy and the snapshot has
-at least one Minxiong rain gauge plus one enabled Minxiong flood-depth sensor. The
-`coverage_ready` and `coverage_gaps` fields distinguish missing township coverage from a healthy
-county-wide feed. It never substitutes missing products: `qpe_available=false`, an empty QPE accumulation, and
+The feature is marked ready only when every upstream live dataset is healthy and the profile's
+minimum gauge and enabled flood-sensor counts are satisfied. For the Minxiong reference profile,
+both minimums are one. The `coverage_ready` and `coverage_gaps` fields distinguish missing regional
+coverage from a healthy county-wide feed. It never substitutes missing products:
+`qpe_available=false`, an empty QPE accumulation, and
 `experimental_forecast_included=false` remain explicit until those sources pass their own gates.
 Demo snapshots classify the feature as `demo_fixture`. A healthy empty rainfall-warning input
 contributes an alert count of zero and does not block the feature; an empty observation input does.
@@ -198,7 +199,7 @@ it with reviewed heavy-rain evidence. Unconfirmed sample evidence never satisfie
 Evaluate the accumulated snapshot history:
 
 ```bash
-minxiong-hydrocast-shadow-report \
+mhc operations shadow \
   --evidence /var/lib/minxiong-hydrocast/reviewed_shadow_evidence.json
 ```
 
@@ -224,7 +225,7 @@ Real Minxiong flood labels must be kept outside tracked demo data. Start from
 audit the result:
 
 ```bash
-minxiong-hydrocast-label-audit \
+mhc labels audit \
   --manifest /var/lib/minxiong-hydrocast/reviewed_flood_labels.json \
   --output /var/lib/minxiong-hydrocast/flood_label_audit.json \
   --require-training-ready
@@ -280,7 +281,7 @@ decision.
 
 ### 2. Live observation ingestion
 
-Run `minxiong-hydrocast-operations` with live mode and the three source selectors. Inspect each JSON
+Run `mhc collect` with live mode and the three source selectors. Inspect each JSON
 run summary and reject the run if its mode is not `live`, its status is not `ok`, observations are
 empty or stale, or validation reports contain errors. A rainfall-warning row count of zero is valid
 only when its official source provenance says `outcome=empty`.

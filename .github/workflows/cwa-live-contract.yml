@@ -36,10 +36,10 @@ jobs:
         run: python -m pip install .
 
       - name: Validate CWA rain-gauge contract
-        run: minxiong-hydrocast-cwa-rain-smoke --county 10010 --county-name 嘉義縣
+        run: mhc source cwa-rain-smoke --county 10010 --county-name 嘉義縣
 
       - name: Validate WRA IoW flood-sensor contracts
-        run: minxiong-hydrocast-wra-flood-smoke --county 10010
+        run: mhc source wra-flood-smoke --county 10010
 
   host-bound-wra-warning:
     runs-on: [self-hosted, linux, x64, minxiong-hydrocast]

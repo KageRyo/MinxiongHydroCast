@@ -12,6 +12,7 @@ from minxionghydrocast.ingestion.source_adapter import (
     SourceRequestError,
     SourceResult,
     SourceSchemaError,
+    validate_adapter_contract,
 )
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
@@ -53,6 +54,7 @@ def test_cwa_adapter_validates_official_fixture_and_normalizes_chiayi_records():
     )
 
     result = adapter.collect()
+    validate_adapter_contract(adapter, result)
 
     assert result.dataset == "rain_gauges"
     assert len(result.records) == 1

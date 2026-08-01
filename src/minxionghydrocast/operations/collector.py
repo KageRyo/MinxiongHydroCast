@@ -40,9 +40,10 @@ from minxionghydrocast.operations.locations import (
     build_operational_locations,
 )
 from minxionghydrocast.operations.features import (
-    MINXIONG_FEATURE_FIELDS,
-    build_minxiong_feature,
+    REGION_FEATURE_FIELDS,
+    build_region_feature,
 )
+from minxionghydrocast.region_profiles import RegionProfile, load_region_profile
 from minxionghydrocast.operations.snapshot_store import DatasetPayload, SnapshotStore
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
@@ -65,9 +66,9 @@ DATASET_CONFIG = {
         "fieldnames": hydrological_data.FLOOD_FIELDNAMES,
         "timestamp_field": "水情時間ISO",
     },
-    "minxiong_features": {
+    "region_features": {
         "product_type": "derived_feature",
-        "fieldnames": MINXIONG_FEATURE_FIELDS,
+        "fieldnames": REGION_FEATURE_FIELDS,
         "timestamp_field": "feature_time",
     },
     "location_reference": {
@@ -86,7 +87,12 @@ class OperationalCollection:
 
 
 def _record_fetched_at(records: list[dict[str, str]]) -> str:
-    return records[0].get("抓取時間", "") if records else now_taipei_iso()
+    if records:
+        for field_name in ("抓取時間", "snapshot_time", "feature_time"):
+            value = records[0].get(field_name, "").strip()
+            if value:
+                return value
+    return now_taipei_iso()
 
 
 def _fixture_source(dataset: str, records: list[dict[str, str]]) -> SourceProvenance:
@@ -232,6 +238,7 @@ def _collect_rain_gauges(
     *,
     source: str,
     county: str,
+    county_name: str,
     headed: bool,
     timeout: int,
     debug_dir: Path | None,
@@ -247,6 +254,7 @@ def _collect_rain_gauges(
         official_adapter = adapter or CwaRainGaugeAdapter(
             authorization=settings.cwa_api_key,
             county_code=county,
+            county_name=county_name,
             timeout_seconds=api_timeout_seconds,
             max_age_minutes=max_age_minutes,
             now=now,
@@ -286,6 +294,7 @@ def _collect_flood_sensors(
     *,
     source: str,
     county: str,
+    town_code: str | None,
     headed: bool,
     timeout: int,
     debug_dir: Path | None,
@@ -300,6 +309,7 @@ def _collect_flood_sensors(
     if source != "scraper":
         official_adapter = adapter or WraFloodSensorAdapter(
             county_code=county,
+            town_code=town_code,
             base_url=settings.wra_open_data_api_url,
             timeout_seconds=api_timeout_seconds,
             max_age_minutes=max_age_minutes,
@@ -340,6 +350,8 @@ def collect_records(
     *,
     mode: str,
     county: str,
+    county_name: str = "嘉義縣",
+    town_code: str | None = None,
     headed: bool,
     timeout: int,
     debug_dir: Path | None,
@@ -390,6 +402,7 @@ def collect_records(
         rain, rain_provenance, rain_retries = _collect_rain_gauges(
             source=rain_source,
             county=county,
+            county_name=county_name,
             headed=headed,
             timeout=timeout,
             debug_dir=debug_dir,
@@ -401,6 +414,7 @@ def collect_records(
         flood, flood_provenance, flood_retries = _collect_flood_sensors(
             source=flood_source,
             county=county,
+            town_code=town_code,
             headed=headed,
             timeout=timeout,
             debug_dir=debug_dir,
@@ -457,7 +471,9 @@ def build_payloads(
     max_age_minutes: float,
     flood_max_age_minutes: float | None = None,
     now: datetime,
+    profile: RegionProfile | None = None,
 ) -> list[DatasetPayload]:
+    profile = profile or load_region_profile("minxiong")
     payloads: list[DatasetPayload] = []
     for name, dataset_records in records.items():
         config = DATASET_CONFIG[name]
@@ -522,15 +538,16 @@ def build_payloads(
         for payload in payloads
     }
     feature_records = [
-        build_minxiong_feature(
+        build_region_feature(
             records,
+            profile=profile,
             mode=mode,
             upstream_health=upstream_health,
             now=now,
         )
     ]
     feature_source = _derived_source(
-        "minxiong_features",
+        "region_features",
         feature_records,
         inputs={
             name: sources[name]
@@ -538,10 +555,10 @@ def build_payloads(
         },
         now=now,
     )
-    sources["minxiong_features"] = feature_source
+    sources["region_features"] = feature_source
     feature_health = assess_dataset(
         feature_records,
-        fieldnames=MINXIONG_FEATURE_FIELDS,
+        fieldnames=REGION_FEATURE_FIELDS,
         timestamp_field="feature_time",
         mode=mode,
         max_age_minutes=max_age_minutes,
@@ -572,14 +589,14 @@ def build_payloads(
         ]
     payloads.append(
         DatasetPayload(
-            name="minxiong_features",
+            name="region_features",
             product_type=(
                 "demo_fixture"
                 if mode == "demo"
-                else str(DATASET_CONFIG["minxiong_features"]["product_type"])
+                else str(DATASET_CONFIG["region_features"]["product_type"])
             ),
             records=feature_records,
-            fieldnames=MINXIONG_FEATURE_FIELDS,
+            fieldnames=REGION_FEATURE_FIELDS,
             health=feature_health,
             source=feature_source.model_dump(exclude_none=True),
         )
@@ -592,6 +609,7 @@ def run_collection(
     *,
     mode: str,
     county: str,
+    profile: RegionProfile | None = None,
     headed: bool,
     timeout: int,
     debug_dir: Path | None,
@@ -611,6 +629,7 @@ def run_collection(
     rain_adapter: SourceAdapter | None = None,
     flood_adapter: SourceAdapter | None = None,
 ) -> dict[str, Any]:
+    profile = profile or load_region_profile("minxiong")
     now = now or datetime.now(TAIPEI_TZ)
     started_at, start_timer = start_run()
     with store.collection_lock():
@@ -619,6 +638,8 @@ def run_collection(
             collection = collect_records(
                 mode=mode,
                 county=county,
+                county_name=profile.region.county,
+                town_code=profile.region.township_code,
                 headed=headed,
                 timeout=timeout,
                 debug_dir=debug_dir,
@@ -666,6 +687,7 @@ def run_collection(
                 max_age_minutes=max_age_minutes,
                 flood_max_age_minutes=flood_max_age_minutes,
                 now=now,
+                profile=profile,
             )
             dataset_details = {
                 payload.name: {"health": payload.health}
@@ -681,6 +703,7 @@ def run_collection(
                 health=health,
                 metadata={
                     "county": county,
+                    "region_profile": profile.model_dump(mode="json"),
                     "source_authority": (
                         "demo fixture"
                         if mode == "demo"
@@ -715,7 +738,7 @@ def run_collection(
                 started_at=started_at,
                 start_timer=start_timer,
                 mode=mode,
-                inputs={"county": county},
+                inputs={"county": county, "region": profile.region.id},
                 outputs={
                     "snapshot_id": manifest["snapshot_id"],
                     "store": str(store.root),
@@ -765,6 +788,7 @@ def run_collection(
                 failure_reason=str(exc),
                 metadata={
                     "county": county,
+                    "region_profile": profile.model_dump(mode="json"),
                     "failure_kind": (
                         exc.kind if isinstance(exc, SourceAdapterError) else "collection"
                     ),
@@ -782,7 +806,7 @@ def run_collection(
                 started_at=started_at,
                 start_timer=start_timer,
                 mode=mode,
-                inputs={"county": county},
+                inputs={"county": county, "region": profile.region.id},
                 outputs={
                     "snapshot_id": manifest["snapshot_id"],
                     "store": str(store.root),
@@ -838,8 +862,16 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Collect and version Minxiong operational observations.",
     )
+    parser.add_argument(
+        "--region",
+        default="minxiong",
+        help="Packaged region profile ID or path to a JSON-compatible YAML profile.",
+    )
     parser.add_argument("--mode", choices=["live", "demo"], default="live")
-    parser.add_argument("--county", default=hydrological_data.DEFAULT_COUNTY_VALUE)
+    parser.add_argument(
+        "--county",
+        help="Override the official county code declared by the selected region profile.",
+    )
     schedule = parser.add_mutually_exclusive_group()
     schedule.add_argument("--once", action="store_true", help="Run once and exit (default).")
     schedule.add_argument(
@@ -871,13 +903,12 @@ def main() -> None:
     parser.add_argument(
         "--max-age-minutes",
         type=float,
-        default=get_settings().operations_max_age_minutes,
+        help="Override the region profile rain-gauge freshness contract.",
     )
     parser.add_argument(
         "--flood-max-age-minutes",
         type=float,
-        default=get_settings().operations_flood_max_age_minutes,
-        help="Freshness limit for the hourly WRA IoW Open Data snapshot.",
+        help="Override the region profile flood-sensor freshness contract.",
     )
     parser.add_argument("--headed", action="store_true")
     parser.add_argument("--timeout", type=int, default=45_000)
@@ -894,16 +925,29 @@ def main() -> None:
     args = parser.parse_args()
 
     try:
+        profile = load_region_profile(args.region)
+        county = args.county or profile.region.county_code
+        max_age_minutes = (
+            args.max_age_minutes
+            if args.max_age_minutes is not None
+            else profile.freshness.rain_gauge_minutes
+        )
+        flood_max_age_minutes = (
+            args.flood_max_age_minutes
+            if args.flood_max_age_minutes is not None
+            else profile.freshness.flood_sensor_minutes
+        )
         manifest = run_scheduler(
             SnapshotStore(args.store),
             interval_seconds=args.interval_seconds,
             retention_days=args.retention_days,
             mode=args.mode,
-            county=args.county,
+            county=county,
+            profile=profile,
             headed=args.headed,
             timeout=args.timeout,
             debug_dir=args.debug_dir,
-            max_age_minutes=args.max_age_minutes,
+            max_age_minutes=max_age_minutes,
             summary_output=args.summary_output,
             log_output=args.log_output,
             pumping_stations=args.pumping_stations,
@@ -913,7 +957,7 @@ def main() -> None:
             rain_source=args.rain_source,
             flood_source=args.flood_source,
             api_timeout_seconds=args.api_timeout_seconds,
-            flood_max_age_minutes=args.flood_max_age_minutes,
+            flood_max_age_minutes=flood_max_age_minutes,
         )
     except KeyboardInterrupt:
         print("[INFO] Scheduler stopped.")

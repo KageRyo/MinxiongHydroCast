@@ -122,6 +122,8 @@ def warning_record(
 
 class WraRainfallAlertAdapter:
     dataset = DATASET_NAME
+    source_id = DATASET_ID
+    adapter_version = SCHEMA_VERSION
 
     def __init__(
         self,

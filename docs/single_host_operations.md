@@ -147,10 +147,10 @@ Create, verify, and restore a fresh backup:
 systemctl --user start minxiong-hydrocast-backup.service
 archive="$(find ~/.local/share/minxiong-hydrocast/backups -name '*.tar.gz' -printf '%T@ %p\n' \
   | sort -n | tail -n 1 | cut -d' ' -f2-)"
-~/.local/share/minxiong-hydrocast/venv/bin/minxiong-hydrocast-backup \
+~/.local/share/minxiong-hydrocast/venv/bin/mhc operations backup \
   verify --archive "$archive"
 target="$HOME/.local/share/minxiong-hydrocast/restore_drills/$(date +%Y%m%dT%H%M%S)"
-~/.local/share/minxiong-hydrocast/venv/bin/minxiong-hydrocast-backup \
+~/.local/share/minxiong-hydrocast/venv/bin/mhc operations backup \
   restore --archive "$archive" --target "$target"
 test -f "$target/restore_report.json"
 ```

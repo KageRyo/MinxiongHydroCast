@@ -270,7 +270,7 @@ def test_api_serves_status_classified_data_and_operator_view(tmp_path):
         assert observations.source.dataset_id == "demo-rain_gauges"
 
         features = DatasetResponse.model_validate(
-            request_json(base_url, "/api/v1/features/minxiong")
+            request_json(base_url, "/api/v1/features/region")
         )
         assert features.product_type == "demo_fixture"
         assert features.records[0]["township"] == "民雄鄉"

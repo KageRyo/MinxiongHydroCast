@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "region": {
+    "id": "minxiong",
+    "name": "Minxiong Township",
+    "county": "嘉義縣",
+    "county_code": "10010",
+    "township": "民雄鄉",
+    "township_code": "10010050",
+    "timezone": "Asia/Taipei"
+  },
+  "coverage": {
+    "required_rain_gauges": 1,
+    "required_flood_sensors": 1
+  },
+  "spatial": {
+    "boundary_file": "minxiong.geojson",
+    "radar_grid_contract": "cwa_o_a0059_001"
+  },
+  "freshness": {
+    "rain_gauge_minutes": 30,
+    "flood_sensor_minutes": 90
+  }
+}

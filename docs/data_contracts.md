@@ -191,12 +191,13 @@ records are not fully quality-controlled. MinxiongHydroCast therefore does not m
 dataset today. A future integration must use a separate `river_water_levels` contract and retain
 the upstream `checkresult`, `checkdesc`, observation timestamp, and explicit freshness state.
 
-## Minxiong Feature Coverage
+## Region Feature Coverage
 
-The derived `minxiong_features` row includes `coverage_ready` and `coverage_gaps`. Live readiness
-requires at least one Minxiong rain gauge and one enabled Minxiong flood-depth sensor. A healthy
-Chiayi County feed with no Minxiong records is `coverage_missing`, not ready. A valid empty rainfall
-warning remains healthy and contributes an alert count of zero; it is not a coverage gap.
+The profile-driven `region_features` row includes `coverage_ready` and `coverage_gaps`. For the
+Minxiong reference profile, live readiness requires at least one Minxiong rain gauge and one
+enabled Minxiong flood-depth sensor. A healthy Chiayi County feed with no Minxiong records is
+`coverage_missing`, not ready. A valid empty rainfall warning remains healthy and contributes an
+alert count of zero; it is not a coverage gap.
 
 ## Shelters
 
