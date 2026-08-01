@@ -223,6 +223,8 @@ class WraFloodSensorAdapter:
     """Join official IoW measurements with sensor metadata for one target region."""
 
     dataset = DATASET_NAME
+    source_id = f"{LATEST_DATASET_ID}+{CATALOG_DATASET_ID}"
+    adapter_version = SCHEMA_VERSION
 
     def __init__(
         self,

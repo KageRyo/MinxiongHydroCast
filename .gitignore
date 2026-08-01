@@ -232,6 +232,7 @@ data/processed/**
 data/external/**
 !data/external/.gitkeep
 output/playwright/
+.playwright-cli/
 
 # Do not commit source exports, live captures, model weights, or archives.
 *.docx

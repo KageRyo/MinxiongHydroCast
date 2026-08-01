@@ -46,7 +46,7 @@ before using it as a target.
 The recommended model order after CWA sample validation is:
 
 1. Persistence baseline on `O-A0059-001`.
-2. Small U-Net/RainNet-style nowcaster through `minxiong-hydrocast-train-torch-baseline` on full
+2. Small U-Net/RainNet-style nowcaster through `mhc model train` on full
    event-window tensors.
 3. NowcastNet-style migration only after event diversity, checkpointing, and evaluation are stable.
 
@@ -57,9 +57,9 @@ Exact host hardware and driver inventory are deployment-private. Use accelerator
 controlled experiments:
 
 - Run persistence and threshold baselines on CPU.
-- Evaluate tensor archives with `minxiong-hydrocast-tensor-baseline-evaluate` before deep learning.
+- Evaluate tensor archives with `mhc model evaluate-tensor` before deep learning.
 - Create a separate training environment with CUDA-enabled PyTorch.
-- Run `minxiong-hydrocast-train-torch-baseline --device auto` on one GPU first.
+- Run `mhc model train --device auto` on one GPU first.
 - Use both GPUs only after data loading, checkpointing, and evaluation are repeatable.
 - Reserve NowcastNet-style training for gridded Taiwan radar tensors with event-based splits.
 
@@ -100,7 +100,7 @@ sliding tensors, trains only on the two training events, and uses a completely s
 event:
 
 ```bash
-mhc dataset-build \
+mhc dataset build \
   --manifest data/samples/event_split_manifest.json \
   --root "$MINXIONGHYDROCAST_RESEARCH_ROOT" \
   --train-weighted-unet \

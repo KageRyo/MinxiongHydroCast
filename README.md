@@ -4,9 +4,9 @@
 [![CodeQL](https://github.com/KageRyo/MinxiongHydroCast/actions/workflows/codeql.yml/badge.svg)](https://github.com/KageRyo/MinxiongHydroCast/actions/workflows/codeql.yml)
 [![Release](https://img.shields.io/github/v/release/KageRyo/MinxiongHydroCast)](https://github.com/KageRyo/MinxiongHydroCast/releases)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.13-blue)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/code%20license-MIT-green)](LICENSE)
-[![Status](https://img.shields.io/badge/status-operational%20prototype-2f7d57)](docs/project_scope.md)
-[![Forecast](https://img.shields.io/badge/forecast%20publication-blocked-b42318)](docs/operational_use.md#production-gates)
+[![License: MIT](https://img.shields.io/badge/code%20license-MIT-green)](https://github.com/KageRyo/MinxiongHydroCast/blob/main/LICENSE)
+[![Status](https://img.shields.io/badge/status-operational%20prototype-2f7d57)](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/project_scope.md)
+[![Forecast](https://img.shields.io/badge/forecast%20publication-blocked-b42318)](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/operational_use.md#production-gates)
 
 Official-source hydrometeorological observations and reproducible rainfall-nowcasting research for
 Minxiong, Taiwan.
@@ -15,7 +15,7 @@ Minxiong, Taiwan.
 localhost-only deployment. Forecast publication and automated risk notifications remain disabled
 until the model, label, and shadow-deployment gates pass.
 
-![MinxiongHydroCast operator dashboard showing a healthy live snapshot and a blocked shadow gate](docs/assets/screenshots/operator-dashboard.png)
+![MinxiongHydroCast operator dashboard showing a healthy live snapshot and a blocked shadow gate](https://raw.githubusercontent.com/KageRyo/MinxiongHydroCast/main/docs/assets/screenshots/operator-dashboard.png)
 
 _Real localhost operator view captured on 2026-07-29. It uses live official observations; values
 change over time. The blocked shadow gate is intentional._
@@ -64,7 +64,8 @@ flowchart LR
 Schema drift, invalid units or timestamps, broken measurement/catalog joins, and unexpected empty
 observation sets fail the attempt. The optional scraper fallback is limited to transport,
 authentication, timeout, HTTP, or rate-limit failures and never satisfies readiness. See the
-[architecture](docs/architecture.md) and [data contracts](docs/data_contracts.md).
+[architecture](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/architecture.md)
+and [data contracts](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/data_contracts.md).
 
 ## Official data flow
 
@@ -77,7 +78,9 @@ authentication, timeout, HTTP, or rate-limit failures and never satisfies readin
 | QPE | CWA `O-B0045-001` | Radar/gauge validation evidence | External synchronized evidence; not committed |
 
 API keys, official raw files, research evidence, model weights, live snapshots, CCTV, and host
-configuration are not committed. The [source register](docs/data_source_register.md) records
+configuration are not committed. The
+[source register](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/data_source_register.md)
+records
 authority, acceptance, and redistribution questions.
 
 ## Current status
@@ -93,7 +96,8 @@ Public-safe verification on **2026-07-29**:
 | Forecast API | Disabled | Tiny U-Net does not consistently beat Persistence on CSI and lead-time gates |
 
 These are dated observations, not an availability promise. The current public-safe rollout record
-is in [deployment status](docs/deployment_status.md).
+is in
+[deployment status](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/deployment_status.md).
 
 ## Baseline results
 
@@ -110,12 +114,37 @@ better.
 The weighted Tiny U-Net lowers aggregate RMSE on all three events, but CSI regresses on one local
 test event and some 10-to-60-minute lead-time gates regress. Therefore
 `forecast_publication_ready=false`; Persistence remains the required benchmark. See the full
-[baseline results](docs/baseline_results.md), [model card](docs/model_cards/minxiong_chiayi_baseline.md),
-and [reproducibility evidence](docs/research_dataset.md).
+[baseline results](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/baseline_results.md),
+[model card](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/model_cards/minxiong_chiayi_baseline.md),
+and
+[reproducibility evidence](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/research_dataset.md).
 
 ## Quick Start
 
 Python 3.11 and 3.13 are tested in CI.
+
+The fastest path is a credential-free, synthetic demo:
+
+```bash
+docker compose up --build
+```
+
+Open <http://127.0.0.1:8080/>. The dashboard shows demo rain gauges and flood sensors,
+`/healthz`, intentionally blocked `/readyz`, Prometheus `/metrics`, and the forecast publication
+gate. No API key or live official request is used.
+
+If port 8080 is already in use, choose another host port:
+
+```bash
+MHC_DEMO_PORT=18080 docker compose up --build
+```
+
+![Synthetic Docker demo walkthrough: blocked readiness, demo observations, region coverage, and blocked forecast gate](https://raw.githubusercontent.com/KageRyo/MinxiongHydroCast/main/docs/assets/demo-walkthrough.gif)
+
+_A 60-second capture of the credential-free synthetic stack. Every source is classified as
+`demo_fixture`; readiness and forecast publication stay blocked._
+
+For a local Python installation:
 
 ```bash
 python3 -m venv .venv
@@ -126,7 +155,7 @@ python -m pip install -e ".[dev]"
 Create a deterministic demo snapshot without contacting live sources, then open the operator view:
 
 ```bash
-mhc operations --mode demo --once
+mhc collect --region minxiong --mode demo --once
 mhc serve --host 127.0.0.1 --port 8080
 ```
 
@@ -138,7 +167,8 @@ curl --fail http://127.0.0.1:8080/healthz
 
 Open <http://127.0.0.1:8080/>. Demo data intentionally does not pass readiness. Live collection
 requires CWA/WRA credentials in an ignored `.env`; follow
-[operational use](docs/operational_use.md#run-the-observation-service) rather than placing secrets
+[operational use](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/operational_use.md#run-the-observation-service)
+rather than placing secrets
 on the command line.
 
 Useful entry points:
@@ -147,8 +177,19 @@ Useful entry points:
 mhc --help
 mhc collect --help
 mhc serve --help
-mhc dataset-build --help
-mhc event-review-queue --help
+mhc dataset build --help
+mhc event queue --help
+mhc model evaluate --help
+mhc operations backup --help
+```
+
+The base wheel installs only Pydantic, Requests, and NumPy. Install capability extras only when
+needed:
+
+```bash
+pip install "minxiong-hydrocast[scraper]"
+pip install "minxiong-hydrocast[model]"
+pip install "minxiong-hydrocast[report]"
 ```
 
 ## Example output
@@ -171,7 +212,7 @@ curl --silent http://127.0.0.1:8080/readyz |
 ```
 
 The service also exposes `/healthz`, `/metrics`, `/api/v1/status`, official observations,
-Minxiong features, locations, shadow readiness, and a fail-closed experimental forecast endpoint.
+region features, locations, shadow readiness, and a fail-closed experimental forecast endpoint.
 
 ## Evaluation and tests
 
@@ -182,8 +223,10 @@ python -m pytest -q
 ```
 
 CI runs the same quality gates on Python 3.11 and 3.13. CodeQL, Dependabot, secret scanning, and
-protected `main` rules provide repository-level controls; scheduled live-contract checks detect
-upstream CWA/WRA changes without printing credentials.
+protected `main` rules provide repository-level controls. A separate clean-wheel job builds both
+distributions, installs the wheel, verifies that `mhc` is the only executable, and exercises the
+synthetic API/readiness/metrics/forecast-gate flow. Scheduled live-contract checks detect upstream
+CWA/WRA changes without printing credentials.
 
 ## Limitations
 
@@ -198,35 +241,56 @@ upstream CWA/WRA changes without printing credentials.
 
 ## Data, model, and code license
 
-Repository code is released under the [MIT License](LICENSE). That license does not relicense CWA
+Repository code is released under the
+[MIT License](https://github.com/KageRyo/MinxiongHydroCast/blob/main/LICENSE). That license does
+not relicense CWA
 or WRA data, third-party documents, research evidence, or trained weights. This repository ships
 schemas and synthetic samples, not an official dataset or model checkpoint. Review the
-[data source register](docs/data_source_register.md) and each authority's terms before
+[data source register](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/data_source_register.md)
+and each authority's terms before
 redistribution or commercial use.
 
 ## Roadmap and releases
 
 | Version | Milestone | State |
 | --- | --- | --- |
-| [`v0.1.0`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.0) | Observation Service | Current release |
+| [`v0.1.0`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.0) | Observation Service | Previous release |
+| [`v0.1.1`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.1) | One-command demo, lean package, region/adapter contracts, contributor entry | Current release |
 | `v0.2.0` | Reproducible Radar Dataset | Planned; requires broader reviewed event diversity |
 | `v0.3.0` | Baseline Nowcasting | Planned; requires model, label, and lead-time gates |
 
-See [CHANGELOG.md](CHANGELOG.md), the [v0.1.0 release notes](docs/releases/v0.1.0.md), and the
-long-term [roadmap](docs/roadmap.md). Current work belongs in [tasks](docs/tasks.md); generated
+See [CHANGELOG.md](https://github.com/KageRyo/MinxiongHydroCast/blob/main/CHANGELOG.md), the
+[v0.1.1 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.1.md),
+and the long-term
+[roadmap](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/roadmap.md). Current work
+belongs in [tasks](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/tasks.md); generated
 deployment numbers do not belong in the README.
 
 ## Documentation
 
-- Start here: [documentation index](docs/index.md), [project scope](docs/project_scope.md),
-  [architecture](docs/architecture.md)
-- Operate: [operational use](docs/operational_use.md),
-  [single-host runbook](docs/single_host_operations.md),
-  [incident response](docs/incident_response.md), [rollback](docs/rollback.md)
-- Contracts: [data contracts](docs/data_contracts.md),
-  [source register](docs/data_source_register.md), [spatial alignment](docs/spatial_alignment.md)
-- Research: [dataset build](docs/research_dataset.md),
-  [event evidence and review](docs/continuous_event_evidence.md),
-  [baseline results](docs/baseline_results.md), [model card](docs/model_cards/minxiong_chiayi_baseline.md)
-- Governance: [decision authority](docs/decision_authority.md), [security policy](SECURITY.md),
-  [roadmap](docs/roadmap.md), [tasks](docs/tasks.md)
+- Start here:
+  [documentation index](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/index.md),
+  [project scope](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/project_scope.md),
+  [architecture](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/architecture.md)
+- Operate:
+  [operational use](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/operational_use.md),
+  [single-host runbook](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/single_host_operations.md),
+  [incident response](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/incident_response.md),
+  [rollback](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/rollback.md)
+- Contracts:
+  [data contracts](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/data_contracts.md),
+  [source register](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/data_source_register.md),
+  [spatial alignment](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/spatial_alignment.md),
+  [region profiles](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/region_profiles.md),
+  [adapter development](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/adapter_development.md)
+- Research:
+  [dataset build](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/research_dataset.md),
+  [event evidence and review](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/continuous_event_evidence.md),
+  [baseline results](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/baseline_results.md),
+  [model card](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/model_cards/minxiong_chiayi_baseline.md)
+- Governance:
+  [decision authority](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/decision_authority.md),
+  [security policy](https://github.com/KageRyo/MinxiongHydroCast/blob/main/SECURITY.md),
+  [contributing](https://github.com/KageRyo/MinxiongHydroCast/blob/main/CONTRIBUTING.md),
+  [roadmap](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/roadmap.md),
+  [tasks](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/tasks.md)

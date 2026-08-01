@@ -18,6 +18,8 @@ governance details without duplicating changing deployment numbers.
   production gates.
 - [Single-host operations](single_host_operations.md): localhost-only systemd installation,
   monitoring, backup, and shadow evaluation.
+- [Region profiles](region_profiles.md): reusable operational boundaries, coverage, and freshness.
+- [Adapter development](adapter_development.md): public source interface and contract tests.
 - [Deployment status](deployment_status.md): dated, public-safe rollout evidence.
 - [Incident response](incident_response.md): detection, triage, containment, and evidence.
 - [Rollback](rollback.md): application and data rollback procedure.

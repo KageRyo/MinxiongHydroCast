@@ -47,14 +47,16 @@ def test_demo_collection_writes_versioned_non_ready_snapshot(tmp_path):
         "rainfall_alerts",
         "rain_gauges",
         "flood_sensors",
-        "minxiong_features",
+        "region_features",
         "location_reference",
     }
     assert manifest["datasets"]["rainfall_alerts"]["product_type"] == "demo_fixture"
     assert manifest["datasets"]["rain_gauges"]["product_type"] == "demo_fixture"
     assert manifest["datasets"]["rain_gauges"]["source"]["source_kind"] == "demo_fixture"
     assert manifest["datasets"]["rain_gauges"]["source"]["dataset_id"] == "demo-rain_gauges"
-    feature = store.read_dataset(manifest, "minxiong_features")[0]
+    assert manifest["metadata"]["region_profile"]["region"]["id"] == "minxiong"
+    feature = store.read_dataset(manifest, "region_features")[0]
+    assert feature["region_id"] == "minxiong"
     assert feature["township"] == "民雄鄉"
     assert feature["rain_gauge_count"] == "1"
     assert feature["flood_sensor_count"] == "0"
@@ -154,7 +156,7 @@ def test_live_payloads_use_official_product_classifications():
         "rainfall_alerts": "official_alert",
         "rain_gauges": "official_observation",
         "flood_sensors": "official_observation",
-        "minxiong_features": "derived_feature",
+        "region_features": "derived_feature",
         "location_reference": "derived_reference",
     }
 
@@ -314,7 +316,7 @@ def test_valid_empty_alert_is_healthy_and_keeps_feature_ready():
     )
 
     alert_payload = next(payload for payload in payloads if payload.name == "rainfall_alerts")
-    feature_payload = next(payload for payload in payloads if payload.name == "minxiong_features")
+    feature_payload = next(payload for payload in payloads if payload.name == "region_features")
     assert alert_payload.records == []
     assert alert_payload.health["state"] == "healthy"
     assert alert_payload.health["ready"] is True
@@ -449,12 +451,15 @@ def test_missing_minxiong_observation_coverage_stays_not_ready_on_refresh():
         max_age_minutes=30,
         now=now,
     )
-    feature_payload = next(payload for payload in payloads if payload.name == "minxiong_features")
+    feature_payload = next(payload for payload in payloads if payload.name == "region_features")
     refreshed = refresh_dataset_health(feature_payload.health, mode="live", now=now)
 
     assert feature_payload.records[0]["data_ready"] == "false"
     assert feature_payload.records[0]["coverage_ready"] == "false"
-    assert feature_payload.records[0]["coverage_gaps"] == "rain_gauges=0;flood_sensors=0"
+    assert (
+        feature_payload.records[0]["coverage_gaps"]
+        == "rain_gauges=0<1;flood_sensors=0<1"
+    )
     assert feature_payload.health["state"] == "coverage_missing"
     assert refreshed["state"] == "coverage_missing"
     assert refreshed["ready"] is False

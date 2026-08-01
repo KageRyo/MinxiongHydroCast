@@ -1,17 +1,20 @@
-"""Build Minxiong operational features from validated snapshot records."""
+"""Build profile-driven regional features from validated snapshot records."""
 
 from __future__ import annotations
 
 from datetime import datetime
 from typing import Any
 
+from minxionghydrocast.region_profiles import RegionProfile, load_region_profile
 from minxionghydrocast.spatial.locations import (
     flood_sensor_location,
     rain_gauge_location,
 )
 
-MINXIONG_FEATURE_FIELDS = [
+REGION_FEATURE_FIELDS = [
     "feature_time",
+    "region_id",
+    "region_name",
     "county",
     "township",
     "data_mode",
@@ -35,6 +38,7 @@ MINXIONG_FEATURE_FIELDS = [
     "qpe_accumulation_mm",
     "experimental_forecast_included",
 ]
+MINXIONG_FEATURE_FIELDS = REGION_FEATURE_FIELDS
 
 
 def _float(value: object) -> float | None:
@@ -71,30 +75,32 @@ def _latest(records: list[dict[str, str]], field: str) -> str:
     return max(values) if values else ""
 
 
-def build_minxiong_feature(
+def build_region_feature(
     records: dict[str, list[dict[str, str]]],
     *,
+    profile: RegionProfile,
     mode: str,
     upstream_health: dict[str, str],
     now: datetime,
 ) -> dict[str, Any]:
+    identity = profile.region
     rain = [
         record
         for record in records["rain_gauges"]
-        if "民雄鄉" in record.get("行政區", "")
+        if identity.township in record.get("行政區", "")
     ]
     flood = [
         record
         for record in records["flood_sensors"]
-        if record.get("鄉鎮", "").strip() == "民雄鄉"
+        if record.get("鄉鎮", "").strip() == identity.township
         and record.get("啟用狀態", "true").strip().lower() != "false"
     ]
     alerts = [
         record
         for record in records["rainfall_alerts"]
-        if record.get("鄉鎮代碼", "").strip() == "10010050"
-        or "民雄鄉" in record.get("地區", "")
-        or "民雄鄉" in record.get("影響村落", "")
+        if record.get("鄉鎮代碼", "").strip() == identity.township_code
+        or identity.township in record.get("地區", "")
+        or identity.township in record.get("影響村落", "")
     ]
     active_alerts = [
         record
@@ -109,15 +115,23 @@ def build_minxiong_feature(
     )
     upstream_ready = all(state == "healthy" for state in upstream_health.values())
     coverage_gaps: list[str] = []
-    if not rain:
-        coverage_gaps.append("rain_gauges=0")
-    if not flood:
-        coverage_gaps.append("flood_sensors=0")
+    if len(rain) < profile.coverage.required_rain_gauges:
+        coverage_gaps.append(
+            f"rain_gauges={len(rain)}"
+            f"<{profile.coverage.required_rain_gauges}"
+        )
+    if len(flood) < profile.coverage.required_flood_sensors:
+        coverage_gaps.append(
+            f"flood_sensors={len(flood)}"
+            f"<{profile.coverage.required_flood_sensors}"
+        )
     coverage_ready = not coverage_gaps
     return {
         "feature_time": now.isoformat(timespec="seconds"),
-        "county": "嘉義縣",
-        "township": "民雄鄉",
+        "region_id": identity.id,
+        "region_name": identity.name,
+        "county": identity.county,
+        "township": identity.township,
         "data_mode": mode,
         "data_ready": str(upstream_ready and coverage_ready).lower(),
         "upstream_health": ";".join(
@@ -143,3 +157,21 @@ def build_minxiong_feature(
         "qpe_accumulation_mm": "",
         "experimental_forecast_included": "false",
     }
+
+
+def build_minxiong_feature(
+    records: dict[str, list[dict[str, str]]],
+    *,
+    mode: str,
+    upstream_health: dict[str, str],
+    now: datetime,
+) -> dict[str, Any]:
+    """Compatibility wrapper for callers that have not selected a profile yet."""
+
+    return build_region_feature(
+        records,
+        profile=load_region_profile("minxiong"),
+        mode=mode,
+        upstream_health=upstream_health,
+        now=now,
+    )

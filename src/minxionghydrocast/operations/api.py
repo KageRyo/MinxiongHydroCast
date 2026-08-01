@@ -33,7 +33,8 @@ DATASET_ROUTES = {
     "/api/v1/official-alerts/rainfall": "rainfall_alerts",
     "/api/v1/observations/rain-gauges": "rain_gauges",
     "/api/v1/observations/flood-sensors": "flood_sensors",
-    "/api/v1/features/minxiong": "minxiong_features",
+    "/api/v1/features/region": "region_features",
+    "/api/v1/features/minxiong": "region_features",
     "/api/v1/locations": "location_reference",
 }
 
@@ -451,7 +452,7 @@ OPERATOR_HTML = """<!doctype html>
       <div class="table-wrap" id="sensors"></div>
     </section>
     <section>
-      <div class="section-head"><h2>Minxiong Features</h2><span id="features-type">Loading</span></div>
+      <div class="section-head"><h2>Region Features</h2><span id="features-type">Loading</span></div>
       <div class="table-wrap" id="features"></div>
     </section>
     <section>
@@ -468,7 +469,7 @@ OPERATOR_HTML = """<!doctype html>
       alerts: "/api/v1/official-alerts/rainfall",
       gauges: "/api/v1/observations/rain-gauges",
       sensors: "/api/v1/observations/flood-sensors",
-      features: "/api/v1/features/minxiong",
+      features: "/api/v1/features/region",
       locations: "/api/v1/locations"
     };
     const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({

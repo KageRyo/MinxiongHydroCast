@@ -1,0 +1,48 @@
+name: Feature request
+description: Propose a scoped, testable enhancement.
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Which user or contributor workflow is currently difficult?
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: Proposed contract
+      description: Describe the public interface and boundaries, not only an implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Completion evidence
+      description: What tests, demo behavior, or artifact would prove this is complete?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Region profile
+        - Data-source adapter
+        - Operations
+        - Dataset and research
+        - Model baseline
+        - Documentation
+        - Packaging and developer experience
+    validations:
+      required: true
+  - type: checkboxes
+    id: gates
+    attributes:
+      label: Safety boundary
+      options:
+        - label: This proposal does not lower an observation, model, notification, or publication gate.
+          required: true

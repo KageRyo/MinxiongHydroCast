@@ -1,0 +1,26 @@
+{
+  "type": "FeatureCollection",
+  "name": "example_region_placeholder",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "region_id": "example-region",
+        "boundary_type": "placeholder",
+        "notice": "Replace this geometry before using the example profile."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [0.0, 0.0],
+            [0.1, 0.0],
+            [0.1, 0.1],
+            [0.0, 0.1],
+            [0.0, 0.0]
+          ]
+        ]
+      }
+    }
+  ]
+}

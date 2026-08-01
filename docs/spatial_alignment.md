@@ -8,7 +8,7 @@ regular WGS84 grids.
 Build a reference table from processed hydrology outputs:
 
 ```bash
-minxiong-hydrocast-locations \
+mhc spatial locations \
   --rain data/processed/rain_monitor.csv \
   --flood data/processed/flood_sensors.csv \
   --output data/processed/location_reference.csv

@@ -6,7 +6,7 @@ After=network-online.target
 [Service]
 Type=oneshot
 EnvironmentFile=%h/.config/minxiong-hydrocast/env
-ExecStart=%h/.local/share/minxiong-hydrocast/venv/bin/minxiong-hydrocast-operations \
+ExecStart=%h/.local/share/minxiong-hydrocast/venv/bin/mhc collect \
   --mode live \
   --once \
   --alert-source api \

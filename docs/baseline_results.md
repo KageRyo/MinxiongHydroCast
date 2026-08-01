@@ -6,7 +6,7 @@ small synthetic radar-like nowcasting case. They are not scientific model perfor
 Run:
 
 ```bash
-minxiong-hydrocast-evaluate-baselines \
+mhc model evaluate \
   --events data/samples/flood_risk_events.csv \
   --output data/processed/baseline_evaluation.json
 ```
@@ -26,10 +26,10 @@ minxiong-hydrocast-evaluate-baselines \
 ## Tensor Archive Baseline
 
 Run after creating `data/processed/radar_tensor_sample.npz` with
-`minxiong-hydrocast-radar-tensor-convert`:
+`mhc dataset radar-tensor-convert`:
 
 ```bash
-minxiong-hydrocast-tensor-baseline-evaluate \
+mhc model evaluate-tensor \
   --archive data/processed/radar_tensor_sample.npz \
   --output data/processed/tensor_baseline_evaluation.json
 ```
@@ -51,7 +51,7 @@ Run after collecting a CWA `O-A0059-001` event sequence and converting it with
 `--source-format cwa_opendata_grid`:
 
 ```bash
-minxiong-hydrocast-tensor-baseline-evaluate \
+mhc model evaluate-tensor \
   --archive data/processed/cwa_recent_tensor_sample.npz \
   --output data/processed/cwa_recent_tensor_baseline_evaluation.json \
   --event-threshold-mm 35
@@ -101,7 +101,7 @@ masking, and training normalization. It is still a smoke test rather than a benc
 Run:
 
 ```bash
-minxiong-hydrocast-torch-baseline-evaluate \
+mhc model evaluate-torch \
   --archive data/processed/cwa_recent_tensor_sample.npz \
   --checkpoint data/external/checkpoints/tiny_unet_cwa_2gpu_masked_smoke/tiny_unet_nowcaster.pt \
   --event-threshold 35 \

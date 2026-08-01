@@ -1,0 +1,73 @@
+name: Official data-source change
+description: Report schema drift or documented upstream behavior changes.
+title: "data-source: "
+labels:
+  - data-source
+body:
+  - type: input
+    id: authority
+    attributes:
+      label: Affected authority
+      placeholder: Central Weather Administration
+    validations:
+      required: true
+  - type: input
+    id: dataset
+    attributes:
+      label: Affected dataset
+      placeholder: O-A0002-001
+    validations:
+      required: true
+  - type: input
+    id: observed-date
+    attributes:
+      label: Observed date
+      placeholder: YYYY-MM-DD
+    validations:
+      required: true
+  - type: textarea
+    id: previous-schema
+    attributes:
+      label: Previous schema or behavior
+    validations:
+      required: true
+  - type: textarea
+    id: new-schema
+    attributes:
+      label: New schema or behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: raw-retained
+    attributes:
+      label: Raw response retained locally
+      options:
+        - "Yes"
+        - "No"
+        - Not applicable
+    validations:
+      required: true
+  - type: dropdown
+    id: sensitive
+    attributes:
+      label: Contains sensitive or redistribution-restricted information
+      options:
+        - "No"
+        - "Yes — details kept private"
+        - Unknown — needs rights review
+    validations:
+      required: true
+  - type: textarea
+    id: public-evidence
+    attributes:
+      label: Public-safe evidence
+      description: Provide redacted field names, documented URLs, or a synthetic reproduction only.
+    validations:
+      required: true
+  - type: checkboxes
+    id: redaction
+    attributes:
+      label: Redaction check
+      options:
+        - label: I did not paste credentials, private evidence, or restricted raw responses.
+          required: true

@@ -66,7 +66,7 @@ preventive action. Do not erase failed-attempt manifests or audit records after 
 Generate a read-only queue for every ready-data gap above the shadow threshold:
 
 ```bash
-mhc shadow-gap-incidents \
+mhc operations gap-incidents \
   --store "${MINXIONGHYDROCAST_OPERATIONS_STORE}" \
   --output /private/run-summaries/shadow-gap-incidents.json
 ```

@@ -1,6 +1,6 @@
 # Continuous Event Evidence
 
-`mhc event-discover` continuously preserves short-retention CWA radar events before they disappear.
+`mhc event discover` continuously preserves short-retention CWA radar events before they disappear.
 It is a research-data collector, not a forecast publisher and not an automatic training trigger.
 
 ## Collection Cycle
@@ -39,7 +39,7 @@ set -a
 source .env
 set +a
 
-mhc event-discover --repository-root "$PWD"
+mhc event discover --repository-root "$PWD"
 ```
 
 Use `--max-candidate-window-minutes` to select another cadence-aligned bound. It must cover at least
@@ -99,7 +99,7 @@ the radar frames, source timing, QPE, gauges, warnings, and official synoptic co
 read-only priority queue first:
 
 ```bash
-mhc event-review-queue \
+mhc event queue \
   --catalog "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json"
 ```
 
@@ -112,7 +112,7 @@ split. `--format json` exposes the same fields for operator tooling.
 Record the decision through the schema-validated command rather than editing JSON directly:
 
 ```bash
-mhc event-review \
+mhc event review \
   --catalog "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json" \
   --candidate-id <candidate-id> \
   --decision approved \
@@ -139,19 +139,19 @@ when the candidate is a false positive.
 Catalogs containing earlier URL-only review records remain readable. New approval decisions require
 the checksummed artifact fields and must not treat a mutable web URL as permanent evidence.
 
-`mhc event-review` still does not edit `data/samples/event_split_manifest.json`. Adding an approved
+`mhc event review` still does not edit `data/samples/event_split_manifest.json`. Adding an approved
 event is a separate tracked change with an explicit train/validation/test decision. The manifest
 event must set `evidence_candidate_id`, use the reviewed window, and match the reviewed weather
 regime in `event_type`. Then run:
 
 ```bash
-mhc event-split-check \
+mhc dataset split-check \
   --manifest data/samples/event_split_manifest.json \
   --event-evidence-catalog \
     "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json" \
   --require-ok
 
-mhc dataset-build \
+mhc dataset build \
   --manifest data/samples/event_split_manifest.json \
   --event-evidence-catalog \
     "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json" \

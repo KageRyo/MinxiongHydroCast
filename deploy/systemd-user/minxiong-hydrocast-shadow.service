@@ -3,7 +3,7 @@ Description=Evaluate MinxiongHydroCast shadow-deployment evidence
 
 [Service]
 Type=oneshot
-ExecStart=%h/.local/share/minxiong-hydrocast/venv/bin/minxiong-hydrocast-shadow-report \
+ExecStart=%h/.local/share/minxiong-hydrocast/venv/bin/mhc operations shadow \
   --store %h/.local/share/minxiong-hydrocast/operations \
   --evidence %h/.local/share/minxiong-hydrocast/config/shadow_evidence.json \
   --output %h/.local/share/minxiong-hydrocast/run_summaries/shadow_report.json \

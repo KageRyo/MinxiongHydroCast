@@ -59,14 +59,14 @@ credentials, raw official data, or model weights.
   before official CWA evidence is attached.
 - Completed: CWA official weather-context source review manifest listing reviewed CWA pages,
   current coverage, and next historical chart probe URLs.
-- Completed: `mhc dataset-build` orchestration for CWA history, resilient event download, sequence
+- Completed: `mhc dataset build` orchestration for CWA history, resilient event download, sequence
   validation, tensor conversion, Persistence evaluation, weighted Tiny U-Net evaluation, catalog
   generation, and checksum verification in an external durable research root.
-- Completed: deployed `mhc event-discover` on a 20-minute user-systemd timer with incremental
+- Completed: deployed `mhc event discover` on a 20-minute user-systemd timer with incremental
   `O-A0059-001` scanning, local/Taiwan `35 dBZ` metrics, resumable checksummed event windows, and
-  synchronized QPE/gauge/warning evidence. The Pydantic catalog and `mhc event-review` gate keep
+  synchronized QPE/gauge/warning evidence. The Pydantic catalog and `mhc event review` gate keep
   discovery candidates out of formal splits until an auditable human decision.
-- Completed: checksummed official-context artifacts for `mhc event-review`, including publisher,
+- Completed: checksummed official-context artifacts for `mhc event review`, including publisher,
   source URL, published/fetched times, atomic external preservation, catalog verification, and
   backward-compatible reading of URL-only reviews.
 - Completed: cadence-aligned maximum candidate windows that split sustained trigger sequences while
@@ -150,7 +150,7 @@ credentials, raw official data, or model weights.
 
 ## Phase 2: Dataset Build
 
-- Maintain `mhc dataset-build` as the canonical checksummed external-dataset workflow.
+- Maintain `mhc dataset build` as the canonical checksummed external-dataset workflow.
 - Expand `data/samples/event_split_manifest.json` with weather-diverse real historical events.
 - Add event manifests for Chiayi/Minxiong heavy-rain windows and Taiwan-wide typhoon/front events.
 - Add gauge/QPE validation reports so QPE is not treated as ground truth without checks.

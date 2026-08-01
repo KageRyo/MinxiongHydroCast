@@ -3,7 +3,7 @@ Description=Back up MinxiongHydroCast operational snapshots
 
 [Service]
 Type=oneshot
-ExecStart=%h/.local/share/minxiong-hydrocast/venv/bin/minxiong-hydrocast-backup create \
+ExecStart=%h/.local/share/minxiong-hydrocast/venv/bin/mhc operations backup create \
   --store %h/.local/share/minxiong-hydrocast/operations \
   --backup-dir %h/.local/share/minxiong-hydrocast/backups \
   --retention-days 30 \

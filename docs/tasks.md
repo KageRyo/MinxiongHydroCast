@@ -1,8 +1,16 @@
 # Task List
 
-This list replaces GitHub issues for now. Keep tasks small enough to finish, test, and propose
-through a focused pull request. The end-to-end target is defined in
+This file is the internal roadmap and historical completion record. Public-safe, claimable work
+belongs in GitHub Issues using the repository templates; private event review, credentials,
+deployment hosts, and unpublished evidence stay outside public issues. Keep tasks small enough to
+finish, test, and propose through a focused pull request. The end-to-end target is defined in
 [completion_plan.md](completion_plan.md).
+
+## Public backlog
+
+- [#29 — Add an optical-flow rainfall nowcasting baseline](https://github.com/KageRyo/MinxiongHydroCast/issues/29)
+- [#30 — Expand reviewed radar-event weather-regime diversity](https://github.com/KageRyo/MinxiongHydroCast/issues/30)
+- [#31 — Publish the v0.2 dataset-building protocol and event manifest](https://github.com/KageRyo/MinxiongHydroCast/issues/31)
 
 ## Active
 
@@ -47,7 +55,7 @@ through a focused pull request. The end-to-end target is defined in
 - [x] Train and evaluate the Tiny U-Net/RainNet-style baseline on full CWA event windows.
 - [x] Define a NowcastNet readiness gate so SOTA migration waits for stable data and license
       review.
-- [x] Add `mhc dataset-build` to orchestrate history discovery, resilient downloads, validation,
+- [x] Add `mhc dataset build` to orchestrate history discovery, resilient downloads, validation,
       tensor conversion, Persistence evaluation, catalog generation, and checksum verification.
 - [x] Move formal research artifacts to a configurable durable root outside Git.
 - [x] Replace formal demo split entries with two real train, one independent validation, and two
@@ -55,14 +63,15 @@ through a focused pull request. The end-to-end target is defined in
 - [x] Validate persisted dataset, training, and evaluation JSON through strict Pydantic schemas.
 - [x] Train weighted Tiny U-Net with train-only normalization and a separate validation event.
 - [x] Verify 251 cataloged external artifacts and retain the failed forecast-promotion blockers.
-- [x] Add `mhc event-discover` with an incremental history cursor and both Minxiong-local and
+- [x] Add `mhc event discover` with an incremental history cursor and both Minxiong-local and
       Taiwan-wide `35 dBZ` coverage metrics.
 - [x] Preserve candidate radar windows with retry, resume, SHA-256, atomic writes, and bounded
       temporary scan-cache retention under the external research root.
 - [x] Capture synchronized `O-B0045-001` QPE, `O-A0002-001` gauges, and WRA rainfall warnings in a
       strict Pydantic `EventEvidenceCatalog`.
 - [x] Schedule candidate discovery every 20 minutes while preventing automatic formal-split edits.
-- [x] Add auditable `mhc event-review` decisions and make `event-split-check` plus `dataset-build`
+- [x] Add auditable `mhc event review` decisions and make `mhc dataset split-check` plus
+      `mhc dataset build`
       reject incomplete, unapproved, checksum-invalid, time-mismatched, or regime-mismatched
       candidate promotions.
 - [x] Preserve official review context as Pydantic-validated, atomically written, checksummed
@@ -88,7 +97,7 @@ Each code change should remain a focused pull request with its own tests and rol
 - [x] **P0 - Deploy and verify the WRA reliability change.** Empty/invalid/malformed page retries,
       bounded full join-transaction retry, structured telemetry, live contracts, backup, and the
       unchanged `schema_drift` exhaustion behavior passed rollout checks.
-- [x] **P0 - Add a read-only event review queue.** `mhc event-review-queue` verifies artifacts and
+- [x] **P0 - Add a read-only event review queue.** `mhc event queue` verifies artifacts and
       ranks candidates using local radar, QPE, Minxiong gauges, warnings, official context, and
       evidence readiness. It does not edit the evidence catalog or formal split.
 - [x] **P0 - Prepare the v0.1.0 public release.** Add a concise README, architecture, real
@@ -160,7 +169,7 @@ Each code change should remain a focused pull request with its own tests and rol
       root, with source provenance, time ranges, and lead-time metrics.
 - [x] Add a next-batch event expansion queue from the existing CWA hourly discovery scan.
 - [x] Let the first continuously collected candidate finish its post-trigger window, inspect
-      official context and synchronized evidence, and record its `mhc event-review` decision
+      official context and synchronized evidence, and record its `mhc event review` decision
       without automatically changing a formal split.
 - [ ] Human-review and accumulate typhoon, frontal, Mei-yu, and convective candidates before SOTA
       model migration.

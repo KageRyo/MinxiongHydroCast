@@ -65,14 +65,14 @@ Downloaded files belong under ignored paths such as `data/external/radar/cwa_o_a
 Dry-run URL and output-path handling without a key:
 
 ```bash
-minxiong-hydrocast-cwa-download --dry-run --data-id O-A0059-001
+mhc source cwa-download --dry-run --data-id O-A0059-001
 ```
 
 Download a live sample after setting a local key:
 
 ```bash
 export CWA_API_KEY  # set this locally first
-minxiong-hydrocast-cwa-download \
+mhc source cwa-download \
   --data-id O-A0059-001 \
   --output-dir data/external/radar
 ```
@@ -97,7 +97,7 @@ Both products store comma-separated scientific-notation floats. Values are order
 east first, then south to north. Inspect local samples with:
 
 ```bash
-minxiong-hydrocast-cwa-grid-inspect \
+mhc source cwa-grid-inspect \
   data/external/radar/cwa_o_a0059_001/O-A0059-001.json \
   data/external/radar/cwa_o_b0045_001/O-B0045-001.json
 ```
@@ -108,7 +108,7 @@ Use `O-B0045-001` only as an estimated rainfall grid until it is checked against
 local QPE and `O-A0002-001` gauge captures exist, generate an ignored report:
 
 ```bash
-minxiong-hydrocast-qpe-gauge-validate \
+mhc dataset qpe-gauge-validate \
   --qpe-grid data/external/radar/events/<event>/O-B0045-001.json \
   --gauge-json data/external/gauges/events/<event>/O-A0002-001.json \
   --event-id <event_id> \
@@ -162,13 +162,13 @@ https://opendata.cwa.gov.tw/historyapi/v1/getMetadata/{data_id}?Authorization=RE
 Dry-run the inferred URL:
 
 ```bash
-minxiong-hydrocast-cwa-history-list --dry-run --data-id O-A0059-001
+mhc source cwa-history-list --dry-run --data-id O-A0059-001
 ```
 
 Download a specific history `getData` timestamp directly into ignored local storage:
 
 ```bash
-minxiong-hydrocast-cwa-history-data-download \
+mhc source cwa-history-data-download \
   --data-id O-A0002-001 \
   --data-time 2026-07-02T15:30:00+08:00 \
   --output data/external/gauges/events/O-A0002-001_20260702153000.xml \
@@ -183,7 +183,7 @@ both JSON and XML gauge payloads.
 After a live history index is available, create an event frame plan:
 
 ```bash
-minxiong-hydrocast-cwa-event-plan \
+mhc source cwa-event-plan \
   --history-index data/processed/cwa_history_index.json \
   --event-id chiayi_20260706_evening \
   --start-time 2026-07-06T18:00:00+08:00 \
@@ -194,7 +194,7 @@ For broad candidate discovery, sample the history index before downloading compl
 windows:
 
 ```bash
-minxiong-hydrocast-cwa-event-plan \
+mhc source cwa-event-plan \
   --history-index data/processed/cwa_history_index_live.json \
   --event-id cwa_o_a0059_hourly_scan_20260628_20260708 \
   --start-time 2026-06-28T13:00:00+08:00 \
@@ -209,7 +209,7 @@ minxiong-hydrocast-cwa-event-plan \
 Then summarize the downloaded scan:
 
 ```bash
-minxiong-hydrocast-radar-event-summary \
+mhc dataset radar-event-summary \
   --collection data/processed/cwa_event_collection_hourly_scan_20260628_20260708.json \
   --output data/processed/cwa_event_summary_hourly_scan_20260628_20260708.json \
   --expected-cadence-minutes 60
@@ -239,7 +239,7 @@ for training until history retention and multi-frame event collection are review
 ## Check Command
 
 ```bash
-minxiong-hydrocast-radar-source-check \
+mhc dataset radar-source-check \
   --manifest data/samples/radar_source_manifest.json \
   --output data/processed/radar_source_check.json
 ```
@@ -248,7 +248,7 @@ Use `--require-confirmed` in automation when training should fail unless the sel
 fully reviewed:
 
 ```bash
-minxiong-hydrocast-radar-source-check --require-confirmed
+mhc dataset radar-source-check --require-confirmed
 ```
 
 ## Confirmation Criteria

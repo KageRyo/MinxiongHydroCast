@@ -7,7 +7,7 @@ After=network-online.target
 Type=oneshot
 EnvironmentFile=%h/.config/minxiong-hydrocast/env
 WorkingDirectory=%h/.local/share/minxiong-hydrocast
-ExecStart=%h/.local/share/minxiong-hydrocast/venv/bin/minxiong-hydrocast-event-discover \
+ExecStart=%h/.local/share/minxiong-hydrocast/venv/bin/mhc event discover \
   --repository-root %h/.local/share/minxiong-hydrocast \
   --initial-lookback-minutes 120 \
   --before-minutes 60 \
