@@ -17,6 +17,13 @@ jobs:
       - name: Check out release
         uses: actions/checkout@v7
 
+      - name: Verify release display name
+        env:
+          RELEASE_NAME: ${{ github.event.release.name }}
+          EXPECTED_RELEASE_NAME: "MinxiongHydroCast ${{ github.event.release.tag_name }}"
+        run: |
+          test "$RELEASE_NAME" = "$EXPECTED_RELEASE_NAME"
+
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
