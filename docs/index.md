@@ -34,6 +34,8 @@ governance details without duplicating changing deployment numbers.
 - [Radar data sources](radar_data_sources.md): official radar/QPE candidates and formats.
 - [Radar tensor conversion](radar_tensor_conversion.md): grid and tensor contract.
 - [Baseline results](baseline_results.md): smoke and formal independent-event metrics.
+- [Optical-flow baseline](optical_flow_baseline.md): deterministic motion baseline, evaluation,
+  and public-safe comparison report.
 - [Model card](model_cards/minxiong_chiayi_baseline.md): intended use, evaluation, and limitations.
 - [Model strategy](model_strategy.md): baseline-first model progression.
 

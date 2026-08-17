@@ -17,6 +17,16 @@ def rmse(prediction, target) -> float:
     return float(np.sqrt(np.mean((prediction_array - target_array) ** 2)))
 
 
+def mae(prediction, target) -> float:
+    prediction_array = np.asarray(prediction, dtype=float)
+    target_array = np.asarray(target, dtype=float)
+    if prediction_array.shape != target_array.shape:
+        raise ValueError(
+            f"prediction and target shapes differ: {prediction_array.shape} != {target_array.shape}"
+        )
+    return float(np.mean(np.abs(prediction_array - target_array)))
+
+
 @dataclass(frozen=True)
 class BinaryEventMetrics:
     hits: int

@@ -199,6 +199,12 @@ Each code change should remain a focused pull request with its own tests and rol
 - [x] Run the weighted Tiny U-Net experiment on two CUDA GPUs and compare full-event metrics.
 - [x] Compare the weighted Tiny U-Net with Persistence on one independent validation event and two
       held-out Minxiong/Chiayi test events.
+- [x] Add a deterministic CPU optical-flow baseline with the existing tensor, mask, split, and
+      lead-time contracts.
+- [x] Compare Optical Flow with Persistence per event and lead time, including RMSE, MAE, CSI,
+      POD, and FAR.
+- [x] Generate a public-safe Persistence/Optical Flow/Tiny U-Net aggregate report without private
+      archive or checkpoint paths.
 - [ ] Improve the learned model until it consistently beats Persistence on aggregate and
       lead-time RMSE and CSI without weakening the promotion gate.
 - [ ] Wire NowcastNet inference only after event diversity, code, checkpoint, tensor shape, and

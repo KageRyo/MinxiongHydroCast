@@ -180,6 +180,8 @@ mhc serve --help
 mhc dataset build --help
 mhc event queue --help
 mhc model evaluate --help
+mhc model evaluate-optical-flow --help
+mhc model optical-flow-report --help
 mhc operations backup --help
 ```
 

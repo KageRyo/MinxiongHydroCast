@@ -119,6 +119,34 @@ latest-input validity mask.
 The Tiny U-Net smoke checkpoint lowers RMSE by `0.797769 dBZ` but predicts no threshold events at
 `35 dBZ`. Do not treat it as a usable model until trained on longer event splits.
 
+## Optical-flow Baseline
+
+The deterministic CPU optical-flow baseline uses FFT phase correlation to estimate a global
+integer translation between adjacent input frames and advects the latest frame forward. It is
+evaluated with the same event threshold, nodata mask, event-based split, and lead-time contract as
+Persistence. It reports RMSE, MAE, CSI, POD, and FAR for both models:
+
+```bash
+mhc model evaluate-optical-flow \
+  --archive data/processed/cwa_recent_tensor_sample.npz \
+  --event-threshold 35 \
+  --output data/processed/optical_flow_evaluation.json
+```
+
+A formal five-event run completed on 2026-08-17 and was validated through the public-safe report
+pipeline. The independent aggregate contains the validation event and both held-out test events:
+
+| Aggregate | Persistence RMSE / CSI | Optical Flow RMSE / MAE / CSI | Tiny U-Net RMSE / CSI |
+| --- | ---: | ---: | ---: |
+| Validation | `9.654280 / 0.188989` | `14.888268 / 10.878172 / 0.252558` | `8.053179 / 0.205842` |
+| Test | `9.237183 / 0.147536` | `13.588221 / 10.412672 / 0.120353` | `8.281294 / 0.148989` |
+| Independent | `9.258762 / 0.152099` | `13.657048 / 10.436251 / 0.135459` | `8.269890 / 0.155855` |
+
+This run confirms that the implementation is reproducible and that Optical Flow is a useful
+motion benchmark, but it does not improve the current formal aggregate over Persistence. Use
+`mhc model optical-flow-report` to regenerate the public-safe report from the external event
+artifacts. This baseline does not alter the existing forecast promotion gate.
+
 ## Reproducible Five-Event CWA Baseline
 
 The formal build uses five complete `O-A0059-001` 10-minute radar events. Each archive uses six

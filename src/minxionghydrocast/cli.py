@@ -34,6 +34,12 @@ COMMANDS: dict[CommandPath, str] = {
     ("model", "evaluate-tensor"): (
         "minxionghydrocast.pipelines.tensor_baseline_evaluation:main"
     ),
+    ("model", "evaluate-optical-flow"): (
+        "minxionghydrocast.pipelines.optical_flow_evaluation:main"
+    ),
+    ("model", "optical-flow-report"): (
+        "minxionghydrocast.pipelines.optical_flow_report:main"
+    ),
     ("model", "evaluate-torch"): (
         "minxionghydrocast.pipelines.torch_baseline_evaluation:main"
     ),

@@ -1,6 +1,6 @@
 import numpy as np
 
-from minxionghydrocast.models.metrics import binary_event_metrics, rmse
+from minxionghydrocast.models.metrics import binary_event_metrics, mae, rmse
 
 
 def test_rmse_matches_expected_value():
@@ -8,6 +8,13 @@ def test_rmse_matches_expected_value():
     target = np.array([1.0, 4.0, 5.0])
 
     assert round(rmse(prediction, target), 6) == 1.632993
+
+
+def test_mae_matches_expected_value():
+    prediction = np.array([1.0, 2.0, 3.0])
+    target = np.array([1.0, 4.0, 5.0])
+
+    assert round(mae(prediction, target), 6) == 1.333333
 
 
 def test_binary_event_metrics_counts_and_scores():
