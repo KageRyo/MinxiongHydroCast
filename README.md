@@ -258,12 +258,14 @@ redistribution or commercial use.
 | --- | --- | --- |
 | [`v0.1.0`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.0) | Observation Service | Previous release |
 | [`v0.1.1`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.1) | One-command demo, lean package, region/adapter contracts, contributor entry | Previous release |
-| [`v0.1.2`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.2) | Deterministic optical-flow benchmark and public-safe comparison report | Current release |
+| [`v0.1.3`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.3) | Version metadata alignment and release consistency | Current release |
+| [`v0.1.2`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.2) | Deterministic optical-flow benchmark and public-safe comparison report | Previous release |
 | `v0.2.0` | Reproducible Radar Dataset | Planned; requires broader reviewed event diversity |
 | `v0.3.0` | Baseline Nowcasting | Planned; requires model, label, and lead-time gates |
 
 See [CHANGELOG.md](https://github.com/KageRyo/MinxiongHydroCast/blob/main/CHANGELOG.md), the
-[v0.1.2 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.2.md),
+[v0.1.3 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.3.md),
+the [v0.1.2 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.2.md),
 and the long-term
 [roadmap](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/roadmap.md). Current work
 belongs in [tasks](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/tasks.md); generated
