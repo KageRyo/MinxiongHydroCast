@@ -10,6 +10,18 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 - Broader human-reviewed radar-event diversity and QPE/gauge validation for `v0.2.0`.
 - Independent model, lead-time, label, and shadow-gate completion for `v0.3.0`.
 
+## [0.1.3] - 2026-08-18
+
+### Changed
+
+- Align the package metadata, runtime `__version__`, citation metadata, issue-template example,
+  and release documentation at `0.1.3`.
+
+### Safety
+
+- This is a metadata-only patch release; the v0.1.2 research and forecast-publication boundaries
+  remain unchanged.
+
 ## [0.1.2] - 2026-08-17
 
 ### Added
@@ -89,7 +101,8 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 - Radar candidates cannot automatically enter formal train/validation/test splits.
 - Forecast publication and automated notification remain disabled until all gates pass.
 
-[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.0
