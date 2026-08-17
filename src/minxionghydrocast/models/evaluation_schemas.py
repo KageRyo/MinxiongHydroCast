@@ -38,6 +38,25 @@ class ModelEvaluationSchema(EvaluationSchema):
     lead_time_metrics: list[LeadTimeMetricsSchema] = Field(min_length=1)
 
 
+class MaeLeadTimeMetricsSchema(EvaluationSchema):
+    lead_index: int = Field(ge=0)
+    lead_time_minutes: int = Field(ge=1)
+    rmse: float = Field(ge=0.0)
+    mae: float = Field(ge=0.0)
+    event_metrics: BinaryEventMetricsSchema
+    valid_pixel_count: int = Field(ge=1)
+    ignored_pixel_count: int = Field(ge=0)
+
+
+class OpticalFlowModelEvaluationSchema(EvaluationSchema):
+    rmse: float = Field(ge=0.0)
+    mae: float = Field(ge=0.0)
+    event_metrics: BinaryEventMetricsSchema
+    valid_pixel_count: int = Field(ge=1)
+    ignored_pixel_count: int = Field(ge=0)
+    lead_time_metrics: list[MaeLeadTimeMetricsSchema] = Field(min_length=1)
+
+
 class PersistenceEvaluationSchema(EvaluationSchema):
     generated_at: str
     model: Literal["PersistenceNowcaster"]
@@ -109,3 +128,84 @@ class TorchBaselineComparisonSchema(EvaluationSchema):
         if set(self.models) != expected:
             raise ValueError("models must contain PersistenceNowcaster and TinyUNetNowcaster")
         return self
+
+
+class OpticalFlowModelComparisonSchema(EvaluationSchema):
+    rmse_delta_optical_flow_minus_persistence: float
+    mae_delta_optical_flow_minus_persistence: float
+    csi_delta_optical_flow_minus_persistence: float
+
+
+class OpticalFlowComparisonSchema(EvaluationSchema):
+    generated_at: str
+    archive: str
+    event_id: str
+    event_threshold: float
+    event_threshold_units: str
+    value_units: str
+    archive_layout: str
+    window_count: int = Field(ge=1)
+    input_shape: list[int]
+    target_shape: list[int]
+    evaluation_mask: EvaluationMaskSchema
+    models: dict[str, OpticalFlowModelEvaluationSchema]
+    comparison: OpticalFlowModelComparisonSchema
+    optical_flow_metadata: dict[str, Any]
+    tensor_spec: dict[str, Any]
+    metadata: dict[str, Any]
+
+    @model_validator(mode="after")
+    def validate_model_keys(self) -> "OpticalFlowComparisonSchema":
+        expected = {"PersistenceNowcaster", "OpticalFlowNowcaster"}
+        if set(self.models) != expected:
+            raise ValueError("models must contain PersistenceNowcaster and OpticalFlowNowcaster")
+        return self
+
+
+class PublicLeadTimeMetricsSchema(EvaluationSchema):
+    lead_index: int = Field(ge=0)
+    lead_time_minutes: int = Field(ge=1)
+    rmse: float = Field(ge=0.0)
+    mae: float | None = Field(default=None, ge=0.0)
+    event_metrics: BinaryEventMetricsSchema
+    valid_pixel_count: int = Field(ge=1)
+    ignored_pixel_count: int = Field(ge=0)
+
+
+class PublicModelMetricsSchema(EvaluationSchema):
+    rmse: float = Field(ge=0.0)
+    mae: float | None = Field(default=None, ge=0.0)
+    event_metrics: BinaryEventMetricsSchema
+    valid_pixel_count: int = Field(ge=1)
+    ignored_pixel_count: int = Field(ge=0)
+    lead_time_metrics: list[PublicLeadTimeMetricsSchema] = Field(min_length=1)
+
+
+class PublicEventReportSchema(EvaluationSchema):
+    event_id: str
+    split: Literal["train", "validation", "test"]
+    region: str
+    event_type: str
+    models: dict[str, PublicModelMetricsSchema]
+
+    @model_validator(mode="after")
+    def validate_model_keys(self) -> "PublicEventReportSchema":
+        expected = {"PersistenceNowcaster", "OpticalFlowNowcaster"}
+        if not expected <= set(self.models):
+            raise ValueError("public event report must include Persistence and OpticalFlow")
+        return self
+
+
+class PublicAggregateModelMetricsSchema(PublicModelMetricsSchema):
+    event_count: int = Field(ge=1)
+
+
+class OpticalFlowAggregateReportSchema(EvaluationSchema):
+    schema_version: Literal["1.0"]
+    generated_at: str
+    dataset_id: str
+    source_data_id: str
+    manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    split_strategy: Literal["event_based"]
+    events: list[PublicEventReportSchema] = Field(min_length=1)
+    aggregate_by_split: dict[str, dict[str, PublicAggregateModelMetricsSchema]]

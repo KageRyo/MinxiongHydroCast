@@ -48,6 +48,7 @@ from minxionghydrocast.models.dataset_schemas import (
     DatasetVerificationReport,
     EventCatalogEntry,
     EventModelComparison,
+    OpticalFlowMetrics,
     PersistenceMetrics,
     RadarDatasetEvent,
     RadarDatasetManifest,
@@ -64,6 +65,10 @@ from minxionghydrocast.pipelines.radar_tensor_conversion import (
 from minxionghydrocast.pipelines.tensor_baseline_evaluation import (
     evaluate_persistence_tensor_archive,
     write_evaluation_result as write_persistence_evaluation_result,
+)
+from minxionghydrocast.pipelines.optical_flow_evaluation import (
+    evaluate_optical_flow_tensor_archive,
+    write_evaluation_result as write_optical_flow_evaluation_result,
 )
 from minxionghydrocast.pipelines.torch_baseline_evaluation import (
     evaluate_torch_baseline_comparison,
@@ -195,6 +200,19 @@ def persistence_metrics(result: dict[str, Any]) -> PersistenceMetrics:
     )
 
 
+def optical_flow_metrics(result: dict[str, Any]) -> OpticalFlowMetrics:
+    optical_flow = result["models"]["OpticalFlowNowcaster"]
+    event_metrics = optical_flow["event_metrics"]
+    return OpticalFlowMetrics(
+        rmse=float(optical_flow["rmse"]),
+        mae=float(optical_flow["mae"]),
+        csi=float(event_metrics["csi"]),
+        pod=float(event_metrics["pod"]),
+        far=float(event_metrics["far"]),
+        lead_time_metrics=optical_flow["lead_time_metrics"],
+    )
+
+
 def build_event(
     *,
     event: RadarDatasetEvent,
@@ -217,6 +235,7 @@ def build_event(
     raw_root = layout.raw / "radar"
     tensor_path = layout.tensors / f"{event.event_id}.npz"
     persistence_path = layout.reports / f"{event.event_id}_persistence.json"
+    optical_flow_path = layout.reports / f"{event.event_id}_optical_flow.json"
 
     plan = build_event_plan(
         history_index,
@@ -285,11 +304,17 @@ def build_event(
         event_threshold_mm=dataset.event_threshold,
     )
     write_persistence_evaluation_result(persistence, persistence_path)
+    optical_flow = evaluate_optical_flow_tensor_archive(
+        archive_path=tensor_path,
+        event_threshold=dataset.event_threshold,
+    )
+    write_optical_flow_evaluation_result(optical_flow, optical_flow_path)
     LOGGER.info(
-        "event_build_completed event_id=%s windows=%s persistence_csi=%s",
+        "event_build_completed event_id=%s windows=%s persistence_csi=%s optical_flow_csi=%s",
         event.event_id,
         metadata.get("window_count", 1),
         persistence["event_metrics"]["csi"],
+        optical_flow["models"]["OpticalFlowNowcaster"]["event_metrics"]["csi"],
     )
 
     artifacts = [
@@ -297,6 +322,7 @@ def build_event(
         artifact_record(layout, collection_path, kind="event_collection"),
         artifact_record(layout, tensor_path, kind="tensor_archive"),
         artifact_record(layout, persistence_path, kind="persistence_evaluation"),
+        artifact_record(layout, optical_flow_path, kind="optical_flow_evaluation"),
     ]
     artifacts.extend(
         artifact_record(layout, path, kind="raw_radar_frame") for path in frame_paths
@@ -312,6 +338,7 @@ def build_event(
         window_count=int(metadata.get("window_count", 1)),
         artifacts=artifacts,
         persistence=persistence_metrics(persistence),
+        optical_flow=optical_flow_metrics(optical_flow),
     )
 
 

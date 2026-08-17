@@ -16,6 +16,7 @@ def test_wheel_exposes_only_single_mhc_console_script():
     assert ("dataset", "build") in cli.COMMANDS
     assert ("event", "review") in cli.COMMANDS
     assert ("model", "evaluate") in cli.COMMANDS
+    assert ("model", "evaluate-optical-flow") in cli.COMMANDS
     assert ("operations", "backup") in cli.COMMANDS
 
 

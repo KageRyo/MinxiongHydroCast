@@ -26,6 +26,13 @@ research-root/
 └── evidence/  # candidate-aligned QPE, gauge, and warning captures
 ```
 
+Each event build also writes a checksummed `*_optical_flow.json` comparison
+under `reports/`. It contains Persistence and the deterministic CPU optical-flow
+baseline with RMSE, MAE, event metrics, and lead-time metrics. These reports are
+inputs to the public-safe aggregate command documented in
+[optical_flow_baseline.md](optical_flow_baseline.md); they do not change the
+Tiny U-Net promotion gate.
+
 Do not place the root inside the repository. Do not commit `.env`, raw official data, generated
 tensors, evaluation artifacts, or model checkpoints.
 

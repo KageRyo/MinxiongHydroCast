@@ -165,6 +165,25 @@ class PersistenceMetrics(DatasetSchema):
     lead_time_metrics: list[LeadTimeMetricsSchema] = Field(min_length=1)
 
 
+class OpticalFlowLeadTimeMetrics(DatasetSchema):
+    lead_index: int = Field(ge=0)
+    lead_time_minutes: int = Field(ge=1)
+    rmse: float = Field(ge=0.0)
+    mae: float = Field(ge=0.0)
+    event_metrics: dict[str, float | int]
+    valid_pixel_count: int = Field(ge=1)
+    ignored_pixel_count: int = Field(ge=0)
+
+
+class OpticalFlowMetrics(DatasetSchema):
+    rmse: float = Field(ge=0.0)
+    mae: float = Field(ge=0.0)
+    csi: float = Field(ge=0.0, le=1.0)
+    pod: float = Field(ge=0.0, le=1.0)
+    far: float = Field(ge=0.0, le=1.0)
+    lead_time_metrics: list[OpticalFlowLeadTimeMetrics] = Field(min_length=1)
+
+
 class EventCatalogEntry(DatasetSchema):
     event_id: str
     split: Literal["train", "validation", "test"]
@@ -176,6 +195,7 @@ class EventCatalogEntry(DatasetSchema):
     window_count: int = Field(ge=1)
     artifacts: list[ArtifactRecord]
     persistence: PersistenceMetrics
+    optical_flow: OpticalFlowMetrics | None = None
 
 
 class EventModelComparison(DatasetSchema):
