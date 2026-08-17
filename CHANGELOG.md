@@ -10,6 +10,28 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 - Broader human-reviewed radar-event diversity and QPE/gauge validation for `v0.2.0`.
 - Independent model, lead-time, label, and shadow-gate completion for `v0.3.0`.
 
+## [0.1.2] - 2026-08-17
+
+### Added
+
+- Deterministic CPU optical-flow rainfall nowcasting with FFT phase correlation and global
+  integer translation.
+- Per-event and per-lead-time RMSE, MAE, CSI, POD, and FAR comparisons against Persistence.
+- Split-safe public aggregate reporting for Persistence, Optical Flow, and Tiny U-Net without
+  private archive or checkpoint paths.
+
+### Changed
+
+- Dataset builds now persist checksummed optical-flow evaluation artifacts in the external
+  research root.
+- The release workflow verifies that GitHub Release display names use the
+  `MinxiongHydroCast vX.Y.Z` convention.
+
+### Safety
+
+- Optical Flow remains a research benchmark; the independent aggregate does not beat Persistence
+  and the forecast promotion gate remains unchanged.
+
 ## [0.1.1] - 2026-08-01
 
 ### Added
@@ -67,6 +89,7 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 - Radar candidates cannot automatically enter formal train/validation/test splits.
 - Forecast publication and automated notification remain disabled until all gates pass.
 
-[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.0
