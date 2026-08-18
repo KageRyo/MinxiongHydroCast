@@ -12,6 +12,8 @@ governance details without duplicating changing deployment numbers.
   redistribution review.
 - [Data contracts](data_contracts.md): persisted schemas, provenance, and validation behavior.
 - [Storage layout](storage_layout.md): repository, runtime, data-root, and Git boundaries.
+- [Data-root relocation](data_root_relocation.md): verified metadata migration after moving data
+  assets.
 
 ## Operate the observation service
 

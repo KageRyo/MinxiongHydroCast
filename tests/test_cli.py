@@ -13,6 +13,7 @@ def test_wheel_exposes_only_single_mhc_console_script():
 
     assert pyproject["project"]["scripts"] == {"mhc": "minxionghydrocast.cli:main"}
     assert ("collect",) in cli.COMMANDS
+    assert ("data", "relocate-root") in cli.COMMANDS
     assert ("dataset", "build") in cli.COMMANDS
     assert ("event", "review") in cli.COMMANDS
     assert ("model", "evaluate") in cli.COMMANDS
@@ -27,6 +28,7 @@ def test_help_lists_grouped_workflows(capsys):
     assert "usage: mhc <command> [args]" in output
     assert "  collect" in output
     assert "  serve" in output
+    assert "  data <command>" in output
     assert "  dataset <command>" in output
     assert "mhc operations backup --help" in output
 
@@ -70,6 +72,28 @@ def test_dispatches_nested_command_and_restores_argv(monkeypatch):
     cli.main(["dataset", "build", "--dry-run"])
 
     assert received == ["mhc dataset build", "--dry-run"]
+    assert sys.argv is original
+
+
+def test_dispatches_data_root_relocation_and_restores_argv(monkeypatch):
+    received: list[str] = []
+    original = ["pytest", "original"]
+    monkeypatch.setattr(sys, "argv", original)
+    monkeypatch.setattr(
+        cli,
+        "import_module",
+        lambda _name: SimpleNamespace(main=lambda: received.extend(sys.argv)),
+    )
+
+    cli.main(["data", "relocate-root", "--old-root", "/old", "--new-root", "/new"])
+
+    assert received == [
+        "mhc data relocate-root",
+        "--old-root",
+        "/old",
+        "--new-root",
+        "/new",
+    ]
     assert sys.argv is original
 
 

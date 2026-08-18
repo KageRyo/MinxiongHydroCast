@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import logging
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -134,8 +135,36 @@ def verify_dataset_catalog(
     repository_root: Path,
 ) -> tuple[DatasetVerificationReport, Path]:
     catalog = DatasetCatalog.model_validate_json(catalog_path.read_text(encoding="utf-8"))
+    report = build_dataset_verification_report(
+        catalog=catalog,
+        catalog_path=catalog_path,
+        repository_root=repository_root,
+    )
+    report_path = ResearchLayout(Path(catalog.data_root)).catalog / "dataset_verification.json"
+    atomic_write_schema(report_path, report)
+    return report, report_path
+
+
+def build_dataset_verification_report(
+    *,
+    catalog: DatasetCatalog,
+    catalog_path: Path,
+    repository_root: Path,
+    catalog_bytes: bytes | None = None,
+    artifact_bytes_overrides: Mapping[Path, bytes] | None = None,
+) -> DatasetVerificationReport:
+    """Create a dataset verification report without writing it.
+
+    ``catalog_bytes`` and ``artifact_bytes_overrides`` make the verifier usable by a
+    transactional metadata migration before its staged JSON files reach disk.
+    """
+
     layout = ResearchLayout(Path(catalog.data_root))
     require_external_research_root(layout, repository_root=repository_root)
+    overrides = {
+        path.expanduser().resolve(): payload
+        for path, payload in (artifact_bytes_overrides or {}).items()
+    }
     mismatches = []
     total_bytes = 0
     artifacts = catalog_artifacts(catalog)
@@ -157,17 +186,31 @@ def verify_dataset_catalog(
         if not path.is_file():
             mismatches.append(f"missing artifact: {artifact.path}")
             continue
-        actual_bytes = path.stat().st_size
+        override = overrides.get(path)
+        actual_bytes = len(override) if override is not None else path.stat().st_size
         total_bytes += actual_bytes
         if actual_bytes != artifact.bytes:
             mismatches.append(
                 f"size mismatch: {artifact.path} expected={artifact.bytes} actual={actual_bytes}"
             )
-        actual_sha256 = sha256_file(path)
+        actual_sha256 = (
+            hashlib.sha256(override).hexdigest()
+            if override is not None
+            else sha256_file(path)
+        )
         if actual_sha256 != artifact.sha256:
             mismatches.append(f"sha256 mismatch: {artifact.path}")
-    catalog_artifact = artifact_record(layout, catalog_path, kind="dataset_catalog")
-    report = DatasetVerificationReport(
+    catalog_artifact = (
+        artifact_record(layout, catalog_path, kind="dataset_catalog")
+        if catalog_bytes is None
+        else ArtifactRecord(
+            kind="dataset_catalog",
+            path=layout.relative(catalog_path),
+            sha256=hashlib.sha256(catalog_bytes).hexdigest(),
+            bytes=len(catalog_bytes),
+        )
+    )
+    return DatasetVerificationReport(
         verified_at=datetime.now(TAIPEI_TZ).isoformat(timespec="seconds"),
         status="error" if mismatches else "ok",
         catalog=catalog_artifact,
@@ -175,9 +218,6 @@ def verify_dataset_catalog(
         total_bytes=total_bytes,
         mismatches=mismatches,
     )
-    report_path = layout.catalog / "dataset_verification.json"
-    atomic_write_schema(report_path, report)
-    return report, report_path
 
 
 def expected_frame_count(event: RadarDatasetEvent, *, cadence_minutes: int) -> int:

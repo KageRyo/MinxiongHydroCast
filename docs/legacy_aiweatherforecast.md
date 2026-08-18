@@ -12,5 +12,6 @@ Treat the directory as a read-only migration source until each item has an expli
 - delete only files proved to be duplicate, generated, or no longer required.
 
 Do not delete the legacy directory as part of a code-only refactor. Record the inventory and an
-approved retention decision before archival or removal. The canonical repository remains
-`KageRyo/MinxiongHydroCast`.
+approved retention decision before archival or removal. After a verified deployment and an
+independent retained archive, removal is a host-maintenance action; it is not a Git operation and
+must not remove external data assets. The canonical repository remains `KageRyo/MinxiongHydroCast`.
