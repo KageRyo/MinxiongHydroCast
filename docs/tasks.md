@@ -88,6 +88,8 @@ finish, test, and propose through a focused pull request. The end-to-end target 
       live external catalog with zero artifact checksum or size errors.
 - [x] Add a no-write-first `mhc data relocate-root` command that updates relocated catalog roots,
       collection output paths, affected checksums, and dataset verification metadata atomically.
+- [x] Retire the obsolete AIWeatherForecast documentation boundary after host removal and retained
+      external archival were confirmed.
 
 ## Next
 
