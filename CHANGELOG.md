@@ -10,6 +10,20 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 - Broader human-reviewed radar-event diversity and QPE/gauge validation for `v0.2.0`.
 - Independent model, lead-time, label, and shadow-gate completion for `v0.3.0`.
 
+## [0.1.5] - 2026-08-18
+
+### Added
+
+- `mhc data relocate-root`, a no-write-first command that updates the external data-root binding
+  after data files are moved or copied.
+- Atomic backups and rollback of changed collection and catalog JSON, with a refreshed dataset
+  verification report for a changed dataset catalog.
+
+### Safety
+
+- The relocation preflight rejects missing artifacts, unexpected roots, root escapes, and checksum
+  mismatches not caused by rewritten collection manifests. It never moves or deletes data payloads.
+
 ## [0.1.4] - 2026-08-18
 
 ### Added
@@ -122,7 +136,8 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 - Radar candidates cannot automatically enter formal train/validation/test splits.
 - Forecast publication and automated notification remain disabled until all gates pass.
 
-[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.5...HEAD
+[0.1.5]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.1...v0.1.2

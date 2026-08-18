@@ -18,6 +18,11 @@ deployment, but new environment files must use `MINXIONGHYDROCAST_DATA_ROOT`.
 Existing catalogs that contain the legacy `research_root` field remain readable. New catalog writes
 use `data_root`; the artifact paths inside both forms remain relative to that external root.
 
+If the external root needs to change, first move or copy its payload files, then run
+[`mhc data relocate-root`](data_root_relocation.md). The command defaults to a no-write integrity
+preflight and atomically updates the catalog root, collection absolute paths, affected artifact
+checksums, and dataset verification metadata only when `--apply` is supplied.
+
 The build creates this layout:
 
 ```text

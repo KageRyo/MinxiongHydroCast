@@ -11,6 +11,7 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 | `v0.1.0` | Observation Service | Official-source collection, strict readiness, immutable snapshots, API/operator view, monitoring, backup, and fail-closed shadow gate |
 | `v0.1.1` | Portable Reference Implementation | Credential-free Compose demo, lean wheel, single grouped CLI, reusable region profiles and source-adapter contracts, and contributor entry points |
 | `v0.1.4` | Storage and Deployment Governance | Canonical data root, explicit Git/runtime/data boundaries, and verified deployment metadata |
+| `v0.1.5` | Safe Data-root Relocation | No-write-first catalog, collection-path, checksum, and verification metadata migration |
 | `v0.2.0` | Reproducible Radar Dataset | Broader human-reviewed weather-regime coverage, complete source rights record, and reproducible checksummed event catalog |
 | `v0.3.0` | Baseline Nowcasting | Learned model consistently beats Persistence on independent aggregate and lead-time gates; local label and shadow gates pass |
 

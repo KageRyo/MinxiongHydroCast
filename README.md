@@ -178,6 +178,7 @@ mhc --help
 mhc collect --help
 mhc serve --help
 mhc dataset build --help
+mhc data relocate-root --help
 mhc event queue --help
 mhc model evaluate --help
 mhc model evaluate-optical-flow --help
@@ -256,15 +257,17 @@ redistribution or commercial use.
 
 | Version | Milestone | State |
 | --- | --- | --- |
+| [`v0.1.5`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.5) | Verified data-root relocation command and metadata integrity repair | Current release |
 | [`v0.1.0`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.0) | Observation Service | Previous release |
 | [`v0.1.1`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.1) | One-command demo, lean package, region/adapter contracts, contributor entry | Previous release |
-| [`v0.1.4`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.4) | Data-root migration, storage policy, and verified deployment metadata | Current release |
+| [`v0.1.4`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.4) | Data-root migration, storage policy, and verified deployment metadata | Previous release |
 | [`v0.1.3`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.3) | Version metadata alignment and release consistency | Previous release |
 | [`v0.1.2`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.2) | Deterministic optical-flow benchmark and public-safe comparison report | Previous release |
 | `v0.2.0` | Reproducible Radar Dataset | Planned; requires broader reviewed event diversity |
 | `v0.3.0` | Baseline Nowcasting | Planned; requires model, label, and lead-time gates |
 
 See [CHANGELOG.md](https://github.com/KageRyo/MinxiongHydroCast/blob/main/CHANGELOG.md), the
+[v0.1.5 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.5.md),
 [v0.1.4 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.4.md),
 [v0.1.3 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.3.md),
 the [v0.1.2 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.2.md),
@@ -293,6 +296,7 @@ deployment numbers do not belong in the README.
 - Data and models:
   [dataset build](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/data_assets.md),
   [storage layout](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/storage_layout.md),
+  [data-root relocation](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/data_root_relocation.md),
   [event evidence and review](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/continuous_event_evidence.md),
   [baseline results](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/baseline_results.md),
   [model card](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/model_cards/minxiong_chiayi_baseline.md)

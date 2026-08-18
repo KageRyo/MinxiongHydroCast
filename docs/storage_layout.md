@@ -39,5 +39,7 @@ verifiable without placing data in Git.
 
 Before a storage migration, pause writing timers, create and verify an operations backup, verify
 the data catalog, record the existing runtime deployment metadata, and retain the old paths until
-health checks and catalog verification succeed. See [single_host_operations.md](single_host_operations.md)
-and [data_assets.md](data_assets.md).
+health checks and catalog verification succeed. After copying or moving the data tree, use the
+no-write-first [`mhc data relocate-root`](data_root_relocation.md) command to update catalogs,
+collection paths, and checksums rather than editing JSON by hand. See
+[single_host_operations.md](single_host_operations.md) and [data_assets.md](data_assets.md).

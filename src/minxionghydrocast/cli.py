@@ -26,6 +26,9 @@ COMMANDS: dict[CommandPath, str] = {
         "minxionghydrocast.pipelines.radar_tensor_conversion:main"
     ),
     ("dataset", "split-check"): "minxionghydrocast.pipelines.event_split_check:main",
+    ("data", "relocate-root"): (
+        "minxionghydrocast.operations.data_root_relocation:main"
+    ),
     ("event", "discover"): "minxionghydrocast.pipelines.event_discovery:main",
     ("event", "queue"): "minxionghydrocast.pipelines.event_review_queue:main",
     ("event", "review"): "minxionghydrocast.pipelines.event_review:main",
@@ -126,6 +129,7 @@ def _print_help(group: str | None = None) -> None:
     print("  mhc collect --region minxiong --mode demo --once")
     print("  mhc serve --host 127.0.0.1 --port 8080")
     print("  mhc dataset build --help")
+    print("  mhc data relocate-root --help")
     print("  mhc event review --help")
     print("  mhc model evaluate --help")
     print("  mhc operations backup --help")
