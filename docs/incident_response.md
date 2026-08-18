@@ -11,7 +11,7 @@ external operational workflow.
 | Critical | API down, collector repeatedly failing, corrupt snapshot, credential compromise | 15 min |
 | High | Required dataset stale, Minxiong coverage missing, official contract drift | 30 min |
 | Medium | Degraded fallback, notification delivery failure, backup failure | 4 hours |
-| Low | Research pipeline failure with no operational impact | Next working day |
+| Low | Data or model pipeline failure with no operational impact | Next working day |
 
 Targets are internal objectives, not a public service-level agreement.
 

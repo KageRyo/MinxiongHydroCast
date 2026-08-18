@@ -170,7 +170,7 @@ The learned model lowers aggregate RMSE on validation and both test events. It d
 promotion gate because CSI regresses on the 2026-07-03 local test event and some lead-time RMSE or
 CSI values regress. Persistence remains the required benchmark and
 `forecast_publication_ready=false`. Complete checksummed evidence is documented in
-[research_dataset.md](research_dataset.md).
+[data_assets.md](data_assets.md).
 
 ## Threshold Flood Risk
 

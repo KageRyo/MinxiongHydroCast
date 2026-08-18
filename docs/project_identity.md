@@ -7,7 +7,7 @@
 - **Minxiong** identifies the fixed geographic scope: Minxiong Township, Chiayi County.
 - **Hydro** covers the water-related chain represented in the repository: rainfall, rainfall
   warnings, flood-depth observations, drainage context, and future flood-risk features.
-- **Cast** describes the research direction toward short-horizon rainfall nowcasting. It does not
+- **Cast** describes the model-development direction toward short-horizon rainfall nowcasting. It does not
   imply that every current API response is a forecast or that the project issues official warnings.
 
 The name intentionally does not use a general weather term. Temperature, wind, air quality,

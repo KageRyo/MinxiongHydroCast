@@ -114,7 +114,7 @@ def _print_help(group: str | None = None) -> None:
 
     print("usage: mhc <command> [args]")
     print()
-    print("Official-source hydrometeorological data and research workflows.")
+    print("Official-source hydrometeorological data and model workflows.")
     print()
     print("commands:")
     for path in sorted(path for path in COMMANDS if len(path) == 1):

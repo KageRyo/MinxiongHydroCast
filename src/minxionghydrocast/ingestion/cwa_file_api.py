@@ -16,7 +16,7 @@ from urllib3.exceptions import InsecureRequestWarning
 from urllib3 import disable_warnings
 
 from minxionghydrocast.config import get_settings
-from minxionghydrocast.io.research_store import atomic_write_bytes
+from minxionghydrocast.io.data_store import atomic_write_bytes
 from minxionghydrocast.io.run_summary import (
     DEFAULT_RUN_LOG_PATH,
     build_run_summary,

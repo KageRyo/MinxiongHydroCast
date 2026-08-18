@@ -10,7 +10,7 @@ from pathlib import Path
 @dataclass(frozen=True)
 class Settings:
     operations_store: Path
-    research_root: Path
+    data_root: Path
     operations_max_age_minutes: float
     operations_flood_max_age_minutes: float
     wra_base_url: str
@@ -23,6 +23,12 @@ class Settings:
     cwa_history_api_url: str
     cwa_history_data_api_url: str
 
+    @property
+    def research_root(self) -> Path:
+        """Compatibility alias for integrations not yet using ``data_root``."""
+
+        return self.data_root
+
 
 def get_settings() -> Settings:
     return Settings(
@@ -32,11 +38,10 @@ def get_settings() -> Settings:
                 "data/processed/operations",
             )
         ),
-        research_root=Path(
-            os.getenv(
-                "MINXIONGHYDROCAST_RESEARCH_ROOT",
-                "~/.local/share/minxiong-hydrocast-research",
-            )
+        data_root=Path(
+            os.getenv("MINXIONGHYDROCAST_DATA_ROOT")
+            or os.getenv("MINXIONGHYDROCAST_RESEARCH_ROOT")
+            or "~/.local/share/minxiong-hydrocast-data"
         ).expanduser(),
         operations_max_age_minutes=float(os.getenv("MINXIONGHYDROCAST_MAX_AGE_MINUTES", "30")),
         operations_flood_max_age_minutes=float(

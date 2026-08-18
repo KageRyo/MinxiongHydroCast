@@ -22,7 +22,7 @@ credentials, raw official data, or model weights.
 
 ## Forecast Product Definition Of Done
 
-- CWA radar/QPE research ingestion and CWA/WRA operational ingestion run from documented local
+- CWA radar/QPE data ingestion and CWA/WRA operational ingestion run from documented local
   configuration.
 - Multi-frame CWA radar events can be collected, inspected, converted, and evaluated.
 - Event-based train/validation/test splits are populated with real historical weather events.
@@ -61,7 +61,7 @@ credentials, raw official data, or model weights.
   current coverage, and next historical chart probe URLs.
 - Completed: `mhc dataset build` orchestration for CWA history, resilient event download, sequence
   validation, tensor conversion, Persistence evaluation, weighted Tiny U-Net evaluation, catalog
-  generation, and checksum verification in an external durable research root.
+  generation, and checksum verification in an external durable data root.
 - Completed: deployed `mhc event discover` on a 20-minute user-systemd timer with incremental
   `O-A0059-001` scanning, local/Taiwan `35 dBZ` metrics, resumable checksummed event windows, and
   synchronized QPE/gauge/warning evidence. The Pydantic catalog and `mhc event review` gate keep
@@ -189,4 +189,4 @@ credentials, raw official data, or model weights.
 - Publish model cards for Taiwan-wide and Minxiong/Chiayi-specific checkpoints.
 - Add scheduled jobs only after manual ingestion and validation are repeatable.
 - Add alerting only after run summaries expose reliable failure reasons.
-- Keep deployment configuration separate from research/training artifacts.
+- Keep deployment configuration separate from data and training artifacts.

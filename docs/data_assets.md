@@ -1,21 +1,27 @@
-# Reproducible Radar Dataset
+# Durable Data Assets
 
-MinxiongHydroCast builds research datasets in a durable root outside Git. The tracked repository
+MinxiongHydroCast builds datasets and model-supporting data assets in a durable root outside Git. The tracked repository
 contains the event manifest, schemas, orchestration code, tests, and documented results. Raw CWA
 frames, tensor archives, reports, catalogs, and checkpoints remain external artifacts.
 
 ## Storage Contract
 
-Set the research root in the ignored local `.env`:
+Set the data root in the ignored local `.env`:
 
 ```dotenv
-MINXIONGHYDROCAST_RESEARCH_ROOT=/durable/path/minxiong-hydrocast-research
+MINXIONGHYDROCAST_DATA_ROOT=/durable/path/minxiong-hydrocast-data
 ```
+
+`MINXIONGHYDROCAST_RESEARCH_ROOT` remains a temporary compatibility fallback for an existing
+deployment, but new environment files must use `MINXIONGHYDROCAST_DATA_ROOT`.
+
+Existing catalogs that contain the legacy `research_root` field remain readable. New catalog writes
+use `data_root`; the artifact paths inside both forms remain relative to that external root.
 
 The build creates this layout:
 
 ```text
-research-root/
+data-root/
 ├── raw/       # downloaded formal and candidate-event frames
 ├── events/    # event plans and collection manifests
 ├── tensors/   # per-event and combined split archives
@@ -47,7 +53,7 @@ set +a
 
 mhc dataset build \
   --manifest data/samples/event_split_manifest.json \
-  --root "$MINXIONGHYDROCAST_RESEARCH_ROOT" \
+  --root "$MINXIONGHYDROCAST_DATA_ROOT" \
   --train-weighted-unet \
   --epochs 20 \
   --hidden-channels 8 \
@@ -126,7 +132,7 @@ The latest completed build produced:
 - catalog SHA-256 `4db1c8f112bd8bc45aa6fe05b06ee4407434931d69acb9ffcdd288d2c80a41a5`.
 
 The external evidence files are `catalog/dataset_catalog.json` and
-`catalog/dataset_verification.json` under the configured research root.
+`catalog/dataset_verification.json` under the configured data root.
 
 ## Publication Gate
 
@@ -135,7 +141,7 @@ consistently beat Persistence on CSI and every lead time. In particular, CSI reg
 2026-07-03 Minxiong test event. The fail-closed catalog therefore records
 `forecast_publication_ready=false` with detailed blockers.
 
-This dataset is usable for reproducible model research and regression testing. It is not enough
+This dataset is usable for reproducible model development and regression testing. It is not enough
 to publish an operational forecast. The next model iteration must add weather-regime diversity,
 official event context, QPE/gauge validation, and local outcome labels, then pass the same
 independent-event promotion gate without weakening it.

@@ -231,6 +231,18 @@ data/processed/**
 !data/processed/.gitkeep
 data/external/**
 !data/external/.gitkeep
+
+# Safety net only: durable runtime and data roots belong beside the checkout, never inside it.
+runtime/
+data/operations/
+data/backups/
+data/events/
+data/tensors/
+data/models/
+data/reports/
+data/catalog/
+data/discovery/
+data/evidence/
 output/playwright/
 .playwright-cli/
 

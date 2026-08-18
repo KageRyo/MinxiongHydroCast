@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
 
 from minxionghydrocast.ingestion.source_adapter import SourceProvenance
 from minxionghydrocast.models.dataset_schemas import ArtifactRecord
@@ -344,7 +344,10 @@ class EventCandidate(EventEvidenceSchema):
 class EventEvidenceCatalog(EventEvidenceSchema):
     schema_version: Literal["1.0"] = "1.0"
     updated_at: str
-    research_root: str
+    data_root: str = Field(
+        validation_alias=AliasChoices("data_root", "research_root"),
+        min_length=1,
+    )
     config: DiscoveryConfig
     cursor: DiscoveryCursor
     candidate_queue_only: Literal[True] = True
@@ -354,6 +357,12 @@ class EventEvidenceCatalog(EventEvidenceSchema):
     )
     history_indexes: tuple[ArtifactRecord, ...] = ()
     candidates: tuple[EventCandidate, ...] = ()
+
+    @property
+    def research_root(self) -> str:
+        """Compatibility alias for catalogs written before the data-root migration."""
+
+        return self.data_root
 
     @model_validator(mode="after")
     def validate_catalog(self) -> "EventEvidenceCatalog":

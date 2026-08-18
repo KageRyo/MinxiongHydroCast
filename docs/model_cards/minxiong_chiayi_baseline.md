@@ -14,7 +14,7 @@
 The formal dataset contains five real CWA `O-A0059-001` events: two Taiwan-wide training events,
 one separate Taiwan-wide validation event, and two held-out Minxiong/Chiayi test events. Each
 sample has six input and six target frames. Raw frames, tensor archives, reports, and checkpoints
-remain in the configured external research root.
+remain in the configured external data root.
 
 Training uses 88 sliding windows. Validation uses a separate 26-window event archive and does not
 contribute to training normalization or gradients. The two local test events contain 26 windows
@@ -44,7 +44,7 @@ not consistently beat Persistence.
 
 ## Intended Use
 
-Use Persistence as the required benchmark and the weighted Tiny U-Net as a research diagnostic
+Use Persistence as the required benchmark and the weighted Tiny U-Net as a model-development diagnostic
 for architecture, loss, and dataset changes. Use the checksummed external catalog to reproduce
 comparisons and detect artifact drift.
 
@@ -61,4 +61,4 @@ official warning, or claim calibrated rainfall/flood prediction performance.
 - The promotion gate remains fail-closed with `forecast_publication_ready=false`.
 
 Dataset construction and complete evidence are documented in
-[research_dataset.md](../research_dataset.md).
+[data_assets.md](../data_assets.md).

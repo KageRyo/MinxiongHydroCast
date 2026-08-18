@@ -10,6 +10,27 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 - Broader human-reviewed radar-event diversity and QPE/gauge validation for `v0.2.0`.
 - Independent model, lead-time, label, and shadow-gate completion for `v0.3.0`.
 
+## [0.1.4] - 2026-08-18
+
+### Added
+
+- A preferred `MINXIONGHYDROCAST_DATA_ROOT` setting and `--data-root` event-discovery option,
+  while accepting the former research-root setting during migration.
+- Verified private deployment metadata recording the installed package version, source revision,
+  installation time, and Python version.
+- Explicit storage, Git-policy, and legacy-AIWeatherForecast boundary documentation.
+
+### Changed
+
+- Rename the external artifact layout and documentation from research to data and model assets.
+- Write `data_root` in new dataset and event-evidence catalogs while accepting existing
+  `research_root` catalogs.
+
+### Safety
+
+- Runtime state, raw official captures, evidence, model artifacts, and backups remain external to
+  the Git checkout; ignored in-checkout paths are a safety net only.
+
 ## [0.1.3] - 2026-08-18
 
 ### Changed
@@ -101,7 +122,8 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 - Radar candidates cannot automatically enter formal train/validation/test splits.
 - Forecast publication and automated notification remain disabled until all gates pass.
 
-[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.0...v0.1.1

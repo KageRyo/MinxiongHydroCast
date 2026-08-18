@@ -134,7 +134,7 @@ def verify_dataset_catalog(
     repository_root: Path,
 ) -> tuple[DatasetVerificationReport, Path]:
     catalog = DatasetCatalog.model_validate_json(catalog_path.read_text(encoding="utf-8"))
-    layout = ResearchLayout(Path(catalog.research_root))
+    layout = ResearchLayout(Path(catalog.data_root))
     require_external_research_root(layout, repository_root=repository_root)
     mismatches = []
     total_bytes = 0
@@ -601,7 +601,7 @@ def build_dataset(
     catalog = DatasetCatalog(
         generated_at=datetime.now(TAIPEI_TZ).isoformat(timespec="seconds"),
         dataset_id=dataset_id,
-        research_root=str(layout.root),
+        data_root=str(layout.root),
         source_data_id=manifest.dataset.data_id,
         manifest=ArtifactRecord(
             kind="tracked_dataset_manifest",
@@ -676,7 +676,7 @@ def main() -> None:
         type=Path,
         default=Path("data/samples/event_split_manifest.json"),
     )
-    parser.add_argument("--root", type=Path, default=get_settings().research_root)
+    parser.add_argument("--root", type=Path, default=get_settings().data_root)
     parser.add_argument("--history-index", type=Path, default=None)
     parser.add_argument("--event-evidence-catalog", type=Path, default=None)
     parser.add_argument("--api-key-env", default="CWA_API_KEY")
@@ -772,7 +772,7 @@ def main() -> None:
                 "verified_artifacts": verification.artifact_count,
             },
             metadata={
-                "research_root": str(args.root.expanduser()),
+                "data_root": str(args.root.expanduser()),
                 "source_data_id": catalog.source_data_id,
                 "api_key_env": args.api_key_env,
                 "api_key_present": bool(os.getenv(args.api_key_env, "")),
@@ -800,7 +800,7 @@ def main() -> None:
             },
             outputs={"catalog": ""},
             metadata={
-                "research_root": str(args.root.expanduser()),
+                "data_root": str(args.root.expanduser()),
                 "api_key_env": args.api_key_env,
                 "api_key_present": bool(os.getenv(args.api_key_env, "")),
                 "verify_tls": not args.insecure_tls,

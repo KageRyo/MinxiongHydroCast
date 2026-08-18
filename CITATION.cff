@@ -5,19 +5,19 @@ type: software
 authors:
   - family-names: Chang
     given-names: Chien-Hsun
-version: 0.1.3
+version: 0.1.4
 date-released: 2026-08-18
 repository-code: "https://github.com/KageRyo/MinxiongHydroCast"
 url: "https://github.com/KageRyo/MinxiongHydroCast"
 license: MIT
 abstract: >-
   A fail-closed official-source hydrometeorological observation service and
-  reproducible rainfall-nowcasting research toolkit for Minxiong Township,
+  reproducible rainfall-nowcasting data and model-development toolkit for Minxiong Township,
   Taiwan.
 keywords:
   - hydrology
   - nowcasting
   - open data
-  - reproducible research
+  - reproducible data
   - Taiwan
   - weather

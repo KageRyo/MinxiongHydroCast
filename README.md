@@ -8,10 +8,10 @@
 [![Status](https://img.shields.io/badge/status-operational%20prototype-2f7d57)](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/project_scope.md)
 [![Forecast](https://img.shields.io/badge/forecast%20publication-blocked-b42318)](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/operational_use.md#production-gates)
 
-Official-source hydrometeorological observations and reproducible rainfall-nowcasting research for
-Minxiong, Taiwan.
+Official-source hydrometeorological observations and reproducible rainfall-nowcasting data and
+model development for Minxiong, Taiwan.
 
-**Status: Operational Prototype / Active Research.** The observation service is usable on a
+**Status: Operational Prototype / Data and Model Development.** The observation service is usable on a
 localhost-only deployment. Forecast publication and automated risk notifications remain disabled
 until the model, label, and shadow-deployment gates pass.
 
@@ -26,7 +26,7 @@ Official rainfall, radar, warning, and flood-sensor feeds are useful but have di
 cadences, failure modes, and retention windows. A downloader alone cannot answer whether a
 snapshot is fresh, internally consistent, reproducible, or safe to expose.
 
-MinxiongHydroCast turns those feeds into a fail-closed observation and research system:
+MinxiongHydroCast turns those feeds into a fail-closed observation, data, and model system:
 
 - strict Pydantic contracts, freshness checks, and cross-page WRA sensor joins;
 - bounded retries and explicitly degraded fallbacks without hiding schema drift;
@@ -74,10 +74,10 @@ and [data contracts](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs
 | Rain gauges | CWA [`O-A0002-001`](https://opendata.cwa.gov.tw/dataset/observation/O-A0002-001) | Chiayi rainfall observations | Strict schema and 30-minute freshness gate |
 | Rainfall warnings | WRA OpenApiv3 `Rainfall/Warning` | Active Chiayi warning context | Authenticated API; validated `Data=[]` is healthy |
 | Flood sensors | WRA IoW Open Data [142980](https://data.gov.tw/dataset/142980) + [142979](https://data.gov.tw/dataset/142979) | Measurement/catalog join | Bounded full-transaction retry and 90-minute freshness gate |
-| Radar | CWA `O-A0059-001` | 10-to-60-minute research nowcasting | External event archives; checksummed fixed splits |
+| Radar | CWA `O-A0059-001` | 10-to-60-minute model development | External event archives; checksummed fixed splits |
 | QPE | CWA `O-B0045-001` | Radar/gauge validation evidence | External synchronized evidence; not committed |
 
-API keys, official raw files, research evidence, model weights, live snapshots, CCTV, and host
+API keys, official raw files, event evidence, model weights, live snapshots, CCTV, and host
 configuration are not committed. The
 [source register](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/data_source_register.md)
 records
@@ -92,7 +92,7 @@ Public-safe verification on **2026-07-29**:
 | Observation service | Operational Prototype | Latest live snapshot healthy: 80 CWA gauges, 150 WRA flood sensors, validated empty warning set |
 | Reliability | Active | 1,150 rolling attempts; 99.39% success and 97.39% readiness |
 | Shadow gate | Blocked | Maximum ready-data gap 50.98 minutes; no confirmed heavy-rain period |
-| Radar dataset | Active Research | Five real CWA events: 2 train / 1 validation / 2 held-out local tests |
+| Radar dataset | Data pipeline | Five real CWA events: 2 train / 1 validation / 2 held-out local tests |
 | Forecast API | Disabled | Tiny U-Net does not consistently beat Persistence on CSI and lead-time gates |
 
 These are dated observations, not an availability promise. The current public-safe rollout record
@@ -117,7 +117,7 @@ test event and some 10-to-60-minute lead-time gates regress. Therefore
 [baseline results](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/baseline_results.md),
 [model card](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/model_cards/minxiong_chiayi_baseline.md),
 and
-[reproducibility evidence](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/research_dataset.md).
+[data assets](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/data_assets.md).
 
 ## Quick Start
 
@@ -246,7 +246,7 @@ CWA/WRA changes without printing credentials.
 Repository code is released under the
 [MIT License](https://github.com/KageRyo/MinxiongHydroCast/blob/main/LICENSE). That license does
 not relicense CWA
-or WRA data, third-party documents, research evidence, or trained weights. This repository ships
+or WRA data, third-party documents, event evidence, or trained weights. This repository ships
 schemas and synthetic samples, not an official dataset or model checkpoint. Review the
 [data source register](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/data_source_register.md)
 and each authority's terms before
@@ -258,12 +258,14 @@ redistribution or commercial use.
 | --- | --- | --- |
 | [`v0.1.0`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.0) | Observation Service | Previous release |
 | [`v0.1.1`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.1) | One-command demo, lean package, region/adapter contracts, contributor entry | Previous release |
-| [`v0.1.3`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.3) | Version metadata alignment and release consistency | Current release |
+| [`v0.1.4`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.4) | Data-root migration, storage policy, and verified deployment metadata | Current release |
+| [`v0.1.3`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.3) | Version metadata alignment and release consistency | Previous release |
 | [`v0.1.2`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.2) | Deterministic optical-flow benchmark and public-safe comparison report | Previous release |
 | `v0.2.0` | Reproducible Radar Dataset | Planned; requires broader reviewed event diversity |
 | `v0.3.0` | Baseline Nowcasting | Planned; requires model, label, and lead-time gates |
 
 See [CHANGELOG.md](https://github.com/KageRyo/MinxiongHydroCast/blob/main/CHANGELOG.md), the
+[v0.1.4 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.4.md),
 [v0.1.3 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.3.md),
 the [v0.1.2 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.2.md),
 and the long-term
@@ -288,8 +290,9 @@ deployment numbers do not belong in the README.
   [spatial alignment](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/spatial_alignment.md),
   [region profiles](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/region_profiles.md),
   [adapter development](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/adapter_development.md)
-- Research:
-  [dataset build](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/research_dataset.md),
+- Data and models:
+  [dataset build](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/data_assets.md),
+  [storage layout](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/storage_layout.md),
   [event evidence and review](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/continuous_event_evidence.md),
   [baseline results](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/baseline_results.md),
   [model card](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/model_cards/minxiong_chiayi_baseline.md)

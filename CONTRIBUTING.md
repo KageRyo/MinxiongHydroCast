@@ -17,7 +17,7 @@ Good starting areas include:
 - region-profile validation;
 - adapter contract tests using fixture transports;
 - package and Docker demo portability;
-- research baselines that retain Persistence as the benchmark.
+- model-development baselines that retain Persistence as the benchmark.
 
 Do not post API keys, private event identifiers or notes, raw official captures with unclear
 redistribution rights, production paths, notification recipients, or deployment secrets.

@@ -3,18 +3,36 @@ from minxionghydrocast.config import get_settings
 
 def test_settings_load_canonical_operational_prefix(monkeypatch, tmp_path):
     store = tmp_path / "operations"
-    research_root = tmp_path / "research"
+    data_root = tmp_path / "data"
     monkeypatch.setenv("MINXIONGHYDROCAST_OPERATIONS_STORE", str(store))
-    monkeypatch.setenv("MINXIONGHYDROCAST_RESEARCH_ROOT", str(research_root))
+    monkeypatch.setenv("MINXIONGHYDROCAST_DATA_ROOT", str(data_root))
     monkeypatch.setenv("MINXIONGHYDROCAST_MAX_AGE_MINUTES", "45")
     monkeypatch.setenv("MINXIONGHYDROCAST_FLOOD_MAX_AGE_MINUTES", "120")
 
     settings = get_settings()
 
     assert settings.operations_store == store
-    assert settings.research_root == research_root
+    assert settings.data_root == data_root
+    assert settings.research_root == data_root
     assert settings.operations_max_age_minutes == 45
     assert settings.operations_flood_max_age_minutes == 120
+
+
+def test_settings_accepts_legacy_research_root_when_data_root_is_unset(monkeypatch, tmp_path):
+    legacy_root = tmp_path / "legacy-research"
+    monkeypatch.setenv("MINXIONGHYDROCAST_RESEARCH_ROOT", str(legacy_root))
+    monkeypatch.delenv("MINXIONGHYDROCAST_DATA_ROOT", raising=False)
+
+    assert get_settings().data_root == legacy_root
+
+
+def test_data_root_takes_precedence_over_legacy_research_root(monkeypatch, tmp_path):
+    data_root = tmp_path / "data"
+    legacy_root = tmp_path / "legacy-research"
+    monkeypatch.setenv("MINXIONGHYDROCAST_DATA_ROOT", str(data_root))
+    monkeypatch.setenv("MINXIONGHYDROCAST_RESEARCH_ROOT", str(legacy_root))
+
+    assert get_settings().data_root == data_root
 
 
 def test_settings_load_cwa_rest_api_and_key(monkeypatch):

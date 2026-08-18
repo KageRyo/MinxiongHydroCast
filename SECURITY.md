@@ -12,7 +12,7 @@ Security fixes are applied to the latest released minor version and the `main` b
 ## Reporting a vulnerability
 
 Do not open a public issue containing credentials, webhook URLs, private host details, unpublished
-research data, or an exploitable vulnerability. Use GitHub's private vulnerability-reporting
+private data assets, or an exploitable vulnerability. Use GitHub's private vulnerability-reporting
 channel for this repository when available, or contact the maintainer privately through the
 contact method on the GitHub profile.
 
@@ -38,12 +38,12 @@ Safe to publish:
 Keep private:
 
 - API keys, cookies, Discord webhook URLs, and access tokens;
-- CCTV, personal data, unpublished labels, raw research evidence, and model weights;
+- CCTV, personal data, unpublished labels, raw event evidence, and model weights;
 - live snapshots, logs, backup archives, hostnames, mount paths, runner identities, and internal
   deployment inventories;
 - commercial delivery material or data without redistribution rights.
 
-Local `.env` files, generated data directories, external research roots, checkpoints, documents,
+Local `.env` files, generated data directories, external data roots, checkpoints, documents,
 archives, and Playwright artifacts are ignored by Git. Before every release, inspect staged files
 and secret-scanning results; ignore rules do not make a committed secret safe.
 

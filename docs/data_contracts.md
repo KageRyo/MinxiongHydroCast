@@ -5,9 +5,9 @@ modeling, and product usage. Every live dataset includes source metadata and an 
 `資料模式` value. Operational collection prefers official machine-readable sources; a page scraper
 is only a degraded request-failure fallback.
 
-## Research Dataset Artifacts
+## Dataset Artifacts
 
-The formal radar research manifest is validated by a strict Pydantic schema before any event is
+The formal radar manifest is validated by a strict Pydantic schema before any event is
 downloaded. It requires exactly event-based train, validation, and test splits with minimum real
 event counts of 2/1/2, including two held-out Minxiong test events. Demo IDs and sources,
 unassigned events, duplicate assignment, invalid timestamps, and unknown fields fail the build.
@@ -16,8 +16,8 @@ CWA history indexes, event plans, collection manifests, Persistence evaluations,
 training and comparison reports, the dataset catalog, and the checksum verification report are
 also validated through Pydantic before JSON serialization. The external catalog records relative
 artifact paths, byte sizes, SHA-256, provenance, event time ranges, and aggregate and lead-time
-metrics. Artifact resolution rejects absolute research paths and attempts to escape the configured
-research root. See [research_dataset.md](research_dataset.md).
+metrics. Artifact resolution rejects absolute data paths and attempts to escape the configured
+data root. See [data_assets.md](data_assets.md).
 
 ## Event Evidence Catalog
 
@@ -25,7 +25,7 @@ research root. See [research_dataset.md](research_dataset.md).
 incremental cursor, immutable discovery configuration, checksummed history indexes, candidate
 trigger metrics, full radar-window artifacts, and synchronized QPE/gauge/warning captures. Unknown
 fields, naive timestamps, duplicate candidates or trigger times, inconsistent frame counts, and
-artifact paths outside the research root fail validation.
+artifact paths outside the data root fail validation.
 
 Discovery configuration includes a cadence-aligned maximum candidate window, defaulting to 480
 minutes and including the before/after context. A trigger that would exceed the bound starts a new

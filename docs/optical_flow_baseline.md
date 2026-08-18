@@ -50,8 +50,8 @@ event metadata and aggregate metrics:
 ```bash
 mhc model optical-flow-report \
   --manifest data/samples/event_split_manifest.json \
-  --optical-flow-dir "$MINXIONGHYDROCAST_RESEARCH_ROOT/reports" \
-  --tiny-unet-dir "$MINXIONGHYDROCAST_RESEARCH_ROOT/reports" \
+  --optical-flow-dir "$MINXIONGHYDROCAST_DATA_ROOT/reports" \
+  --tiny-unet-dir "$MINXIONGHYDROCAST_DATA_ROOT/reports" \
   --output data/processed/optical_flow_public_report.json
 ```
 
@@ -59,7 +59,7 @@ The report requires optical-flow results for every formal event and Tiny U-Net
 results for the independent validation/test events. It rejects missing events,
 event-ID mismatches, split metadata mismatches, inconsistent Persistence
 metrics, and inconsistent lead-time grids. It does not copy archive paths,
-checkpoint paths, raw source identifiers, or private research metadata into the
+checkpoint paths, raw source identifiers, or private data metadata into the
 public report.
 
 ## Reproducibility and limits

@@ -2,9 +2,9 @@
 
 ## Purpose
 
-MinxiongHydroCast provides a reproducible hydrometeorological data and research foundation for
+MinxiongHydroCast provides a reproducible hydrometeorological data and model-development foundation for
 Minxiong Township. Its immediate product is an internal official-source observation and
-data-quality service. Its research track evaluates short-horizon rainfall nowcasting and future
+data-quality service. Its model-development track evaluates short-horizon rainfall nowcasting and future
 local flood-risk methods without presenting experimental output as public guidance.
 
 ## Current supported capabilities
@@ -22,7 +22,7 @@ local flood-risk methods without presenting experimental output as public guidan
 
 - Radar/QPE tensor construction and gauge validation.
 - Persistence and Tiny U-Net rainfall-nowcasting evaluation.
-- NowcastNet adapter and migration research.
+- NowcastNet adapter and migration evaluation.
 - Flood-risk feature engineering and label auditing.
 
 Experimental capability does not imply operational availability. `/api/v1/experimental-forecasts`
