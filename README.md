@@ -257,7 +257,8 @@ redistribution or commercial use.
 
 | Version | Milestone | State |
 | --- | --- | --- |
-| [`v0.1.5`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.5) | Verified data-root relocation command and metadata integrity repair | Current release |
+| [`v0.1.6`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.6) | Complete retirement of AIWeatherForecast legacy documentation | Current release |
+| [`v0.1.5`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.5) | Verified data-root relocation command and metadata integrity repair | Previous release |
 | [`v0.1.0`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.0) | Observation Service | Previous release |
 | [`v0.1.1`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.1) | One-command demo, lean package, region/adapter contracts, contributor entry | Previous release |
 | [`v0.1.4`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.4) | Data-root migration, storage policy, and verified deployment metadata | Previous release |
@@ -267,6 +268,7 @@ redistribution or commercial use.
 | `v0.3.0` | Baseline Nowcasting | Planned; requires model, label, and lead-time gates |
 
 See [CHANGELOG.md](https://github.com/KageRyo/MinxiongHydroCast/blob/main/CHANGELOG.md), the
+[v0.1.6 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.6.md),
 [v0.1.5 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.5.md),
 [v0.1.4 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.4.md),
 [v0.1.3 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.3.md),

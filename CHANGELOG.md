@@ -10,6 +10,18 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 - Broader human-reviewed radar-event diversity and QPE/gauge validation for `v0.2.0`.
 - Independent model, lead-time, label, and shadow-gate completion for `v0.3.0`.
 
+## [0.1.6] - 2026-08-18
+
+### Removed
+
+- The retired `AIWeatherForecast` legacy boundary document and its documentation-index link. The
+  host-side legacy directory was already removed after a retained independent archive was confirmed.
+
+### Documentation
+
+- Keep the v0.1.4 changelog entry as released historical evidence; it is no longer an active
+  migration or retention instruction.
+
 ## [0.1.5] - 2026-08-18
 
 ### Added
@@ -136,7 +148,8 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 - Radar candidates cannot automatically enter formal train/validation/test splits.
 - Forecast publication and automated notification remain disabled until all gates pass.
 
-[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.5...HEAD
+[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.6...HEAD
+[0.1.6]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.2...v0.1.3

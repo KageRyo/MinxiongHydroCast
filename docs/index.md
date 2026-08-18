@@ -48,8 +48,6 @@ governance details without duplicating changing deployment numbers.
 - [Roadmap](roadmap.md): long-term milestones.
 - [Completion plan](completion_plan.md): product-level exit criteria.
 - [Decision authority](decision_authority.md): who may approve operational and data-model changes.
-- [Legacy AIWeatherForecast](legacy_aiweatherforecast.md): predecessor inventory and retirement
-  boundary.
 - [Security policy](../SECURITY.md): vulnerability reporting and sensitive-data boundaries.
 - [Changelog](../CHANGELOG.md): released changes.
 
