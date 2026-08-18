@@ -40,7 +40,7 @@ themselves.
   lower RMSE alone is insufficient.
 
 The current weighted Tiny U-Net fails that promotion gate, so forecast publication remains
-disabled. See [research_dataset.md](research_dataset.md) for the build, metrics, catalog, and
+disabled. See [data_assets.md](data_assets.md) for the build, metrics, catalog, and
 verification evidence.
 
 ## Commands
@@ -50,7 +50,7 @@ Validate the general event-split contract:
 ```bash
 mhc dataset split-check \
   --manifest data/samples/event_split_manifest.json \
-  --event-evidence-catalog "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json" \
+  --event-evidence-catalog "$MINXIONGHYDROCAST_DATA_ROOT/discovery/event_evidence_catalog.json" \
   --output data/processed/event_split_check.json \
   --require-ok
 ```
@@ -60,8 +60,8 @@ Build and validate the stronger formal dataset contract:
 ```bash
 mhc dataset build \
   --manifest data/samples/event_split_manifest.json \
-  --event-evidence-catalog "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json" \
-  --root "$MINXIONGHYDROCAST_RESEARCH_ROOT"
+  --event-evidence-catalog "$MINXIONGHYDROCAST_DATA_ROOT/discovery/event_evidence_catalog.json" \
+  --root "$MINXIONGHYDROCAST_DATA_ROOT"
 ```
 
 The evidence-catalog argument is required for either command only after the manifest references a

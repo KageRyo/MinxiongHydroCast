@@ -297,7 +297,7 @@ Use the CWA history clients, event planner, grid inspector, and tensor converter
 reproducible event datasets. Keep official raw files under ignored external storage and retain
 source IDs, timestamps, checksums, grid metadata, and collection summaries.
 
-This profile supports research, backtesting, and model development. It does not produce an
+This profile supports backtesting and model development. It does not produce an
 operational forecast by itself.
 
 ### 4. Baseline and neural-model evaluation

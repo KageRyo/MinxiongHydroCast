@@ -13,6 +13,7 @@ from zoneinfo import ZoneInfo
 
 from pydantic import ValidationError
 
+from minxionghydrocast import __version__
 from minxionghydrocast.operations.collector import DEFAULT_STORE
 from minxionghydrocast.operations.health import aggregate_health, refresh_dataset_health
 from minxionghydrocast.operations.schemas import (
@@ -541,7 +542,7 @@ OPERATOR_HTML = """<!doctype html>
 
 def handler_factory(store: SnapshotStore) -> type[BaseHTTPRequestHandler]:
     class OperationsHandler(BaseHTTPRequestHandler):
-        server_version = "MinxiongHydroCast/0.1"
+        server_version = f"MinxiongHydroCast/{__version__}"
 
         def _json(
             self,

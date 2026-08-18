@@ -357,7 +357,7 @@ def build_event_review_queue(
     """Build a report without writing the catalog, evidence, or formal split."""
 
     catalog = load_event_evidence_catalog(catalog_path)
-    layout = ResearchLayout(Path(catalog.research_root))
+    layout = ResearchLayout(Path(catalog.data_root))
     candidates = [
         candidate
         for candidate in catalog.candidates
@@ -462,7 +462,7 @@ def main() -> None:
     parser.add_argument(
         "--catalog",
         type=Path,
-        default=settings.research_root / "discovery" / "event_evidence_catalog.json",
+        default=settings.data_root / "discovery" / "event_evidence_catalog.json",
     )
     parser.add_argument(
         "--include-reviewed",

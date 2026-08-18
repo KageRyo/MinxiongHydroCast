@@ -1,9 +1,9 @@
 # Architecture
 
-MinxiongHydroCast has two connected but separately gated products:
+MinxiongHydroCast has two connected but separately gated capabilities:
 
 1. a localhost-only official-source observation service;
-2. a reproducible radar-nowcasting research pipeline.
+2. a reproducible radar-nowcasting data and model pipeline.
 
 The observation service may be healthy while forecast publication remains blocked. No model result
 can bypass data readiness, label, shadow, and promotion gates.
@@ -30,7 +30,7 @@ flowchart TB
         SHADOW["Rolling shadow evaluator<br/>notification gate"]
     end
 
-    subgraph Research["External research root"]
+    subgraph Data["External data root"]
         DISCOVERY["Radar discovery<br/>bounded event candidates"]
         REVIEW["Human evidence review<br/>no automatic promotion"]
         BUILD["Dataset builder<br/>fixed event splits"]
@@ -87,7 +87,7 @@ The WRA page parser is a degraded diagnostic fallback only for authentication, t
 HTTP, or rate-limit failures. It cannot convert malformed official payloads into healthy data and
 cannot satisfy readiness.
 
-## Research data path
+## Data and model asset path
 
 1. Radar discovery scans official CWA history metadata and creates bounded candidates only from
    configured local triggers.

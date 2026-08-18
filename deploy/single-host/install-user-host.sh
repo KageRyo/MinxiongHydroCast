@@ -87,27 +87,46 @@ fi
 "$DURABLE_ROOT/venv/bin/python" -m pip install --upgrade "$REPOSITORY_ROOT[scraper]"
 "$DURABLE_ROOT/venv/bin/python" -m pip freeze \
   > "$DURABLE_ROOT/config/installed-packages.txt"
-git -C "$REPOSITORY_ROOT" rev-parse HEAD \
-  > "$DURABLE_ROOT/config/installed-revision.txt"
+SOURCE_REVISION="$(git -C "$REPOSITORY_ROOT" rev-parse HEAD)"
+printf '%s\n' "$SOURCE_REVISION" > "$DURABLE_ROOT/config/installed-revision.txt"
+"$DURABLE_ROOT/venv/bin/python" -m minxionghydrocast.operations.deployment \
+  --repository-root "$REPOSITORY_ROOT" \
+  --revision "$SOURCE_REVISION" \
+  --output "$DURABLE_ROOT/config/deployment.json"
 
 mkdir -p "$HOME/.config/minxiong-hydrocast" "$HOME/.config/systemd/user"
-research_config_count="$(grep -Ec \
+data_config_count="$(grep -Ec \
+  '^[[:space:]]*MINXIONGHYDROCAST_DATA_ROOT=' "$ENV_FILE" || true)"
+legacy_research_config_count="$(grep -Ec \
   '^[[:space:]]*MINXIONGHYDROCAST_RESEARCH_ROOT=' "$ENV_FILE" || true)"
-if [[ "$research_config_count" -gt 1 ]]; then
+if [[ "$data_config_count" -gt 1 ]]; then
+  echo "[ERROR] MINXIONGHYDROCAST_DATA_ROOT must not be defined more than once" >&2
+  exit 1
+fi
+if [[ "$legacy_research_config_count" -gt 1 ]]; then
   echo "[ERROR] MINXIONGHYDROCAST_RESEARCH_ROOT must not be defined more than once" >&2
   exit 1
 fi
-if [[ "$research_config_count" -eq 1 ]] && \
+if [[ "$data_config_count" -eq 1 && "$legacy_research_config_count" -eq 1 ]]; then
+  echo "[ERROR] Set only MINXIONGHYDROCAST_DATA_ROOT; the legacy RESEARCH_ROOT fallback cannot coexist" >&2
+  exit 1
+fi
+if [[ "$data_config_count" -eq 1 ]] && \
+  ! grep -Eq '^[[:space:]]*MINXIONGHYDROCAST_DATA_ROOT=.+$' "$ENV_FILE"; then
+  echo "[ERROR] MINXIONGHYDROCAST_DATA_ROOT must not be blank when defined" >&2
+  exit 1
+fi
+if [[ "$legacy_research_config_count" -eq 1 ]] && \
   ! grep -Eq '^[[:space:]]*MINXIONGHYDROCAST_RESEARCH_ROOT=.+$' "$ENV_FILE"; then
   echo "[ERROR] MINXIONGHYDROCAST_RESEARCH_ROOT must not be blank when defined" >&2
   exit 1
 fi
 install -m 0600 "$ENV_FILE" "$HOME/.config/minxiong-hydrocast/env"
-if [[ "$research_config_count" -eq 0 ]]; then
-  RESEARCH_ROOT="${DURABLE_ROOT}-research"
-  mkdir -p "$RESEARCH_ROOT"
-  chmod 0700 "$RESEARCH_ROOT"
-  printf '\nMINXIONGHYDROCAST_RESEARCH_ROOT=%s\n' "$RESEARCH_ROOT" \
+if [[ "$data_config_count" -eq 0 && "$legacy_research_config_count" -eq 0 ]]; then
+  DATA_ROOT="${DURABLE_ROOT}-data"
+  mkdir -p "$DATA_ROOT"
+  chmod 0700 "$DATA_ROOT"
+  printf '\nMINXIONGHYDROCAST_DATA_ROOT=%s\n' "$DATA_ROOT" \
     >> "$HOME/.config/minxiong-hydrocast/env"
 fi
 discord_config_count="$(grep -Ec '^[[:space:]]*MINXIONGHYDROCAST_DISCORD_WEBHOOK_URL=' "$ENV_FILE" || true)"

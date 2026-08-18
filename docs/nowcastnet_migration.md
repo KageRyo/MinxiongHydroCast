@@ -5,7 +5,7 @@ contains only the contract and adapter needed to connect those assets once they 
 
 ## Radar Tensor Contract
 
-Original NowcastNet-style research code usually expects cropped/resampled radar tensors rather than
+Original NowcastNet-style evaluation code usually expects cropped/resampled radar tensors rather than
 the native CWA `921 x 881` grid. Keep the native CWA tensor contract stable first, then add a
 separate NowcastNet preprocessing adapter if migration starts.
 
@@ -53,7 +53,7 @@ Do not migrate NowcastNet until all of these are true:
   event splits.
 - The target NowcastNet implementation, license, dependency stack, checkpoint format, and expected
   tensor shape are reviewed.
-- External code, checkpoints, and datasets stay under the configured durable research root or
+- External code, checkpoints, and datasets stay under the configured durable data root or
   other ignored external paths unless a license review explicitly permits tracked integration.
 
 Current status: not ready. The reproducible build now has five complete CWA radar events, an
@@ -64,7 +64,7 @@ and gauge-vs-QPE reports are blocked until event-time `O-B0045-001` QPE grids ar
 
 ## External Assets
 
-Keep these outside Git under the configured durable research root or another ignored external
+Keep these outside Git under the configured durable data root or another ignored external
 location:
 
 - NowcastNet source code

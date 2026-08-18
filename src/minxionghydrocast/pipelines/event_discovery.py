@@ -322,7 +322,7 @@ def _new_catalog(
 ) -> EventEvidenceCatalog:
     return EventEvidenceCatalog(
         updated_at=iso_seconds(now),
-        research_root=str(layout.root),
+        data_root=str(layout.root),
         config=config,
         cursor=DiscoveryCursor(),
     )
@@ -338,8 +338,8 @@ def _load_or_create_catalog(
     if not path.is_file():
         return _new_catalog(layout=layout, config=config, now=now), True
     catalog = load_event_evidence_catalog(path)
-    if Path(catalog.research_root).resolve() != layout.root:
-        raise ValueError("event evidence catalog research_root does not match configuration")
+    if Path(catalog.data_root).resolve() != layout.root:
+        raise ValueError("event evidence catalog data_root does not match configuration")
     if catalog.config != config:
         raise ValueError(
             "event discovery configuration changed; migrate the catalog explicitly before rerunning"
@@ -1287,7 +1287,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Incrementally discover CWA radar events and preserve reviewable evidence.",
     )
-    parser.add_argument("--research-root", type=Path, default=None)
+    parser.add_argument(
+        "--data-root",
+        "--research-root",
+        dest="data_root",
+        type=Path,
+        default=None,
+        help="external durable data root; --research-root is a temporary compatibility alias",
+    )
     parser.add_argument("--repository-root", type=Path, default=Path.cwd())
     parser.add_argument("--initial-lookback-minutes", type=int, default=120)
     parser.add_argument("--merge-gap-minutes", type=int, default=60)
@@ -1318,11 +1325,11 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     started_at, start_timer = start_run()
     settings = get_settings()
-    research_root = args.research_root or settings.research_root
+    data_root = args.data_root or settings.data_root
     try:
         result = run_event_discovery(
             repository_root=args.repository_root,
-            research_root=research_root,
+            research_root=data_root,
             cwa_api_key=settings.cwa_api_key,
             wra_api_key=settings.wra_api_key,
             config=DiscoveryConfig(
@@ -1356,7 +1363,7 @@ def main() -> None:
             ),
             started_at=started_at,
             start_timer=start_timer,
-            inputs={"research_root": str(research_root)},
+            inputs={"data_root": str(data_root)},
             metadata={"candidate_queue_only": True, "automatic_formal_split_updates": False},
         )
         record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)
@@ -1374,7 +1381,7 @@ def main() -> None:
         ),
         started_at=started_at,
         start_timer=start_timer,
-        inputs={"research_root": str(research_root), "radar_data_id": "O-A0059-001"},
+        inputs={"data_root": str(data_root), "radar_data_id": "O-A0059-001"},
         outputs={"event_evidence_catalog": str(result.catalog_path)},
         row_counts={
             "scanned_frames": result.scanned_frame_count,

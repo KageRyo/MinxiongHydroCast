@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
 
 from minxionghydrocast.models.evaluation_schemas import LeadTimeMetricsSchema
 
@@ -249,7 +249,10 @@ class DatasetCatalog(DatasetSchema):
     schema_version: Literal["1.0"] = "1.0"
     generated_at: str
     dataset_id: str
-    research_root: str
+    data_root: str = Field(
+        validation_alias=AliasChoices("data_root", "research_root"),
+        min_length=1,
+    )
     source_data_id: str
     manifest: ArtifactRecord
     history_index: ArtifactRecord
@@ -259,6 +262,12 @@ class DatasetCatalog(DatasetSchema):
     weighted_tiny_unet: WeightedTinyUnetAssessment | None = None
     forecast_publication_ready: bool = False
     forecast_publication_blockers: list[str]
+
+    @property
+    def research_root(self) -> str:
+        """Compatibility alias for catalogs written before the data-root migration."""
+
+        return self.data_root
 
     @model_validator(mode="after")
     def validate_catalog_consistency(self) -> "DatasetCatalog":

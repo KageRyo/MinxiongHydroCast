@@ -225,13 +225,13 @@ def review_event_candidate(
         fetched_at=current_time,
     )
     initial_catalog = load_event_evidence_catalog(catalog_path)
-    layout = ResearchLayout(Path(initial_catalog.research_root))
+    layout = ResearchLayout(Path(initial_catalog.data_root))
     require_external_research_root(layout, repository_root=repository_root)
 
     with layout.event_discovery_lock():
         catalog = load_event_evidence_catalog(catalog_path)
-        if Path(catalog.research_root).resolve() != layout.root:
-            raise ValueError("event evidence catalog research_root changed during review")
+        if Path(catalog.data_root).resolve() != layout.root:
+            raise ValueError("event evidence catalog data_root changed during review")
         verification_errors = verify_event_evidence_catalog(catalog, layout=layout)
         if verification_errors:
             raise RuntimeError(
@@ -334,7 +334,7 @@ def main() -> None:
     parser.add_argument(
         "--catalog",
         type=Path,
-        default=settings.research_root / "discovery" / "event_evidence_catalog.json",
+        default=settings.data_root / "discovery" / "event_evidence_catalog.json",
     )
     parser.add_argument("--repository-root", type=Path, default=Path.cwd())
     parser.add_argument("--candidate-id", required=True)

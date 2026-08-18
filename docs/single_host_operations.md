@@ -12,6 +12,7 @@ The default installation uses:
 | Path | Purpose |
 | --- | --- |
 | `<durable-root>` | Durable runtime, snapshots, TSDBs, backups, and runner |
+| `<durable-root>-data` | Durable data assets: raw captures, evidence, tensors, models, reports, and catalogs |
 | `~/.local/share/minxiong-hydrocast` | Stable symlink used by user units |
 | `~/.config/minxiong-hydrocast/env` | Mode `0600` collector API-key environment file |
 | `~/.config/minxiong-hydrocast/notifications.env` | Mode `0600` notification-only environment |
@@ -36,8 +37,9 @@ sudo loginctl enable-linger "$USER"
 ```
 
 The installer refuses tracked, staged, or untracked source changes so the deployed revision is
-reproducible. It records the Git commit and installed Python package set under the durable
-`config/` directory.
+reproducible. It records the Git commit, installed Python package set, and verified
+`config/deployment.json` under the durable runtime directory. Installation fails when the
+installed package version does not match the source metadata.
 
 The second command is required once. Without linger, user services may stop after the last login
 session ends. The installer pins Prometheus and Alertmanager release versions, verifies their
@@ -67,7 +69,7 @@ Use `journalctl --user -u UNIT` for service logs. The API, Prometheus, Alertmana
 bind to loopback intentionally. Put authentication and TLS at a reverse proxy before allowing
 network access.
 
-Event discovery writes only to the external `MINXIONGHYDROCAST_RESEARCH_ROOT`. Its candidate queue
+Event discovery writes only to the external `MINXIONGHYDROCAST_DATA_ROOT`. Its candidate queue
 requires human review and never edits the formal dataset split. Inspect the structured summary at
 `~/.local/share/minxiong-hydrocast/run_summaries/event_discover.json`; see
 [continuous_event_evidence.md](continuous_event_evidence.md) for the artifact and review contract.

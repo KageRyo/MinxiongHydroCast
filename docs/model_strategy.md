@@ -14,7 +14,7 @@ historical flood labels and features are available.
 
 ## SOTA Candidate
 
-The old project contained a NowcastNet-style research capsule. NowcastNet is a strong SOTA
+The old project contained a NowcastNet-style evaluation capsule. NowcastNet is a strong SOTA
 candidate for extreme precipitation nowcasting, but it is not ready to run here until these are
 available:
 
@@ -102,7 +102,7 @@ event:
 ```bash
 mhc dataset build \
   --manifest data/samples/event_split_manifest.json \
-  --root "$MINXIONGHYDROCAST_RESEARCH_ROOT" \
+  --root "$MINXIONGHYDROCAST_DATA_ROOT" \
   --train-weighted-unet \
   --device cuda \
   --multi-gpu \
@@ -118,7 +118,7 @@ The current run used 88 training windows and 26 independent validation windows. 
 events, but CSI regressed on one Minxiong test event and several lead-time gates failed. Keep
 Persistence as the primary benchmark and forecast publication disabled. The next modeling work
 should add weather-regime diversity, QPE/gauge validation, official context, and local labels
-before increasing architecture complexity. See [research_dataset.md](research_dataset.md).
+before increasing architecture complexity. See [data_assets.md](data_assets.md).
 
 ## Recommended Roadmap
 

@@ -2,7 +2,7 @@
 
 This page records dated, public-safe evidence from a private localhost-only shadow deployment. It
 does not publish hostnames, mount paths, runner identities, notification destinations, raw
-snapshots, backup digests, candidate identifiers, or unpublished research artifacts.
+snapshots, backup digests, candidate identifiers, or unpublished data artifacts.
 
 It also does not claim that MinxiongHydroCast is an official warning system or authorize external
 operational use. Runtime state remains the authority; this page is a release-oriented snapshot.
@@ -58,10 +58,10 @@ Post-rollout official-source contract checks returned a healthy empty warning pr
 observations, and WRA flood-sensor observations. Backup creation and independent archive
 verification completed successfully.
 
-## Research and publication state
+## Data and publication state
 
 Continuous event discovery and the read-only review queue remain active in the private external
-research root. Candidate ranking does not edit review decisions or formal event splits. Raw radar,
+data root. Candidate ranking does not edit review decisions or formal event splits. Raw radar,
 QPE, gauges, warning captures, official-context artifacts, and candidate-level evidence are not
 published by this status page.
 

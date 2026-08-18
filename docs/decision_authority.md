@@ -14,7 +14,7 @@ instructions.
 | Model reviewer | Approves evaluation evidence, calibration, and model promotion | Unassigned |
 | Local decision liaison | Confirms how outputs may support a real local workflow | Unassigned |
 
-One person may hold multiple roles for internal research, but external operational use requires a
+One person may hold multiple roles for internal data and model development, but external operational use requires a
 named primary and backup for service operations. Role assignments must be recorded outside source
 code with contact and escalation details protected from public exposure.
 

@@ -57,7 +57,7 @@ finish, test, and propose through a focused pull request. The end-to-end target 
       review.
 - [x] Add `mhc dataset build` to orchestrate history discovery, resilient downloads, validation,
       tensor conversion, Persistence evaluation, catalog generation, and checksum verification.
-- [x] Move formal research artifacts to a configurable durable root outside Git.
+- [x] Move formal data artifacts to a configurable durable root outside Git.
 - [x] Replace formal demo split entries with two real train, one independent validation, and two
       held-out Minxiong/Chiayi test events.
 - [x] Validate persisted dataset, training, and evaluation JSON through strict Pydantic schemas.
@@ -66,7 +66,7 @@ finish, test, and propose through a focused pull request. The end-to-end target 
 - [x] Add `mhc event discover` with an incremental history cursor and both Minxiong-local and
       Taiwan-wide `35 dBZ` coverage metrics.
 - [x] Preserve candidate radar windows with retry, resume, SHA-256, atomic writes, and bounded
-      temporary scan-cache retention under the external research root.
+      temporary scan-cache retention under the external data root.
 - [x] Capture synchronized `O-B0045-001` QPE, `O-A0002-001` gauges, and WRA rainfall warnings in a
       strict Pydantic `EventEvidenceCatalog`.
 - [x] Schedule candidate discovery every 20 minutes while preventing automatic formal-split edits.
@@ -165,7 +165,7 @@ Each code change should remain a focused pull request with its own tests and rol
       `data/samples/qpe_gauge_validation_status.json`.
 - [ ] Run live QPE/gauge validation reports for each selected event after event-time
       `O-B0045-001` QPE grids are captured or an official historical QPE archive is confirmed.
-- [x] Produce a checksummed dataset catalog and verification report under the external research
+- [x] Produce a checksummed dataset catalog and verification report under the external data
       root, with source provenance, time ranges, and lead-time metrics.
 - [x] Add a next-batch event expansion queue from the existing CWA hourly discovery scan.
 - [x] Let the first continuously collected candidate finish its post-trigger window, inspect
@@ -253,7 +253,7 @@ Each code change should remain a focused pull request with its own tests and rol
 - [ ] Complete the seven-day shadow gate with 900 attempts, 99% collection success, 95% readiness,
       no gap over 30 minutes, intact snapshots, and a reviewed heavy-rain period.
 - [ ] Exercise incident response, operator override, and recovery before enabling notifications.
-- [x] Keep deployment configuration separate from research/training artifacts.
+- [x] Keep deployment configuration separate from data and training artifacts.
 
 ## Later
 

@@ -1,6 +1,6 @@
 # Documentation
 
-The README is the project overview. This index routes implementation, operations, research, and
+The README is the project overview. This index routes implementation, operations, data assets, and
 governance details without duplicating changing deployment numbers.
 
 ## Understand the project
@@ -11,6 +11,7 @@ governance details without duplicating changing deployment numbers.
 - [Data source register](data_source_register.md): official authority, purpose, acceptance, and
   redistribution review.
 - [Data contracts](data_contracts.md): persisted schemas, provenance, and validation behavior.
+- [Storage layout](storage_layout.md): repository, runtime, data-root, and Git boundaries.
 
 ## Operate the observation service
 
@@ -24,9 +25,9 @@ governance details without duplicating changing deployment numbers.
 - [Incident response](incident_response.md): detection, triage, containment, and evidence.
 - [Rollback](rollback.md): application and data rollback procedure.
 
-## Reproduce the research
+## Build data and model assets
 
-- [Research dataset](research_dataset.md): durable external layout, build command, split, and
+- [Data assets](data_assets.md): durable external layout, build command, split, and
   checksum evidence.
 - [Continuous event evidence](continuous_event_evidence.md): discovery, artifact completeness,
   human review, and formal-promotion boundary.
@@ -44,7 +45,9 @@ governance details without duplicating changing deployment numbers.
 - [Tasks](tasks.md): current actionable work and acceptance checks.
 - [Roadmap](roadmap.md): long-term milestones.
 - [Completion plan](completion_plan.md): product-level exit criteria.
-- [Decision authority](decision_authority.md): who may approve operational and research changes.
+- [Decision authority](decision_authority.md): who may approve operational and data-model changes.
+- [Legacy AIWeatherForecast](legacy_aiweatherforecast.md): predecessor inventory and retirement
+  boundary.
 - [Security policy](../SECURITY.md): vulnerability reporting and sensitive-data boundaries.
 - [Changelog](../CHANGELOG.md): released changes.
 

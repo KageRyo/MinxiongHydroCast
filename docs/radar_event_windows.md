@@ -1,9 +1,9 @@
 # Historical Radar Event Windows
 
 This document preserves the earlier three-event discovery and experiment record. It is not the
-active formal split. The current five-event manifest, durable external research layout, build
+active formal split. The current five-event manifest, durable external data layout, build
 command, checksums, and independent validation/test results are documented in
-[research_dataset.md](research_dataset.md) and [event_splits.md](event_splits.md).
+[data_assets.md](data_assets.md) and [event_splits.md](event_splits.md).
 
 The historical raw CWA frames, collections, summaries, tensor archives, and checkpoints stay in
 ignored paths and must not be committed.

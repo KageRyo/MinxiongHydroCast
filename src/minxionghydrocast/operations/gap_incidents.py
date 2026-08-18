@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from minxionghydrocast.io.research_store import (
+from minxionghydrocast.io.data_store import (
     atomic_write_bytes,
     canonical_json_bytes,
 )

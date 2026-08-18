@@ -10,6 +10,7 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 | --- | --- | --- |
 | `v0.1.0` | Observation Service | Official-source collection, strict readiness, immutable snapshots, API/operator view, monitoring, backup, and fail-closed shadow gate |
 | `v0.1.1` | Portable Reference Implementation | Credential-free Compose demo, lean wheel, single grouped CLI, reusable region profiles and source-adapter contracts, and contributor entry points |
+| `v0.1.4` | Storage and Deployment Governance | Canonical data root, explicit Git/runtime/data boundaries, and verified deployment metadata |
 | `v0.2.0` | Reproducible Radar Dataset | Broader human-reviewed weather-regime coverage, complete source rights record, and reproducible checksummed event catalog |
 | `v0.3.0` | Baseline Nowcasting | Learned model consistently beats Persistence on independent aggregate and lead-time gates; local label and shadow gates pass |
 
@@ -65,7 +66,7 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
       candidate events.
 - [x] Populate tracked event split manifests with real historical event metadata.
 - [x] Produce reproducible dataset summaries without committing official raw data.
-- [x] Add a durable external research root and a single `mhc dataset build` orchestration command.
+- [x] Add a durable external data root and a single `mhc dataset build` orchestration command.
 - [x] Build a formal 2-train/1-validation/2-local-test dataset with no demo placeholders.
 - [x] Catalog and verify every dataset artifact with provenance, time ranges, SHA-256, and
       lead-time metrics.

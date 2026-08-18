@@ -32,7 +32,7 @@ def validate_candidate_promotion_gate(
     catalog = EventEvidenceCatalog.model_validate_json(
         event_evidence_catalog_path.read_text(encoding="utf-8")
     )
-    layout = ResearchLayout(Path(catalog.research_root))
+    layout = ResearchLayout(Path(catalog.data_root))
     require_external_research_root(layout, repository_root=repository_root)
 
     from minxionghydrocast.pipelines.event_discovery import verify_event_evidence_catalog

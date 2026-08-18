@@ -1,7 +1,7 @@
 # Continuous Event Evidence
 
 `mhc event discover` continuously preserves short-retention CWA radar events before they disappear.
-It is a research-data collector, not a forecast publisher and not an automatic training trigger.
+It is a data-asset collector, not a forecast publisher and not an automatic training trigger.
 
 ## Collection Cycle
 
@@ -48,10 +48,10 @@ change it while a candidate is collecting without an explicit catalog rollout de
 
 ## External Layout
 
-All artifacts are under `MINXIONGHYDROCAST_RESEARCH_ROOT`, which must remain outside Git:
+All artifacts are under `MINXIONGHYDROCAST_DATA_ROOT`, which must remain outside Git:
 
 ```text
-research-root/
+data-root/
 ├── discovery/
 │   ├── event_evidence_catalog.json
 │   ├── history/
@@ -100,7 +100,7 @@ read-only priority queue first:
 
 ```bash
 mhc event queue \
-  --catalog "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json"
+  --catalog "$MINXIONGHYDROCAST_DATA_ROOT/discovery/event_evidence_catalog.json"
 ```
 
 The table includes local peak dBZ, local/total trigger counts, Minxiong-point QPE peak, Minxiong
@@ -113,7 +113,7 @@ Record the decision through the schema-validated command rather than editing JSO
 
 ```bash
 mhc event review \
-  --catalog "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json" \
+  --catalog "$MINXIONGHYDROCAST_DATA_ROOT/discovery/event_evidence_catalog.json" \
   --candidate-id <candidate-id> \
   --decision approved \
   --reviewer <reviewer-identity> \
@@ -148,14 +148,14 @@ regime in `event_type`. Then run:
 mhc dataset split-check \
   --manifest data/samples/event_split_manifest.json \
   --event-evidence-catalog \
-    "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json" \
+    "$MINXIONGHYDROCAST_DATA_ROOT/discovery/event_evidence_catalog.json" \
   --require-ok
 
 mhc dataset build \
   --manifest data/samples/event_split_manifest.json \
   --event-evidence-catalog \
-    "$MINXIONGHYDROCAST_RESEARCH_ROOT/discovery/event_evidence_catalog.json" \
-  --root "$MINXIONGHYDROCAST_RESEARCH_ROOT"
+    "$MINXIONGHYDROCAST_DATA_ROOT/discovery/event_evidence_catalog.json" \
+  --root "$MINXIONGHYDROCAST_DATA_ROOT"
 ```
 
 Both commands reject a referenced candidate that is unknown, incomplete, unapproved,

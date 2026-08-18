@@ -1,7 +1,9 @@
 # Data Layout
 
 This repository tracks only synthetic or low-risk sample data. Live captures, source exports,
-model-ready datasets, and files containing contact details or credentials must stay out of git.
+model-ready datasets, and files containing contact details or credentials must stay out of Git.
+See [Storage Layout and Git Policy](../docs/storage_layout.md) for the external runtime and data
+boundaries.
 
 ## Folders
 
