@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import json
 import os
@@ -71,62 +72,56 @@ class DataLayout:
             raise ValueError(f"research artifact escapes root: {relative_path}") from exc
         return resolved
 
-    def _remove_stale_lock(self) -> bool:
-        try:
-            payload = json.loads(self.lock_path.read_text(encoding="utf-8"))
-            pid = int(payload["pid"])
-        except FileNotFoundError:
-            return True
-        except (KeyError, TypeError, ValueError, json.JSONDecodeError):
-            try:
-                lock_age_seconds = max(0.0, time.time() - self.lock_path.stat().st_mtime)
-            except FileNotFoundError:
-                return True
-            if lock_age_seconds <= 60:
-                return False
-            self.lock_path.unlink(missing_ok=True)
-            return True
-        try:
-            os.kill(pid, 0)
-        except ProcessLookupError:
-            self.lock_path.unlink(missing_ok=True)
-            return True
-        except PermissionError:
-            return False
-        return False
-
     @contextmanager
     def event_discovery_lock(self) -> Iterator[None]:
+        """Serialize discovery and review across processes and PID namespaces.
+
+        The lock file is intentionally persistent and the kernel advisory lock is
+        the source of truth.  PID-based stale-lock recovery is unsafe when the
+        writer and reviewer run in different PID namespaces (for example, a
+        systemd service and a sandbox), because a live PID can look absent.
+        ``flock`` is released by the kernel if a process exits, so no stale-lock
+        deletion is needed.
+        """
         self.ensure()
-        while True:
+        descriptor = os.open(self.lock_path, os.O_CREAT | os.O_RDWR, 0o600)
+        acquired = False
+        try:
             try:
-                descriptor = os.open(
-                    self.lock_path,
-                    os.O_CREAT | os.O_EXCL | os.O_WRONLY,
-                    0o600,
-                )
-                break
-            except FileExistsError as exc:
-                if self._remove_stale_lock():
-                    continue
+                fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError as exc:
                 raise DataLockError(
                     f"event discovery already running: {self.lock_path}"
                 ) from exc
-        try:
+            acquired = True
             payload = {
                 "pid": os.getpid(),
                 "acquired_at": datetime.now(TAIPEI_TZ).isoformat(timespec="seconds"),
+                "active": True,
             }
+            os.ftruncate(descriptor, 0)
+            os.lseek(descriptor, 0, os.SEEK_SET)
             os.write(descriptor, canonical_json_bytes(payload))
             os.fsync(descriptor)
-            os.close(descriptor)
             yield
         finally:
-            try:
-                os.close(descriptor)
-            except OSError:
-                pass
-            self.lock_path.unlink(missing_ok=True)
+            if acquired:
+                try:
+                    released_payload = {
+                        "pid": os.getpid(),
+                        "acquired_at": payload["acquired_at"],
+                        "released_at": datetime.now(TAIPEI_TZ).isoformat(
+                            timespec="seconds"
+                        ),
+                        "active": False,
+                    }
+                    os.ftruncate(descriptor, 0)
+                    os.lseek(descriptor, 0, os.SEEK_SET)
+                    os.write(descriptor, canonical_json_bytes(released_payload))
+                    os.fsync(descriptor)
+                finally:
+                    fcntl.flock(descriptor, fcntl.LOCK_UN)
+            os.close(descriptor)
 
 
 def require_external_data_root(layout: DataLayout, *, repository_root: Path) -> None:
