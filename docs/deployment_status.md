@@ -58,6 +58,20 @@ Post-rollout official-source contract checks returned a healthy empty warning pr
 observations, and WRA flood-sensor observations. Backup creation and independent archive
 verification completed successfully.
 
+## WRA freshness incident evidence — 2026-09-12
+
+The scheduled `Official Live Contracts` run observed a valid WRA IoW response with 150 joined
+records, while the CWA rain-gauge contract completed successfully. The WRA response was classified
+as `stale` because its newest observation remained at 2026-09-02 12:25 Asia/Taipei when fetched on
+2026-09-12. Repeated local captures had the same upstream content checksum while their fetch times
+advanced, which is consistent with an unchanged upstream snapshot rather than a parser crash or
+missing credential.
+
+The WRA catalog describes IoW flood-depth data as an approximately hourly public snapshot. The
+90-minute freshness limit is therefore retained: widening it to make the scheduled check green
+would hide a source-cadence failure and weaken readiness semantics. See
+[WRA freshness evidence](wra_freshness_evidence.md) for the measurement and follow-up procedure.
+
 ## Data and publication state
 
 Continuous event discovery and the read-only review queue remain active in the private external
@@ -68,7 +82,10 @@ published by this status page.
 The formal public benchmark remains the five-event CWA split documented in
 [baseline results](baseline_results.md). Weighted Tiny U-Net improves aggregate RMSE on the
 independent validation and two local test events, but it regresses CSI on one local test event and
-some lead-time metrics. `forecast_publication_ready=false`.
+some lead-time metrics. The latest private review-queue aggregate contains 128 candidates: 1
+approved `convective`, 2 rejected/unclassified, and 125 pending. No `typhoon`, `frontal`, or
+`mei_yu` candidate is approved, and all candidate formal-split memberships remain `not_added`.
+`forecast_publication_ready=false`.
 
 ## Active blockers
 

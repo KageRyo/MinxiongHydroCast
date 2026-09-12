@@ -123,9 +123,9 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
       a 90-minute freshness limit for the approximately hourly public snapshot.
 - [x] Fail closed on official-source schema drift and permit scraper fallback only for request
       failures.
-- [ ] Retry bounded, demonstrably transient WRA invalid/empty JSON and inconsistent pagination,
+- [x] Retry bounded, demonstrably transient WRA invalid/empty JSON and inconsistent pagination,
       while preserving strict fail-closed behavior for repeatable schema changes and exhausted
-      retries.
+      retries; deployment evidence is recorded in [deployment_status.md](deployment_status.md).
 - [x] Review WRA river/regional-drainage water-level dataset 25768 and prohibit substituting it for
       `flood_sensors`.
 - [ ] Add a separate `river_water_levels` contract only after an operational use case is defined;
