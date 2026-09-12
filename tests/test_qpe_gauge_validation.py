@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from minxionghydrocast.pipelines.qpe_gauge_validation import (
+    GaugeObservation,
     build_qpe_gauge_report,
     extract_gauge_observations,
     extract_gauge_observations_from_xml,
@@ -182,6 +183,35 @@ def test_extract_gauge_observations_from_cwa_like_payload(tmp_path: Path):
     assert observations[0].latitude == 23.1
     assert observations[0].longitude == 120.1
     assert observations[0].rainfall_mm == 6.5
+
+
+def test_extract_gauge_observations_from_normalized_cwa_records():
+    observations = extract_gauge_observations(
+        {
+            "dataset": "rain_gauges",
+            "records": [
+                {
+                    "雨量站代碼": "C0M760",
+                    "雨量站": "民雄",
+                    "緯度": "23.5582",
+                    "經度": "120.4281",
+                    "1小時累積雨量mm": "31.0",
+                    "水情時間ISO": "2026-07-29T18:10:00+08:00",
+                }
+            ],
+        }
+    )
+
+    assert observations == [
+        GaugeObservation(
+            station_id="C0M760",
+            station_name="民雄",
+            latitude=23.5582,
+            longitude=120.4281,
+            rainfall_mm=31.0,
+            data_time="2026-07-29T18:10:00+08:00",
+        )
+    ]
 
 
 def test_extract_gauge_observations_from_cwa_xml_prefers_wgs84(tmp_path: Path):

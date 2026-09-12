@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -26,10 +26,24 @@ from minxionghydrocast.models.metrics import rmse
 PIPELINE_NAME = "qpe_gauge_validation"
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 
-STATION_ID_KEYS = ("StationId", "StationID", "stationId", "station_id", "id")
-STATION_NAME_KEYS = ("StationName", "stationName", "Name", "name")
-LATITUDE_KEYS = ("StationLatitude", "Latitude", "latitude", "lat")
-LONGITUDE_KEYS = ("StationLongitude", "Longitude", "longitude", "lon", "lng")
+STATION_ID_KEYS = (
+    "StationId",
+    "StationID",
+    "stationId",
+    "station_id",
+    "id",
+    "雨量站代碼",
+)
+STATION_NAME_KEYS = ("StationName", "stationName", "Name", "name", "雨量站")
+LATITUDE_KEYS = ("StationLatitude", "Latitude", "latitude", "lat", "緯度")
+LONGITUDE_KEYS = (
+    "StationLongitude",
+    "Longitude",
+    "longitude",
+    "lon",
+    "lng",
+    "經度",
+)
 DEFAULT_RAINFALL_KEYS = (
     "Past1hr",
     "Past1Hr",
@@ -38,6 +52,8 @@ DEFAULT_RAINFALL_KEYS = (
     "past1Hour",
     "hourlyRainfall",
     "rainfall",
+    "1小時累積雨量mm",
+    "1小時累積雨量",
 )
 INVALID_RAINFALL_VALUES = {-99.0, -999.0, -1.0}
 DEFAULT_XML_RAINFALL_WINDOWS = ("Past1hr", "Past1Hr", "Past1Hour")
@@ -138,7 +154,17 @@ def _first_nested_float(payload: dict[str, Any], keys: tuple[str, ...]) -> float
 
 def _first_data_time(payload: dict[str, Any]) -> str:
     for item in _iter_dicts(payload):
-        for key in ("DateTime", "dataTime", "DataTime", "time", "Time"):
+        for key in (
+            "DateTime",
+            "dataTime",
+            "DataTime",
+            "time",
+            "Time",
+            "水情時間ISO",
+            "資料產出時間ISO",
+            "水情時間",
+            "資料產出時間",
+        ):
             value = item.get(key)
             if isinstance(value, str) and value:
                 return value
@@ -472,6 +498,13 @@ def write_report(path: Path, report: dict[str, object]) -> None:
     path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def _summary_int(summary: dict[str, object], key: str) -> int:
+    value = summary[key]
+    if not isinstance(value, int):
+        raise TypeError(f"QPE/gauge report summary field {key!r} must be an integer")
+    return value
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Validate CWA QPE grid values against gauges.")
     parser.add_argument("--qpe-grid", type=Path, required=True)
@@ -506,25 +539,26 @@ def main() -> None:
         rainfall_keys=rainfall_keys,
     )
     write_report(args.output, report)
-    summary = build_run_summary(
+    report_summary = cast(dict[str, object], report["summary"])
+    run_summary = build_run_summary(
         pipeline=PIPELINE_NAME,
-        status=str(report["summary"]["status"]),
+        status=str(report_summary["status"]),
         started_at=started_at,
         start_timer=start_timer,
         inputs={"qpe_grid": str(args.qpe_grid), "gauge_json": str(args.gauge_json)},
         outputs={"report": str(args.output)},
         row_counts={
-            "gauges": int(report["summary"]["gauge_count"]),
-            "matched_gauges": int(report["summary"]["matched_gauge_count"]),
+            "gauges": _summary_int(report_summary, "gauge_count"),
+            "matched_gauges": _summary_int(report_summary, "matched_gauge_count"),
         },
         metrics={
-            "mae_mm": report["summary"]["mae_mm"],
-            "rmse_mm": report["summary"]["rmse_mm"],
-            "bias_mm": report["summary"]["bias_mm"],
+            "mae_mm": report_summary["mae_mm"],
+            "rmse_mm": report_summary["rmse_mm"],
+            "bias_mm": report_summary["bias_mm"],
         },
         metadata={"event_id": args.event_id, "rainfall_keys": list(rainfall_keys)},
     )
-    record_run(summary_output=args.summary_output, log_output=args.log_output, summary=summary)
+    record_run(summary_output=args.summary_output, log_output=args.log_output, summary=run_summary)
     print(f"[OK] Wrote QPE/gauge validation report to {args.output}")
 
 
