@@ -31,6 +31,8 @@ governance details without duplicating changing deployment numbers.
 
 - [Data assets](data_assets.md): durable external layout, build command, split, and
   checksum evidence.
+- [v0.2 dataset protocol](v0.2_dataset_protocol.md): tracked manifests, synthetic checks, evidence
+  gates, and redistribution boundaries.
 - [Continuous event evidence](continuous_event_evidence.md): discovery, artifact completeness,
   human review, and formal-promotion boundary.
 - [Event splits](event_splits.md): event-level leakage controls.

@@ -112,9 +112,10 @@ credentials, raw official data, or model weights.
   system. The accepted risk must be resolved before external operational use.
 - Pending operational safeguards: assign primary and backup operators, route alerts to a named human
   receiver, exercise incident/override/rollback procedures, and complete the real shadow gate.
-- Pending reliability work: add bounded retries for demonstrably transient invalid WRA payloads or
-  inconsistent pagination while retaining strict Pydantic fail-closed behavior for persistent
-  schema changes. The current rolling window contains 16 WRA-related failed attempts.
+- Completed reliability work: bounded retries for demonstrably transient invalid/empty WRA payloads,
+  repeated full pages, and inconsistent measurement/catalog joins are deployed and tested while
+  persistent schema changes still fail closed. Current scheduled `stale` outcomes are a freshness
+  investigation, not a reason to weaken the retry or readiness contract.
 - Pending public exposure work: define SLOs and add authenticated TLS ingress only if the service
   must become reachable beyond localhost.
 - Pending optional hydrology work: define a separate operational use case and contract before
@@ -132,12 +133,12 @@ credentials, raw official data, or model weights.
   idempotent. Two subsequent complete Taiwan-wide-only candidates were reviewed as
   `rejected/unclassified`; catalog verification remained clean and the formal split checksum did
   not change.
-- Next technical focus: harden transient WRA response handling, close the preserved context-only
-  review item, and review the complete Minxiong-local candidates collected from July 15 through
-  July 18. Record a shadow heavy-rain period only when the reviewed radar, gauge, QPE, warning, and
-  official context evidence supports it. Only after the dataset becomes meaningfully more diverse
-  should the formal split change, the model retrain, and the unchanged independent-event gate
-  rerun. Do not consider NowcastNet or forecast publication before those evidence gaps close.
+- Next technical focus: investigate the observed WRA freshness incident without changing the 90-minute
+  threshold, close the preserved context-only review item, and review complete Minxiong-local
+  candidates. Record a shadow heavy-rain period only when the reviewed radar, gauge, QPE, warning,
+  and official context evidence supports it. Only after the dataset becomes meaningfully more
+  diverse should the formal split change, the model retrain, and the unchanged independent-event
+  gate rerun. Do not consider NowcastNet or forecast publication before those evidence gaps close.
 
 ## Phase 1: Data Source Finalization
 

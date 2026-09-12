@@ -6,9 +6,11 @@ deployment hosts, and unpublished evidence stay outside public issues. Keep task
 finish, test, and propose through a focused pull request. The end-to-end target is defined in
 [completion_plan.md](completion_plan.md).
 
+The public backlog below mirrors open GitHub Issues only; completed work remains in the historical
+record below and in closed issues.
+
 ## Public backlog
 
-- [#29 — Add an optical-flow rainfall nowcasting baseline](https://github.com/KageRyo/MinxiongHydroCast/issues/29)
 - [#30 — Expand reviewed radar-event weather-regime diversity](https://github.com/KageRyo/MinxiongHydroCast/issues/30)
 - [#31 — Publish the v0.2 dataset-building protocol and event manifest](https://github.com/KageRyo/MinxiongHydroCast/issues/31)
 

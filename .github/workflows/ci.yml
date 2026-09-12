@@ -39,8 +39,10 @@ jobs:
 
       - name: Install package
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e ".[dev]"
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -e ".[dev]"
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
 
       - name: Compile Python files
         run: python -m compileall -q src tests scripts
@@ -48,8 +50,21 @@ jobs:
       - name: Lint
         run: python -m ruff check .
 
-      - name: Test
-        run: python -m pytest -q
+      - name: Validate tracked public contracts
+        run: python scripts/validate_public_contracts.py
+
+      - name: Static type check
+        run: >-
+          python -m pyright -p pyrightconfig.json
+          src/minxionghydrocast/pipelines/qpe_gauge_validation.py
+          scripts/validate_public_contracts.py
+
+      - name: Test with coverage
+        run: python -m coverage run --source=src -m pytest -q
+
+      - name: Report test coverage
+        if: always()
+        run: python -m coverage report
 
   package:
     name: Build and smoke-test wheel
