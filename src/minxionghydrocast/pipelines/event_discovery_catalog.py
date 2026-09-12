@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -18,6 +19,7 @@ from minxionghydrocast.models.event_evidence_schemas import (
 )
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
+INTEGRITY_VERIFY_WORKERS = 4
 
 
 def now_taipei() -> datetime:
@@ -114,26 +116,39 @@ def verify_event_evidence_catalog(
     *,
     layout: ResearchLayout,
 ) -> tuple[str, ...]:
+    """Verify every cataloged artifact without weakening checksum semantics.
+
+    Each artifact is still checked for existence, exact byte size, and a complete SHA-256
+    digest. Independent files are verified concurrently because a mature external catalog can
+    contain thousands of radar frames; there is intentionally no stat-based cache or skip path.
+    Results are collected in catalog order so error reporting remains deterministic.
+    """
     errors = []
     seen: set[str] = set()
+    unique_artifacts: list[ArtifactRecord] = []
     for artifact in event_catalog_artifacts(catalog):
         if artifact.path in seen:
             errors.append(f"duplicate artifact path: {artifact.path}")
             continue
         seen.add(artifact.path)
+        unique_artifacts.append(artifact)
+
+    def verify_artifact(artifact: ArtifactRecord) -> str | None:
         try:
             path = layout.resolve_relative(artifact.path)
         except ValueError as exc:
-            errors.append(str(exc))
-            continue
+            return str(exc)
         if not path.is_file():
-            errors.append(f"missing artifact: {artifact.path}")
-            continue
+            return f"missing artifact: {artifact.path}"
         if path.stat().st_size != artifact.bytes:
-            errors.append(f"size mismatch: {artifact.path}")
-            continue
+            return f"size mismatch: {artifact.path}"
         if sha256_file(path) != artifact.sha256:
-            errors.append(f"sha256 mismatch: {artifact.path}")
+            return f"sha256 mismatch: {artifact.path}"
+        return None
+
+    with ThreadPoolExecutor(max_workers=INTEGRITY_VERIFY_WORKERS) as executor:
+        verification_results = executor.map(verify_artifact, unique_artifacts)
+        errors.extend(error for error in verification_results if error is not None)
     return tuple(errors)
 
 
