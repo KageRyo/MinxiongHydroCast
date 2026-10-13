@@ -1,0 +1,74 @@
+site_name: MinxiongHydroCast
+site_url: https://kageryo.github.io/MinxiongHydroCast/
+site_description: 民雄官方水文氣象觀測與可重現降雨臨近預報研究。
+repo_url: https://github.com/KageRyo/MinxiongHydroCast
+repo_name: GitHub
+edit_uri: edit/main/docs/
+hooks:
+  - docs/theme/site_hooks.py
+theme:
+  name: mkdocs
+  custom_dir: docs/theme
+  locale: zh_TW
+  color_mode: light
+  user_color_mode_toggle: false
+  navigation_depth: 2
+  highlightjs: false
+  analytics: null
+extra_css:
+  - assets/site.css
+plugins:
+  - search:
+      # Bundled TinySegmenter supports CJK without the zh tokenizer's missing nodejieba.
+      lang: [en, ja]
+      min_search_length: 2
+markdown_extensions:
+  - tables
+  - fenced_code
+  - admonition
+exclude_docs: |
+  /theme/
+  /superpowers/
+validation:
+  nav:
+    omitted_files: info
+  links:
+    not_found: warn
+    unrecognized_links: warn
+    anchors: warn
+nav:
+  - 首頁: index.md
+  - 快速開始:
+      - 本機示範: getting_started.md
+      - 文件總覽: documentation.md
+      - 專案範圍: project_scope.md
+      - 系統架構: architecture.md
+  - 操作維運:
+      - 觀測服務: operational_use.md
+      - API 與狀態判讀: api_reference.md
+      - 部署證據: deployment_status.md
+      - 單機部署: single_host_operations.md
+      - 區域設定: region_profiles.md
+      - 事件處理: incident_response.md
+      - 復原與回滾: rollback.md
+  - 資料與研究:
+      - 資料來源: data_source_register.md
+      - 資料契約: data_contracts.md
+      - 資料資產: data_assets.md
+      - 資料集協定: v0.2_dataset_protocol.md
+      - 事件蒐集與審查: continuous_event_evidence.md
+      - 事件切分: event_splits.md
+      - 雷達轉換: radar_tensor_conversion.md
+      - 基準模型結果: baseline_results.md
+      - Optical Flow: optical_flow_baseline.md
+      - 模型卡: model_cards/minxiong_chiayi_baseline.md
+      - 模型策略: model_strategy.md
+  - 開發貢獻:
+      - 貢獻入口: contributing.md
+      - Adapter 開發: adapter_development.md
+      - 文件站開發: site_development.md
+      - 儲存配置: storage_layout.md
+      - 任務: tasks.md
+      - 路線圖: roadmap.md
+      - 完成條件: completion_plan.md
+      - 決策權責: decision_authority.md

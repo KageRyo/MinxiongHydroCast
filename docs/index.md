@@ -1,58 +1,31 @@
-# Documentation
+---
+title: 民雄水文氣象觀測與研究
+template: home.html
+lang: zh-Hant
+---
 
-The README is the project overview. This index routes implementation, operations, data assets, and
-governance details without duplicating changing deployment numbers.
+# MinxiongHydroCast
 
-## Understand the project
+從官方觀測，走向可驗證的降雨研究。
 
-- [Project identity](project_identity.md): canonical name and package identifiers.
-- [Project scope](project_scope.md): supported capabilities, non-goals, and geographic boundary.
-- [Architecture](architecture.md): components, data paths, gates, and public/private boundaries.
-- [Data source register](data_source_register.md): official authority, purpose, acceptance, and
-  redistribution review.
-- [Data contracts](data_contracts.md): persisted schemas, provenance, and validation behavior.
-- [Storage layout](storage_layout.md): repository, runtime, data-root, and Git boundaries.
-- [Data-root relocation](data_root_relocation.md): verified metadata migration after moving data
-  assets.
+整理民雄／嘉義的官方雨量、淹水深度與雷達資料，保存來源、時間與品質，
+建立可重現的降雨臨近預報研究流程。
 
-## Operate the observation service
+專案目前是內部觀測與資料／模型開發原型。公開文件站沒有即時資料連線；
+實驗預報與風險通知尚未通過全部發布條件。
 
-- [Operational use](operational_use.md): demo/live profiles, API, readiness, features, and
-  production gates.
-- [Single-host operations](single_host_operations.md): localhost-only systemd installation,
-  monitoring, backup, and shadow evaluation.
-- [Region profiles](region_profiles.md): reusable operational boundaries, coverage, and freshness.
-- [Adapter development](adapter_development.md): public source interface and contract tests.
-- [Deployment status](deployment_status.md): dated, public-safe rollout evidence.
-- [Incident response](incident_response.md): detection, triage, containment, and evidence.
-- [Rollback](rollback.md): application and data rollback procedure.
+- [快速開始](getting_started.md)：不用 API key 的合成資料示範。
+- [操作維運](operational_use.md)：資料時效、API、備份與 shadow 條件。
+- [資料與研究](data_assets.md)：事件切分、雷達轉換與模型比較。
+- [開發貢獻](contributing.md)：契約測試、區域設定與文件站開發。
+- [完整文件總覽](documentation.md)。
 
-## Build data and model assets
+## 證據與限制
 
-- [Data assets](data_assets.md): durable external layout, build command, split, and
-  checksum evidence.
-- [v0.2 dataset protocol](v0.2_dataset_protocol.md): tracked manifests, synthetic checks, evidence
-  gates, and redistribution boundaries.
-- [Continuous event evidence](continuous_event_evidence.md): discovery, artifact completeness,
-  human review, and formal-promotion boundary.
-- [Event splits](event_splits.md): event-level leakage controls.
-- [Radar data sources](radar_data_sources.md): official radar/QPE candidates and formats.
-- [Radar tensor conversion](radar_tensor_conversion.md): grid and tensor contract.
-- [Baseline results](baseline_results.md): smoke and formal independent-event metrics.
-- [Optical-flow baseline](optical_flow_baseline.md): deterministic motion baseline, evaluation,
-  and public-safe comparison report.
-- [Model card](model_cards/minxiong_chiayi_baseline.md): intended use, evaluation, and limitations.
-- [Model strategy](model_strategy.md): baseline-first model progression.
+[部署紀錄](deployment_status.md)保存 2026-07-29 的歷史驗證與 2026-09-12 的
+WRA 資料時效事件；這些紀錄不能代表今天的服務健康。
+[五事件模型評估](baseline_results.md#reproducible-five-event-cwa-baseline)顯示
+Tiny U-Net 改善 RMSE，但部分 CSI 與預報時距退步，預報發布仍受阻擋。
 
-## Plan and govern
-
-- [Tasks](tasks.md): current actionable work and acceptance checks.
-- [Roadmap](roadmap.md): long-term milestones.
-- [Completion plan](completion_plan.md): product-level exit criteria.
-- [Decision authority](decision_authority.md): who may approve operational and data-model changes.
-- [Security policy](../SECURITY.md): vulnerability reporting and sensitive-data boundaries.
-- [Changelog](../CHANGELOG.md): released changes.
-
-`tasks.md` is the source of truth for current work; `roadmap.md` owns longer-term direction.
-Runtime counts and gate metrics should be generated from run summaries, with only dated public-safe
-snapshots recorded in `deployment_status.md`.
+官方警戒由主管機關發布。雷達回波、雨量與淹水深度是不同物理量；
+本專案不取代官方警報或緊急決策。詳見[專案範圍](project_scope.md)。

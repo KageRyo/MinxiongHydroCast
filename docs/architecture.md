@@ -113,7 +113,7 @@ cannot satisfy readiness.
 
 The repository ignore rules cover generated data and common credential files, but ignore rules are
 not a substitute for review. Before publishing a change, inspect tracked paths, staged diffs, and
-GitHub secret-scanning results. See [SECURITY.md](../SECURITY.md) and the
+GitHub secret-scanning results. See [SECURITY.md](https://github.com/KageRyo/MinxiongHydroCast/blob/main/SECURITY.md) and the
 [source register](data_source_register.md).
 
 ## Deployment boundary
