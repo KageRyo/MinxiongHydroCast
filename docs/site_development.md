@@ -1,7 +1,14 @@
+---
+lang: zh-Hant
+---
+
 # 文件站開發
 
 網站使用 MkDocs 1.6.1，把現有 Markdown 建置成靜態頁面。
 公開網站不會呼叫 localhost API，也不使用私人觀測快照。
+
+`requirements-docs.txt` 適用本機開發；CI 使用 `requirements-docs.lock` 鎖定全部依賴與
+SHA-256，並只安裝 wheels。此鎖檔對應 Python 3.13 / Linux x86_64。
 
 ## 本機建置
 
@@ -26,6 +33,7 @@ python -m mkdocs serve --dev-addr 127.0.0.1:8000
 | `mkdocs.yml` | 導覽、搜尋、來源排除與連結驗證 |
 | `docs/index.md` | GitHub 可讀的首頁內容與首頁模板設定 |
 | `docs/theme/home.html` | 網站首頁模板 |
+| `docs/theme/site_hooks.py` | 將翻譯 locale 轉為頁面的有效 HTML 語言標記 |
 | `docs/assets/site.css` | 首頁與文件頁的共用視覺樣式 |
 | `docs/documentation.md` | 完整文件入口 |
 | `.github/workflows/docs.yml` | PR 建置檢查與 main 發布 |

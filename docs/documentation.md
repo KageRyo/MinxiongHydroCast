@@ -66,6 +66,16 @@ governance details without duplicating changing deployment numbers.
 - [WRA freshness evidence](wra_freshness_evidence.md) and [NowcastNet migration](nowcastnet_migration.md).
 - [Release notes](releases/v0.1.6.md) and [migration notes](migration_notes.md).
 
+## Release history
+
+- [v0.1.0](releases/v0.1.0.md): observation service.
+- [v0.1.1](releases/v0.1.1.md): portable reference implementation.
+- [v0.1.2](releases/v0.1.2.md): deterministic optical-flow baseline.
+- [v0.1.3](releases/v0.1.3.md): version metadata alignment.
+- [v0.1.4](releases/v0.1.4.md): storage and deployment governance.
+- [v0.1.5](releases/v0.1.5.md): data-root relocation.
+- [v0.1.6](releases/v0.1.6.md): legacy documentation retirement.
+
 `tasks.md` is the source of truth for current work; `roadmap.md` owns longer-term direction.
 Runtime counts and gate metrics should be generated from run summaries, with only dated public-safe
 snapshots recorded in `deployment_status.md`.

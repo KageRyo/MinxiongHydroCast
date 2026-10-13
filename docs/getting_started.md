@@ -1,3 +1,7 @@
+---
+lang: zh-Hant
+---
+
 # 快速開始
 
 MinxiongHydroCast 整理民雄／嘉義的官方水文氣象觀測，並提供可重現的降雨臨近預報

@@ -1,6 +1,7 @@
 ---
 title: 民雄水文氣象觀測與研究
 template: home.html
+lang: zh-Hant
 ---
 
 # MinxiongHydroCast

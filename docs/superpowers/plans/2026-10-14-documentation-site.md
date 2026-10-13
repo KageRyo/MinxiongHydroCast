@@ -35,9 +35,9 @@ Strict builds and generated-link checks protect the public site; GitHub Actions 
 
 **Interfaces:** Markdown documentation feeds MkDocs; homepage metadata selects `home.html`.
 
-- [ ] Configure MkDocs navigation, search, strict link validation, and source exclusions.
-- [ ] Add reading paths and runnable API examples; correct historical/current-state wording.
-- [ ] Build with `python -m mkdocs build --strict`; expect exit 0.
+- [x] Configure MkDocs navigation, search, strict link validation, and source exclusions.
+- [x] Add reading paths and runnable API examples; correct historical/current-state wording.
+- [x] Build with `python -m mkdocs build --strict`; expect exit 0.
 
 ### Task 2: Custom homepage and public-output validation
 
@@ -46,10 +46,10 @@ Strict builds and generated-link checks protect the public site; GitHub Actions 
 
 **Interfaces:** `validate_site(site_dir: Path) -> list[str]` reports broken local href/src targets.
 
-- [ ] Write tests for valid subpath links, missing files/anchors, escaped paths, and ignored external URLs.
-- [ ] Run focused tests; expect failure before validator implementation.
-- [ ] Implement validator and homepage using Jinja URL filters for project-subpath correctness.
-- [ ] Run validator tests, strict build, generated-link check, and desktop/mobile browser checks.
+- [x] Write tests for valid subpath links, missing files/anchors, escaped paths, and ignored external URLs.
+- [x] Run focused tests; expect failure before validator implementation.
+- [x] Implement validator and homepage using Jinja URL filters for project-subpath correctness.
+- [x] Run validator tests, strict build, generated-link check, and desktop/mobile browser checks.
 
 ### Task 3: CI, review, and GitHub flow
 
@@ -57,8 +57,8 @@ Strict builds and generated-link checks protect the public site; GitHub Actions 
 
 **Interfaces:** PR job builds/validates public output; main-only deployment publishes the artifact.
 
-- [ ] Add build and Pages deploy jobs with scoped permissions and deployment concurrency.
-- [ ] Run lint, compile, public contracts, full tests, and strict docs build.
-- [ ] Commit with Conventional Commits, request independent branch review, fix material findings.
+- [x] Add build and Pages deploy jobs with scoped permissions and deployment concurrency.
+- [x] Run lint, compile, public contracts, full tests, and strict docs build.
+- [x] Commit with Conventional Commits, request independent branch review, fix material findings.
 - [ ] Push feature branch, open PR, inspect all checks, squash merge with explicit clean message.
 - [ ] Confirm main checks and Pages deployment and report PR/site URLs.

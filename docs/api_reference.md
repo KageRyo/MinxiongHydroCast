@@ -1,3 +1,7 @@
+---
+lang: zh-Hant
+---
+
 # API 與狀態判讀
 
 API 是 localhost 觀測服務的一部分，與公開靜態文件站分開。先依

@@ -4,6 +4,8 @@ site_description: 民雄官方水文氣象觀測與可重現降雨臨近預報�
 repo_url: https://github.com/KageRyo/MinxiongHydroCast
 repo_name: GitHub
 edit_uri: edit/main/docs/
+hooks:
+  - docs/theme/site_hooks.py
 theme:
   name: mkdocs
   custom_dir: docs/theme

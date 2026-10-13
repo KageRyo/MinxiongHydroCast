@@ -1,5 +1,7 @@
+import json
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
+from types import SimpleNamespace
 
 
 def validator():
@@ -58,3 +60,29 @@ def test_percent_encoded_links_and_fragments_resolve(tmp_path):
 
 def test_missing_site_is_not_reported_as_valid(tmp_path):
     assert validator()(tmp_path / "missing")
+
+
+def test_search_results_with_missing_page_or_anchor_are_reported(tmp_path):
+    (tmp_path / "index.html").write_text('<h1 id="intro">Intro</h1>')
+    (tmp_path / "search").mkdir()
+    (tmp_path / "search" / "search_index.json").write_text(json.dumps({
+        "docs": [{"location": "#intro"}, {"location": "#missing"},
+                 {"location": "missing/"}]
+    }))
+    errors = validator()(tmp_path)
+    assert len(errors) == 2
+    assert any("#missing" in error for error in errors)
+    assert any("missing/" in error for error in errors)
+
+
+def test_page_language_uses_valid_tag_and_defaults_to_english():
+    path = Path(__file__).resolve().parents[1] / "docs" / "theme" / "site_hooks.py"
+    assert path.is_file(), "page language hook is missing"
+    spec = spec_from_file_location("site_hooks", path)
+    module = module_from_spec(spec)
+    spec.loader.exec_module(module)
+    html = '<html lang="zh_TW"><head></head><body>Content</body></html>'
+    assert '<html lang="zh-Hant">' in module.on_post_page(
+        html, page=SimpleNamespace(meta={"lang": "zh-Hant"})
+    )
+    assert '<html lang="en">' in module.on_post_page(html, page=SimpleNamespace(meta={}))
