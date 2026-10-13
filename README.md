@@ -11,6 +11,10 @@
 Official-source hydrometeorological observations and reproducible rainfall-nowcasting data and
 model development for Minxiong, Taiwan.
 
+[Project website and documentation](https://kageryo.github.io/MinxiongHydroCast/) ·
+[Quick start](docs/getting_started.md) · [API reference](docs/api_reference.md) ·
+[Documentation index](docs/documentation.md)
+
 **Status: Operational Prototype / Data and Model Development.** The observation service is usable on a
 localhost-only deployment. Forecast publication and automated risk notifications remain disabled
 until the model, label, and shadow-deployment gates pass.
@@ -83,7 +87,7 @@ configuration are not committed. The
 records
 authority, acceptance, and redistribution questions.
 
-## Current status
+## Dated verification evidence
 
 Public-safe verification on **2026-07-29**:
 
@@ -98,6 +102,12 @@ Public-safe verification on **2026-07-29**:
 These are dated observations, not an availability promise. The current public-safe rollout record
 is in
 [deployment status](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/deployment_status.md).
+
+The later **2026-09-12** WRA freshness investigation recorded an unchanged flood-sensor
+observation timestamp from September 2 despite successful fetches. Readiness correctly failed
+closed. See [WRA freshness evidence](docs/wra_freshness_evidence.md). Neither the July verification
+nor the September incident establishes today's private runtime state. The public documentation
+site is static and does not connect to that runtime.
 
 ## Baseline results
 

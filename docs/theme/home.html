@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="mhc-home" id="main-content">
+  <section class="mhc-intro" aria-labelledby="intro-title">
+    <div class="mhc-intro-copy">
+      <p class="mhc-context">民雄・嘉義 / 水文氣象資料與研究</p>
+      <h1 id="intro-title">從官方觀測，<br>走向可驗證的<br><span>降雨研究。</span></h1>
+      <p class="mhc-lead">讓每一筆雨量與淹水觀測，都有可追溯的來源、時間與品質。讓每一次模型比較，都能被重現與檢驗。</p>
+      <div class="mhc-actions">
+        <a class="mhc-primary" href="{{ 'getting_started/' | url }}">開始本機示範</a>
+        <a href="{{ 'documentation/' | url }}">瀏覽技術文件</a>
+      </div>
+      <p class="mhc-note">內部觀測與研究原型。實驗預報及風險通知尚未開放。</p>
+    </div>
+    <figure class="mhc-field">
+      <div class="mhc-field-top"><span>民雄資料對齊範圍</span><span>WGS84</span></div>
+      <img src="{{ 'assets/minxiong-outline.svg' | url }}" width="480" height="330" alt="民雄工作範圍示意：東經 120.38 至 120.52 度，北緯 23.48 至 23.62 度的矩形資料對齊範圍。">
+      <figcaption>取自專案 region profile 的工作範圍，非正式行政邊界或淹水風險圖。</figcaption>
+      <div class="mhc-field-source">嘉義觀測提供在地脈絡；臺灣雷達支援事件研究。</div>
+    </figure>
+  </section>
+
+  <aside class="mhc-evidence" aria-label="網站資料狀態">
+    <strong>這裡展示方法與證據，不是即時天氣。</strong>
+    <p>文件保存 2026-07-29 的驗證與 2026-09-12 的 WRA 時效事件。私人服務的今日健康須另行查驗。</p>
+    <a href="{{ 'deployment_status/' | url }}">查看日期與部署證據</a>
+  </aside>
+
+  <section class="mhc-section" aria-labelledby="flow-title">
+    <div class="mhc-section-head"><h2 id="flow-title">資料有來源，結果有條件。</h2><p>從觀測到研究，每一步都保留可檢驗的依據。</p></div>
+    <ol class="mhc-flow">
+      <li><span class="mhc-flow-label">官方來源</span><h3>CWA / WRA</h3><p>雨量、雷達、降雨警戒與淹水深度，各自保留原始意義。</p></li>
+      <li><span class="mhc-flow-label">品質檢查</span><h3>時間與契約</h3><p>檢查欄位、單位、來源一致性與資料新鮮度。</p></li>
+      <li><span class="mhc-flow-label">可重現資料</span><h3>快照與事件</h3><p>保存校驗資訊，人工審查事件，固定訓練與測試切分。</p></li>
+      <li><span class="mhc-flow-label">研究評估</span><h3>比較與門檻</h3><p>以獨立事件及各預報時距評估，通過條件才考慮發布。</p></li>
+    </ol>
+    <a href="{{ 'architecture/' | url }}">深入了解系統架構</a>
+  </section>
+
+  <section class="mhc-section mhc-reading" aria-labelledby="reading-title">
+    <h2 id="reading-title">從你的任務開始。</h2>
+    <div class="mhc-paths">
+      <a href="{{ 'getting_started/' | url }}"><h3>先試用</h3><p>不用 API key，啟動合成資料示範，理解介面與 readiness。</p><span>快速開始</span></a>
+      <a href="{{ 'operational_use/' | url }}"><h3>操作觀測服務</h3><p>設定官方來源，判讀資料時效、監控與復原程序。</p><span>操作維運</span></a>
+      <a href="{{ 'data_assets/' | url }}"><h3>重現研究</h3><p>從雷達事件切分、張量轉換到基準模型比較。</p><span>資料與研究</span></a>
+      <a href="{{ 'contributing/' | url }}"><h3>參與開發</h3><p>以合成 fixtures、資料契約與文件改善開始貢獻。</p><span>開發指南</span></a>
+    </div>
+  </section>
+
+  <section class="mhc-section mhc-results" aria-labelledby="results-title">
+    <div class="mhc-section-head"><h2 id="results-title">改善誤差，還不等於能發布。</h2><p>五個正式雷達事件：兩個訓練、一個驗證、兩個獨立在地測試。</p></div>
+    <div class="mhc-table-wrap"><table>
+      <caption>獨立驗證與測試的 CSI 比較，門檻 35 dBZ；數值越高越好。歷史實驗結果，非即時預報。</caption>
+      <thead><tr><th scope="col">事件 / 切分</th><th scope="col">Persistence</th><th scope="col">Tiny U-Net</th><th scope="col">結果</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">2026-07-09 / 驗證</th><td>0.188989</td><td>0.205842</td><td>CSI 改善</td></tr>
+        <tr><th scope="row">2026-07-03 / 測試</th><td>0.315475</td><td>0.294527</td><td class="mhc-caution">CSI 退步</td></tr>
+        <tr><th scope="row">2026-07-11 / 測試</th><td>0.119412</td><td>0.122282</td><td>CSI 改善</td></tr>
+      </tbody>
+    </table></div>
+    <p>加權 Tiny U-Net 在上述事件降低整體 RMSE，但部分 CSI 與預報時距仍退步。事件多樣性、QPE／雨量站驗證及在地淹水標籤也需補足。</p>
+    <div class="mhc-actions"><a href="{{ 'baseline_results/' | url }}">完整評估與重現方式</a><a href="{{ 'model_cards/minxiong_chiayi_baseline/' | url }}">模型使用限制</a></div>
+  </section>
+
+  <section class="mhc-section mhc-boundary" aria-labelledby="boundary-title">
+    <h2 id="boundary-title">尊重資料與決策的邊界。</h2>
+    <p>官方警戒由主管機關發布。雷達回波、雨量與淹水深度是不同物理量；研究結果不取代官方警報或緊急決策。程式的 MIT 授權也不代表第三方資料或模型權重可任意再散布。</p>
+    <div class="mhc-actions"><a href="{{ 'project_scope/' | url }}">專案能力與範圍</a><a href="{{ 'data_source_register/' | url }}">資料來源與使用條件</a></div>
+  </section>
+</main>
+{% endblock %}

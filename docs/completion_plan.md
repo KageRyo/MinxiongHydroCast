@@ -36,7 +36,13 @@ credentials, raw official data, or model weights.
 - Service-level objectives cover data freshness, pipeline success, and forecast availability.
 - Raw data, API keys, checkpoints, and generated artifacts remain outside git.
 
-## Current Status
+## Implementation status and dated evidence
+
+This section summarizes implemented capabilities and historical evidence, not current runtime
+health. [Deployment status](deployment_status.md) owns dated operational evidence, including the
+later 2026-09-12 WRA freshness incident. [Tasks](tasks.md) owns actionable work; the
+[roadmap](roadmap.md) owns long-term milestones. Recheck private run summaries before an
+operational decision; do not infer present readiness from the July figures below.
 
 - Completed: CWA `O-A0059-001` historyAPI live verification, short multi-frame radar sequence
   download, sequence validation, XML/JSON CWA grid parsing, tensor conversion, and persistence

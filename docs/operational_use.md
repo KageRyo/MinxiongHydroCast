@@ -147,6 +147,9 @@ mhc serve
 
 The following endpoints are available:
 
+See the [API reference](api_reference.md) for runnable requests, complete forecast-unavailable
+JSON, and the distinction between HTTP status, source outcome, readiness, and shadow gates.
+
 | Endpoint | Purpose |
 | --- | --- |
 | `GET /healthz` | Process liveness |

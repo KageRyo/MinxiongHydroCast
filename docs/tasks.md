@@ -95,7 +95,11 @@ record below and in closed issues.
 
 ## Next
 
-### Immediate Operational Queue (Verified 2026-07-29)
+### Operational Queue (July 2026 verification baseline)
+
+The queue below was established from dated July evidence. The later
+[September WRA freshness incident](wra_freshness_evidence.md) must be considered before reusing
+those readiness figures. Live run summaries, rather than this checklist, establish current health.
 
 Complete these items in order unless candidate review and code work are being handled independently.
 Each code change should remain a focused pull request with its own tests and rollout evidence.
