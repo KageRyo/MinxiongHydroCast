@@ -56,6 +56,7 @@ nav:
       - 資料契約: data_contracts.md
       - 資料資產: data_assets.md
       - 資料集協定: v0.2_dataset_protocol.md
+      - 資料集驗收: dataset_acceptance.md
       - 事件蒐集與審查: continuous_event_evidence.md
       - 事件切分: event_splits.md
       - 雷達轉換: radar_tensor_conversion.md

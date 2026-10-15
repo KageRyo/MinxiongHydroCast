@@ -95,6 +95,11 @@ record below and in closed issues.
 
 ## Next
 
+The [2026-10-15 acceptance record](dataset_acceptance.md) separates verified source reconstruction
+from remaining event review, historical validation, rights, and archival release evidence. Use
+the [dated deployment update](deployment_status.md#verification-update-2026-10-15) when assessing
+shadow progress; the July figures below remain historical.
+
 ### Operational Queue (July 2026 verification baseline)
 
 The queue below was established from dated July evidence. The later
