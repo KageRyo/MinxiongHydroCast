@@ -90,3 +90,29 @@ jobs:
 
       - name: Smoke-test installed CLI and demo service
         run: python scripts/package_smoke.py
+
+  protocol:
+    name: Rebuild dataset protocol archive
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install source verification dependencies
+        run: |
+          python -m pip install --require-hashes "--only-binary=:all:" -r requirements-protocol.lock
+          python -m pip install --no-deps --no-build-isolation .
+      - name: Build, verify, and reconstruct synthetic data
+        run: |
+          python scripts/protocol_archive.py build --output "$RUNNER_TEMP/protocol.tar.gz"
+          python scripts/protocol_archive.py verify --archive "$RUNNER_TEMP/protocol.tar.gz" --extract-to "$RUNNER_TEMP/protocol-source"
+          cd "$RUNNER_TEMP/protocol-source"
+          python scripts/validate_public_contracts.py
+          python -m pytest -q tests/test_public_contracts.py tests/test_event_splits.py tests/test_dataset_build.py tests/test_qpe_gauge_validation.py tests/test_radar_source_adapters.py tests/test_radar_tensor_conversion.py tests/test_tensor_baseline_evaluation.py
+      - name: Retain verified source archive
+        uses: actions/upload-artifact@v7
+        with:
+          name: dataset-protocol-source
+          path: ${{ runner.temp }}/protocol.tar.gz
+          if-no-files-found: error

@@ -11,7 +11,7 @@ it does not certify a released official dataset or forecast readiness.
 | Fixed split traces to human-reviewed evidence | Five-event 2/1/2 split is checksum-pinned and non-overlapping | Named human decisions, official weather context, and evidence links for every formal event |
 | Restricted assets remain external | Official captures, generated tensors, private catalogs, and checkpoints use the external data root | Inspect the final archive and record source-specific rights decisions |
 | Release documentation names redistributed content | Protocol distinguishes contracts and synthetic fixtures from official captures and model weights | Version-specific release notes and exact artifact inventory |
-| Artifact is archival and citable without implying forecast readiness | Existing citation describes software 0.1.6; local source reconstruction was verified | Final dataset release identifier, version-consistent citation, checksums, and documented limitations |
+| Artifact is archival and citable without implying forecast readiness | Software citation and protocol-source checksums are separate from a released official dataset | Final dataset release identifier, dataset citation, and reviewed limitations |
 
 The tracked weather-context and QPE/gauge availability tables each cover only one of the current
 five formal event IDs. That entry is still awaiting official context or blocked by missing
@@ -22,10 +22,12 @@ Remaining manifest evidence includes reviewed weather regime, machine-readable s
 per-event frame availability and checksums, and versioned build provenance. Radar threshold
 crossings do not establish a weather mechanism. QPE remains an estimate requiring gauge checks.
 
-The current wheel and sdist are software distributions: they omit the dataset protocol, event
+The wheel and sdist are software distributions: they omit the dataset protocol, event
 manifest, public-contract validator, and test fixtures. A dataset-protocol source archive must
-include those inputs separately, with verification commands and checksums. It must not include
-private runtime reports or imply that the planned v0.2 dataset milestone is complete.
+include those inputs separately, with verification commands and checksums. The
+[protocol archive commands](v0.2_dataset_protocol.md#reproduce-the-credential-free-contract-checks)
+and CI now provide this source reconstruction path. The source archive excludes private runtime
+reports and does not imply that the planned v0.2 dataset milestone is complete.
 
 ## Next actions
 
@@ -34,7 +36,7 @@ private runtime reports or imply that the planned v0.2 dataset milestone is comp
    and formal-split states. Broader regime coverage remains tracked in
    [issue #30](https://github.com/KageRyo/MinxiongHydroCast/issues/30).
 3. Complete formal-event weather context and event-time QPE/gauge reports.
-4. Produce a reproducible, public-safe protocol archive and exercise its clean extraction path.
+4. Retain CI verification of the protocol archive's clean extraction and synthetic reconstruction.
 5. Review rights, release inventory, citation, and versioned dataset evidence before publishing
    the dataset milestone. Model and notification gates remain separate.
 
