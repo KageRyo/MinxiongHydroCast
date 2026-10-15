@@ -10,6 +10,25 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 - Broader human-reviewed radar-event diversity and QPE/gauge validation for `v0.2.0`.
 - Independent model, lead-time, label, and shadow-gate completion for `v0.3.0`.
 
+## [0.1.7] - 2026-10-15
+
+### Added
+
+- Deterministic protocol-source archive build and verification commands with committed source
+  provenance, a pinned event manifest, synthetic fixtures, and per-file checksums.
+- CI reconstruction from the extracted archive and a separate verified GitHub release asset.
+- Public documentation site, dated operational evidence, and a dataset-milestone acceptance record.
+
+### Fixed
+
+- Public manifest drift checks and normalized QPE/gauge evidence validation.
+- Event discovery catalog integrity performance and kernel-backed locking across PID namespaces.
+
+### Publication boundary
+
+- This patch releases source verification tooling. The v0.2 dataset milestone, official event
+  review, source rights, model promotion, and external notification gates remain incomplete.
+
 ## [0.1.6] - 2026-08-18
 
 ### Removed
