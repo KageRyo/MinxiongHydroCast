@@ -156,3 +156,25 @@ def test_build_refuses_restricted_or_linked_source_content(repository, tmp_path,
     result = command(repository, 'build', '--output', str(output))
     assert result.returncode != 0
     assert not output.exists()
+
+
+@pytest.mark.parametrize('field,value', [('source_commit', 123), ('source_tree', None),
+                                        ('forecast_publication_ready', True)])
+def test_verify_rejects_invalid_metadata_with_a_concise_error(repository, tmp_path, field, value):
+    output = tmp_path / 'source.tar.gz'
+    assert command(repository, 'build', '--output', str(output)).returncode == 0
+    files = archive_files(output)
+    metadata = json.loads(files['PROTOCOL_ARCHIVE.json'])
+    metadata[field] = value
+    files['PROTOCOL_ARCHIVE.json'] = json.dumps(metadata).encode()
+    del files['SHA256SUMS']
+    files['SHA256SUMS'] = ''.join(
+        f'{hashlib.sha256(content).hexdigest()}  {name}\n'
+        for name, content in sorted(files.items())
+    ).encode()
+    rewrite_archive(output, files)
+    destination = tmp_path / 'verified'
+    result = command(repository, 'verify', '--archive', str(output), '--extract-to', str(destination))
+    assert result.returncode != 0
+    assert 'Traceback' not in result.stderr
+    assert not destination.exists()

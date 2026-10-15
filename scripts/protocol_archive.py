@@ -140,8 +140,9 @@ def verify_bytes(payload: bytes) -> dict[str, bytes]:
             or metadata.get('artifact_kind') != 'dataset_protocol_source'
             or metadata.get('dataset_milestone_complete') is not False
             or metadata.get('forecast_publication_ready') is not False
-            or not re.fullmatch(r'[0-9a-f]{40}', metadata.get('source_commit', ''))
-            or not re.fullmatch(r'[0-9a-f]{40}', metadata.get('source_tree', ''))):
+            or any(not isinstance(metadata.get(field), str)
+                   or not re.fullmatch(r'[0-9a-f]{40}', metadata[field])
+                   for field in ('source_commit', 'source_tree'))):
         raise ValueError('invalid protocol archive metadata')
     validate_inputs(files)
     files['SHA256SUMS'] = expected
