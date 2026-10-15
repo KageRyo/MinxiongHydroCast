@@ -36,16 +36,20 @@ MAX_BYTES = 128 * 1024 * 1024
 MAX_FILES = 10000
 
 
-def checked_output_path(path: Path) -> Path:
-    if os.path.lexists(path):
-        raise FileExistsError('output destination already exists')
+def checked_path(path: Path) -> Path:
     resolved = path.resolve()
     roots = [Path.cwd().resolve(), Path(tempfile.gettempdir()).resolve()]
     if os.environ.get('RUNNER_TEMP'):
         roots.append(Path(os.environ['RUNNER_TEMP']).resolve())
     if not any(resolved.is_relative_to(root) for root in roots):
-        raise ValueError('outside permitted output roots: checkout and temporary directories')
+        raise ValueError('outside permitted roots: checkout and temporary directories')
     return resolved
+
+
+def checked_output_path(path: Path) -> Path:
+    if os.path.lexists(path):
+        raise FileExistsError('output destination already exists')
+    return checked_path(path)
 
 
 def selected(name: str) -> bool:
@@ -169,6 +173,7 @@ def verify_bytes(payload: bytes) -> dict[str, bytes]:
 
 
 def verify(archive: Path, extract_to: Path | None) -> None:
+    archive = checked_path(archive)
     if archive.stat().st_size > MAX_BYTES:
         raise ValueError('compressed protocol archive exceeds verification limits')
     files = verify_bytes(archive.read_bytes())

@@ -192,7 +192,7 @@ def test_build_rejects_git_option_as_revision(repository, tmp_path):
 def test_build_rejects_output_outside_workspace_and_temporary_roots(repository):
     result = command(repository, 'build', '--output', '/proc/mhc-forbidden/source.tar.gz')
     assert result.returncode != 0
-    assert 'outside permitted output roots' in result.stderr
+    assert 'outside permitted' in result.stderr
 
 
 @pytest.mark.parametrize('action', ['build', 'verify'])
@@ -210,3 +210,9 @@ def test_destinations_refuse_dangling_symlinks_without_writing_targets(repositor
     assert result.returncode != 0
     assert destination.is_symlink()
     assert not target.exists()
+
+
+def test_verify_refuses_reading_archive_outside_permitted_roots(repository):
+    result = command(repository, 'verify', '--archive', '/proc/self/maps')
+    assert result.returncode != 0
+    assert 'outside permitted' in result.stderr
