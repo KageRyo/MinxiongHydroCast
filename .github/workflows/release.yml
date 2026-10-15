@@ -53,14 +53,14 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          python -m pip install pytest
+          python -m pip install --require-hashes "--only-binary=:all:" -r requirements-protocol.lock
           python scripts/protocol_archive.py build --output "protocol-dist/minxiong-hydrocast-protocol-${RELEASE_TAG}.tar.gz"
           python scripts/protocol_archive.py verify --archive "protocol-dist/minxiong-hydrocast-protocol-${RELEASE_TAG}.tar.gz" --extract-to "$RUNNER_TEMP/protocol-source"
           cd "$RUNNER_TEMP/protocol-source"
           python scripts/validate_public_contracts.py
           python -m pytest -q tests/test_public_contracts.py tests/test_event_splits.py tests/test_dataset_build.py tests/test_qpe_gauge_validation.py tests/test_radar_source_adapters.py tests/test_radar_tensor_conversion.py tests/test_tensor_baseline_evaluation.py
           cd "$GITHUB_WORKSPACE/protocol-dist"
-          sha256sum *.tar.gz > SHA256SUMS
+          sha256sum ./*.tar.gz > SHA256SUMS
 
       - name: Upload verified protocol source
         uses: actions/upload-artifact@v7
@@ -84,7 +84,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
-        run: gh release upload "$RELEASE_TAG" protocol-dist/* --repo "$GITHUB_REPOSITORY"
+        run: gh release upload "$RELEASE_TAG" ./protocol-dist/* --repo "$GITHUB_REPOSITORY"
 
   publish:
     name: Publish to PyPI

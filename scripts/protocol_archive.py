@@ -8,6 +8,7 @@ import gzip
 import hashlib
 import io
 import json
+import os
 import re
 import subprocess
 import sys
@@ -27,11 +28,24 @@ REQUIRED = {
 ROOT_FILES = {
     'README.md', 'LICENSE', 'CITATION.cff', 'CHANGELOG.md', 'CONTRIBUTING.md',
     'SECURITY.md', 'pyproject.toml', 'pyrightconfig.json', 'mkdocs.yml',
-    'requirements-docs.txt', 'requirements-docs.lock',
+    'requirements-docs.txt', 'requirements-docs.lock', 'requirements-protocol.lock',
 }
-GENERATED = {'PROTOCOL_ARCHIVE.json', 'SHA256SUMS'}
+METADATA_NAME = 'PROTOCOL_ARCHIVE.json'
+GENERATED = {METADATA_NAME, 'SHA256SUMS'}
 MAX_BYTES = 128 * 1024 * 1024
 MAX_FILES = 10000
+
+
+def checked_output_path(path: Path) -> Path:
+    if os.path.lexists(path):
+        raise FileExistsError('output destination already exists')
+    resolved = path.resolve()
+    roots = [Path.cwd().resolve(), Path(tempfile.gettempdir()).resolve()]
+    if os.environ.get('RUNNER_TEMP'):
+        roots.append(Path(os.environ['RUNNER_TEMP']).resolve())
+    if not any(resolved.is_relative_to(root) for root in roots):
+        raise ValueError('outside permitted output roots: checkout and temporary directories')
+    return resolved
 
 
 def selected(name: str) -> bool:
@@ -68,10 +82,15 @@ def checksums(files: dict[str, bytes]) -> bytes:
 
 
 def build(output: Path, ref: str) -> None:
+    output = checked_output_path(output)
+    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._/-]*', ref):
+        raise ValueError('revision must be a commit hash or a branch/tag name')
     def git(*args: str) -> bytes:
         return subprocess.check_output(['git', *args])
 
-    revision = git('rev-parse', '--verify', f'{ref}^{{commit}}').decode().strip()
+    revision = git('rev-parse', '--verify', '--end-of-options', f'{ref}^{{commit}}').decode().strip()
+    if not re.fullmatch(r'[0-9a-f]{40}', revision):
+        raise ValueError('Git did not return a full commit hash')
     tree = git('rev-parse', f'{revision}^{{tree}}').decode().strip()
     files = {}
     with tarfile.open(fileobj=io.BytesIO(git('archive', '--format=tar', revision))) as source:
@@ -95,7 +114,7 @@ def build(output: Path, ref: str) -> None:
                             'tests/test_radar_tensor_conversion.py',
                             'tests/test_qpe_gauge_validation.py'],
     }
-    files['PROTOCOL_ARCHIVE.json'] = (json.dumps(metadata, indent=2, sort_keys=True)+'\n').encode()
+    files[METADATA_NAME] = (json.dumps(metadata, indent=2, sort_keys=True)+'\n').encode()
     files['SHA256SUMS'] = checksums(files)
     buffer = io.BytesIO()
     with tarfile.open(fileobj=buffer, mode='w', format=tarfile.USTAR_FORMAT) as archive:
@@ -128,12 +147,12 @@ def verify_bytes(payload: bytes) -> dict[str, bytes]:
             content = archive.extractfile(member)
             assert content is not None
             files[member.name] = content.read()
-    if not GENERATED <= files.keys():
+    if GENERATED - files.keys():
         raise ValueError('missing archive metadata or checksums')
     expected = files.pop('SHA256SUMS')
     if expected != checksums(files):
         raise ValueError('archive checksum inventory mismatch')
-    metadata = json.loads(files['PROTOCOL_ARCHIVE.json'])
+    metadata = json.loads(files[METADATA_NAME])
     if not isinstance(metadata, dict):
         raise ValueError('invalid protocol archive metadata')
     if (metadata.get('schema_version') != 1
@@ -154,10 +173,13 @@ def verify(archive: Path, extract_to: Path | None) -> None:
         raise ValueError('compressed protocol archive exceeds verification limits')
     files = verify_bytes(archive.read_bytes())
     if extract_to is not None:
+        extract_to = checked_output_path(extract_to)
         # Validation completes before any extraction; mkdir refuses existing paths and symlinks.
         extract_to.mkdir(parents=True, exist_ok=False)
         for name, data in files.items():
-            target = extract_to / name
+            target = (extract_to / name).resolve()
+            if not target.is_relative_to(extract_to):
+                raise ValueError('archive member escapes the extraction directory')
             target.parent.mkdir(parents=True, exist_ok=True)
             with target.open('xb') as destination:
                 destination.write(data)

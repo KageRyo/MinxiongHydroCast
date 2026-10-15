@@ -68,7 +68,8 @@ def test_build_uses_committed_source_and_produces_verifiable_deterministic_archi
     assert first.read_bytes() == second.read_bytes()
     files = archive_files(first)
     assert files['README.md'] == b'committed source\n'
-    assert '.env' not in files and 'data/external/raw.json' not in files
+    assert '.env' not in files
+    assert 'data/external/raw.json' not in files
     metadata = json.loads(files['PROTOCOL_ARCHIVE.json'])
     assert metadata['source_commit'] == git(repository, 'rev-parse', 'HEAD')
     assert metadata['forecast_publication_ready'] is False
@@ -126,7 +127,8 @@ def test_verify_rejects_unsafe_members(repository, tmp_path, name, kind):
     destination = tmp_path / 'verified'
     result = command(repository, 'verify', '--archive', str(output), '--extract-to', str(destination))
     assert result.returncode != 0
-    assert not destination.exists() and not (tmp_path / 'escape').exists()
+    assert not destination.exists()
+    assert not (tmp_path / 'escape').exists()
 
 
 def test_verify_never_overwrites_existing_destination(repository, tmp_path):
@@ -178,3 +180,33 @@ def test_verify_rejects_invalid_metadata_with_a_concise_error(repository, tmp_pa
     assert result.returncode != 0
     assert 'Traceback' not in result.stderr
     assert not destination.exists()
+
+
+def test_build_rejects_git_option_as_revision(repository, tmp_path):
+    output = tmp_path / 'source.tar.gz'
+    result = command(repository, 'build', '--ref=--help', '--output', str(output))
+    assert result.returncode != 0
+    assert not output.exists()
+
+
+def test_build_rejects_output_outside_workspace_and_temporary_roots(repository):
+    result = command(repository, 'build', '--output', '/proc/mhc-forbidden/source.tar.gz')
+    assert result.returncode != 0
+    assert 'outside permitted output roots' in result.stderr
+
+
+@pytest.mark.parametrize('action', ['build', 'verify'])
+def test_destinations_refuse_dangling_symlinks_without_writing_targets(repository, tmp_path, action):
+    target = tmp_path / 'must-not-be-created'
+    destination = tmp_path / 'alias'
+    destination.symlink_to(target)
+    if action == 'build':
+        result = command(repository, 'build', '--output', str(destination))
+    else:
+        archive = tmp_path / 'source.tar.gz'
+        assert command(repository, 'build', '--output', str(archive)).returncode == 0
+        result = command(repository, 'verify', '--archive', str(archive),
+                         '--extract-to', str(destination))
+    assert result.returncode != 0
+    assert destination.is_symlink()
+    assert not target.exists()
