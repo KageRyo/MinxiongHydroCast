@@ -235,3 +235,27 @@ def test_candidate_consistency_summary_does_not_promote_formal_or_human_reviews(
         assert len(summary[key]) == 64
         assert all(c in "0123456789abcdef" for c in summary[key])
     assert datetime.fromisoformat(summary["generated_at"]).tzinfo is not None
+
+
+def test_label_free_protocol_preserves_unknown_labels_and_source_provenance():
+    manifest = validate_public_manifest()
+    policy = load_pinned_record("label_free_protocol_policy.json")
+    assert policy["human_annotations_required_for_protocol"] is False
+    assert policy["annotation_availability"] == "no_human_annotations_available"
+    for key in ("formal_split_changed", "weather_regime_used_for_split_or_target",
+                "flood_labels_available", "formal_qpe_gauge_validation_complete",
+                "historical_build_authentication_complete", "forecast_publication_ready"):
+        assert policy[key] is False
+    for key, name in (("manifest_sha256", "event_split_manifest.json"),
+                      ("official_context_audit_sha256", "formal_event_source_audit.json")):
+        assert policy[key] == hashlib.sha256((Path("data/samples") / name).read_bytes()).hexdigest()
+    audit = load_pinned_record("formal_event_source_audit.json")
+    sources = {source["source_id"] for source in audit["sources"]}
+    assert [e["event_id"] for e in policy["events"]] == [e.event_id for e in manifest.events]
+    for event in policy["events"]:
+        assert event["split"] == manifest.split_for(event["event_id"])
+        assert event["weather_regime"] is None
+        assert event["annotation_status"] == "unavailable"
+        assert event["context_is_causal_label"] is False
+        assert event["official_context_source_ids"]
+        assert set(event["official_context_source_ids"]) <= sources

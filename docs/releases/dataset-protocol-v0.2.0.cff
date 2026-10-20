@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this label-free dataset-building protocol, cite this artifact separately from the software."
+title: "MinxiongHydroCast label-free radar dataset-building protocol"
+type: dataset
+authors:
+  - family-names: Chang
+    given-names: Chien-Hsun
+version: 0.2.0
+url: "https://github.com/KageRyo/MinxiongHydroCast/releases/tag/dataset-protocol-v0.2.0"
+abstract: >-
+  Source protocol, fixed radar-selected event split, source and frame provenance,
+  public evidence metadata, and synthetic reconstruction fixtures. Prediction targets
+  derive from future observed radar frames. Human weather and flood annotations are
+  unavailable. Original official observations, private catalogs, tensors and model
+  checkpoints are excluded. Historical acquisition and QPE limitations remain explicit.
+  This artifact does not certify forecast readiness.

@@ -11,6 +11,8 @@ permissions:
 jobs:
   build:
     name: Build and verify distributions
+    # Dataset-protocol releases carry a separately verified source asset, not a Python version.
+    if: startsWith(github.event.release.tag_name, 'v')
     runs-on: ubuntu-latest
 
     steps:

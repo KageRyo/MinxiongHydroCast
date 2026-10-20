@@ -74,6 +74,7 @@ def test_build_uses_committed_source_and_produces_verifiable_deterministic_archi
     assert metadata['source_commit'] == git(repository, 'rev-parse', 'HEAD')
     assert metadata['forecast_publication_ready'] is False
     assert metadata['dataset_milestone_complete'] is False
+    assert 'public metadata and test fixtures' in metadata['redistribution']
     extracted = tmp_path / 'verified'
     result = command(repository, 'verify', '--archive', str(first), '--extract-to', str(extracted))
     assert result.returncode == 0, result.stderr
