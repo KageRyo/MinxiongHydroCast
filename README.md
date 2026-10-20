@@ -275,7 +275,7 @@ redistribution or commercial use.
 | [`v0.1.4`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.4) | Data-root migration, storage policy, and verified deployment metadata | Previous release |
 | [`v0.1.3`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.3) | Version metadata alignment and release consistency | Previous release |
 | [`v0.1.2`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.2) | Deterministic optical-flow benchmark and public-safe comparison report | Previous release |
-| `v0.2.0` | Reproducible Radar Dataset | Planned; requires broader reviewed event diversity |
+| `dataset-protocol-v0.2.0` | Label-free radar dataset-building protocol | Source/frame provenance, fixed split and synthetic reconstruction; human annotations unavailable and not required |
 | `v0.3.0` | Baseline Nowcasting | Planned; requires model, label, and lead-time gates |
 
 See [CHANGELOG.md](https://github.com/KageRyo/MinxiongHydroCast/blob/main/CHANGELOG.md), the

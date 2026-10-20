@@ -111,7 +111,8 @@ def build(output: Path, ref: str) -> None:
         'schema_version': 1, 'source_commit': revision, 'source_tree': tree,
         'artifact_kind': 'dataset_protocol_source',
         'dataset_milestone_complete': False, 'forecast_publication_ready': False,
-        'redistribution': 'Committed code, documentation and synthetic fixtures only; '
+        'redistribution': 'Committed code, documentation, package resources, '
+                          'public metadata and test fixtures only; '
                           'official captures, tensors, checkpoints and private evidence excluded.',
         'verify_command': 'python scripts/validate_public_contracts.py',
         'synthetic_tests': ['tests/test_event_splits.py', 'tests/test_dataset_build.py',
