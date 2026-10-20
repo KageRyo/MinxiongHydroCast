@@ -11,8 +11,13 @@ record below and in closed issues.
 
 ## Public backlog
 
-- [#30 — Expand reviewed radar-event weather-regime diversity](https://github.com/KageRyo/MinxiongHydroCast/issues/30)
-- [#31 — Publish the v0.2 dataset-building protocol and event manifest](https://github.com/KageRyo/MinxiongHydroCast/issues/31)
+No open public issues remained after the 2026-10-20 protocol publication. Issues
+[#30](https://github.com/KageRyo/MinxiongHydroCast/issues/30) and
+[#31](https://github.com/KageRyo/MinxiongHydroCast/issues/31) are closed. Proposed rolling
+backtests, event replay and archive coverage are scoped in the
+[roadmap](roadmap.md#next-features-without-manual-annotations); they are not implemented or
+opened as public tasks yet. Historical curated-review items below are a separate track and do
+not make unavailable human labels a prerequisite for label-free research.
 
 ## Active
 

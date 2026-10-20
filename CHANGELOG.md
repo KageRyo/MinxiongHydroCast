@@ -7,10 +7,11 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 
 ### Planned
 
-- Broader human-reviewed radar-event diversity and QPE/gauge validation for `v0.2.0`.
+- Automatic rolling backtests against future observed radar, an event replay explorer, and an
+  archive coverage dashboard; no manual weather/flood annotations required.
 - Independent model, lead-time, label, and shadow-gate completion for `v0.3.0`.
 
-## [0.1.7] - 2026-10-15
+## [0.1.7] - 2026-10-20
 
 ### Added
 
@@ -18,16 +19,23 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
   provenance, a pinned event manifest, synthetic fixtures, and per-file checksums.
 - CI reconstruction from the extracted archive and a separate verified GitHub release asset.
 - Public documentation site, dated operational evidence, and a dataset-milestone acceptance record.
+- Checksum-pinned formal frame/source/build-provenance inventories and a label-free protocol
+  policy, with independent `dataset-protocol-v0.2.0` release notes and citation.
 
 ### Fixed
 
 - Public manifest drift checks and normalized QPE/gauge evidence validation.
+- Require equal timezone-aware observation times and a common declared geographic datum for
+  QPE/gauge matching; select native station coordinate pairs together and reject production-time
+  substitutions, unknown datums and unsupported QPE products/units.
 - Event discovery catalog integrity performance and kernel-backed locking across PID namespaces.
 
 ### Publication boundary
 
-- This patch releases source verification tooling. The v0.2 dataset milestone, official event
-  review, source rights, model promotion, and external notification gates remain incomplete.
+- This software patch ships verification tooling and the label-free protocol policy. The
+  independently published protocol does not require manual labels. Raw observations, tensors,
+  checkpoints and private catalogs remain external; legacy acquisition/QPE limits and existing
+  model/notification gates remain explicit.
 
 ## [0.1.6] - 2026-08-18
 
