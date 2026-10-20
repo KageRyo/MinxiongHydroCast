@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-10-20T04:49:18.044866+00:00",
+  "catalog_snapshot_sha256": "fcebaf587df3e7ce84e72ce8472fa41692e9dabaf5639b7bcdb8dac05493acb0",
+  "coordinate_source_sha256": "7c69a5d0ac130fb4e171ba0ad5b6c74c87665139461b3150101e40568675a386",
+  "selected_exact_time_captures": 59,
+  "unique_source_pairs": 59,
+  "candidates_with_comparisons": 35,
+  "pending_candidates_with_comparisons": 34,
+  "unique_pair_status_counts": {
+    "ok": 59
+  },
+  "excluded_station_reasons": {
+    "unknown_coordinate_crs": 307
+  },
+  "method": "Exact timezone-aware past-hour end times; same declared geographic datum; official coordinate pairs verified against preserved station IDs and WGS84 positions; nearest native grid point.",
+  "scope": "Source-consistency diagnostic, not independent QPE truth, event approval, heavy-rain confirmation or a formal split update.",
+  "formal_split_changed": false,
+  "human_reviews_added": 0,
+  "forecast_publication_ready": false,
+  "validation_code_sha256": "f960c8a46bc4c5ab5c4ed679ad32ffc99319c2c76c1e031ecc43a2dff15a73bc",
+  "verified_shortlist_candidates": 5,
+  "verified_shortlist_artifacts": 454,
+  "verified_shortlist_radar_frames": 219,
+  "shortlist_exact_captures": 16,
+  "shortlist_official_context_months": [
+    "2026-07",
+    "2026-08",
+    "2026-09"
+  ]
+}

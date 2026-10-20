@@ -58,5 +58,45 @@ use newly collected candidates with complete synchronized sources and official c
 proposal must preserve independent splits and rerun the unchanged validation gates; silently
 relabeling the five legacy events is not an acceptable shortcut.
 
+## Preserved candidate fallback, verified 2026-10-20
+
+The fallback now has collected evidence: 59 distinct QPE/gauge capture pairs across 35
+candidates (34 pending and one rejected) have matching observation times and completed
+source-consistency reports. Every source pair passed its recorded byte-count and SHA-256
+checks. The public, checksum-pinned aggregate is
+`data/samples/candidate_qpe_validation_summary.json`; detailed reports and candidate IDs remain
+in the external research store.
+
+The grids declare TWD67 geographic coordinates, while preserved normalized gauges use WGS84.
+The diagnostic used official paired station coordinates only when station ID and both preserved
+WGS84 coordinates agreed within 0.000001 degree. It selected the official native TWD67 pair;
+307 station observations without a verified pair were excluded. No approximate datum shift was
+applied. Each of the 59 reports retains at least one matched station. Because this QPE product
+already incorporates gauge correction, these are consistency checks, not independent accuracy
+estimates. Exact paired captures also do not cover each complete event window.
+
+Five pending, non-overlapping candidates were shortlisted using local gauge rainfall. All 454
+referenced artifacts, including 219 radar frames, passed checksum and size verification. Their
+16 exact paired captures and preserved official July, August and September reports are assembled
+with blank review decisions in an external review proposal. The largest observed Minxiong
+single-station hourly accumulation in this shortlist was 46 mm; this does not establish township
+flooding or approve an event's weather regime. No human decisions or formal split changes were
+added. This provides a concrete review route while the legacy windows' historical QPE remains
+unavailable at the tested URLs.
+
+The validator now requires timezone-aware equal accumulation end times and the same declared
+geographic datum before matching. Raw official station payloads can supply paired native
+coordinates; normalized WGS84 gauges cannot be compared directly to TWD67 grids. Missing or
+incompatible metadata yields exclusions. Previously generated reports must be rerun with these
+checks before use as acceptance evidence. For compatible source payloads:
+
+```bash
+python -m minxionghydrocast.pipelines.qpe_gauge_validation \
+  --qpe-grid /external/capture/qpe.xml \
+  --gauge-json /external/capture/gauges.json \
+  --event-id review_candidate \
+  --output /external/reports/qpe_gauge_validation.json
+```
+
 See [dataset acceptance](dataset_acceptance.md), [dataset protocol](v0.2_dataset_protocol.md)
 and [source rights register](data_source_register.md).

@@ -67,6 +67,7 @@ class GaugeObservation:
     longitude: float
     rainfall_mm: float
     data_time: str = ""
+    crs: str = "WGS84"
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -76,6 +77,7 @@ class GaugeObservation:
             "longitude": self.longitude,
             "rainfall_mm": self.rainfall_mm,
             "data_time": self.data_time,
+            "crs": self.crs,
         }
 
 
@@ -93,6 +95,8 @@ class QpeGaugeMatch:
     grid_col: int | None
     status: str
     reason: str = ""
+    gauge_data_time: str = ""
+    gauge_crs: str = ""
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -108,6 +112,8 @@ class QpeGaugeMatch:
             "grid_col": self.grid_col,
             "status": self.status,
             "reason": self.reason,
+            "gauge_data_time": self.gauge_data_time,
+            "gauge_crs": self.gauge_crs,
         }
 
 
@@ -161,9 +167,7 @@ def _first_data_time(payload: dict[str, Any]) -> str:
             "time",
             "Time",
             "水情時間ISO",
-            "資料產出時間ISO",
             "水情時間",
-            "資料產出時間",
         ):
             value = item.get(key)
             if isinstance(value, str) and value:
@@ -191,25 +195,58 @@ def _child_text(element: ET.Element, path: tuple[str, ...]) -> str:
     return node.text.strip()
 
 
-def _station_xml_coordinates(station: ET.Element) -> tuple[float | None, float | None]:
+def _station_xml_coordinates(
+    station: ET.Element, *, preferred_crs: str
+) -> tuple[float | None, float | None, str]:
     geo_info = _child(station, "GeoInfo")
     if geo_info is None:
-        return None, None
+        return None, None, ""
     coordinates = [
         child for child in list(geo_info) if _local_name(child.tag) == "Coordinates"
     ]
     selected = None
     for coordinate in coordinates:
-        if _child_text(coordinate, ("CoordinateName",)).upper() == "WGS84":
+        if _geographic_crs(_child_text(coordinate, ("CoordinateName",))) == preferred_crs:
             selected = coordinate
             break
     if selected is None and coordinates:
         selected = coordinates[0]
     if selected is None:
-        return None, None
+        return None, None, ""
     return (
         _parse_float(_child_text(selected, ("StationLatitude",))),
         _parse_float(_child_text(selected, ("StationLongitude",))),
+        _child_text(selected, ("CoordinateName",)),
+    )
+
+
+def _station_json_coordinates(
+    station: dict[str, Any], *, normalized: bool, preferred_crs: str
+) -> tuple[float | None, float | None, str]:
+    geo_info = station.get("GeoInfo", {})
+    coordinates = geo_info.get("Coordinates", []) if isinstance(geo_info, dict) else []
+    if isinstance(coordinates, dict):
+        coordinates = [coordinates]
+    if isinstance(coordinates, list) and coordinates:
+        entries = [coordinate for coordinate in coordinates if isinstance(coordinate, dict)]
+        if not entries:
+            return None, None, ""
+        selected = next(
+            (coordinate for coordinate in entries
+             if _geographic_crs(str(coordinate.get("CoordinateName", ""))) == preferred_crs),
+            entries[0],
+        )
+        return (
+            _first_nested_float(selected, LATITUDE_KEYS),
+            _first_nested_float(selected, LONGITUDE_KEYS),
+            str(selected.get("CoordinateName", "")),
+        )
+    # The project's normalized rain_gauges contract uses WGS84. Other flat inputs must
+    # declare their datum; do not guess it from the magnitude of latitude/longitude.
+    return (
+        _first_nested_float(station, LATITUDE_KEYS),
+        _first_nested_float(station, LONGITUDE_KEYS),
+        _first_string(station, ("coordinate_crs", "crs")) or ("WGS84" if normalized else ""),
     )
 
 
@@ -237,6 +274,7 @@ def extract_gauge_observations_from_xml(
     xml_text: str,
     *,
     rainfall_windows: tuple[str, ...] = DEFAULT_XML_RAINFALL_WINDOWS,
+    preferred_crs: str = "WGS84",
 ) -> list[GaugeObservation]:
     root = ET.fromstring(xml_text)
     observations = []
@@ -247,7 +285,7 @@ def extract_gauge_observations_from_xml(
         station_id = _child_text(station, ("StationId",))
         station_name = _child_text(station, ("StationName",))
         data_time = _child_text(station, ("ObsTime", "DateTime"))
-        latitude, longitude = _station_xml_coordinates(station)
+        latitude, longitude, crs = _station_xml_coordinates(station, preferred_crs=preferred_crs)
         rainfall = _station_xml_rainfall(station, rainfall_windows=rainfall_windows)
         if latitude is None or longitude is None or rainfall is None:
             continue
@@ -265,6 +303,7 @@ def extract_gauge_observations_from_xml(
                 longitude=longitude,
                 rainfall_mm=rainfall,
                 data_time=data_time,
+                crs=crs,
             )
         )
     return observations
@@ -274,6 +313,7 @@ def extract_gauge_observations(
     payload: dict[str, Any],
     *,
     rainfall_keys: tuple[str, ...] = DEFAULT_RAINFALL_KEYS,
+    preferred_crs: str = "WGS84",
 ) -> list[GaugeObservation]:
     observations: list[GaugeObservation] = []
     seen: set[tuple[str, str]] = set()
@@ -282,8 +322,9 @@ def extract_gauge_observations(
         station_name = _first_string(item, STATION_NAME_KEYS)
         if not station_id and not station_name:
             continue
-        latitude = _first_nested_float(item, LATITUDE_KEYS)
-        longitude = _first_nested_float(item, LONGITUDE_KEYS)
+        latitude, longitude, crs = _station_json_coordinates(
+            item, normalized=payload.get("dataset") == "rain_gauges", preferred_crs=preferred_crs
+        )
         rainfall = _first_nested_float(item, rainfall_keys)
         if latitude is None or longitude is None or rainfall is None:
             continue
@@ -301,6 +342,7 @@ def extract_gauge_observations(
                 longitude=longitude,
                 rainfall_mm=rainfall,
                 data_time=_first_data_time(item),
+                crs=crs,
             )
         )
     return observations
@@ -317,15 +359,20 @@ def load_gauge_observations(
     path: Path,
     *,
     rainfall_keys: tuple[str, ...] = DEFAULT_RAINFALL_KEYS,
+    preferred_crs: str = "WGS84",
 ) -> list[GaugeObservation]:
     text = path.read_text(encoding="utf-8")
     if text.lstrip().startswith("<"):
         xml_windows = tuple(key for key in rainfall_keys if key.startswith("Past"))
         if not xml_windows:
             xml_windows = DEFAULT_XML_RAINFALL_WINDOWS
-        return extract_gauge_observations_from_xml(text, rainfall_windows=xml_windows)
+        return extract_gauge_observations_from_xml(
+            text, rainfall_windows=xml_windows, preferred_crs=preferred_crs
+        )
     payload = json.loads(text)
-    return extract_gauge_observations(payload, rainfall_keys=rainfall_keys)
+    return extract_gauge_observations(
+        payload, rainfall_keys=rainfall_keys, preferred_crs=preferred_crs
+    )
 
 
 def qpe_grid_index_for_point(
@@ -371,12 +418,16 @@ def match_qpe_to_gauges(
 ) -> list[QpeGaugeMatch]:
     matches: list[QpeGaugeMatch] = []
     for gauge in gauges:
-        qpe_mm, row, col, reason = qpe_value_at(
-            inspection,
-            values,
-            latitude=gauge.latitude,
-            longitude=gauge.longitude,
-        )
+        reason = _alignment_error(inspection, gauge)
+        if reason:
+            qpe_mm, row, col = None, None, None
+        else:
+            qpe_mm, row, col, reason = qpe_value_at(
+                inspection,
+                values,
+                latitude=gauge.latitude,
+                longitude=gauge.longitude,
+            )
         if qpe_mm is None:
             matches.append(
                 QpeGaugeMatch(
@@ -392,6 +443,8 @@ def match_qpe_to_gauges(
                     grid_col=col,
                     status="excluded",
                     reason=reason,
+                    gauge_data_time=gauge.data_time,
+                    gauge_crs=gauge.crs,
                 )
             )
             continue
@@ -409,9 +462,45 @@ def match_qpe_to_gauges(
                 grid_row=row,
                 grid_col=col,
                 status="matched",
+                gauge_data_time=gauge.data_time,
+                gauge_crs=gauge.crs,
             )
         )
     return matches
+
+
+def _geographic_crs(crs: str) -> str:
+    value = crs.strip().upper()
+    if value in {"WGS84", "WGS 84", "EPSG:4326"}:
+        return "WGS84"
+    if value in {"TWD67", "TWD67經緯網格", "EPSG:3821"}:
+        return "TWD67"
+    return ""
+
+
+def _aware_time(value: str) -> datetime | None:
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo is not None and parsed.utcoffset() is not None else None
+
+
+def _alignment_error(inspection: CwaGridInspection, gauge: GaugeObservation) -> str:
+    qpe_time = _aware_time(inspection.data_time)
+    gauge_time = _aware_time(gauge.data_time)
+    if qpe_time is None:
+        return "invalid_qpe_time"
+    if gauge_time is None:
+        return "invalid_gauge_time"
+    if qpe_time != gauge_time:
+        return "gauge_time_mismatch"
+    qpe_crs, gauge_crs = _geographic_crs(inspection.crs), _geographic_crs(gauge.crs)
+    if not qpe_crs or not gauge_crs:
+        return "unknown_coordinate_crs"
+    if qpe_crs != gauge_crs:
+        return "coordinate_crs_mismatch"
+    return ""
 
 
 def summarize_matches(matches: list[QpeGaugeMatch]) -> dict[str, object]:
@@ -461,7 +550,12 @@ def build_qpe_gauge_report(
     rainfall_keys: tuple[str, ...] = DEFAULT_RAINFALL_KEYS,
 ) -> dict[str, object]:
     inspection, values = extract_cwa_grid_values(qpe_grid_path)
-    gauges = load_gauge_observations(gauge_json_path, rainfall_keys=rainfall_keys)
+    if inspection.data_id != "O-B0045-001" or inspection.units != "mm" or not inspection.valid:
+        raise ValueError("QPE validation requires a valid O-B0045-001 past-hour grid in mm")
+    gauges = load_gauge_observations(
+        gauge_json_path, rainfall_keys=rainfall_keys,
+        preferred_crs=_geographic_crs(inspection.crs) or inspection.crs,
+    )
     matches = match_qpe_to_gauges(inspection=inspection, values=values, gauges=gauges)
     summary = summarize_matches(matches)
     return {
@@ -488,6 +582,7 @@ def build_qpe_gauge_report(
         "matches": [match.to_dict() for match in matches],
         "notes": [
             "Nearest-grid lookup is used for the first validation pass.",
+            "Observation end times and declared geographic datums must match; no implicit reprojection.",
             "CWA QPE grids are estimates and must be checked against gauges before flood-risk use.",
         ],
     }
