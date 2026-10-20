@@ -1,5 +1,8 @@
 import json
+from dataclasses import replace
 from pathlib import Path
+
+import pytest
 
 from minxionghydrocast.pipelines.qpe_gauge_validation import (
     GaugeObservation,
@@ -7,6 +10,7 @@ from minxionghydrocast.pipelines.qpe_gauge_validation import (
     extract_gauge_observations,
     extract_gauge_observations_from_xml,
     load_gauge_observations,
+    match_qpe_to_gauges,
     qpe_grid_index_for_point,
     summarize_matches,
 )
@@ -279,6 +283,12 @@ def test_build_qpe_gauge_report_computes_error_metrics(tmp_path: Path):
     gauge_path = tmp_path / "gauges.json"
     write_qpe_grid(qpe_path)
     write_gauges(gauge_path)
+    # This metric fixture deliberately uses a common datum. Mixed datums are tested below.
+    grid = json.loads(qpe_path.read_text())
+    grid["cwaopendata"]["dataset"]["contents"]["contentDescription"] = (
+        "資料無效值為-1。使用之座標系統為WGS84。"
+    )
+    qpe_path.write_text(json.dumps(grid))
 
     report = build_qpe_gauge_report(
         qpe_grid_path=qpe_path,
@@ -311,3 +321,151 @@ def test_summarize_matches_reports_no_matches():
     assert summary["status"] == "no_matches"
     assert summary["matched_gauge_count"] == 0
     assert summary["mae_mm"] is None
+
+
+@pytest.mark.parametrize(
+    ("data_time", "reason"),
+    [
+        ("2026-07-02T15:10:00+08:00", "gauge_time_mismatch"),
+        ("", "invalid_gauge_time"),
+        ("2026-07-02T15:00:00", "invalid_gauge_time"),
+    ],
+)
+def test_matching_excludes_different_or_unzoned_accumulation_end_times(
+    tmp_path: Path, data_time: str, reason: str
+):
+    path = tmp_path / "qpe.json"
+    write_qpe_grid(path)
+    inspection = replace(inspect_cwa_grid_file(path), crs="WGS84")
+    gauge = GaugeObservation("station", "station", 23.0, 120.0, 1.0, data_time)
+    matches = match_qpe_to_gauges(inspection=inspection, values=[1.0] * 6, gauges=[gauge])
+    assert matches[0].status == "excluded"
+    assert matches[0].reason == reason
+    assert matches[0].qpe_mm is None
+
+
+def test_matching_rejects_mixed_coordinate_datums(tmp_path: Path):
+    path = tmp_path / "qpe.json"
+    write_qpe_grid(path)
+    gauge = GaugeObservation(
+        "station", "station", 23.0, 120.0, 1.0, "2026-07-02T15:00:00+08:00"
+    )
+    matches = match_qpe_to_gauges(
+        inspection=inspect_cwa_grid_file(path), values=[1.0] * 6, gauges=[gauge]
+    )
+    assert matches[0].status == "excluded"
+    assert matches[0].reason == "coordinate_crs_mismatch"
+
+
+def test_matching_accepts_same_instant_with_different_utc_offsets(tmp_path: Path):
+    path = tmp_path / "qpe.json"
+    write_qpe_grid(path)
+    inspection = replace(inspect_cwa_grid_file(path), crs="WGS84")
+    gauge = GaugeObservation(
+        "station", "station", 23.0, 120.0, 1.0, "2026-07-02T07:00:00Z"
+    )
+    matches = match_qpe_to_gauges(inspection=inspection, values=[1.0] * 6, gauges=[gauge])
+    assert matches[0].status == "matched"
+
+
+def test_json_coordinate_selection_keeps_latitude_and_longitude_in_same_datum():
+    payload = {
+        "Station": [{
+            "StationId": "station", "ObsTime": {"DateTime": "2026-07-02T15:00:00+08:00"},
+            "GeoInfo": {"Coordinates": [
+                {"CoordinateName": "TWD67", "StationLatitude": 23.0, "StationLongitude": 120.0},
+                {"CoordinateName": "WGS84", "StationLatitude": 23.1, "StationLongitude": 120.1},
+            ]},
+            "Past1hr": 1.0,
+        }]
+    }
+    observation = extract_gauge_observations(payload)[0]
+    assert (observation.latitude, observation.longitude) == (23.1, 120.1)
+
+
+def test_report_uses_official_coordinates_in_the_grid_datum(tmp_path: Path):
+    qpe_path, gauge_path = tmp_path / "qpe.json", tmp_path / "gauge.json"
+    write_qpe_grid(qpe_path)
+    write_gauges(gauge_path)
+    payload = json.loads(gauge_path.read_text())
+    station = payload["cwaopendata"]["dataset"]["Station"][0]
+    station["GeoInfo"]["Coordinates"][0]["StationLongitude"] = "120.2"
+    station["GeoInfo"]["Coordinates"].append({
+        "CoordinateName": "TWD67", "StationLatitude": "23.1", "StationLongitude": "120.1"
+    })
+    gauge_path.write_text(json.dumps(payload))
+    report = build_qpe_gauge_report(
+        qpe_grid_path=qpe_path, gauge_json_path=gauge_path, event_id="native_datum"
+    )
+    assert report["matches"][0]["qpe_mm"] == 5.0
+    assert report["matches"][0]["gauge_crs"] == "TWD67"
+    assert report["summary"]["matched_gauge_count"] == 1
+    assert report["summary"]["excluded_reasons"] == {"coordinate_crs_mismatch": 3}
+
+
+def test_xml_coordinate_selection_can_use_official_native_datum(tmp_path: Path):
+    path = tmp_path / "gauges.xml"
+    write_xml_gauges(path)
+    observation = load_gauge_observations(path, preferred_crs="TWD67")[0]
+    assert (observation.latitude, observation.longitude, observation.crs) == (
+        23.56, 120.42, "TWD67"
+    )
+
+
+def test_flat_undeclared_coordinates_are_not_assumed_to_be_a_known_datum():
+    observation = extract_gauge_observations({"stations": [{
+        "StationId": "station", "StationLatitude": 23.1, "StationLongitude": 120.1,
+        "DateTime": "2026-07-02T15:00:00+08:00", "Past1hr": 1.0,
+    }]})[0]
+    assert observation.crs == ""
+
+
+@pytest.mark.parametrize("production_key", ["資料產出時間ISO", "資料產出時間"])
+def test_production_timestamp_cannot_replace_missing_observation_time(production_key: str):
+    observation = extract_gauge_observations({"dataset": "rain_gauges", "records": [{
+        "雨量站代碼": "station", "緯度": 23.1, "經度": 120.1,
+        production_key: "2026-07-02T15:00:00+08:00", "Past1hr": 1.0,
+    }]})[0]
+    assert observation.data_time == ""
+
+
+@pytest.mark.parametrize("data_time", ["", "not-a-time", "2026-07-02T15:00:00"])
+def test_matching_excludes_missing_invalid_or_naive_grid_time(tmp_path: Path, data_time: str):
+    path = tmp_path / "qpe.json"
+    write_qpe_grid(path)
+    inspection = replace(inspect_cwa_grid_file(path), data_time=data_time)
+    gauge = GaugeObservation(
+        "station", "station", 23.0, 120.0, 1.0, "2026-07-02T15:00:00+08:00", crs="TWD67"
+    )
+    result = match_qpe_to_gauges(inspection=inspection, values=[1.0] * 6, gauges=[gauge])[0]
+    assert result.status == "excluded"
+    assert result.reason == "invalid_qpe_time"
+
+
+@pytest.mark.parametrize("crs", ["", "EPSG:3826", "unrecognized"])
+def test_matching_rejects_unknown_or_projected_coordinate_system(tmp_path: Path, crs: str):
+    path = tmp_path / "qpe.json"
+    write_qpe_grid(path)
+    gauge = GaugeObservation(
+        "station", "station", 23.0, 120.0, 1.0, "2026-07-02T15:00:00+08:00", crs=crs
+    )
+    result = match_qpe_to_gauges(
+        inspection=inspect_cwa_grid_file(path), values=[1.0] * 6, gauges=[gauge]
+    )[0]
+    assert result.status == "excluded"
+    assert result.reason == "unknown_coordinate_crs"
+
+
+@pytest.mark.parametrize("field,value", [("dataid", "O-A0059-001"), ("units", "dBZ")])
+def test_report_rejects_non_hourly_qpe_product(tmp_path: Path, field: str, value: str):
+    qpe_path, gauge_path = tmp_path / "qpe.json", tmp_path / "gauge.json"
+    write_qpe_grid(qpe_path)
+    write_gauges(gauge_path)
+    payload = json.loads(qpe_path.read_text())
+    if field == "dataid":
+        payload["cwaopendata"][field] = value
+    else:
+        payload["cwaopendata"]["dataset"]["datasetInfo"]["parameterSet"]["Precipitation"] = value
+    qpe_path.write_text(json.dumps(payload))
+    with pytest.raises(ValueError, match="past-hour grid in mm"):
+        build_qpe_gauge_report(qpe_grid_path=qpe_path, gauge_json_path=gauge_path, event_id="bad")

@@ -218,3 +218,20 @@ def test_build_provenance_preserves_legacy_acquisition_limits():
     ).hexdigest()
     assert provenance["training"]["seed"] == 42
     assert provenance["training"]["normalization"]["method"] == "z_score"
+
+
+def test_candidate_consistency_summary_does_not_promote_formal_or_human_reviews():
+    summary = load_pinned_record("candidate_qpe_validation_summary.json")
+    assert summary["formal_split_changed"] is False
+    assert summary["human_reviews_added"] == 0
+    assert summary["forecast_publication_ready"] is False
+    assert summary["selected_exact_time_captures"] == summary["unique_source_pairs"]
+    assert sum(summary["unique_pair_status_counts"].values()) == summary["unique_source_pairs"]
+    assert summary["pending_candidates_with_comparisons"] <= summary["candidates_with_comparisons"]
+    assert summary["verified_shortlist_candidates"] <= summary["pending_candidates_with_comparisons"]
+    assert 0 < summary["shortlist_exact_captures"] <= summary["unique_source_pairs"]
+    assert summary["verified_shortlist_radar_frames"] < summary["verified_shortlist_artifacts"]
+    for key in ("catalog_snapshot_sha256", "coordinate_source_sha256", "validation_code_sha256"):
+        assert len(summary[key]) == 64
+        assert all(c in "0123456789abcdef" for c in summary[key])
+    assert datetime.fromisoformat(summary["generated_at"]).tzinfo is not None
