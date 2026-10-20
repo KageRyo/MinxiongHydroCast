@@ -49,13 +49,13 @@ def run(path, root, **kwargs):
 def test_pending_targets_arrive_without_changing_saved_predictions(tmp_path):
     root = tmp_path / "external"
     frames = [frame(root, i) for i in range(4)]
-    path = manifest(tmp_path, frames[:2])
+    path = manifest(root, frames[:2])
     first = run(path, root, max_new_windows=1)
     assert first["counts"]["new_forecasts"] == 1
     assert first["windows"][0]["leads"][0]["status"] == "pending"
     artifact = root / first["windows"][0]["forecast_path"]
     saved_bytes = artifact.read_bytes()
-    manifest(tmp_path, frames)
+    manifest(root, frames)
     second = run(path, root, max_new_windows=0)
     assert second["counts"]["new_forecasts"] == 0
     assert second["counts"]["new_scores"] == 2
@@ -74,7 +74,7 @@ def test_pending_targets_arrive_without_changing_saved_predictions(tmp_path):
 
 def test_as_of_never_uses_future_inputs_or_targets(tmp_path):
     root = tmp_path / "external"
-    path = manifest(tmp_path, [frame(root, i) for i in range(4)])
+    path = manifest(root, [frame(root, i) for i in range(4)])
     result = run(path, root, as_of=START + timedelta(minutes=10))
     assert len(result["windows"]) == 1
     assert all(x["status"] == "pending" for x in result["windows"][0]["leads"])
@@ -87,7 +87,7 @@ def test_future_observation_values_do_not_change_predictions(tmp_path):
     for value in (0, 90):
         root = tmp_path / str(value)
         refs = [frame(root, 0), frame(root, 1), frame(root, 2, [value] * 4)]
-        result = run(manifest(tmp_path, refs), root, max_new_windows=1)
+        result = run(manifest(root, refs), root, max_new_windows=1)
         with np.load(root / result["windows"][0]["forecast_path"], allow_pickle=False) as a:
             forecast_values.append(a["predictions"].copy())
     np.testing.assert_array_equal(*forecast_values)
@@ -97,7 +97,7 @@ def test_common_mask_ignores_nodata_for_both_models(tmp_path):
     root = tmp_path / "external"
     refs = [frame(root, 0), frame(root, 1, [10, -999, 10, 10]),
             frame(root, 2, [20, 20, -999, 20])]
-    result = run(manifest(tmp_path, refs), root, max_new_windows=1)
+    result = run(manifest(root, refs), root, max_new_windows=1)
     metrics = result["windows"][0]["leads"][0]["metrics"]
     assert metrics["persistence"]["valid_pixel_count"] == 2
     assert metrics["optical_flow"]["valid_pixel_count"] == 2
@@ -107,7 +107,7 @@ def test_common_mask_ignores_nodata_for_both_models(tmp_path):
 def test_all_nodata_is_excluded_not_perfect_score(tmp_path):
     root = tmp_path / "external"
     refs = [frame(root, 0), frame(root, 1), frame(root, 2, [-999] * 4)]
-    result = run(manifest(tmp_path, refs), root, max_new_windows=1)
+    result = run(manifest(root, refs), root, max_new_windows=1)
     lead = result["windows"][0]["leads"][0]
     assert lead["status"] == "excluded"
     assert lead["reason"] == "no_common_valid_pixels"
@@ -118,7 +118,7 @@ def test_all_nodata_is_excluded_not_perfect_score(tmp_path):
 def test_tampered_source_or_cached_artifact_fails_closed(tmp_path, failure):
     root = tmp_path / "external"
     refs = [frame(root, i) for i in range(3)]
-    path = manifest(tmp_path, refs)
+    path = manifest(root, refs)
     report = run(path, root, max_new_windows=1)
     if failure == "source":
         p = root / refs[2]["path"]
@@ -135,17 +135,17 @@ def test_tampered_source_or_cached_artifact_fails_closed(tmp_path, failure):
 def test_changed_input_identity_cannot_replace_forecast(tmp_path):
     root = tmp_path / "external"
     refs = [frame(root, i) for i in range(3)]
-    path = manifest(tmp_path, refs)
+    path = manifest(root, refs)
     run(path, root, max_new_windows=1)
     refs[1] = frame(root, 1, [42] * 4)
-    manifest(tmp_path, refs)
+    manifest(root, refs)
     with pytest.raises(ValueError, match="input identity"):
         run(path, root, max_new_windows=0)
 
 
 def test_changed_configuration_uses_separate_store(tmp_path):
     root = tmp_path / "external"
-    path = manifest(tmp_path, [frame(root, i) for i in range(3)])
+    path = manifest(root, [frame(root, i) for i in range(3)])
     a = run(path, root, max_new_windows=1)
     b = run_backtest(manifest_path=path, root=root, config=config(event_threshold=20.0),
                      max_new_windows=1)
@@ -155,7 +155,7 @@ def test_changed_configuration_uses_separate_store(tmp_path):
 
 def test_bounded_new_work_resumes_at_next_origin(tmp_path):
     root = tmp_path / "external"
-    path = manifest(tmp_path, [frame(root, i) for i in range(5)])
+    path = manifest(root, [frame(root, i) for i in range(5)])
     a = run(path, root, max_new_windows=1)
     b = run(path, root, max_new_windows=1)
     assert a["counts"]["new_forecasts"] == b["counts"]["new_forecasts"] == 1
@@ -166,11 +166,11 @@ def test_bounded_new_work_resumes_at_next_origin(tmp_path):
 def test_missing_input_sequence_is_explicit_and_missing_target_can_recover(tmp_path):
     root = tmp_path / "external"
     refs = [frame(root, i) for i in (0, 1, 3)]
-    report = run(manifest(tmp_path, refs), root)
+    report = run(manifest(root, refs), root)
     assert any(x["reason"] == "input_gap" for x in report["excluded_origins"])
     assert report["windows"][0]["leads"][0]["reason"] == "target_not_captured"
     refs.insert(2, frame(root, 2))
-    later = run(manifest(tmp_path, refs), root, max_new_windows=0)
+    later = run(manifest(root, refs), root, max_new_windows=0)
     assert later["windows"][0]["leads"][0]["status"] == "scored"
 
 
@@ -179,8 +179,9 @@ def test_missing_input_sequence_is_explicit_and_missing_target_can_recover(tmp_p
 def test_incompatible_target_contract_fails_closed(tmp_path, change):
     root = tmp_path / "external"
     refs = [frame(root, 0), frame(root, 1), frame(root, 2, **change)]
+    path = manifest(root, refs)
     with pytest.raises(ValueError, match="grid|timestamp|product"):
-        run(manifest(tmp_path, refs), root, max_new_windows=1)
+        run(path, root, max_new_windows=1)
 
 
 @pytest.mark.parametrize("failure", ["naive_time", "duplicate_time", "duplicate_event",
@@ -204,7 +205,7 @@ def test_manifest_rejects_unsafe_or_ambiguous_contracts(tmp_path, failure):
 
 def test_concurrent_run_is_rejected(tmp_path):
     root = tmp_path / "external"
-    path = manifest(tmp_path, [frame(root, i) for i in range(2)])
+    path = manifest(root, [frame(root, i) for i in range(2)])
     directory = root / "backtests"
     directory.mkdir()
     with (directory / ".lock").open("w") as lock:
@@ -215,7 +216,7 @@ def test_concurrent_run_is_rejected(tmp_path):
 
 def test_orphan_uncommitted_forecast_can_be_rebuilt(tmp_path):
     root = tmp_path / "external"
-    path = manifest(tmp_path, [frame(root, i) for i in range(2)])
+    path = manifest(root, [frame(root, i) for i in range(2)])
     result = run(path, root)
     p = root / result["windows"][0]["forecast_path"]
     p.with_suffix(".json").unlink()
@@ -233,8 +234,9 @@ def test_symlink_source_cannot_escape_data_root(tmp_path):
     source = root / refs[0]["path"]
     source.rename(outside)
     source.symlink_to(outside)
+    path = manifest(root, refs)
     with pytest.raises(ValueError, match="escapes root"):
-        run(manifest(tmp_path, refs), root)
+        run(path, root)
 
 
 def test_target_file_can_arrive_after_forecast(tmp_path):
@@ -243,7 +245,7 @@ def test_target_file_can_arrive_after_forecast(tmp_path):
     target = root / refs[2]["path"]
     raw = target.read_bytes()
     target.unlink()
-    path = manifest(tmp_path, refs)
+    path = manifest(root, refs)
     first = run(path, root, max_new_windows=1)
     assert first["windows"][0]["leads"][0]["reason"] == "target_file_missing"
     target.write_bytes(raw)
@@ -253,7 +255,7 @@ def test_target_file_can_arrive_after_forecast(tmp_path):
 
 def test_output_store_symlink_cannot_escape_data_root(tmp_path):
     root = tmp_path / "external"
-    path = manifest(tmp_path, [frame(root, i) for i in range(2)])
+    path = manifest(root, [frame(root, i) for i in range(2)])
     outside = tmp_path / "outside"
     outside.mkdir()
     (root / "backtests").symlink_to(outside, target_is_directory=True)
@@ -266,7 +268,7 @@ def test_cli_creates_report_through_grouped_command(tmp_path):
     import subprocess
     import sys
     root = tmp_path / "external"
-    path = manifest(tmp_path, [frame(root, i) for i in range(3)])
+    path = manifest(root, [frame(root, i) for i in range(3)])
     result = subprocess.run([sys.executable, "-c", "from minxionghydrocast.cli import main; main()", "model",
         "rolling-backtest", "--manifest", str(path), "--root", str(root),
         "--input-length", "2", "--horizon", "2", "--max-new-windows", "1"],
@@ -280,7 +282,7 @@ def test_cli_creates_report_through_grouped_command(tmp_path):
 @pytest.mark.parametrize("directory", ["runs", "manifests"])
 def test_report_outputs_cannot_follow_parent_symlinks_outside_root(tmp_path, directory):
     root = tmp_path / "external"
-    path = manifest(tmp_path, [frame(root, i) for i in range(2)])
+    path = manifest(root, [frame(root, i) for i in range(2)])
     outside = tmp_path / "outside"
     outside.mkdir()
     (root / "backtests").mkdir()
@@ -292,7 +294,7 @@ def test_report_outputs_cannot_follow_parent_symlinks_outside_root(tmp_path, dir
 
 def test_manifest_snapshot_integrity_is_checked_before_resume(tmp_path):
     root = tmp_path / "external"
-    path = manifest(tmp_path, [frame(root, i) for i in range(2)])
+    path = manifest(root, [frame(root, i) for i in range(2)])
     run(path, root)
     snapshot = next((root / "backtests/manifests").glob("*.json"))
     snapshot.write_bytes(b"corrupt snapshot")
@@ -312,9 +314,27 @@ def test_code_identity_includes_both_contract_and_runner_without_name_collision(
 
 def test_default_configuration_scores_every_ten_to_sixty_minute_lead(tmp_path):
     root = tmp_path / "external"
-    path = manifest(tmp_path, [frame(root, i) for i in range(12)])
+    path = manifest(root, [frame(root, i) for i in range(12)])
     result = run_backtest(manifest_path=path, root=root, config=BacktestConfig(), max_new_windows=1)
     leads = result["windows"][0]["leads"]
     assert [lead["lead_time_minutes"] for lead in leads] == [10, 20, 30, 40, 50, 60]
     assert all(lead["status"] == "scored" for lead in leads)
     assert leads[-1]["metrics"]["persistence"]["rmse"] == 60
+
+
+@pytest.mark.parametrize("case", ["absolute", "relative", "symlink"])
+def test_manifest_path_cannot_read_outside_data_root(tmp_path, case):
+    root = tmp_path / "external"
+    path = manifest(root, [frame(root, i) for i in range(2)])
+    outside = tmp_path / "outside.json"
+    outside.write_bytes(path.read_bytes())
+    if case == "absolute":
+        requested = outside
+    elif case == "relative":
+        requested = Path("../outside.json")
+    else:
+        requested = root / "linked.json"
+        requested.symlink_to(outside)
+    with pytest.raises(ValueError, match="manifest|escapes root"):
+        run(requested, root)
+    assert not (root / "backtests").exists()

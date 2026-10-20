@@ -11,6 +11,10 @@ Install that source revision with `python -m pip install -e .` before using the 
 Use an external data root and a versioned manifest with this structure (replace the paths, byte
 counts and SHA-256 placeholders with the collector's recorded values):
 
+The manifest file itself must also remain inside `--root`, including after resolving symlinks.
+An absolute manifest path is accepted within that root; a relative manifest path is relative to
+the data root, rather than the current working directory.
+
 ```json
 {
   "schema_version": "1.0",

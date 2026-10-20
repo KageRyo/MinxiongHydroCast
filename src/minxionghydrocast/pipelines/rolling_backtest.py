@@ -5,10 +5,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import io
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import numpy as np
 
@@ -20,12 +21,16 @@ from minxionghydrocast.io.data_store import (
 from minxionghydrocast.models import baselines, metrics
 from minxionghydrocast.models.radar_tensor import valid_value_mask
 from minxionghydrocast.models.rolling_backtest import (
-    BacktestConfig, BacktestManifest, RadarFrame, aware_time,
+    BacktestConfig, BacktestEvent, BacktestManifest, RadarFrame, aware_time,
 )
 from minxionghydrocast.pipelines import optical_flow_evaluation, tensor_baseline_evaluation
 from minxionghydrocast.pipelines.backtest_store import (
     backtest_lock, digest, load_record, save_record,
 )
+
+JSON_SUFFIX = ".json"
+FrameData = tuple[dict[str, Any], np.ndarray]
+FrameReader = Callable[[RadarFrame], FrameData]
 
 
 def code_identity() -> dict[str, str]:
@@ -49,14 +54,45 @@ def _grid(inspection: cwa_grid.CwaGridInspection) -> dict[str, Any]:
                                 inspection.start_longitude]).all()
             or inspection.grid_resolution <= 0):
         raise ValueError("unsupported radar product, units or grid contract")
-    return {name: getattr(inspection, name) for name in (
+    grid = {name: getattr(inspection, name) for name in (
         "data_id", "units", "crs", "start_longitude", "start_latitude", "grid_resolution",
         "grid_dimension_x", "grid_dimension_y", "nodata_values",
     )}
+    grid["nodata_values"] = list(grid["nodata_values"])
+    return grid
 
 
-def _read_forecast(path: Path, expected: dict[str, Any]) -> tuple[np.ndarray, np.ndarray, dict]:
-    record = load_record(path.with_suffix(".json"))
+def _frame_reader(layout: DataLayout, config: BacktestConfig) -> FrameReader:
+    @lru_cache(maxsize=config.input_length + config.horizon + 2)
+    def cached(path_name: str, time: str, byte_count: int, checksum: str) -> FrameData:
+        path = layout.resolve_relative(path_name)
+        if not path.is_file():
+            raise FileNotFoundError(path_name)
+        if path.stat().st_size != byte_count or sha256_file(path) != checksum:
+            raise ValueError(f"source frame integrity failure: {path_name}")
+        inspection, values = cwa_grid.extract_cwa_grid_values(path)
+        if aware_time(inspection.data_time) != aware_time(time):
+            raise ValueError("frame header timestamp differs from manifest timestamp")
+        grid = _grid(inspection)
+        return grid, np.asarray(values, dtype=np.float32).reshape(
+            inspection.grid_dimension_y, inspection.grid_dimension_x, 1
+        )
+
+    def read(reference: RadarFrame) -> FrameData:
+        return cached(reference.path, reference.data_time, reference.bytes, reference.sha256)
+    return read
+
+
+@dataclass(frozen=True)
+class _Forecast:
+    path: Path
+    predictions: np.ndarray
+    latest_mask: np.ndarray
+    record: dict[str, Any]
+
+
+def _read_forecast(path: Path, expected: dict[str, Any]) -> _Forecast:
+    record = load_record(path.with_suffix(JSON_SUFFIX))
     if record.get("context") != expected:
         raise ValueError("forecast input identity changed for existing origin/configuration")
     try:
@@ -66,13 +102,197 @@ def _read_forecast(path: Path, expected: dict[str, Any]) -> tuple[np.ndarray, np
             predictions = archive["predictions"]
             mask = archive["last_input_valid"]
         grid = record["grid"]
-        expected_shape = (len(expected["config"]["models"]), expected["config"]["horizon"],
-                          grid["grid_dimension_y"], grid["grid_dimension_x"], 1)
-        if predictions.shape != expected_shape or mask.shape != expected_shape[2:]:
+        shape = (len(expected["config"]["models"]), expected["config"]["horizon"],
+                 grid["grid_dimension_y"], grid["grid_dimension_x"], 1)
+        if predictions.shape != shape or mask.shape != shape[2:]:
             raise ValueError("shape mismatch")
-        return predictions, mask.astype(bool), record
+        return _Forecast(path, predictions, mask.astype(bool), record)
     except (OSError, KeyError, ValueError) as exc:
         raise ValueError("forecast array integrity failure") from exc
+
+
+def _safe_manifest_path(layout: DataLayout, requested: Path) -> Path:
+    requested = requested.expanduser()
+    if requested.is_absolute():
+        try:
+            requested = requested.resolve().relative_to(layout.root)
+        except ValueError as exc:
+            raise ValueError("manifest must remain inside the configured data root") from exc
+    return layout.resolve_relative(requested.as_posix())
+
+
+class _Runner:
+    """One immutable manifest snapshot and bounded generation/scoring pass."""
+
+    def __init__(self, layout: DataLayout, config: BacktestConfig, cutoff: datetime,
+                 max_new_windows: int, manifest: BacktestManifest, raw_manifest: bytes):
+        self.layout, self.config, self.cutoff = layout, config, cutoff
+        self.max_new_windows = max_new_windows
+        self.manifest, self.raw_manifest = manifest, raw_manifest
+        self.config_payload = config.model_dump(mode="json")
+        self.identity = {"config": self.config_payload, "code": code_identity(),
+                         "numpy": np.__version__, "package_version": __version__}
+        self.configuration_id = digest(self.identity)
+        self.store = layout.resolve_relative("backtests")
+        for name in (".lock", "runs", "manifests", "latest.json"):
+            layout.resolve_relative(f"backtests/{name}")
+        self.counts: dict[str, int] = dict.fromkeys(("new_forecasts", "cached_forecasts", "new_scores",
+                                    "cached_scores", "deferred_origins"), 0)
+        self.windows: list[dict[str, Any]] = []
+        self.excluded: list[dict[str, str]] = []
+        self.step = timedelta(minutes=config.cadence_minutes)
+        self.read_frame = _frame_reader(layout, config)
+
+    def forecast_path(self, event_id: str, origin: datetime) -> Path:
+        directory = f"backtests/{self.configuration_id}/{event_id}/{origin:%Y%m%dT%H%M%S%fZ}"
+        self.layout.resolve_relative(f"{directory}/forecast.json")
+        return self.layout.resolve_relative(f"{directory}/forecast.npz")
+
+    def predict(self, inputs: np.ndarray, nodata: tuple[float, ...]) -> tuple[np.ndarray, np.ndarray]:
+        input_mask = valid_value_mask(inputs, nodata)
+        outputs = []
+        for model in self.config.models:
+            if model == "persistence":
+                output = tensor_baseline_evaluation.persistence_predict(inputs, horizon=self.config.horizon)
+            else:
+                output = optical_flow_evaluation.optical_flow_predict(
+                    inputs, horizon=self.config.horizon, input_mask=input_mask,
+                    max_displacement=self.config.max_displacement,
+                    min_valid_pixels=self.config.min_valid_pixels,
+                    fill_value=nodata[0] if nodata else float("nan"),
+                )
+            outputs.append(output)
+        return np.stack(outputs), input_mask[-1]
+
+    def forecast(self, event_id: str, origin: datetime, refs: list[RadarFrame], path: Path) -> _Forecast:
+        context = {"event_id": event_id, "issue_time": origin.isoformat(),
+                   "configuration_id": self.configuration_id, "config": self.config_payload,
+                   "inputs": [f.model_dump(mode="json") for f in refs]}
+        committed = path.with_suffix(JSON_SUFFIX).exists()
+        # Check identity before reading changed input artifacts.
+        cached = _read_forecast(path, context) if committed else None
+        inputs = [self.read_frame(f) for f in refs]
+        grid = inputs[0][0]
+        if any(g != grid for g, _ in inputs):
+            raise ValueError("input grid contract changed")
+        if cached is not None:
+            if cached.record["grid"] != grid:
+                raise ValueError("cached forecast grid contract changed")
+            self.counts["cached_forecasts"] += 1
+            return cached
+        predictions, latest_mask = self.predict(np.stack([a for _, a in inputs]), tuple(grid["nodata_values"]))
+        payload = io.BytesIO()
+        np.savez_compressed(payload, predictions=predictions, last_input_valid=latest_mask)
+        atomic_write_bytes(path, payload.getvalue())
+        record = {"context": context, "grid": grid, "identity": self.identity,
+                  "created_at": datetime.now(timezone.utc).isoformat(),
+                  "array_sha256": hashlib.sha256(payload.getvalue()).hexdigest(),
+                  "mode": "retrospective_replay"}
+        save_record(path.with_suffix(JSON_SUFFIX), record)
+        self.counts["new_forecasts"] += 1
+        return _Forecast(path, predictions, latest_mask, record)
+
+    def lead_metrics(self, forecast: _Forecast, target: np.ndarray, lead: int) -> dict[str, Any]:
+        nodata = tuple(forecast.record["grid"]["nodata_values"])
+        mask = forecast.latest_mask & valid_value_mask(target, nodata)
+        mask &= np.all(valid_value_mask(forecast.predictions[:, lead - 1], nodata), axis=0)
+        if not mask.any():
+            return {}
+        return {model: optical_flow_evaluation.evaluate_masked_arrays_with_mae(
+            prediction=forecast.predictions[i, lead - 1], target=target,
+            evaluation_mask=mask, event_threshold=self.config.event_threshold,
+        ) for i, model in enumerate(self.config.models)}
+
+    def score(self, forecast: _Forecast, target_ref: RadarFrame | None,
+              target_time: datetime, lead: int) -> dict[str, Any]:
+        result: dict[str, Any] = {
+            "lead_time_minutes": self.config.cadence_minutes * lead,
+            "target_time": target_time.isoformat(), "status": "pending",
+            "reason": "target_after_as_of" if target_time > self.cutoff else "target_not_captured",
+        }
+        if target_time > self.cutoff or target_ref is None:
+            return result
+        try:
+            grid, target = self.read_frame(target_ref)
+        except FileNotFoundError:
+            return {**result, "status": "excluded", "reason": "target_file_missing"}
+        if grid != forecast.record["grid"]:
+            raise ValueError("target grid contract differs from forecast grid")
+        relative = forecast.path.parent.relative_to(self.layout.root).as_posix()
+        path = self.layout.resolve_relative(f"{relative}/scores/{lead:03d}.json")
+        context = {"forecast_sha256": forecast.record["array_sha256"],
+                   "target": target_ref.model_dump(mode="json"), "lead": lead}
+        if path.exists():
+            cached = load_record(path)
+            if cached.get("context") != context:
+                raise ValueError("cached score target identity changed")
+            self.counts["cached_scores"] += 1
+            return cached["result"]
+        metrics_by_model = self.lead_metrics(forecast, target, lead)
+        result.update(status="scored" if metrics_by_model else "excluded",
+                      reason="" if metrics_by_model else "no_common_valid_pixels",
+                      metrics=metrics_by_model)
+        save_record(path, {"context": context, "result": result})
+        self.counts["new_scores"] += 1
+        return result
+
+    def window(self, event: BacktestEvent, origin: datetime, by_time: dict[datetime, RadarFrame]) -> None:
+        issue_time = origin.isoformat()
+        expected = [origin - self.step * i for i in range(self.config.input_length - 1, -1, -1)]
+        if any(t not in by_time for t in expected):
+            self.excluded.append({"event_id": event.event_id, "issue_time": issue_time, "reason": "input_gap"})
+            return
+        path = self.forecast_path(event.event_id, origin)
+        if not path.with_suffix(JSON_SUFFIX).exists() and self.counts["new_forecasts"] >= self.max_new_windows:
+            self.counts["deferred_origins"] += 1
+            return
+        try:
+            forecast = self.forecast(event.event_id, origin, [by_time[t] for t in expected], path)
+        except FileNotFoundError:
+            self.excluded.append({"event_id": event.event_id, "issue_time": issue_time, "reason": "input_file_missing"})
+            return
+        leads = []
+        for lead in range(1, self.config.horizon + 1):
+            target_time = origin + self.step * lead
+            leads.append(self.score(forecast, by_time.get(target_time), target_time, lead))
+        self.windows.append({"event_id": event.event_id, "issue_time": issue_time,
+                             "forecast_path": self.layout.relative(path), "grid": forecast.record["grid"],
+                             "created_at": forecast.record["created_at"], "leads": leads})
+
+    def snapshot(self) -> None:
+        checksum = hashlib.sha256(self.raw_manifest).hexdigest()
+        path = self.layout.resolve_relative(f"backtests/manifests/{checksum}.json")
+        if path.exists():
+            if sha256_file(path) != checksum:
+                raise ValueError("manifest snapshot integrity failure")
+        else:
+            atomic_write_bytes(path, self.raw_manifest)
+
+    def report(self) -> dict[str, Any]:
+        for status in ("scored", "pending", "excluded"):
+            self.counts[f"{status}_leads"] = sum(
+                lead["status"] == status for window in self.windows for lead in window["leads"]
+            )
+        record = {"schema_version": "1.0", "scope": "label_free_research_backtest",
+                  "configuration_id": self.configuration_id, "identity": self.identity,
+                  "manifest_sha256": hashlib.sha256(self.raw_manifest).hexdigest(),
+                  "as_of": self.cutoff.isoformat(), "generated_at": datetime.now(timezone.utc).isoformat(),
+                  "counts": self.counts, "windows": self.windows, "excluded_origins": self.excluded,
+                  "overlapping_origins_are_independent_events": False,
+                  "forecast_publication_ready": False}
+        save_record(self.layout.resolve_relative(f"backtests/runs/{digest(record)}.json"), record)
+        save_record(self.layout.resolve_relative("backtests/latest.json"), record)
+        return record
+
+    def execute(self) -> dict[str, Any]:
+        with backtest_lock(self.store):
+            self.snapshot()
+            for event in self.manifest.events:
+                by_time = {aware_time(f.data_time): f for f in event.frames}
+                for origin in by_time:
+                    if origin <= self.cutoff:
+                        self.window(event, origin, by_time)
+            return self.report()
 
 
 def run_backtest(
@@ -86,183 +306,15 @@ def run_backtest(
     cutoff = aware_time(as_of or datetime.now(timezone.utc))
     layout = DataLayout(root)
     require_external_data_root(layout, repository_root=Path(__file__).resolve().parents[3])
-    raw_manifest = manifest_path.read_bytes()
+    safe_manifest = _safe_manifest_path(layout, manifest_path)
+    raw_manifest = safe_manifest.read_bytes()
     manifest = BacktestManifest.model_validate_json(raw_manifest)
-    config_payload = config.model_dump(mode="json")
-    identity = {"config": config_payload, "code": code_identity(), "numpy": np.__version__,
-                "package_version": __version__}
-    configuration_id = digest(identity)
-    store = layout.resolve_relative("backtests")
-    for name in (".lock", "runs", "manifests", "latest.json"):
-        layout.resolve_relative(f"backtests/{name}")
-    counts = {name: 0 for name in ("new_forecasts", "cached_forecasts", "new_scores",
-                                   "cached_scores", "deferred_origins")}
-    windows: list[dict[str, Any]] = []
-    excluded: list[dict[str, str]] = []
-    step = timedelta(minutes=config.cadence_minutes)
-
-    @lru_cache(maxsize=config.input_length + config.horizon + 2)
-    def cached_frame(path_name: str, time: str, byte_count: int, checksum: str) -> tuple[dict[str, Any], np.ndarray]:
-        reference = RadarFrame(path=path_name, data_time=time, bytes=byte_count, sha256=checksum)
-        path = layout.resolve_relative(reference.path)
-        if not path.is_file():
-            raise FileNotFoundError(reference.path)
-        if path.stat().st_size != reference.bytes or sha256_file(path) != reference.sha256:
-            raise ValueError(f"source frame integrity failure: {reference.path}")
-        inspection, values = cwa_grid.extract_cwa_grid_values(path)
-        if aware_time(inspection.data_time) != aware_time(reference.data_time):
-            raise ValueError("frame header timestamp differs from manifest timestamp")
-        grid = _grid(inspection)
-        # Use JSON-compatible lists in both new and cached records.
-        grid["nodata_values"] = list(grid["nodata_values"])
-        array = np.asarray(values, dtype=np.float32).reshape(
-            inspection.grid_dimension_y, inspection.grid_dimension_x, 1
-        )
-        return grid, array
-
-    def read_frame(reference: RadarFrame) -> tuple[dict[str, Any], np.ndarray]:
-        return cached_frame(reference.path, reference.data_time, reference.bytes, reference.sha256)
-
-    with backtest_lock(store):
-        manifest_sha = hashlib.sha256(raw_manifest).hexdigest()
-        snapshot = layout.resolve_relative(f"backtests/manifests/{manifest_sha}.json")
-        if snapshot.exists():
-            if sha256_file(snapshot) != manifest_sha:
-                raise ValueError("manifest snapshot integrity failure")
-        else:
-            atomic_write_bytes(snapshot, raw_manifest)
-        for event in manifest.events:
-            by_time = {aware_time(f.data_time): f for f in event.frames}
-            for origin, reference in by_time.items():
-                if origin > cutoff:
-                    continue
-                issue_time = origin.isoformat()
-                expected_times = [origin - step * i for i in range(config.input_length - 1, -1, -1)]
-                if any(t not in by_time for t in expected_times):
-                    excluded.append({"event_id": event.event_id, "issue_time": issue_time,
-                                     "reason": "input_gap"})
-                    continue
-                refs = [by_time[t] for t in expected_times]
-                directory_name = f"backtests/{configuration_id}/{event.event_id}/{origin:%Y%m%dT%H%M%S%fZ}"
-                forecast_path = layout.resolve_relative(f"{directory_name}/forecast.npz")
-                layout.resolve_relative(f"{directory_name}/forecast.json")
-                committed = forecast_path.with_suffix(".json").exists()
-                if not committed and counts["new_forecasts"] >= max_new_windows:
-                    counts["deferred_origins"] += 1
-                    continue
-                context = {"event_id": event.event_id, "issue_time": issue_time,
-                           "configuration_id": configuration_id, "config": config_payload,
-                           "inputs": [f.model_dump(mode="json") for f in refs]}
-                if committed:
-                    # Check identity before reading changed input artifacts.
-                    predictions, latest_mask, saved = _read_forecast(forecast_path, context)
-                try:
-                    inputs = [read_frame(f) for f in refs]
-                except FileNotFoundError:
-                    excluded.append({"event_id": event.event_id, "issue_time": issue_time,
-                                     "reason": "input_file_missing"})
-                    continue
-                grid = inputs[0][0]
-                if any(g != grid for g, _ in inputs):
-                    raise ValueError("input grid contract changed")
-                nodata = tuple(grid["nodata_values"])
-                if committed:
-                    if saved["grid"] != grid:
-                        raise ValueError("cached forecast grid contract changed")
-                    counts["cached_forecasts"] += 1
-                else:
-                    input_array = np.stack([a for _, a in inputs])
-                    input_mask = valid_value_mask(input_array, nodata)
-                    outputs = []
-                    for model in config.models:
-                        if model == "persistence":
-                            output = tensor_baseline_evaluation.persistence_predict(
-                                input_array, horizon=config.horizon
-                            )
-                        else:
-                            output = optical_flow_evaluation.optical_flow_predict(
-                                input_array, horizon=config.horizon, input_mask=input_mask,
-                                max_displacement=config.max_displacement,
-                                min_valid_pixels=config.min_valid_pixels,
-                                fill_value=nodata[0] if nodata else float("nan"),
-                            )
-                        outputs.append(output)
-                    predictions = np.stack(outputs)
-                    latest_mask = input_mask[-1]
-                    payload = io.BytesIO()
-                    np.savez_compressed(payload, predictions=predictions, last_input_valid=latest_mask)
-                    atomic_write_bytes(forecast_path, payload.getvalue())
-                    saved = {"context": context, "grid": grid, "identity": identity,
-                             "created_at": datetime.now(timezone.utc).isoformat(),
-                             "array_sha256": hashlib.sha256(payload.getvalue()).hexdigest(),
-                             "mode": "retrospective_replay"}
-                    save_record(forecast_path.with_suffix(".json"), saved)
-                    counts["new_forecasts"] += 1
-                leads = []
-                for lead in range(1, config.horizon + 1):
-                    target_time = origin + step * lead
-                    result: dict[str, Any] = {
-                        "lead_time_minutes": config.cadence_minutes * lead,
-                        "target_time": target_time.isoformat(), "status": "pending",
-                        "reason": "target_after_as_of" if target_time > cutoff else "target_not_captured",
-                    }
-                    target_ref = by_time.get(target_time)
-                    if target_time <= cutoff and target_ref is not None:
-                        try:
-                            target_grid, target = read_frame(target_ref)
-                        except FileNotFoundError:
-                            result.update(status="excluded", reason="target_file_missing")
-                            leads.append(result)
-                            continue
-                        if target_grid != grid:
-                            raise ValueError("target grid contract differs from forecast grid")
-                        score_path = layout.resolve_relative(f"{directory_name}/scores/{lead:03d}.json")
-                        score_context = {"forecast_sha256": saved["array_sha256"],
-                                         "target": target_ref.model_dump(mode="json"), "lead": lead}
-                        if score_path.exists():
-                            cached = load_record(score_path)
-                            if cached.get("context") != score_context:
-                                raise ValueError("cached score target identity changed")
-                            result = cached["result"]
-                            counts["cached_scores"] += 1
-                        else:
-                            mask = latest_mask & valid_value_mask(target, nodata)
-                            mask &= np.all(valid_value_mask(predictions[:, lead - 1], nodata), axis=0)
-                            metrics_by_model = {}
-                            if mask.any():
-                                for i, model in enumerate(config.models):
-                                    metrics_by_model[model] = optical_flow_evaluation.evaluate_masked_arrays_with_mae(
-                                        prediction=predictions[i, lead - 1], target=target,
-                                        evaluation_mask=mask, event_threshold=config.event_threshold,
-                                    )
-                            result.update(status="scored" if mask.any() else "excluded",
-                                          reason="" if mask.any() else "no_common_valid_pixels",
-                                          metrics=metrics_by_model)
-                            save_record(score_path, {"context": score_context, "result": result})
-                            counts["new_scores"] += 1
-                    leads.append(result)
-                windows.append({"event_id": event.event_id, "issue_time": issue_time,
-                                "forecast_path": layout.relative(forecast_path), "grid": grid,
-                                "created_at": saved["created_at"], "leads": leads})
-        report = {"schema_version": "1.0", "scope": "label_free_research_backtest",
-                  "configuration_id": configuration_id, "identity": identity,
-                  "manifest_sha256": hashlib.sha256(raw_manifest).hexdigest(),
-                  "as_of": cutoff.isoformat(), "generated_at": datetime.now(timezone.utc).isoformat(),
-                  "counts": counts, "windows": windows, "excluded_origins": excluded,
-                  "overlapping_origins_are_independent_events": False,
-                  "forecast_publication_ready": False}
-        for status in ("scored", "pending", "excluded"):
-            counts[f"{status}_leads"] = sum(
-                lead["status"] == status for window in windows for lead in window["leads"]
-            )
-        save_record(layout.resolve_relative(f"backtests/runs/{digest(report)}.json"), report)
-        save_record(layout.resolve_relative("backtests/latest.json"), report)
-        return report
+    return _Runner(layout, config, cutoff, max_new_windows, manifest, raw_manifest).execute()
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--manifest", type=Path, required=True)
+    parser.add_argument("--manifest", type=Path, required=True, help="Manifest inside --root; relative paths are root-relative.")
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--as-of", type=aware_time)
     parser.add_argument("--input-length", type=int, default=6)

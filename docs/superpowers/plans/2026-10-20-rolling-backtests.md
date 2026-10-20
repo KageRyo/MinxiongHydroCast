@@ -47,7 +47,7 @@ README.md, deploy/systemd-user/minxiong-hydrocast-backtest.{service,timer}.
 - [x] Write a failing CLI integration test, wire command and add disabled scheduling templates.
 - [x] Document manifest production, research-only scope, integrity and retry/limit semantics.
 - [x] Run focused/full tests, lint/type checks and docs build; run a bounded preserved-source case.
-- [ ] Request one read-only whole-branch review, fix important findings and create a verified PR.
+- [x] Request one read-only whole-branch review, fix important findings and create a verified PR.
 
 ## Execution ledger
 
@@ -67,3 +67,9 @@ README.md, deploy/systemd-user/minxiong-hydrocast-backtest.{service,timer}.
   targets, 0 new scores on repeat; original source catalog and formal split unchanged.
 - Service/timer syntax checked with a temporary inert executable; no units installed/enabled.
 - Remaining integration: final review results, committed-source reconstruction and CI/PR.
+
+- PR #61 Sonar follow-up: restrict manifest reads to the configured data root, with three
+  red/green absolute/relative/symlink escape tests; decompose the runner and resolve lint findings.
+  Final read-only review found no important issues. Updated verification: 417 full tests,
+  targeted Pyright (zero errors), Ruff and strict docs/link validation pass. The bounded real-data
+  replay passes again with unchanged forecast bytes and source/formal catalogs.
