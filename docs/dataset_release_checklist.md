@@ -9,6 +9,12 @@ Future observed radar frames provide the targets. Named human weather/flood labe
 QPE coverage are not prerequisites for this protocol publication; their absence must be disclosed.
 This corrects the earlier requirement rather than claiming the missing evidence was collected.
 
+The [protocol release](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/dataset-protocol-v0.2.0)
+was published on 2026-10-20. Its five assets and all 263 archive members were verified after
+download, and 62 reconstruction tests passed from that extraction. The
+[acceptance record](dataset_acceptance.md#published-protocol-2026-10-20) records the exact source
+commit, archive digest and completed protocol criteria.
+
 ## Collected evidence for the fixed formal split
 
 The [CWA July report](https://www.cwa.gov.tw/Data/climate/Watch/report/report_202607.pdf),
@@ -18,13 +24,13 @@ provides the official warning interval. These were downloaded over verified TLS 
 externally with checksums. The monthly report's PDF creation date is not treated as its publication
 date. Context source availability is distinct from a reviewer's final causal classification.
 
-| Formal event window (Taiwan time) | Official context collected | C0M760 complete hourly intervals | Station sum / peak hour (mm) | Remaining review |
+| Formal event window (Taiwan time) | Official context collected | C0M760 complete hourly intervals | Station sum / peak hour (mm) | Unclassified local context |
 | --- | --- | --- | --- | --- |
-| July 7, 04:00–12:00, train | July report's July 1–8 Pacific High annotation | 8 / 8 | 0 / 0 | Local mechanism and label |
-| July 10, 10:00–20:00, train | July report's July 10–11 Bavi annotation and typhoon record | 10 / 10 | 0 / 0 | Local mechanism and label |
+| July 7, 04:00–12:00, train | July report's July 1–8 Pacific High annotation | 8 / 8 | 0 / 0 | Local mechanism unknown |
+| July 10, 10:00–20:00, train | July report's July 10–11 Bavi annotation and typhoon record | 10 / 10 | 0 / 0 | Local mechanism unknown |
 | July 9, 16:00–22:00, validation | Bavi sea-warning interval begins July 9 at 14:30 | 6 / 6 | 0 / 0 | Local mechanism; warning interval alone does not establish local effects |
-| July 3, 13:00–19:00, test | July report's July 1–8 Pacific High annotation | 6 / 6 | 7 / 5.5 | Local mechanism and label |
-| July 11, 00:00–06:00, test | July report's July 10–11 Bavi annotation and typhoon record | 6 / 6 | 16.5 / 6 | Local mechanism and label |
+| July 3, 13:00–19:00, test | July report's July 1–8 Pacific High annotation | 6 / 6 | 7 / 5.5 | Local mechanism unknown |
+| July 11, 00:00–06:00, test | July report's July 10–11 Bavi annotation and typhoon record | 6 / 6 | 16.5 / 6 | Local mechanism unknown |
 
 Station sums cover only full one-hour intervals within each event; they are not township-wide
 rainfall, flood labels or confirmed heavy-rain periods. Each hourly value had a non-negative
@@ -33,16 +39,16 @@ probe times are in `data/samples/formal_event_source_audit.json`; the raw series
 Current station metadata identifies Minxiong C0M760 at WGS84 120.428457 E, 23.551754 N. Historical
 relocation information has not been independently checked.
 
-## What must happen before closing #31
+## Published protocol checklist
 
-| Item | Current state | Concrete next action |
+| Item | Current state | Protocol treatment |
 | --- | --- | --- |
-| Fixed manifest, frame inventory and synthetic reconstruction | Implemented and CI checked | Preserve them in the release packet and record final revision/checksums |
-| Annotation availability and split provenance | No human annotations; five fixed radar-selected events | Publish null weather regimes, unchanged split/checksum and source/frame evidence; do not call them human reviewed |
-| Event-time QPE/gauge validation | CODiS observations collected; formal matched QPE missing | Publish the gap explicitly; keep candidate consistency reports separate; do not claim independent rainfall validation |
-| Acquisition and build provenance | Historical run retained, with TLS verification disabled and exact command/revision absent | Disclose those limits; record the new protocol archive's exact revision, command and inventory. Authenticated corpus reconstruction remains separate work |
-| Rights and redistribution inventory | Code, documentation, fixtures and metadata only; original captures external | List exact archive contents and attribution; no raw-source redistribution is needed for this deliverable |
-| Archival version and citation | Software v0.1.7 citation exists; protocol milestone unreleased | Publish the protocol artifact with exact contents, checksum inventory, limitations, a separate citation and stable release identifier; do not invent a DOI or release date |
+| Fixed manifest, frame inventory and synthetic reconstruction | Implemented and CI checked | Included in the published packet with exact revision/checksums |
+| Annotation availability and split provenance | No human annotations; five fixed radar-selected events | Null weather regimes, unchanged split/checksum and source/frame evidence included; no human review claimed |
+| Event-time QPE/gauge validation | CODiS observations collected; formal matched QPE missing | Gap disclosed; candidate consistency reports separate; no independent rainfall validation claimed |
+| Acquisition and build provenance | Historical run retained, with TLS verification disabled and exact command/revision absent | Limits disclosed; protocol archive has exact revision, command and inventory. Authenticated corpus reconstruction remains separate work |
+| Rights and redistribution inventory | Code, documentation, fixtures and metadata only; original captures external | Exact contents and attribution published; no original raw-source redistribution |
+| Archival version and citation | `dataset-protocol-v0.2.0` published with separate citation and exact 263-file inventory | Preserve the versioned assets and their checksums; no DOI is claimed |
 
 The five July windows comprise 221 cadence-aligned radar timestamps. An official archive inquiry
 can request matching O-B0045-001 past-one-hour QPE grids at 10-minute cadence, or at minimum the

@@ -17,6 +17,16 @@ review before public display, redistribution, or other external operational use.
 
 ## Source acceptance record
 
+### Label-free protocol publication boundary, 2026-10-20
+
+`dataset-protocol-v0.2.0` redistributes the already committed project source, package resources,
+documentation/assets, public test fixtures and source/evidence metadata listed in its exact
+`RELEASE_INVENTORY.json`. Official source identifiers, URLs, checksums and aggregate findings
+are attributed to CWA in the release and preserved audit records. Original official captures,
+website PDFs, CODiS series, private catalogs, tensors and checkpoints remain external.
+This is a protocol-artifact boundary, not approval to redistribute raw source data, publish
+model weights or operate alerts. The source-specific production-use reviews below stay separate.
+
 ### Evidence collected on 2026-10-20
 
 The [CWA platform rules](https://opendata.cwa.gov.tw/about/rules) were inspected through the

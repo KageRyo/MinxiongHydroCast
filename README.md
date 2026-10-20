@@ -267,15 +267,15 @@ redistribution or commercial use.
 
 | Version | Milestone | State |
 | --- | --- | --- |
-| [`v0.1.7`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.7) | Verified protocol source archive, public documentation site, and updated evidence | Current release |
-| [`v0.1.6`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.6) | Complete retirement of AIWeatherForecast legacy documentation | Previous release |
+| [`v0.1.7`](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.7.md) | Verified protocol source archive, public documentation site, and updated evidence | Current software source; GitHub software release not published |
+| [`v0.1.6`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.6) | Complete retirement of AIWeatherForecast legacy documentation | Latest software release |
 | [`v0.1.5`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.5) | Verified data-root relocation command and metadata integrity repair | Previous release |
 | [`v0.1.0`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.0) | Observation Service | Previous release |
 | [`v0.1.1`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.1) | One-command demo, lean package, region/adapter contracts, contributor entry | Previous release |
 | [`v0.1.4`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.4) | Data-root migration, storage policy, and verified deployment metadata | Previous release |
 | [`v0.1.3`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.3) | Version metadata alignment and release consistency | Previous release |
 | [`v0.1.2`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.2) | Deterministic optical-flow benchmark and public-safe comparison report | Previous release |
-| `dataset-protocol-v0.2.0` | Label-free radar dataset-building protocol | Source/frame provenance, fixed split and synthetic reconstruction; human annotations unavailable and not required |
+| [`dataset-protocol-v0.2.0`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/dataset-protocol-v0.2.0) | Label-free radar dataset-building protocol | Published 2026-10-20; source/frame provenance, fixed split, synthetic reconstruction and separate citation; no human annotations required |
 | `v0.3.0` | Baseline Nowcasting | Planned; requires model, label, and lead-time gates |
 
 See [CHANGELOG.md](https://github.com/KageRyo/MinxiongHydroCast/blob/main/CHANGELOG.md), the
