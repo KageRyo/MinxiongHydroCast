@@ -158,3 +158,63 @@ def test_public_frame_inventory_matches_fixed_split_and_checksum():
                 "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/"
             )
             assert "?" not in frame["source_url"]
+
+
+def load_pinned_record(name: str) -> dict:
+    path = Path("data/samples") / name
+    assert path.with_suffix(".json.sha256").read_text().split() == [
+        hashlib.sha256(path.read_bytes()).hexdigest(), path.name
+    ]
+    return json.loads(path.read_text())
+
+
+def test_formal_source_audit_links_all_events_without_approving_reviews():
+    manifest = validate_public_manifest()
+    audit = load_pinned_record("formal_event_source_audit.json")
+    sources = {source["source_id"]: source for source in audit["sources"]}
+    assert len(sources) == len(audit["sources"])
+    assert {e["event_id"] for e in audit["events"]} == {e.event_id for e in manifest.events}
+    assert audit["dataset_release_ready"] is False
+    assert audit["forecast_publication_ready"] is False
+    assert audit["human_review_status"] == "pending"
+    for source in sources.values():
+        assert source["url"].startswith("https://")
+        assert len(source["sha256"]) == 64
+        assert source["bytes"] > 0
+        assert datetime.fromisoformat(source["fetched_at"]).tzinfo is not None
+    by_id = {event["event_id"]: event for event in audit["events"]}
+    for formal in manifest.events:
+        event = by_id[formal.event_id]
+        assert event["human_review_status"] == "pending"
+        assert event["official_weather_type"] == "official_context_pending"
+        assert event["context_source_ids"]
+        assert all(ref in sources for ref in event["context_source_ids"])
+        gauge = event["gauge_evidence"]
+        assert gauge["source_id"] in sources
+        assert gauge["station_id"] == "C0M760"
+        hours = int((datetime.fromisoformat(formal.end_time) -
+                     datetime.fromisoformat(formal.start_time)).total_seconds() / 3600)
+        assert gauge["expected_window_hours"] == gauge["usable_window_hours"] == hours
+        assert gauge["window_rainfall_sum_mm"] >= gauge["window_peak_hourly_mm"] >= 0
+        assert event["qpe_gauge_validation_completed"] is False
+        assert {probe["product"] for probe in event["history_probes"]} == {
+            "O-A0002-001", "O-B0045-001"
+        }
+        for probe in event["history_probes"]:
+            assert probe["http_status"] == 404
+            assert probe["tls_verified"] is True
+            assert "Authorization" not in probe["endpoint"]
+            assert "?" not in probe["endpoint"]
+
+
+def test_build_provenance_preserves_legacy_acquisition_limits():
+    provenance = load_pinned_record("formal_build_provenance.json")
+    assert provenance["recorded_run"]["verify_tls"] is False
+    assert provenance["historical_exact_command"] is None
+    assert provenance["historical_source_revision"] is None
+    assert provenance["dataset_release_ready"] is False
+    assert provenance["input_manifest_sha256"] == hashlib.sha256(
+        Path("data/samples/event_split_manifest.json").read_bytes()
+    ).hexdigest()
+    assert provenance["training"]["seed"] == 42
+    assert provenance["training"]["normalization"]["method"] == "z_score"

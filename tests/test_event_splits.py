@@ -58,10 +58,20 @@ def test_radar_event_windows_have_weather_context_entries():
     for candidate in radar_windows["candidate_windows"]:
         context = context_by_event_id[candidate["event_id"]]
         assert context["official_weather_type"] in allowed_weather_types
-        assert context["status"] in {"needs_official_source", "officially_labeled"}
+        assert context["status"] in {
+            "needs_official_source", "official_sources_collected_pending_human_review",
+            "officially_labeled",
+        }
         if context["status"] == "needs_official_source":
             assert context["official_weather_type"] == "official_context_pending"
             assert context["official_evidence"] == []
+        elif context["status"] == "official_sources_collected_pending_human_review":
+            assert context["official_weather_type"] == "official_context_pending"
+            assert context["official_evidence"]
+            assert all(
+                evidence["review_status"] == "pending"
+                for evidence in context["official_evidence"]
+            )
 
 
 def test_weather_context_source_review_covers_pending_radar_windows():

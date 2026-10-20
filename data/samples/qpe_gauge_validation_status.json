@@ -137,7 +137,14 @@
       "qpe_status": "blocked_cwa_history_getData_http_404",
       "qpe_probe_summary": "data/processed/run_summaries/cwa_history_data_o_b0045_202607031620.json",
       "qpe_redacted_endpoint": "https://opendata.cwa.gov.tw/historyapi/v1/getData/O-B0045-001/2026/07/03/16/20/00?Authorization=REDACTED",
-      "report_status": "blocked_missing_event_time_qpe_grid"
+      "report_status": "blocked_missing_event_time_qpe_grid",
+      "latest_source_audit": {
+        "record": "data/samples/formal_event_source_audit.json",
+        "gauge_status": "codis_single_station_hourly_observations_preserved",
+        "qpe_status": "sampled_history_endpoint_http_404",
+        "report_status": "not_completed_missing_matched_qpe",
+        "sampling_scope": "One history probe per product at event start +30 minutes; CODiS separately covers full hourly intervals at C0M760."
+      }
     },
     {
       "event_id": "cwa_o_a0059_taiwan_candidate_20260707_morning",
@@ -146,7 +153,14 @@
       "gauge_status": "not_verified_for_formal_event",
       "qpe_status": "not_verified_for_formal_event",
       "report_status": "pending_event_time_source_audit",
-      "notes": "No corresponding event-time verification record in this tracked table. Older HTTP 404 probes belong to other events and are not evidence for this window; private artifact availability is not inferred."
+      "notes": "No corresponding event-time verification record in this tracked table. Older HTTP 404 probes belong to other events and are not evidence for this window; private artifact availability is not inferred.",
+      "latest_source_audit": {
+        "record": "data/samples/formal_event_source_audit.json",
+        "gauge_status": "codis_single_station_hourly_observations_preserved",
+        "qpe_status": "sampled_history_endpoint_http_404",
+        "report_status": "not_completed_missing_matched_qpe",
+        "sampling_scope": "One history probe per product at event start +30 minutes; CODiS separately covers full hourly intervals at C0M760."
+      }
     },
     {
       "event_id": "cwa_o_a0059_taiwan_widespread_20260710_daytime",
@@ -155,7 +169,14 @@
       "gauge_status": "not_verified_for_formal_event",
       "qpe_status": "not_verified_for_formal_event",
       "report_status": "pending_event_time_source_audit",
-      "notes": "No corresponding event-time verification record in this tracked table. Older HTTP 404 probes belong to other events and are not evidence for this window; private artifact availability is not inferred."
+      "notes": "No corresponding event-time verification record in this tracked table. Older HTTP 404 probes belong to other events and are not evidence for this window; private artifact availability is not inferred.",
+      "latest_source_audit": {
+        "record": "data/samples/formal_event_source_audit.json",
+        "gauge_status": "codis_single_station_hourly_observations_preserved",
+        "qpe_status": "sampled_history_endpoint_http_404",
+        "report_status": "not_completed_missing_matched_qpe",
+        "sampling_scope": "One history probe per product at event start +30 minutes; CODiS separately covers full hourly intervals at C0M760."
+      }
     },
     {
       "event_id": "cwa_o_a0059_taiwan_widespread_20260709_evening",
@@ -164,7 +185,14 @@
       "gauge_status": "not_verified_for_formal_event",
       "qpe_status": "not_verified_for_formal_event",
       "report_status": "pending_event_time_source_audit",
-      "notes": "No corresponding event-time verification record in this tracked table. Older HTTP 404 probes belong to other events and are not evidence for this window; private artifact availability is not inferred."
+      "notes": "No corresponding event-time verification record in this tracked table. Older HTTP 404 probes belong to other events and are not evidence for this window; private artifact availability is not inferred.",
+      "latest_source_audit": {
+        "record": "data/samples/formal_event_source_audit.json",
+        "gauge_status": "codis_single_station_hourly_observations_preserved",
+        "qpe_status": "sampled_history_endpoint_http_404",
+        "report_status": "not_completed_missing_matched_qpe",
+        "sampling_scope": "One history probe per product at event start +30 minutes; CODiS separately covers full hourly intervals at C0M760."
+      }
     },
     {
       "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260711_early_morning",
@@ -173,7 +201,14 @@
       "gauge_status": "not_verified_for_formal_event",
       "qpe_status": "not_verified_for_formal_event",
       "report_status": "pending_event_time_source_audit",
-      "notes": "No corresponding event-time verification record in this tracked table. Older HTTP 404 probes belong to other events and are not evidence for this window; private artifact availability is not inferred."
+      "notes": "No corresponding event-time verification record in this tracked table. Older HTTP 404 probes belong to other events and are not evidence for this window; private artifact availability is not inferred.",
+      "latest_source_audit": {
+        "record": "data/samples/formal_event_source_audit.json",
+        "gauge_status": "codis_single_station_hourly_observations_preserved",
+        "qpe_status": "sampled_history_endpoint_http_404",
+        "report_status": "not_completed_missing_matched_qpe",
+        "sampling_scope": "One history probe per product at event start +30 minutes; CODiS separately covers full hourly intervals at C0M760."
+      }
     }
   ],
   "next_actions": [

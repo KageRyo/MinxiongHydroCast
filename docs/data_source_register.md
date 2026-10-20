@@ -17,6 +17,23 @@ review before public display, redistribution, or other external operational use.
 
 ## Source acceptance record
 
+### Evidence collected on 2026-10-20
+
+The [CWA platform rules](https://opendata.cwa.gov.tw/about/rules) were inspected through the
+official frontend's published text (the initial HTML alone is an application shell). The source
+defines open data, describes reuse and attribution duties, excludes patent/trademark grants,
+and disclaims endorsement. Its attribution appendix identifies CWA and the dataset name. The
+retrieved rules script has SHA-256
+`82b0d1469ac41d8a5c0db894bef477b8a8ed0d4fd0b8c48c65cf3d8f6134de7e`.
+
+This is collected licensing evidence, not an owner approval or a blanket right to redistribute
+every CWA website PDF, CODiS response, model weight or third-party asset. The proposed public
+packet contains source references, checksums and aggregate station results; the report PDF,
+typhoon-page capture and original hourly observations remain external. Record an explicit
+source-and-artifact decision before the dataset release. Attribution for this packet is
+"Central Weather Administration, Taiwan — July 2026 climate report, Bavi typhoon database and
+CODiS C0M760 hourly observations".
+
 Each production source needs a recorded owner approval covering:
 
 - authoritative dataset identifier and semantic meaning;
