@@ -69,13 +69,19 @@
       "window_end": "2026-07-03T19:00:00+08:00",
       "radar_candidate_type": "local_heavy_rain_radar_candidate",
       "official_weather_type": "official_context_pending",
-      "official_evidence": [],
+      "official_evidence": [
+        {
+          "source_id": "cwa_july2026_report",
+          "source_audit": "data/samples/formal_event_source_audit.json",
+          "review_status": "pending"
+        }
+      ],
       "minimum_required_evidence": [
         "CWA weather map or daily report covering 2026-07-03 afternoon-evening",
         "CWA warning/advisory check for Chiayi County during the window"
       ],
-      "status": "needs_official_source",
-      "notes": "Use this as a radar candidate only until official context is attached."
+      "status": "official_sources_collected_pending_human_review",
+      "notes": "Dated official context collected with immutable checksums; final weather classification and named human review remain pending."
     },
     {
       "event_id": "cwa_o_a0059_taiwan_candidate_20260707_morning",
@@ -83,13 +89,19 @@
       "window_end": "2026-07-07T12:00:00+08:00",
       "radar_candidate_type": "widespread_radar_candidate",
       "official_weather_type": "official_context_pending",
-      "official_evidence": [],
+      "official_evidence": [
+        {
+          "source_id": "cwa_july2026_report",
+          "source_audit": "data/samples/formal_event_source_audit.json",
+          "review_status": "pending"
+        }
+      ],
       "minimum_required_evidence": [
         "Official CWA weather context covering this event window",
         "Official warning/advisory history covering the event region and window"
       ],
-      "status": "needs_official_source",
-      "notes": "Coverage reconciliation only; no weather mechanism or human approval has been inferred."
+      "status": "official_sources_collected_pending_human_review",
+      "notes": "Dated official context collected with immutable checksums; final weather classification and named human review remain pending."
     },
     {
       "event_id": "cwa_o_a0059_taiwan_widespread_20260710_daytime",
@@ -97,13 +109,24 @@
       "window_end": "2026-07-10T20:00:00+08:00",
       "radar_candidate_type": "widespread_radar_candidate",
       "official_weather_type": "official_context_pending",
-      "official_evidence": [],
+      "official_evidence": [
+        {
+          "source_id": "cwa_july2026_report",
+          "source_audit": "data/samples/formal_event_source_audit.json",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "cwa_bavi_202609",
+          "source_audit": "data/samples/formal_event_source_audit.json",
+          "review_status": "pending"
+        }
+      ],
       "minimum_required_evidence": [
         "Official CWA weather context covering this event window",
         "Official warning/advisory history covering the event region and window"
       ],
-      "status": "needs_official_source",
-      "notes": "Coverage reconciliation only; no weather mechanism or human approval has been inferred."
+      "status": "official_sources_collected_pending_human_review",
+      "notes": "Dated official context collected with immutable checksums; final weather classification and named human review remain pending."
     },
     {
       "event_id": "cwa_o_a0059_taiwan_widespread_20260709_evening",
@@ -111,13 +134,19 @@
       "window_end": "2026-07-09T22:00:00+08:00",
       "radar_candidate_type": "widespread_radar_candidate",
       "official_weather_type": "official_context_pending",
-      "official_evidence": [],
+      "official_evidence": [
+        {
+          "source_id": "cwa_bavi_202609",
+          "source_audit": "data/samples/formal_event_source_audit.json",
+          "review_status": "pending"
+        }
+      ],
       "minimum_required_evidence": [
         "Official CWA weather context covering this event window",
         "Official warning/advisory history covering the event region and window"
       ],
-      "status": "needs_official_source",
-      "notes": "Coverage reconciliation only; no weather mechanism or human approval has been inferred."
+      "status": "official_sources_collected_pending_human_review",
+      "notes": "Dated official context collected with immutable checksums; final weather classification and named human review remain pending."
     },
     {
       "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260711_early_morning",
@@ -125,13 +154,24 @@
       "window_end": "2026-07-11T06:00:00+08:00",
       "radar_candidate_type": "chiayi_minxiong_heavy_rain_radar_candidate",
       "official_weather_type": "official_context_pending",
-      "official_evidence": [],
+      "official_evidence": [
+        {
+          "source_id": "cwa_july2026_report",
+          "source_audit": "data/samples/formal_event_source_audit.json",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "cwa_bavi_202609",
+          "source_audit": "data/samples/formal_event_source_audit.json",
+          "review_status": "pending"
+        }
+      ],
       "minimum_required_evidence": [
         "Official CWA weather context covering this event window",
         "Official warning/advisory history covering the event region and window"
       ],
-      "status": "needs_official_source",
-      "notes": "Coverage reconciliation only; no weather mechanism or human approval has been inferred."
+      "status": "official_sources_collected_pending_human_review",
+      "notes": "Dated official context collected with immutable checksums; final weather classification and named human review remain pending."
     }
   ],
   "formal_coverage_checked_at": "2026-10-20T01:06:25.085675+00:00"

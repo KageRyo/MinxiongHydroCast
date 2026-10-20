@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "recorded_run": {
+    "pipeline": "dataset_build",
+    "status": "ok",
+    "started_at": "2026-07-13T13:11:06+08:00",
+    "completed_at": "2026-07-13T13:28:03+08:00",
+    "duration_seconds": 1016.979,
+    "source_data_id": "O-A0059-001",
+    "verify_tls": false,
+    "skip_download": false,
+    "train_weighted_unet": true,
+    "forecast_publication_ready": false,
+    "row_counts": {
+      "events": 5,
+      "train_events": 2,
+      "validation_events": 1,
+      "test_events": 2
+    }
+  },
+  "input_manifest_sha256": "953b8b0d85b0269adcc7468288332e039d01512a0ac626090efbf56b12a6a6e1",
+  "source_catalog_sha256": "aa5126b4115958d6c7f2645f15db8b5469d717e6227bd3f19a8f879eb6582e25",
+  "run_summary_sha256": "d965ed82e7e78db99442ce81f45d3b8d276a62aa5b0724e088864bec3ec97e92",
+  "training_result_sha256": "2091327bb9b73610d24941194763f5316ff3f64418368c1fb26789e03d9dba9d",
+  "historical_exact_command": null,
+  "historical_source_revision": null,
+  "provenance_limitations": [
+    "The preserved build summary records verify_tls=false. Later artifact checksums establish integrity, not retrospective TLS verification or original-source authenticity.",
+    "The exact historical command line and code revision were not preserved in this summary and have not been inferred.",
+    "A future verified build needs a separately recorded source revision, explicit command/configuration and fresh acquisition or independently authenticated source copies."
+  ],
+  "training": {
+    "seed": 42,
+    "epochs": 20,
+    "batch_size": 2,
+    "loss_function": "weighted_mse",
+    "event_threshold": 35.0,
+    "event_weight": 4.0,
+    "focal_gamma": 0.0,
+    "training_sample_count": 88,
+    "validation_sample_count": 26,
+    "normalization": {
+      "method": "z_score",
+      "mean": 22.770865,
+      "std": 8.607946,
+      "input_valid_pixel_count": 42379429,
+      "target_valid_pixel_count": 43962080,
+      "input_ignored_pixel_count": 386040299,
+      "target_ignored_pixel_count": 384457648
+    },
+    "nodata_values": [
+      -999.0,
+      -99.0
+    ]
+  },
+  "dataset_release_ready": false,
+  "forecast_publication_ready": false
+}

@@ -1,0 +1,373 @@
+{
+  "schema_version": "1.0",
+  "collected_at": "2026-10-20T01:24:12.906297+00:00",
+  "dataset_release_ready": false,
+  "forecast_publication_ready": false,
+  "human_review_status": "pending",
+  "attribution": "Meteorological context and observations: Central Weather Administration, Taiwan. Public records contain source identifiers, checksums and derived single-station aggregates; original reports and observations remain external.",
+  "history_probe_scope": "One timestamp at event start plus 30 minutes per product. Not full event coverage or QPE/gauge validation.",
+  "history_authentication_control": {
+    "endpoint": "https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0002-001",
+    "fetched_at": "2026-10-20T01:16:34.817496+00:00",
+    "tls_verified": true,
+    "http_status": 200,
+    "content_status": "authenticated_control_ok"
+  },
+  "sources": [
+    {
+      "source_id": "cwa_july2026_report",
+      "publisher": "Central Weather Administration, Taiwan",
+      "url": "https://www.cwa.gov.tw/Data/climate/Watch/report/report_202607.pdf",
+      "sha256": "89449c01aa7e992e59732419f504ce10278025617779e6a1760ec9cafbbce53a",
+      "bytes": 1155184,
+      "fetched_at": "2026-10-20T01:14:59.311723+00:00",
+      "locator": "Printed page 1, dated synoptic annotations",
+      "coverage": "July 2026 daily context; annotations specify July 1-8 and July 10-11. July 9 is not assigned a mechanism by this page.",
+      "publication_time": "not_established; PDF creation metadata is not publication evidence"
+    },
+    {
+      "source_id": "cwa_bavi_202609",
+      "publisher": "Central Weather Administration, Taiwan",
+      "url": "https://rdc28.cwa.gov.tw/TDB/public/typhoon_detail?typhoon_id=202609",
+      "sha256": "2b289db84d332d5bc11fd4e01e96e3a09e675414f29948c16db4c48aac5ba822",
+      "bytes": 42210,
+      "fetched_at": "2026-10-20T01:22:46.424342+00:00",
+      "locator": "Typhoon overview table and narrative, BAVI 202609",
+      "coverage": "Sea warning from 2026-07-09T14:30:00+08:00 to 2026-07-12T08:30:00+08:00; land warning from July 10 05:30 to July 12 05:30. Does not assert Minxiong was in the warning area or that a local radar feature was caused by the typhoon."
+    },
+    {
+      "source_id": "codis_C0M760_20260707",
+      "publisher": "Central Weather Administration CODiS, Taiwan",
+      "url": "https://codis.cwa.gov.tw/api/station",
+      "request_method": "POST",
+      "request_parameters": {
+        "type": "report_date",
+        "stn_type": "auto_C0",
+        "stn_ID": "C0M760",
+        "date": "2026-07-07",
+        "start": "2026-07-07T00:00:00",
+        "end": "2026-07-07T23:59:59",
+        "more": ""
+      },
+      "sha256": "c61523e62ca1e4408e273129b774dffc3a369772125e3d3e1cc5ace24ffc223e",
+      "bytes": 25294,
+      "fetched_at": "2026-10-20T01:21:38.742992+00:00",
+      "locator": "C0M760 hourly report; response metadata timezone +08:00",
+      "public_query_page": "https://codis.cwa.gov.tw/StationData?target=weather1"
+    },
+    {
+      "source_id": "codis_C0M760_20260710",
+      "publisher": "Central Weather Administration CODiS, Taiwan",
+      "url": "https://codis.cwa.gov.tw/api/station",
+      "request_method": "POST",
+      "request_parameters": {
+        "type": "report_date",
+        "stn_type": "auto_C0",
+        "stn_ID": "C0M760",
+        "date": "2026-07-10",
+        "start": "2026-07-10T00:00:00",
+        "end": "2026-07-10T23:59:59",
+        "more": ""
+      },
+      "sha256": "989612723bff1a4bc699349edddd828b413fef67a58dd51f37325540eb480248",
+      "bytes": 25097,
+      "fetched_at": "2026-10-20T01:21:43.995183+00:00",
+      "locator": "C0M760 hourly report; response metadata timezone +08:00",
+      "public_query_page": "https://codis.cwa.gov.tw/StationData?target=weather1"
+    },
+    {
+      "source_id": "codis_C0M760_20260709",
+      "publisher": "Central Weather Administration CODiS, Taiwan",
+      "url": "https://codis.cwa.gov.tw/api/station",
+      "request_method": "POST",
+      "request_parameters": {
+        "type": "report_date",
+        "stn_type": "auto_C0",
+        "stn_ID": "C0M760",
+        "date": "2026-07-09",
+        "start": "2026-07-09T00:00:00",
+        "end": "2026-07-09T23:59:59",
+        "more": ""
+      },
+      "sha256": "932232538ffbd6db9fa01f31aafaed45535e17338fc8bf68406b15ee62252ef5",
+      "bytes": 25098,
+      "fetched_at": "2026-10-20T01:21:49.191355+00:00",
+      "locator": "C0M760 hourly report; response metadata timezone +08:00",
+      "public_query_page": "https://codis.cwa.gov.tw/StationData?target=weather1"
+    },
+    {
+      "source_id": "codis_C0M760_20260703",
+      "publisher": "Central Weather Administration CODiS, Taiwan",
+      "url": "https://codis.cwa.gov.tw/api/station",
+      "request_method": "POST",
+      "request_parameters": {
+        "type": "report_date",
+        "stn_type": "auto_C0",
+        "stn_ID": "C0M760",
+        "date": "2026-07-03",
+        "start": "2026-07-03T00:00:00",
+        "end": "2026-07-03T23:59:59",
+        "more": ""
+      },
+      "sha256": "1fa7c86f05f7678b89d9004f150235e742430c43c112694de19e2f6e3c4cc0e0",
+      "bytes": 25109,
+      "fetched_at": "2026-10-20T01:21:54.382587+00:00",
+      "locator": "C0M760 hourly report; response metadata timezone +08:00",
+      "public_query_page": "https://codis.cwa.gov.tw/StationData?target=weather1"
+    },
+    {
+      "source_id": "codis_C0M760_20260711",
+      "publisher": "Central Weather Administration CODiS, Taiwan",
+      "url": "https://codis.cwa.gov.tw/api/station",
+      "request_method": "POST",
+      "request_parameters": {
+        "type": "report_date",
+        "stn_type": "auto_C0",
+        "stn_ID": "C0M760",
+        "date": "2026-07-11",
+        "start": "2026-07-11T00:00:00",
+        "end": "2026-07-11T23:59:59",
+        "more": ""
+      },
+      "sha256": "63459957b9044dcd94361452224d302f8a615e3b0a5ef25642fa82d2c959af26",
+      "bytes": 25129,
+      "fetched_at": "2026-10-20T01:21:59.594726+00:00",
+      "locator": "C0M760 hourly report; response metadata timezone +08:00",
+      "public_query_page": "https://codis.cwa.gov.tw/StationData?target=weather1"
+    }
+  ],
+  "events": [
+    {
+      "event_id": "cwa_o_a0059_taiwan_candidate_20260707_morning",
+      "window_start": "2026-07-07T04:00:00+08:00",
+      "window_end": "2026-07-07T12:00:00+08:00",
+      "context_source_ids": [
+        "cwa_july2026_report"
+      ],
+      "reported_synoptic_context": "The official monthly report identifies Pacific High influence during July 1-8. This is broad synoptic context; local convective mechanism remains for human review.",
+      "official_weather_type": "official_context_pending",
+      "human_review_status": "pending",
+      "gauge_evidence": {
+        "source_id": "codis_C0M760_20260707",
+        "station_id": "C0M760",
+        "station_name": "民雄",
+        "coordinate_reference": "WGS84; present station-list coordinates, historical relocation history not independently checked",
+        "latitude": 23.551754,
+        "longitude": 120.428457,
+        "hourly_record_count": 24,
+        "expected_window_hours": 8,
+        "usable_window_hours": 8,
+        "window_rainfall_sum_mm": 0,
+        "window_peak_hourly_mm": 0,
+        "interval_policy": "Use one-hour accumulation intervals fully inside the event: window_start < interval_end <= window_end; values must be non-negative with no quality flag. One station only, not areal rainfall or flood evidence."
+      },
+      "history_probes": [
+        {
+          "product": "O-A0002-001",
+          "requested_time": "2026-07-07T04:30:00+08:00",
+          "endpoint": "https://opendata.cwa.gov.tw/historyapi/v1/getData/O-A0002-001/2026/07/07/04/30/00",
+          "fetched_at": "2026-10-20T01:16:40.035934+00:00",
+          "http_status": 404,
+          "tls_verified": true,
+          "content_status": "http_error_not_archived"
+        },
+        {
+          "product": "O-B0045-001",
+          "requested_time": "2026-07-07T04:30:00+08:00",
+          "endpoint": "https://opendata.cwa.gov.tw/historyapi/v1/getData/O-B0045-001/2026/07/07/04/30/00",
+          "fetched_at": "2026-10-20T01:16:45.408341+00:00",
+          "http_status": 404,
+          "tls_verified": true,
+          "content_status": "http_error_not_archived"
+        }
+      ],
+      "qpe_gauge_validation_completed": false
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260710_daytime",
+      "window_start": "2026-07-10T10:00:00+08:00",
+      "window_end": "2026-07-10T20:00:00+08:00",
+      "context_source_ids": [
+        "cwa_july2026_report",
+        "cwa_bavi_202609"
+      ],
+      "reported_synoptic_context": "The monthly report identifies Typhoon Bavi and peripheral circulation during July 10-11, and the official warning interval overlaps the window. Local mechanism remains for human review.",
+      "official_weather_type": "official_context_pending",
+      "human_review_status": "pending",
+      "gauge_evidence": {
+        "source_id": "codis_C0M760_20260710",
+        "station_id": "C0M760",
+        "station_name": "民雄",
+        "coordinate_reference": "WGS84; present station-list coordinates, historical relocation history not independently checked",
+        "latitude": 23.551754,
+        "longitude": 120.428457,
+        "hourly_record_count": 24,
+        "expected_window_hours": 10,
+        "usable_window_hours": 10,
+        "window_rainfall_sum_mm": 0,
+        "window_peak_hourly_mm": 0,
+        "interval_policy": "Use one-hour accumulation intervals fully inside the event: window_start < interval_end <= window_end; values must be non-negative with no quality flag. One station only, not areal rainfall or flood evidence."
+      },
+      "history_probes": [
+        {
+          "product": "O-A0002-001",
+          "requested_time": "2026-07-10T10:30:00+08:00",
+          "endpoint": "https://opendata.cwa.gov.tw/historyapi/v1/getData/O-A0002-001/2026/07/10/10/30/00",
+          "fetched_at": "2026-10-20T01:16:50.792674+00:00",
+          "http_status": 404,
+          "tls_verified": true,
+          "content_status": "http_error_not_archived"
+        },
+        {
+          "product": "O-B0045-001",
+          "requested_time": "2026-07-10T10:30:00+08:00",
+          "endpoint": "https://opendata.cwa.gov.tw/historyapi/v1/getData/O-B0045-001/2026/07/10/10/30/00",
+          "fetched_at": "2026-10-20T01:16:56.179316+00:00",
+          "http_status": 404,
+          "tls_verified": true,
+          "content_status": "http_error_not_archived"
+        }
+      ],
+      "qpe_gauge_validation_completed": false
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260709_evening",
+      "window_start": "2026-07-09T16:00:00+08:00",
+      "window_end": "2026-07-09T22:00:00+08:00",
+      "context_source_ids": [
+        "cwa_bavi_202609"
+      ],
+      "reported_synoptic_context": "The official sea-warning interval overlaps this radar window. A causal weather-regime label and local warning coverage have not been approved.",
+      "official_weather_type": "official_context_pending",
+      "human_review_status": "pending",
+      "gauge_evidence": {
+        "source_id": "codis_C0M760_20260709",
+        "station_id": "C0M760",
+        "station_name": "民雄",
+        "coordinate_reference": "WGS84; present station-list coordinates, historical relocation history not independently checked",
+        "latitude": 23.551754,
+        "longitude": 120.428457,
+        "hourly_record_count": 24,
+        "expected_window_hours": 6,
+        "usable_window_hours": 6,
+        "window_rainfall_sum_mm": 0,
+        "window_peak_hourly_mm": 0,
+        "interval_policy": "Use one-hour accumulation intervals fully inside the event: window_start < interval_end <= window_end; values must be non-negative with no quality flag. One station only, not areal rainfall or flood evidence."
+      },
+      "history_probes": [
+        {
+          "product": "O-A0002-001",
+          "requested_time": "2026-07-09T16:30:00+08:00",
+          "endpoint": "https://opendata.cwa.gov.tw/historyapi/v1/getData/O-A0002-001/2026/07/09/16/30/00",
+          "fetched_at": "2026-10-20T01:17:01.554902+00:00",
+          "http_status": 404,
+          "tls_verified": true,
+          "content_status": "http_error_not_archived"
+        },
+        {
+          "product": "O-B0045-001",
+          "requested_time": "2026-07-09T16:30:00+08:00",
+          "endpoint": "https://opendata.cwa.gov.tw/historyapi/v1/getData/O-B0045-001/2026/07/09/16/30/00",
+          "fetched_at": "2026-10-20T01:17:06.925910+00:00",
+          "http_status": 404,
+          "tls_verified": true,
+          "content_status": "http_error_not_archived"
+        }
+      ],
+      "qpe_gauge_validation_completed": false
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon",
+      "window_start": "2026-07-03T13:00:00+08:00",
+      "window_end": "2026-07-03T19:00:00+08:00",
+      "context_source_ids": [
+        "cwa_july2026_report"
+      ],
+      "reported_synoptic_context": "The official monthly report identifies Pacific High influence during July 1-8. This is broad synoptic context; local convective mechanism remains for human review.",
+      "official_weather_type": "official_context_pending",
+      "human_review_status": "pending",
+      "gauge_evidence": {
+        "source_id": "codis_C0M760_20260703",
+        "station_id": "C0M760",
+        "station_name": "民雄",
+        "coordinate_reference": "WGS84; present station-list coordinates, historical relocation history not independently checked",
+        "latitude": 23.551754,
+        "longitude": 120.428457,
+        "hourly_record_count": 24,
+        "expected_window_hours": 6,
+        "usable_window_hours": 6,
+        "window_rainfall_sum_mm": 7.0,
+        "window_peak_hourly_mm": 5.5,
+        "interval_policy": "Use one-hour accumulation intervals fully inside the event: window_start < interval_end <= window_end; values must be non-negative with no quality flag. One station only, not areal rainfall or flood evidence."
+      },
+      "history_probes": [
+        {
+          "product": "O-A0002-001",
+          "requested_time": "2026-07-03T13:30:00+08:00",
+          "endpoint": "https://opendata.cwa.gov.tw/historyapi/v1/getData/O-A0002-001/2026/07/03/13/30/00",
+          "fetched_at": "2026-10-20T01:17:12.353089+00:00",
+          "http_status": 404,
+          "tls_verified": true,
+          "content_status": "http_error_not_archived"
+        },
+        {
+          "product": "O-B0045-001",
+          "requested_time": "2026-07-03T13:30:00+08:00",
+          "endpoint": "https://opendata.cwa.gov.tw/historyapi/v1/getData/O-B0045-001/2026/07/03/13/30/00",
+          "fetched_at": "2026-10-20T01:17:17.725849+00:00",
+          "http_status": 404,
+          "tls_verified": true,
+          "content_status": "http_error_not_archived"
+        }
+      ],
+      "qpe_gauge_validation_completed": false
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260711_early_morning",
+      "window_start": "2026-07-11T00:00:00+08:00",
+      "window_end": "2026-07-11T06:00:00+08:00",
+      "context_source_ids": [
+        "cwa_july2026_report",
+        "cwa_bavi_202609"
+      ],
+      "reported_synoptic_context": "The monthly report identifies Typhoon Bavi and peripheral circulation during July 10-11, and the official warning interval overlaps the window. Local mechanism remains for human review.",
+      "official_weather_type": "official_context_pending",
+      "human_review_status": "pending",
+      "gauge_evidence": {
+        "source_id": "codis_C0M760_20260711",
+        "station_id": "C0M760",
+        "station_name": "民雄",
+        "coordinate_reference": "WGS84; present station-list coordinates, historical relocation history not independently checked",
+        "latitude": 23.551754,
+        "longitude": 120.428457,
+        "hourly_record_count": 24,
+        "expected_window_hours": 6,
+        "usable_window_hours": 6,
+        "window_rainfall_sum_mm": 16.5,
+        "window_peak_hourly_mm": 6,
+        "interval_policy": "Use one-hour accumulation intervals fully inside the event: window_start < interval_end <= window_end; values must be non-negative with no quality flag. One station only, not areal rainfall or flood evidence."
+      },
+      "history_probes": [
+        {
+          "product": "O-A0002-001",
+          "requested_time": "2026-07-11T00:30:00+08:00",
+          "endpoint": "https://opendata.cwa.gov.tw/historyapi/v1/getData/O-A0002-001/2026/07/11/00/30/00",
+          "fetched_at": "2026-10-20T01:17:23.158761+00:00",
+          "http_status": 404,
+          "tls_verified": true,
+          "content_status": "http_error_not_archived"
+        },
+        {
+          "product": "O-B0045-001",
+          "requested_time": "2026-07-11T00:30:00+08:00",
+          "endpoint": "https://opendata.cwa.gov.tw/historyapi/v1/getData/O-B0045-001/2026/07/11/00/30/00",
+          "fetched_at": "2026-10-20T01:17:28.537929+00:00",
+          "http_status": 404,
+          "tls_verified": true,
+          "content_status": "http_error_not_archived"
+        }
+      ],
+      "qpe_gauge_validation_completed": false
+    }
+  ]
+}
