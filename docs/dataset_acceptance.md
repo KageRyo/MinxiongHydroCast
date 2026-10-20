@@ -11,19 +11,35 @@ human-review prerequisite is replaced by explicit unknown regimes and reproducib
 provenance; missing QPE and legacy acquisition limits remain disclosures. See the checksum-pinned
 `data/samples/label_free_protocol_policy.json` and the [protocol](v0.2_dataset_protocol.md).
 
-| Acceptance criterion | Evidence | Remaining work |
+## Published protocol, 2026-10-20
+
+The [dataset-protocol-v0.2.0 release](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/dataset-protocol-v0.2.0)
+delivers the corrected label-free scope of #31. Its source commit is
+`257ce24ef6c0fcbf4efd1f6192eb568200371b1f`. All five uploaded assets were downloaded again:
+outer checksums, all 263 archive member sizes/digests, source commit and pinned split were
+verified; 62 reconstruction/public-contract tests passed from that downloaded extraction.
+The source PR passed all 382 tests and Python 3.11/3.13 CI, archive, package, documentation,
+CodeQL and SonarCloud checks before merge.
+
+The archive SHA-256 is
+`7c4e261fa1417d21a003f42eca01548497e608b80fc64f7ec31019d71d031a74`.
+Release assets provide the exact inventory, separate citation, notes and outer checksums.
+No DOI or certified official corpus is claimed. The label-free protocol acceptance is complete;
+the acquisition and annotation limitations below remain limitations rather than pending labels.
+
+| Acceptance criterion | Evidence | Status |
 | --- | --- | --- |
-| Clean checkout validates the manifest and rebuilds synthetic tensors | Fresh Python 3.13 environment; public-contract validation and 90 relevant tests passed, including synthetic CWA grids, sliding tensors, and NPZ round trips | Keep reproducible commands and verification outputs with the release artifact |
-| Schema drift and checksum mismatch fail closed in CI | Public-contract validator and negative tests run in CI | Retain these gates |
-| Fixed split traces to reproducible source evidence | Five-event 2/1/2 split is checksum-pinned and non-overlapping; frame inventory and official context are linked | Keep weather regimes unknown and annotation availability explicit; do not require unavailable manual labels |
-| Restricted assets remain external | Official captures, generated tensors, private catalogs, and checkpoints use the external data root | Inspect the final archive and record source-specific rights decisions |
-| Release documentation names redistributed content | Protocol distinguishes contracts and synthetic fixtures from official captures and model weights | Version-specific release notes and exact artifact inventory |
-| Artifact is archival and citable without implying forecast readiness | Software citation and protocol-source checksums are separate from a released official dataset | Final dataset release identifier, dataset citation, and reviewed limitations |
+| Clean checkout validates the manifest and rebuilds synthetic tensors | CI plus 62 tests from the downloaded release extraction | Passed |
+| Schema drift and checksum mismatch fail closed in CI | Public-contract validator and negative tests run in CI | Passed |
+| Fixed split traces to reproducible source evidence | Five-event 2/1/2 split is checksum-pinned and non-overlapping; source/frame inventory and official context are linked; unknown regimes are explicit | Passed for label-free scope |
+| Restricted assets remain external | Exact 263-file inventory and prepublication path/credential-pattern scan; original captures, private catalogs, tensors and checkpoints excluded | Passed for protocol artifact |
+| Release documentation names redistributed content | Published release notes and per-file sizes/digests; source attribution and exclusion boundaries | Passed |
+| Artifact is archival and citable without implying forecast readiness | Independent protocol tag, immutable source commit, separate CITATION.cff, inner/outer checksums and retained limitations | Published |
 
 The 2026-10-20 reconciliation gives every formal event an explicit weather-context and QPE/gauge
 status entry. A subsequent source audit preserved a CWA July report, the official Bavi typhoon
 record, and five CODiS Minxiong hourly reports. All five events now link official context and
-single-station observations; classification and named human review remain pending. The 36 complete
+single-station observations; human annotations are unavailable and weather regimes stay unknown. The 36 complete
 hourly accumulation intervals inside the event windows are covered at C0M760. This does not
 establish areal rainfall, inundation or QPE/gauge agreement.
 
@@ -61,17 +77,18 @@ manifest, public-contract validator, and test fixtures. A dataset-protocol sourc
 include those inputs separately, with verification commands and checksums. The
 [protocol archive commands](v0.2_dataset_protocol.md#reproduce-the-credential-free-contract-checks)
 and CI now provide this source reconstruction path. The source archive excludes private runtime
-reports and does not imply that the planned v0.2 dataset milestone is complete.
+reports. The source-protocol release completes the label-free deliverable, while a fully
+curated/authenticated corpus and forecast readiness are not certified.
 
-## Next actions
+## Maintenance and separate corpus improvements
 
-1. Publish the five formal events as radar-selected, unannotated windows with their existing
+1. Preserve the published five formal events as radar-selected, unannotated windows with their existing
    source/frame checksums, official context and acquisition limitations.
 2. Preserve candidate reports and optional curated review separately; unavailable manual labels
    do not block protocol publication.
 3. Report missing formal QPE/gauge validation explicitly without substituting candidate results.
 4. Retain CI verification of the protocol archive's clean extraction and synthetic reconstruction.
-5. Finalize the exact metadata/code/fixture archive inventory, attribution, separate protocol
+5. Preserve the published metadata/code/fixture archive inventory, attribution, separate protocol
    citation and version identifier. Raw official files remain excluded. Model and notification
    gates remain separate.
 
