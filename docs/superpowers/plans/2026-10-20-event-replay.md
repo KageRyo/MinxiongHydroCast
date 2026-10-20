@@ -22,8 +22,8 @@ pyproject.toml, tests/test_cli.py, docs/event_replay.md, README, CHANGELOG, mkdo
 - [x] Build three-panel native radar comparison, event/time/model/lead selectors, playback,
   metrics/context/provenance, clear missing states and responsive keyboard-accessible controls.
 - [x] Browser-check controls, mobile, offline behavior and screenshot; bounded real archive run.
-- [ ] Update source-only documentation; lint/types/full suite/docs/package/protocol checks.
-- [ ] Final fresh read-only review, fix important findings with regression tests, create PR and CI.
+- [x] Update source-only documentation; lint/types/full suite/docs/package/protocol checks.
+- [x] Final fresh read-only review, fix important findings with regression tests, create PR and CI.
 
 ## Ledger
 
@@ -51,3 +51,8 @@ pyproject.toml, tests/test_cli.py, docs/event_replay.md, README, CHANGELOG, mkdo
   no private host paths. Desktop/mobile screenshots and raw HTML remain outside the repository.
 - Final: fixed missing scored target, global frame-read budget, malformed report diagnostic,
   malformed XML and timestamp-type handling — regression cases RED→GREEN; suite 444/444.
+
+- Sonar follow-up: replace broad inline CSP permission with SHA-256 allowlists for exact embedded
+  scripts/styles; use native image/output semantics and split rendering into focused functions.
+  CSP export regression RED→GREEN; updated suite 445/445, Pyright and Ruff pass. Browser control
+  assertions passed again under the restricted policy. No quality gate suppression was added.

@@ -154,7 +154,8 @@ def test_offline_export_is_script_safe_and_never_overwrites_existing_files(tmp_p
     html = path.read_text()
     assert '</script><img' not in html
     assert '\\u003c/script' in html
-    assert 'http://' not in html and 'https://' not in html
+    assert 'http://' not in html
+    assert 'https://' not in html
     original = path.read_bytes()
     with pytest.raises(FileExistsError):
         write_replay(payload, path, root=root)
@@ -286,3 +287,17 @@ def test_wrong_timestamp_type_has_fixed_report_diagnostic(tmp_path):
     save_record(path, report)
     with pytest.raises(ValueError, match='replay report unavailable or invalid'):
         replay(root)
+
+
+def test_export_only_authorizes_exact_embedded_scripts_and_styles(tmp_path):
+    import base64
+    import re
+    from minxionghydrocast.research.replay_export import write_replay
+    path = tmp_path / 'hashed.html'
+    write_replay({'events': []}, path, root=tmp_path)
+    html = path.read_text()
+    assert "'unsafe-inline'" not in html
+    for content in re.findall(r'<script[^>]*>(.*?)</script>|<style>(.*?)</style>', html, re.S):
+        block = content[0] or content[1]
+        checksum = base64.b64encode(hashlib.sha256(block.encode()).digest()).decode()
+        assert "'sha256-" + checksum + "'" in html

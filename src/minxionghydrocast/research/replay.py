@@ -21,6 +21,8 @@ from minxionghydrocast.research.replay_io import (
 )
 
 
+REPORT_ERROR = 'replay report unavailable or invalid'
+
 def _timestamp(value: object) -> str:
     if not isinstance(value, str):
         raise ValueError('timestamp must be a timezone-aware string')
@@ -49,7 +51,7 @@ def _report(layout: DataLayout, requested: Path):
             raise ValueError('invalid windows')
         return report, config, manifest
     except FAILURES:
-        raise ValueError('replay report unavailable or invalid') from None
+        raise ValueError(REPORT_ERROR) from None
 
 
 class Replay:
@@ -63,7 +65,7 @@ class Replay:
         for window in report['windows']:
             key = (window['event_id'], _timestamp(window['issue_time']))
             if key in self.windows or key[0] not in self.frames or key[1] not in self.frames[key[0]]:
-                raise ValueError('replay report unavailable or invalid')
+                raise ValueError(REPORT_ERROR)
             self.windows[key] = window
 
     def _observation(self, event: str, time: str) -> tuple[dict, np.ndarray | None]:
@@ -215,7 +217,7 @@ def build_replay(*, root: Path, report_path: Path = Path('backtests/latest.json'
     try:
         reader = Replay(layout, report, config, manifest, preview_size, allowed)
     except FAILURES:
-        raise ValueError('replay report unavailable or invalid') from None
+        raise ValueError(REPORT_ERROR) from None
     contexts, omitted_context = read_context(layout, context_path, preview_size, set(reader.frames))
     events = []
     windows_used = 0
