@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "scope": "label_free_radar_dataset_building_protocol",
+  "annotation_availability": "no_human_annotations_available",
+  "human_annotations_required_for_protocol": false,
+  "target_derivation": "Future observed O-A0059-001 radar frames at fixed cadence; no manually annotated weather, flood or disaster target.",
+  "manifest_sha256": "953b8b0d85b0269adcc7468288332e039d01512a0ac626090efbf56b12a6a6e1",
+  "official_context_audit_sha256": "34aa7c85c69512e32f44298613e3d723484908d12f12631b80e4c9eb5557848c",
+  "formal_split_changed": false,
+  "weather_regime_used_for_split_or_target": false,
+  "flood_labels_available": false,
+  "formal_qpe_gauge_validation_complete": false,
+  "historical_build_authentication_complete": false,
+  "forecast_publication_ready": false,
+  "required_protocol_checks": [
+    "strict_manifest_schema_and_checksum",
+    "non_overlapping_event_splits",
+    "cadence_and_grid_contracts",
+    "source_and_frame_inventory",
+    "synthetic_tensor_reconstruction",
+    "explicit_masks_units_and_train_only_normalization",
+    "historical_provenance_limitations",
+    "exact_archive_inventory_and_source_revision"
+  ],
+  "excluded_claims": [
+    "human_reviewed_weather_regimes",
+    "confirmed_flood_events",
+    "independent_rainfall_accuracy",
+    "authenticated_reacquisition_of_legacy_frames",
+    "operational_forecast_readiness"
+  ],
+  "events": [
+    {
+      "event_id": "cwa_o_a0059_taiwan_candidate_20260707_morning",
+      "split": "train",
+      "weather_regime": null,
+      "annotation_status": "unavailable",
+      "official_context_source_ids": [
+        "cwa_july2026_report"
+      ],
+      "context_is_causal_label": false
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260710_daytime",
+      "split": "train",
+      "weather_regime": null,
+      "annotation_status": "unavailable",
+      "official_context_source_ids": [
+        "cwa_july2026_report",
+        "cwa_bavi_202609"
+      ],
+      "context_is_causal_label": false
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260709_evening",
+      "split": "validation",
+      "weather_regime": null,
+      "annotation_status": "unavailable",
+      "official_context_source_ids": [
+        "cwa_bavi_202609"
+      ],
+      "context_is_causal_label": false
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon",
+      "split": "test",
+      "weather_regime": null,
+      "annotation_status": "unavailable",
+      "official_context_source_ids": [
+        "cwa_july2026_report"
+      ],
+      "context_is_causal_label": false
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260711_early_morning",
+      "split": "test",
+      "weather_regime": null,
+      "annotation_status": "unavailable",
+      "official_context_source_ids": [
+        "cwa_july2026_report",
+        "cwa_bavi_202609"
+      ],
+      "context_is_causal_label": false
+    }
+  ],
+  "limitations": [
+    "Official context is supplied as source evidence, not a human weather-mechanism label.",
+    "Legacy event names containing heavy-rain describe radar-based selection and do not verify heavy rainfall or flooding.",
+    "Historical matched QPE is absent at tested endpoints; candidate consistency reports do not fill this formal-event gap.",
+    "Legacy acquisition used verify_tls=false and did not preserve exact command/revision. These limits are disclosed, not retrospectively repaired.",
+    "Existing curated candidate-promotion and model/alert gates remain unchanged."
+  ]
+}

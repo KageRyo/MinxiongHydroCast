@@ -3,8 +3,11 @@
 This checklist is for [issue #31](https://github.com/KageRyo/MinxiongHydroCast/issues/31).
 It does not require 10 positive / 20 negative flood labels, a trained model promotion,
 an operational shadow pass or a public forecast endpoint. Those gates remain separate.
-The current dataset protocol still requires reviewed official context and matched QPE/gauge
-evidence; this checklist does not waive them.
+No human annotations are available. The deliverable is the label-free radar dataset-building
+protocol described in the [protocol scope](v0.2_dataset_protocol.md#label-free-scope-corrected-2026-10-20).
+Future observed radar frames provide the targets. Named human weather/flood labels and complete
+QPE coverage are not prerequisites for this protocol publication; their absence must be disclosed.
+This corrects the earlier requirement rather than claiming the missing evidence was collected.
 
 ## Collected evidence for the fixed formal split
 
@@ -35,11 +38,11 @@ relocation information has not been independently checked.
 | Item | Current state | Concrete next action |
 | --- | --- | --- |
 | Fixed manifest, frame inventory and synthetic reconstruction | Implemented and CI checked | Preserve them in the release packet and record final revision/checksums |
-| Named human review for every formal event | Sources collected; decisions pending | Inspect the official context, radar and gauge evidence; record identity, decision, time, evidence locators and retained limitations; do not infer approval from collection |
-| Event-time QPE/gauge validation | CODiS observations collected; matched QPE missing | Obtain official O-B0045-001 historical grids for these windows or document another approved official archive; align accumulation intervals, datum, station location and quality flags before running validation |
-| Acquisition and build provenance | Historical run retained, with TLS verification disabled and exact command/revision absent | Preserve those limits; independently authenticate the old source copies or acquire new verified copies and record the build command/configuration, revision and artifact inventory |
-| Rights and redistribution inventory | Official platform rules collected; owner decision pending | Decide each source's attribution and each artifact's redistribution boundary; leave original captures external unless separately approved |
-| Archival version and citation | Software v0.1.7 citation exists; dataset milestone unreleased | Publish the reviewed protocol artifact with exact contents, checksum inventory, limitations, dataset citation and stable release identifier; do not invent a DOI or release date |
+| Annotation availability and split provenance | No human annotations; five fixed radar-selected events | Publish null weather regimes, unchanged split/checksum and source/frame evidence; do not call them human reviewed |
+| Event-time QPE/gauge validation | CODiS observations collected; formal matched QPE missing | Publish the gap explicitly; keep candidate consistency reports separate; do not claim independent rainfall validation |
+| Acquisition and build provenance | Historical run retained, with TLS verification disabled and exact command/revision absent | Disclose those limits; record the new protocol archive's exact revision, command and inventory. Authenticated corpus reconstruction remains separate work |
+| Rights and redistribution inventory | Code, documentation, fixtures and metadata only; original captures external | List exact archive contents and attribution; no raw-source redistribution is needed for this deliverable |
+| Archival version and citation | Software v0.1.7 citation exists; protocol milestone unreleased | Publish the protocol artifact with exact contents, checksum inventory, limitations, a separate citation and stable release identifier; do not invent a DOI or release date |
 
 The five July windows comprise 221 cadence-aligned radar timestamps. An official archive inquiry
 can request matching O-B0045-001 past-one-hour QPE grids at 10-minute cadence, or at minimum the
@@ -53,7 +56,7 @@ live-source authentication control distinguishes these results from an invalid k
 establish the retention policy or completeness of other archives. CODiS is a working alternative
 for station observations, not for missing QPE grids.
 
-If old windows cannot obtain enough reviewed evidence, a separately approved split proposal may
+For a future curated corpus, if old windows cannot obtain enough reviewed evidence, a separate split proposal may
 use newly collected candidates with complete synchronized sources and official context. That
 proposal must preserve independent splits and rerun the unchanged validation gates; silently
 relabeling the five legacy events is not an acceptable shortcut.
@@ -83,6 +86,8 @@ single-station hourly accumulation in this shortlist was 46 mm; this does not es
 flooding or approve an event's weather regime. No human decisions or formal split changes were
 added. This provides a concrete review route while the legacy windows' historical QPE remains
 unavailable at the tested URLs.
+The proposal is optional future corpus work; the label-free protocol does not wait for its
+manual decisions. The current formal split remains fixed and its weather regimes stay unknown.
 
 The validator now requires timezone-aware equal accumulation end times and the same declared
 geographic datum before matching. Raw official station payloads can supply paired native

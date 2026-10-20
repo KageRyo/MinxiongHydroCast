@@ -4,11 +4,18 @@ This record tracks [issue #31](https://github.com/KageRyo/MinxiongHydroCast/issu
 Verification dated 2026-10-15 covers the source contracts and synthetic reconstruction path;
 it does not certify a released official dataset or forecast readiness.
 
+Scope correction, 2026-10-20: human annotations are unavailable. This milestone publishes the
+label-free radar-building protocol, automatically derived temporal targets, source inventories
+and synthetic reconstruction. It does not certify a weather-labeled corpus. The earlier named
+human-review prerequisite is replaced by explicit unknown regimes and reproducible source/split
+provenance; missing QPE and legacy acquisition limits remain disclosures. See the checksum-pinned
+`data/samples/label_free_protocol_policy.json` and the [protocol](v0.2_dataset_protocol.md).
+
 | Acceptance criterion | Evidence | Remaining work |
 | --- | --- | --- |
 | Clean checkout validates the manifest and rebuilds synthetic tensors | Fresh Python 3.13 environment; public-contract validation and 90 relevant tests passed, including synthetic CWA grids, sliding tensors, and NPZ round trips | Keep reproducible commands and verification outputs with the release artifact |
 | Schema drift and checksum mismatch fail closed in CI | Public-contract validator and negative tests run in CI | Retain these gates |
-| Fixed split traces to human-reviewed evidence | Five-event 2/1/2 split is checksum-pinned and non-overlapping | Named human decisions, official weather context, and evidence links for every formal event |
+| Fixed split traces to reproducible source evidence | Five-event 2/1/2 split is checksum-pinned and non-overlapping; frame inventory and official context are linked | Keep weather regimes unknown and annotation availability explicit; do not require unavailable manual labels |
 | Restricted assets remain external | Official captures, generated tensors, private catalogs, and checkpoints use the external data root | Inspect the final archive and record source-specific rights decisions |
 | Release documentation names redistributed content | Protocol distinguishes contracts and synthetic fixtures from official captures and model weights | Version-specific release notes and exact artifact inventory |
 | Artifact is archival and citable without implying forecast readiness | Software citation and protocol-source checksums are separate from a released official dataset | Final dataset release identifier, dataset citation, and reviewed limitations |
@@ -41,9 +48,10 @@ revision were not retained and are not invented here. Later checksums do not ret
 authenticate the original download. A new verified build or independent authenticated copies,
 with explicit command/configuration and revision, are required to remove that provenance gap.
 
-Remaining evidence includes reviewed weather regime, human decisions, matched QPE/gauge validation,
-and complete build provenance. Radar threshold crossings do not establish a weather
-mechanism. QPE remains an estimate requiring gauge checks. See the
+Reviewed weather regimes, human decisions, matched formal QPE/gauge validation and complete
+historical acquisition provenance are unavailable. They are limitations of this label-free
+protocol, not reasons to wait for manual labels. Radar threshold crossings do not establish a
+weather mechanism. QPE remains an estimate requiring gauge checks for rainfall accuracy claims. See the
 [external evidence assessment](external_disaster_evidence.md) for historical disaster sources and
 their limits for the 2026 formal events, and the
 [release closure checklist](dataset_release_checklist.md) for concrete remaining work.
@@ -57,14 +65,15 @@ reports and does not imply that the planned v0.2 dataset milestone is complete.
 
 ## Next actions
 
-1. Review the five formal-event source packets and resolve their provenance and quality gaps.
-2. Review eligible candidates and attach official context; preserve separate candidate, reviewed,
-   and formal-split states. Broader regime coverage remains tracked in
-   [issue #30](https://github.com/KageRyo/MinxiongHydroCast/issues/30).
-3. Complete formal-event weather context and event-time QPE/gauge reports.
+1. Publish the five formal events as radar-selected, unannotated windows with their existing
+   source/frame checksums, official context and acquisition limitations.
+2. Preserve candidate reports and optional curated review separately; unavailable manual labels
+   do not block protocol publication.
+3. Report missing formal QPE/gauge validation explicitly without substituting candidate results.
 4. Retain CI verification of the protocol archive's clean extraction and synthetic reconstruction.
-5. Review rights, release inventory, citation, and versioned dataset evidence before publishing
-   the dataset milestone. Model and notification gates remain separate.
+5. Finalize the exact metadata/code/fixture archive inventory, attribution, separate protocol
+   citation and version identifier. Raw official files remain excluded. Model and notification
+   gates remain separate.
 
 See [deployment evidence](deployment_status.md), [dataset protocol](v0.2_dataset_protocol.md),
 and [source rights register](data_source_register.md).
