@@ -16,8 +16,9 @@ model development for Minxiong, Taiwan.
 [Documentation index](docs/documentation.md)
 
 **Status: Operational Prototype / Data and Model Development.** The observation service is usable on a
-localhost-only deployment. Forecast publication and automated risk notifications remain disabled
-until the model, label, and shadow-deployment gates pass.
+localhost-only deployment. The [label-free radar dataset-building protocol](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/dataset-protocol-v0.2.0)
+is published: future observed radar frames provide targets, and weather regimes remain unknown.
+Forecast publication and automated risk notifications retain their existing acceptance gates.
 
 ![MinxiongHydroCast operator dashboard showing a healthy live snapshot and a blocked shadow gate](https://raw.githubusercontent.com/KageRyo/MinxiongHydroCast/main/docs/assets/screenshots/operator-dashboard.png)
 
@@ -36,7 +37,7 @@ MinxiongHydroCast turns those feeds into a fail-closed observation, data, and mo
 - bounded retries and explicitly degraded fallbacks without hiding schema drift;
 - immutable snapshots with SHA-256, source authority, dataset ID, fetch time, and adapter version;
 - CLI, read-only API, health/readiness endpoints, Prometheus metrics, backup, and operator view;
-- reproducible CWA radar event datasets with human-reviewed evidence and fixed event splits;
+- reproducible CWA radar datasets with source/frame provenance, fixed splits and observed-frame targets;
 - Persistence and Tiny U-Net evaluation behind promotion gates that can block publication.
 
 That operational and scientific boundary is the main difference from a general weather-data
@@ -57,7 +58,7 @@ flowchart LR
     INGEST --> CONTRACTS["Strict contracts<br/>schema · freshness · joins"]
     CONTRACTS --> SNAPSHOTS["Immutable snapshots<br/>provenance · SHA-256"]
     SNAPSHOTS --> SERVICE["Read-only service<br/>API · health · readiness · metrics · UI"]
-    CONTRACTS --> EVIDENCE["Radar event evidence<br/>human review"]
+    CONTRACTS --> EVIDENCE["Radar event evidence<br/>source QA · checksums"]
     EVIDENCE --> DATASET["Reproducible event splits<br/>tensor archives"]
     DATASET --> MODELS["Persistence<br/>weighted Tiny U-Net"]
     MODELS --> GATES{"Model + label +<br/>shadow gates"}
@@ -70,6 +71,8 @@ observation sets fail the attempt. The optional scraper fallback is limited to t
 authentication, timeout, HTTP, or rate-limit failures and never satisfies readiness. See the
 [architecture](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/architecture.md)
 and [data contracts](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/data_contracts.md).
+The fixed radar-building protocol requires no manual weather or flood annotations. The separate
+curated candidate-review workflow and operational model/alert gates remain unchanged.
 
 ## Official data flow
 
@@ -265,10 +268,14 @@ redistribution or commercial use.
 
 ## Roadmap and releases
 
+Software and protocol artifacts have separate version lines. Install the software package for the
+CLI/service; use the independent protocol release for the manifest, fixtures, exact source
+inventory and dataset-building citation.
+
 | Version | Milestone | State |
 | --- | --- | --- |
-| [`v0.1.7`](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.7.md) | Verified protocol source archive, public documentation site, and updated evidence | Current software source; GitHub software release not published |
-| [`v0.1.6`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.6) | Complete retirement of AIWeatherForecast legacy documentation | Latest software release |
+| [`v0.1.7`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.7) | Protocol archive tooling, strict QPE/gauge alignment, public documentation and source provenance | Current software version |
+| [`v0.1.6`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.6) | Complete retirement of AIWeatherForecast legacy documentation | Previous software release |
 | [`v0.1.5`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.5) | Verified data-root relocation command and metadata integrity repair | Previous release |
 | [`v0.1.0`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.0) | Observation Service | Previous release |
 | [`v0.1.1`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.1) | One-command demo, lean package, region/adapter contracts, contributor entry | Previous release |
@@ -277,6 +284,20 @@ redistribution or commercial use.
 | [`v0.1.2`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.2) | Deterministic optical-flow benchmark and public-safe comparison report | Previous release |
 | [`dataset-protocol-v0.2.0`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/dataset-protocol-v0.2.0) | Label-free radar dataset-building protocol | Published 2026-10-20; source/frame provenance, fixed split, synthetic reconstruction and separate citation; no human annotations required |
 | `v0.3.0` | Baseline Nowcasting | Planned; requires model, label, and lead-time gates |
+
+### Proposed next features
+
+These features are planned, not implemented. None requires manual weather or flood annotations.
+
+| Priority | Feature | Useful result |
+| --- | --- | --- |
+| 1 | Automatic rolling backtests | Score archived predictions against subsequently observed radar, with 10–60-minute RMSE/CSI/POD/FAR, Persistence comparison, immutable run records and explicit missing-target exclusions |
+| 2 | Event replay explorer | Replay stored radar and available QPE/gauge observations on a timeline, showing source time, units, datum, missing data and provenance beside model comparisons |
+| 3 | Historical archive coverage dashboard | Show expected/captured/valid frame counts and gaps by day/event; queue bounded retries while sources remain available and distinguish unavailable URLs from unknown archive retention |
+
+Rolling backtests come first: they turn the current one-off event evaluations into repeatable
+evidence as new observations arrive. Proposed research windows remain separate from the fixed
+benchmark; normalization uses training data only. See the [feature scope](docs/roadmap.md#next-features-without-manual-annotations).
 
 See [CHANGELOG.md](https://github.com/KageRyo/MinxiongHydroCast/blob/main/CHANGELOG.md), the
 [v0.1.7 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.7.md),

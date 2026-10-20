@@ -13,9 +13,11 @@ credentials, raw official data, or model weights.
    localhost API/operator view, monitoring, local alert audit, backup/restore, and supervised
    scheduling are implemented and deployed. External operational use still requires the real
    shadow gate, off-host recovery, named operators, and exercised incident paths.
-2. **Experimental rainfall nowcast:** reproducible independent-event evaluation is implemented;
-   event diversity, QPE/gauge validation, local labels, calibration, and passing model-promotion
-   evidence remain incomplete.
+2. **Experimental radar nowcast:** reproducible independent-event evaluation and the label-free
+   building protocol are implemented. Radar prediction targets derive from future observations,
+   so rolling evaluation does not require manual weather/flood labels. Broader observation-based
+   evaluation and passing model-promotion evidence remain future work. Claims about physical
+   rainfall accuracy or calibrated flood risk require their separate validation evidence.
 3. **Public operational service:** authenticated/TLS ingress, approved SLOs and data rights, named
    decision authority, human override, and communication gates are required before any external
    operational use.

@@ -13,8 +13,37 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 | `v0.1.4` | Storage and Deployment Governance | Canonical data root, explicit Git/runtime/data boundaries, and verified deployment metadata |
 | `v0.1.5` | Safe Data-root Relocation | No-write-first catalog, collection-path, checksum, and verification metadata migration |
 | `v0.1.6` | Legacy Retirement | Remove retired AIWeatherForecast documentation after the retained host archive is confirmed |
-| `v0.2.0` | Reproducible Radar Dataset | Broader human-reviewed weather-regime coverage, complete source rights record, and reproducible checksummed event catalog |
+| `v0.1.7` | Protocol and Validation Tooling | Source archive reconstruction, QPE observation-time/native-datum checks and public evidence/provenance records |
+| `dataset-protocol-v0.2.0` | Label-free Radar Dataset-building Protocol | Published 2026-10-20: fixed source/frame inventory, unknown weather regimes, synthetic reconstruction, exact archive inventory and independent citation |
 | `v0.3.0` | Baseline Nowcasting | Learned model consistently beats Persistence on independent aggregate and lead-time gates; local label and shadow gates pass |
+
+## Next features without manual annotations
+
+The protocol milestone is complete. These are proposed features, not current capabilities or
+assigned software versions. They use subsequent observations as targets and do not wait for
+human weather/flood labels. Manual review remains an optional curated-corpus track; it is not
+a dependency of this research backlog. Existing operational publication gates are unchanged.
+
+1. **Automatic rolling backtests.** Extend existing per-event evaluators into a scheduled,
+   resumable comparison of saved Persistence/Optical Flow/Tiny U-Net predictions and later
+   observations. Require identical masks, units, grid and 10–60-minute timestamps; report each
+   lead time and event independently. Record missing targets explicitly. Keep research windows
+   separate from the fixed benchmark, prevent overlap/leakage, and fit normalization on training
+   data only. First deliverable: a reproducible report from archived observations; no public
+   prediction endpoint is required.
+2. **Event replay explorer.** Add an offline/local timeline to inspect saved radar, available
+   QPE/gauges, model outputs and errors. Display source provenance, quality, observation time and
+   CRS; do not overlay incompatible datums or invent a missing QPE/rainfall frame. Use preserved
+   artifacts so replay works when historical URLs disappear.
+3. **Historical archive coverage dashboard.** Summarize expected/captured/checksum-verified/usable
+   frames by day and event, with missing intervals and source errors. Reuse current collection
+   resume/retry logic while recording bounded attempts. Treat HTTP 404 as the tested URL's result,
+   not a documented retention policy. First deliverable: a read-only archive health report.
+
+Rolling backtests are the first priority because they continuously test the existing baselines
+against observable outcomes. Reusing archived predictions and reports then gives replay and
+coverage views a common evidence source. This section does not authorize automatic changes to
+the formal split or operational readiness.
 
 ## Milestone 1: Stabilize Live Data Ingestion
 
@@ -93,7 +122,8 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 - [ ] Review the complete Minxiong-local candidates collected from July 15 through July 18, attach
       checksummed official context, and keep each decision outside the formal split until a
       separate promotion change is reviewed.
-- [ ] Accumulate reviewed typhoon, frontal, Mei-yu, and convective candidates before retraining.
+- [ ] For an optional weather-labeled corpus, accumulate reviewed typhoon, frontal, Mei-yu and
+      convective candidates. Label-free research does not depend on that corpus.
 
 ## Milestone 7: Train And Compare Models
 
