@@ -285,15 +285,16 @@ inventory and dataset-building citation.
 | [`dataset-protocol-v0.2.0`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/dataset-protocol-v0.2.0) | Label-free radar dataset-building protocol | Published 2026-10-20; source/frame provenance, fixed split, synthetic reconstruction and separate citation; no human annotations required |
 | `v0.3.0` | Baseline Nowcasting | Planned; requires model, label, and lead-time gates |
 
-### Proposed next features
+### Research feature roadmap
 
-These features are planned, not implemented. None requires manual weather or flood annotations.
+The first feature is implemented in development source; software v0.1.7 predates the command.
+The other two are planned. None requires manual weather or flood annotations.
 
 | Priority | Feature | Useful result |
 | --- | --- | --- |
-| 1 | Automatic rolling backtests | Score archived predictions against subsequently observed radar, with 10–60-minute RMSE/CSI/POD/FAR, Persistence comparison, immutable run records and explicit missing-target exclusions |
-| 2 | Event replay explorer | Replay stored radar and available QPE/gauge observations on a timeline, showing source time, units, datum, missing data and provenance beside model comparisons |
-| 3 | Historical archive coverage dashboard | Show expected/captured/valid frame counts and gaps by day/event; queue bounded retries while sources remain available and distinguish unavailable URLs from unknown archive retention |
+| 1 | [Rolling backtests](docs/rolling_backtests.md), [#58](https://github.com/KageRyo/MinxiongHydroCast/issues/58) | In source: persist Persistence/Optical Flow forecasts, score arriving radar targets, retain per-lead metrics and resume without changing saved predictions |
+| 2 | [Event replay explorer #59](https://github.com/KageRyo/MinxiongHydroCast/issues/59) | Planned: replay stored radar and available QPE/gauges with source time, units, datum, missing data and model errors |
+| 3 | [Archive coverage #60](https://github.com/KageRyo/MinxiongHydroCast/issues/60) | Planned: summarize expected/captured/valid frames and source gaps, separating unavailable URLs from unknown retention |
 
 Rolling backtests come first: they turn the current one-off event evaluations into repeatable
 evidence as new observations arrive. Proposed research windows remain separate from the fixed

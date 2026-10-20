@@ -57,6 +57,9 @@ jobs:
         run: >-
           python -m pyright -p pyrightconfig.json
           src/minxionghydrocast/pipelines/qpe_gauge_validation.py
+          src/minxionghydrocast/models/rolling_backtest.py
+          src/minxionghydrocast/pipelines/backtest_store.py
+          src/minxionghydrocast/pipelines/rolling_backtest.py
           scripts/validate_public_contracts.py
 
       - name: Test with coverage

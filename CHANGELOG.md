@@ -5,10 +5,16 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 
 ## [Unreleased]
 
+### Added
+
+- `mhc model rolling-backtest`: persist input-only Persistence/Optical Flow forecasts and score
+  arriving radar observations per origin/lead, with immutable checksummed records, bounded new
+  work, shared validity masks, source/code provenance and opt-in scheduling templates.
+
 ### Planned
 
-- Automatic rolling backtests against future observed radar, an event replay explorer, and an
-  archive coverage dashboard; no manual weather/flood annotations required.
+- An event replay explorer and archive coverage dashboard built on the research artifact
+  contracts; no manual weather/flood annotations required.
 - Independent model, lead-time, label, and shadow-gate completion for `v0.3.0`.
 
 ## [0.1.7] - 2026-10-20
