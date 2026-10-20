@@ -66,6 +66,7 @@ where = ["src"]
 minxionghydrocast = [
   "profiles/*.yaml",
   "profiles/boundaries/*.geojson",
+  "research/*.html",
 ]
 
 [tool.pytest.ini_options]

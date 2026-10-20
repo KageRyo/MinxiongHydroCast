@@ -64,6 +64,7 @@ nav:
       - 雷達轉換: radar_tensor_conversion.md
       - 基準模型結果: baseline_results.md
       - 滾動回測: rolling_backtests.md
+      - 離線事件重播: event_replay.md
       - Optical Flow: optical_flow_baseline.md
       - 模型卡: model_cards/minxiong_chiayi_baseline.md
       - 模型策略: model_strategy.md

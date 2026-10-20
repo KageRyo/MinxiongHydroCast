@@ -11,7 +11,7 @@ record below and in closed issues.
 
 ## Public backlog
 
-- [#59 — Offline event replay explorer](https://github.com/KageRyo/MinxiongHydroCast/issues/59): planned.
+- [#59 — Offline event replay explorer](https://github.com/KageRyo/MinxiongHydroCast/issues/59): implemented in development source; [offline export and demo](event_replay.md).
 - [#60 — Historical archive coverage](https://github.com/KageRyo/MinxiongHydroCast/issues/60): planned.
 
 The feature issues use enhancement, area and priority labels. The initial #58 rolling-backtest

@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Any
+from xml.etree.ElementTree import ParseError
 
 import numpy as np
 
@@ -10,7 +11,7 @@ from minxionghydrocast.io.data_store import DataLayout, sha256_file
 from minxionghydrocast.models.radar_tensor import valid_value_mask
 from minxionghydrocast.models.rolling_backtest import RadarFrame
 
-FAILURES = (OSError, ValueError, KeyError, TypeError, IndexError)
+FAILURES = (OSError, ValueError, KeyError, TypeError, IndexError, ParseError)
 
 
 def contained(layout: DataLayout, requested: Path) -> Path:

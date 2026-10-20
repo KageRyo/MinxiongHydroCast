@@ -3,6 +3,7 @@
 import hashlib
 import re
 from datetime import timedelta
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +19,12 @@ from minxionghydrocast.research.replay_context import read_context
 from minxionghydrocast.research.replay_io import (
     FAILURES, contained, grid_metadata, preview, verified_file,
 )
+
+
+def _timestamp(value: object) -> str:
+    if not isinstance(value, str):
+        raise ValueError('timestamp must be a timezone-aware string')
+    return aware_time(value).isoformat()
 
 
 def _report(layout: DataLayout, requested: Path):
@@ -36,8 +43,8 @@ def _report(layout: DataLayout, requested: Path):
         if hashlib.sha256(raw).hexdigest() != checksum:
             raise ValueError('snapshot integrity failure')
         manifest = BacktestManifest.model_validate_json(raw)
-        report['as_of'] = aware_time(report['as_of']).isoformat()
-        report['generated_at'] = aware_time(report['generated_at']).isoformat()
+        report['as_of'] = _timestamp(report['as_of'])
+        report['generated_at'] = _timestamp(report['generated_at'])
         if not isinstance(report['windows'], list):
             raise ValueError('invalid windows')
         return report, config, manifest
@@ -47,26 +54,26 @@ def _report(layout: DataLayout, requested: Path):
 
 class Replay:
     def __init__(self, layout: DataLayout, report: dict[str, Any], config: BacktestConfig,
-                 manifest: BacktestManifest, size: int):
+                 manifest: BacktestManifest, size: int, allowed: set[tuple[str, str]]):
         self.layout, self.report, self.config, self.size = layout, report, config, size
         self.frames = {event.event_id: {f.data_time: f for f in event.frames} for event in manifest.events}
-        self.observations: dict[tuple[str, str], tuple[dict, np.ndarray | None]] = {}
+        self.allowed = allowed
+        self.observation = lru_cache(maxsize=16)(self._observation)
         self.windows = {}
         for window in report['windows']:
-            key = (window['event_id'], aware_time(window['issue_time']).isoformat())
+            key = (window['event_id'], _timestamp(window['issue_time']))
             if key in self.windows or key[0] not in self.frames or key[1] not in self.frames[key[0]]:
                 raise ValueError('replay report unavailable or invalid')
             self.windows[key] = window
 
-    def observation(self, event: str, time: str) -> tuple[dict, np.ndarray | None]:
-        key = event, time
-        if key in self.observations:
-            return self.observations[key]
+    def _observation(self, event: str, time: str) -> tuple[dict, np.ndarray | None]:
         ref = self.frames[event].get(time)
         base: dict[str, Any] = {'status': 'missing', 'data_time': time, 'source': 'O-A0059-001',
                                 'units': 'dBZ', 'fetched_at': None}
         array = None
-        if ref is not None and aware_time(time) <= aware_time(self.report['as_of']):
+        if ref is not None and (event, time) not in self.allowed:
+            base['status'] = 'omitted'
+        elif ref is not None and aware_time(time) <= aware_time(self.report['as_of']):
             base['sha256'] = ref.sha256
             try:
                 inspection, values = extract_cwa_grid_values(verified_file(self.layout, ref))
@@ -82,9 +89,7 @@ class Replay:
                 pass
             except FAILURES:
                 base['status'] = 'invalid'
-        result = base, array
-        self.observations[key] = result
-        return result
+        return base, array
 
     def _forecast(self, event: str, time: str, window: dict):
         origin = aware_time(time)
@@ -134,15 +139,20 @@ class Replay:
             if lead['target_time'] != target_time or lead['lead_time_minutes'] != result['lead_time_minutes']:
                 raise ValueError('lead time mismatch')
             metrics = self._score(forecast, lead, self.frames[event].get(target_time), index)
-            result['status'] = lead['status']
+            result['status'] = target['status'] if lead['status'] == 'scored' else lead['status']
             result['reason'] = lead['reason'] if lead['reason'] in (
                 '', 'target_after_as_of', 'target_not_captured', 'target_file_missing', 'no_common_valid_pixels') else 'invalid'
             nodata = tuple(forecast.record['grid']['nodata_values'])
             common = None
-            if array is not None and target.get('grid') == forecast.record['grid']:
+            if array is not None and target.get('grid') != forecast.record['grid']:
+                result['status'] = 'invalid'
+                result['target'] = {key: value for key, value in target.items() if key != 'preview'}
+                result['target']['status'] = 'invalid'
+            elif array is not None:
                 common = forecast.latest_mask & valid_value_mask(array, nodata)
                 common &= np.all(valid_value_mask(forecast.predictions[:, index - 1], nodata), axis=0)
                 result['metrics'] = metrics
+                result['status'] = lead['status']
             for i, model in enumerate(self.config.models):
                 prediction = forecast.predictions[i, index - 1]
                 model_data = {'preview': preview(prediction, nodata, self.size)}
@@ -161,13 +171,31 @@ class Replay:
             forecast = self._forecast(event, time, window)
             if len(window['leads']) != self.config.horizon:
                 raise ValueError('incomplete lead metadata')
-            return {'status': 'available', 'created_at': aware_time(forecast.record['created_at']).isoformat(),
+            return {'status': 'available', 'created_at': _timestamp(forecast.record['created_at']),
                     'mode': 'retrospective_replay', 'sha256': forecast.record['array_sha256'],
                     'grid': forecast.record['grid'], 'leads': [
                         self.lead(event, forecast, lead, i, time)
                         for i, lead in enumerate(window['leads'], 1)]}
         except FAILURES:
             return {'status': 'invalid'}
+
+
+    def event(self, event_id: str, context: list[dict], budget: int) -> tuple[dict, int]:
+        frames = []
+        used = 0
+        for time in self.frames[event_id]:
+            if (event_id, time) not in self.allowed:
+                continue
+            forecast = {'status': 'missing'}
+            if (event_id, time) in self.windows:
+                forecast = {'status': 'omitted'}
+                if used < budget:
+                    forecast = self.forecast(event_id, time)
+                    used += 1
+            observation, _ = self.observation(event_id, time)
+            frames.append({'data_time': time, 'fetched_at': None,
+                           'observation': observation, 'forecast': forecast})
+        return {'event_id': event_id, 'frames': frames, 'context': context}, used
 
 
 def build_replay(*, root: Path, report_path: Path = Path('backtests/latest.json'),
@@ -178,31 +206,28 @@ def build_replay(*, root: Path, report_path: Path = Path('backtests/latest.json'
     layout = DataLayout(root)
     require_external_data_root(layout, repository_root=Path(__file__).resolve().parents[3])
     report, config, manifest = _report(layout, report_path)
-    reader = Replay(layout, report, config, manifest, preview_size)
-    contexts = read_context(layout, context_path, preview_size, set(reader.frames))
+    cells = preview_size ** 2 * (max_frames + max_windows * config.horizon * (2 * len(config.models) + 1))
+    if cells > 24_000_000:
+        raise ValueError('combined replay preview budget exceeded; reduce export limits')
+    eligible = [(e.event_id, f.data_time) for e in manifest.events for f in e.frames
+                if aware_time(f.data_time) <= aware_time(report['as_of'])]
+    allowed = set(eligible[:max_frames])
+    try:
+        reader = Replay(layout, report, config, manifest, preview_size, allowed)
+    except FAILURES:
+        raise ValueError('replay report unavailable or invalid') from None
+    contexts, omitted_context = read_context(layout, context_path, preview_size, set(reader.frames))
     events = []
-    frames_used = windows_used = 0
+    windows_used = 0
     for event in manifest.events:
-        frames = []
-        for ref in event.frames:
-            if frames_used >= max_frames or aware_time(ref.data_time) > aware_time(report['as_of']):
-                continue
-            forecast = {'status': 'omitted'}
-            if (event.event_id, ref.data_time) not in reader.windows:
-                forecast = {'status': 'missing'}
-            elif windows_used < max_windows:
-                forecast = reader.forecast(event.event_id, ref.data_time)
-                windows_used += 1
-            observation, _ = reader.observation(event.event_id, ref.data_time)
-            frames.append({'data_time': ref.data_time, 'fetched_at': None,
-                           'observation': observation, 'forecast': forecast})
-            frames_used += 1
-        events.append({'event_id': event.event_id, 'frames': frames,
-                       'context': contexts.get(event.event_id, [])})
+        display, used = reader.event(event.event_id, contexts.get(event.event_id, []), max_windows - windows_used)
+        events.append(display)
+        windows_used += used
     return {'schema_version': '1.0', 'scope': 'offline_research_replay', 'events': events,
             'models': config.models, 'cadence_minutes': config.cadence_minutes,
             'horizon': config.horizon, 'configuration_id': report['configuration_id'],
             'report_sha256': digest(report), 'manifest_sha256': report['manifest_sha256'],
             'as_of': report['as_of'], 'report_generated_at': report['generated_at'],
-            'preview_size': preview_size, 'omitted_frames': sum(len(e.frames) for e in manifest.events) - frames_used,
-            'omitted_windows': len(reader.windows) - windows_used, 'forecast_publication_ready': False}
+            'preview_size': preview_size, 'omitted_frames': sum(len(e.frames) for e in manifest.events) - len(allowed),
+            'omitted_windows': len(reader.windows) - windows_used,
+            'omitted_context_artifacts': omitted_context, 'forecast_publication_ready': False}

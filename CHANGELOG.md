@@ -7,13 +7,16 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 
 ### Added
 
+- `mhc event replay`: export a standalone offline radar/forecast/error viewer with verified saved
+  scores, playback, optional segregated hourly QPE/gauge context and a credential-free synthetic demo.
+
 - `mhc model rolling-backtest`: persist input-only Persistence/Optical Flow forecasts and score
   arriving radar observations per origin/lead, with immutable checksummed records, bounded new
   work, shared validity masks, source/code provenance and opt-in scheduling templates.
 
 ### Planned
 
-- An event replay explorer and archive coverage dashboard built on the research artifact
+- An archive coverage dashboard built on the research artifact
   contracts; no manual weather/flood annotations required.
 - Independent model, lead-time, label, and shadow-gate completion for `v0.3.0`.
 

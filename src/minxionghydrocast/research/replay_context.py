@@ -69,17 +69,16 @@ def _gauges(layout: DataLayout, ref: ContextArtifact) -> dict[str, Any]:
 
 
 def read_context(layout: DataLayout, path: Path | None, size: int,
-                 event_ids: set[str]) -> dict[str, list[dict[str, Any]]]:
+                 event_ids: set[str]) -> tuple[dict[str, list[dict[str, Any]]], int]:
     if path is None:
-        return {}
+        return {}, 0
     try:
         manifest = ContextManifest.model_validate_json(contained(layout, path).read_bytes())
     except FAILURES:
         raise ValueError('replay context unavailable or invalid') from None
     result: dict[str, list[dict[str, Any]]] = {}
-    for ref in manifest.artifacts:
-        if ref.event_id not in event_ids:
-            continue
+    selected = [ref for ref in manifest.artifacts if ref.event_id in event_ids]
+    for ref in selected[:24]:
         item = {'kind': ref.kind, 'data_time': ref.data_time, 'fetched_at': ref.fetched_at,
                 'interval_minutes': ref.interval_minutes, 'units': 'mm', 'overlay': False,
                 'source': 'O-B0045-001' if ref.kind == 'qpe' else 'O-A0002-001',
@@ -91,4 +90,4 @@ def read_context(layout: DataLayout, path: Path | None, size: int,
         except FAILURES:
             item['status'] = 'invalid'
         result.setdefault(ref.event_id, []).append(item)
-    return result
+    return result, max(0, len(selected) - 24)

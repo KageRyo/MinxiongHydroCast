@@ -142,3 +142,147 @@ def test_context_rejects_ambiguous_accumulation_and_path_escapes(tmp_path):
     context.write_text(json.dumps({'schema_version': '1.0', 'artifacts': [artifact]}))
     with pytest.raises(ValueError, match='replay context unavailable or invalid'):
         replay(root, context_path=Path('context.json'))
+
+
+def test_offline_export_is_script_safe_and_never_overwrites_existing_files(tmp_path):
+    from minxionghydrocast.research.replay_export import write_replay
+    root, _ = prepared(tmp_path)
+    payload = replay(root)
+    payload['test_note'] = '</script><img src=x onerror=alert(1)>'
+    path = tmp_path / 'viewer.html'
+    write_replay(payload, path, root=root)
+    html = path.read_text()
+    assert '</script><img' not in html
+    assert '\\u003c/script' in html
+    assert 'http://' not in html and 'https://' not in html
+    original = path.read_bytes()
+    with pytest.raises(FileExistsError):
+        write_replay(payload, path, root=root)
+    assert path.read_bytes() == original
+
+
+def test_export_rejects_destination_outside_data_and_temporary_roots(tmp_path):
+    from minxionghydrocast.research.replay_export import write_replay
+    with pytest.raises(ValueError):
+        write_replay({}, Path('/etc/event-replay.html'), root=tmp_path)
+
+
+def test_demo_cli_exports_two_events_from_real_backtest_records(tmp_path):
+    from minxionghydrocast import cli
+    path = tmp_path / 'demo.html'
+    cli.main(['event', 'replay', '--demo', '--output', str(path)])
+    text = path.read_text()
+    data = json.loads(text.split('<script id="replay-data" type="application/json">')[1].split('</script>')[0])
+    assert len(data['events']) == 2
+    assert data['demo'] is True
+    origin = data['events'][0]['frames'][1]['forecast']
+    assert origin['status'] == 'available'
+    assert origin['leads'][0]['metrics']['persistence']['rmse'] > 0
+    assert data['events'][0]['context'][0]['status'] == 'available'
+
+
+@pytest.mark.parametrize('change', ['time', 'grid', 'units', 'symlink'])
+def test_observation_contract_drift_is_not_drawn(tmp_path, change):
+    root, _ = prepared(tmp_path)
+    path = root / 'frames/2.json'
+    if change == 'symlink':
+        outside = tmp_path / 'secret.json'
+        outside.write_bytes(path.read_bytes())
+        path.unlink()
+        path.symlink_to(outside)
+    else:
+        payload = json.loads(path.read_text())
+        params = payload['cwaopendata']['dataset']['datasetInfo']['parameterSet']
+        if change == 'time':
+            params['DateTime'] = '2026-07-01T01:00:00Z'
+        elif change == 'grid':
+            params['GridDimensionX'] = 4
+        else:
+            params['Reflectivity'] = 'mm'
+        path.write_text(json.dumps(payload))
+    result = replay(root)
+    assert result['events'][0]['frames'][2]['observation']['status'] == 'invalid'
+    assert 'preview' not in result['events'][0]['frames'][2]['observation']
+
+
+def test_context_datum_and_time_are_checked_after_checksum_verification(tmp_path):
+    from test_qpe_gauge_validation import write_qpe_grid
+    root, _ = prepared(tmp_path)
+    path = root / 'qpe.json'
+    write_qpe_grid(path)
+    ref = {'kind': 'qpe', 'event_id': 'event_one', 'path': path.name, 'bytes': path.stat().st_size,
+           'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+           'data_time': '2026-07-02T16:00:00+08:00', 'interval_minutes': 60}
+    (root / 'context.json').write_text(json.dumps({'schema_version': '1.0', 'artifacts': [ref]}))
+    result = replay(root, context_path=Path('context.json'))
+    assert result['events'][0]['context'][0]['status'] == 'invalid'
+    assert 'preview' not in result['events'][0]['context'][0]
+
+
+def test_missing_scored_target_is_never_labeled_scored_or_verified(tmp_path):
+    root, _ = prepared(tmp_path)
+    (root / 'frames/2.json').unlink()
+    lead = replay(root)['events'][0]['frames'][1]['forecast']['leads'][0]
+    assert lead['status'] == 'missing'
+    assert lead['metrics'] == {}
+
+
+def test_frame_budget_also_excludes_forecast_target_reads(tmp_path):
+    root, _ = prepared(tmp_path)
+    result = replay(root, max_frames=2)
+    lead = result['events'][0]['frames'][1]['forecast']['leads'][0]
+    assert lead['target']['status'] == 'omitted'
+    assert 'preview' not in lead['target']
+    assert lead['status'] == 'omitted'
+    assert lead['metrics'] == {}
+
+
+def test_malformed_window_metadata_has_a_fixed_diagnostic(tmp_path):
+    root, _ = prepared(tmp_path)
+    path = root / 'backtests/latest.json'
+    report = load_record(path)
+    report['windows'] = [{}]
+    save_record(path, report)
+    with pytest.raises(ValueError, match='replay report unavailable or invalid'):
+        replay(root)
+
+
+def test_context_budget_is_explicit_and_bounded(tmp_path):
+    from datetime import timedelta
+    from test_rolling_backtest import START
+    root, _ = prepared(tmp_path)
+    refs = [{'kind': 'gauges', 'event_id': 'event_one', 'path': 'missing.json',
+             'bytes': 1, 'sha256': '0' * 64, 'interval_minutes': 60,
+             'data_time': (START + timedelta(hours=i)).isoformat()} for i in range(30)]
+    (root / 'context.json').write_text(json.dumps({'schema_version': '1.0', 'artifacts': refs}))
+    result = replay(root, context_path=Path('context.json'))
+    assert len(result['events'][0]['context']) == 24
+    assert result['omitted_context_artifacts'] == 6
+
+
+def test_combined_preview_budget_rejects_excessive_memory_request(tmp_path):
+    root, _ = prepared(tmp_path)
+    with pytest.raises(ValueError, match='preview budget'):
+        replay(root, preview_size=320, max_frames=500, max_windows=100)
+
+
+def test_checksum_valid_but_malformed_gauge_xml_is_an_invalid_context(tmp_path):
+    root, _ = prepared(tmp_path)
+    path = root / 'gauges.xml'
+    path.write_text('<unclosed>')
+    ref = {'kind': 'gauges', 'event_id': 'event_one', 'path': path.name,
+           'bytes': path.stat().st_size, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+           'data_time': '2026-07-01T00:00:00Z', 'interval_minutes': 60}
+    (root / 'context.json').write_text(json.dumps({'schema_version': '1.0', 'artifacts': [ref]}))
+    result = replay(root, context_path=Path('context.json'))
+    assert result['events'][0]['context'][0]['status'] == 'invalid'
+
+
+def test_wrong_timestamp_type_has_fixed_report_diagnostic(tmp_path):
+    root, _ = prepared(tmp_path)
+    path = root / 'backtests/latest.json'
+    report = load_record(path)
+    report['as_of'] = None
+    save_record(path, report)
+    with pytest.raises(ValueError, match='replay report unavailable or invalid'):
+        replay(root)
