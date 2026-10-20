@@ -34,6 +34,7 @@ COMMANDS: dict[CommandPath, str] = {
     ("event", "review"): "minxionghydrocast.pipelines.event_review:main",
     ("labels", "audit"): "minxionghydrocast.validation.flood_labels:main",
     ("model", "evaluate"): "minxionghydrocast.pipelines.baseline_evaluation:main",
+    ("model", "rolling-backtest"): "minxionghydrocast.pipelines.rolling_backtest:main",
     ("model", "evaluate-tensor"): (
         "minxionghydrocast.pipelines.tensor_baseline_evaluation:main"
     ),

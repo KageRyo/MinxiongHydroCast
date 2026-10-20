@@ -1,0 +1,13 @@
+[Unit]
+Description=MinxiongHydroCast observation-derived rolling radar backtest
+
+[Service]
+Type=oneshot
+EnvironmentFile=%h/.config/minxiong-hydrocast/env
+WorkingDirectory=%h/.local/share/minxiong-hydrocast
+ExecStart=%h/.local/share/minxiong-hydrocast/venv/bin/mhc model rolling-backtest \
+  --manifest ${MINXIONGHYDROCAST_BACKTEST_MANIFEST} \
+  --root ${MINXIONGHYDROCAST_DATA_ROOT} \
+  --max-new-windows 24
+NoNewPrivileges=true
+PrivateTmp=true

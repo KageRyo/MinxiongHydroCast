@@ -11,13 +11,13 @@ record below and in closed issues.
 
 ## Public backlog
 
-No open public issues remained after the 2026-10-20 protocol publication. Issues
-[#30](https://github.com/KageRyo/MinxiongHydroCast/issues/30) and
-[#31](https://github.com/KageRyo/MinxiongHydroCast/issues/31) are closed. Proposed rolling
-backtests, event replay and archive coverage are scoped in the
-[roadmap](roadmap.md#next-features-without-manual-annotations); they are not implemented or
-opened as public tasks yet. Historical curated-review items below are a separate track and do
-not make unavailable human labels a prerequisite for label-free research.
+- [#59 — Offline event replay explorer](https://github.com/KageRyo/MinxiongHydroCast/issues/59): planned.
+- [#60 — Historical archive coverage](https://github.com/KageRyo/MinxiongHydroCast/issues/60): planned.
+
+The feature issues use enhancement, area and priority labels. The initial #58 rolling-backtest
+engine is implemented in this change; see the [CLI and storage contract](rolling_backtests.md).
+Issues #30 and #31 are closed. Historical curated-review items below remain a separate track and do not
+make unavailable human labels a prerequisite for label-free research.
 
 ## Active
 
