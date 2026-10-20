@@ -21,9 +21,10 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 
 The protocol milestone is complete. The rolling-backtest engine is implemented in development
 source ([CLI contract](rolling_backtests.md), [#58](https://github.com/KageRyo/MinxiongHydroCast/issues/58));
-event replay ([#59](https://github.com/KageRyo/MinxiongHydroCast/issues/59)) and archive coverage
-([#60](https://github.com/KageRyo/MinxiongHydroCast/issues/60)) remain planned. Software v0.1.7
-predates the new command. These research workflows use subsequent observations as targets and do not wait for
+offline event replay is also implemented ([usage](event_replay.md),
+[#59](https://github.com/KageRyo/MinxiongHydroCast/issues/59)). Archive coverage
+([#60](https://github.com/KageRyo/MinxiongHydroCast/issues/60)) remains planned. Software v0.1.7
+predates both commands. These research workflows use subsequent observations as targets and do not wait for
 human weather/flood labels. Manual review remains an optional curated-corpus track; it is not
 a dependency of this research backlog. Existing operational publication gates are unchanged.
 

@@ -287,13 +287,13 @@ inventory and dataset-building citation.
 
 ### Research feature roadmap
 
-The first feature is implemented in development source; software v0.1.7 predates the command.
-The other two are planned. None requires manual weather or flood annotations.
+Rolling backtests and offline replay are implemented in development source; software v0.1.7
+predates both commands. Archive coverage remains planned. None requires manual weather or flood annotations.
 
 | Priority | Feature | Useful result |
 | --- | --- | --- |
 | 1 | [Rolling backtests](docs/rolling_backtests.md), [#58](https://github.com/KageRyo/MinxiongHydroCast/issues/58) | In source: persist Persistence/Optical Flow forecasts, score arriving radar targets, retain per-lead metrics and resume without changing saved predictions |
-| 2 | [Event replay explorer #59](https://github.com/KageRyo/MinxiongHydroCast/issues/59) | Planned: replay stored radar and available QPE/gauges with source time, units, datum, missing data and model errors |
+| 2 | [Offline event replay](docs/event_replay.md), [#59](https://github.com/KageRyo/MinxiongHydroCast/issues/59) | In source: replay stored radar and available QPE/gauges with source time, units, datum, missing data and model errors |
 | 3 | [Archive coverage #60](https://github.com/KageRyo/MinxiongHydroCast/issues/60) | Planned: summarize expected/captured/valid frames and source gaps, separating unavailable URLs from unknown retention |
 
 Rolling backtests come first: they turn the current one-off event evaluations into repeatable

@@ -60,6 +60,8 @@ jobs:
           src/minxionghydrocast/models/rolling_backtest.py
           src/minxionghydrocast/pipelines/backtest_store.py
           src/minxionghydrocast/pipelines/rolling_backtest.py
+          src/minxionghydrocast/research
+          src/minxionghydrocast/pipelines/event_replay.py
           scripts/validate_public_contracts.py
 
       - name: Test with coverage
