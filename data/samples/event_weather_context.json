@@ -76,6 +76,63 @@
       ],
       "status": "needs_official_source",
       "notes": "Use this as a radar candidate only until official context is attached."
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_candidate_20260707_morning",
+      "window_start": "2026-07-07T04:00:00+08:00",
+      "window_end": "2026-07-07T12:00:00+08:00",
+      "radar_candidate_type": "widespread_radar_candidate",
+      "official_weather_type": "official_context_pending",
+      "official_evidence": [],
+      "minimum_required_evidence": [
+        "Official CWA weather context covering this event window",
+        "Official warning/advisory history covering the event region and window"
+      ],
+      "status": "needs_official_source",
+      "notes": "Coverage reconciliation only; no weather mechanism or human approval has been inferred."
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260710_daytime",
+      "window_start": "2026-07-10T10:00:00+08:00",
+      "window_end": "2026-07-10T20:00:00+08:00",
+      "radar_candidate_type": "widespread_radar_candidate",
+      "official_weather_type": "official_context_pending",
+      "official_evidence": [],
+      "minimum_required_evidence": [
+        "Official CWA weather context covering this event window",
+        "Official warning/advisory history covering the event region and window"
+      ],
+      "status": "needs_official_source",
+      "notes": "Coverage reconciliation only; no weather mechanism or human approval has been inferred."
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260709_evening",
+      "window_start": "2026-07-09T16:00:00+08:00",
+      "window_end": "2026-07-09T22:00:00+08:00",
+      "radar_candidate_type": "widespread_radar_candidate",
+      "official_weather_type": "official_context_pending",
+      "official_evidence": [],
+      "minimum_required_evidence": [
+        "Official CWA weather context covering this event window",
+        "Official warning/advisory history covering the event region and window"
+      ],
+      "status": "needs_official_source",
+      "notes": "Coverage reconciliation only; no weather mechanism or human approval has been inferred."
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260711_early_morning",
+      "window_start": "2026-07-11T00:00:00+08:00",
+      "window_end": "2026-07-11T06:00:00+08:00",
+      "radar_candidate_type": "chiayi_minxiong_heavy_rain_radar_candidate",
+      "official_weather_type": "official_context_pending",
+      "official_evidence": [],
+      "minimum_required_evidence": [
+        "Official CWA weather context covering this event window",
+        "Official warning/advisory history covering the event region and window"
+      ],
+      "status": "needs_official_source",
+      "notes": "Coverage reconciliation only; no weather mechanism or human approval has been inferred."
     }
-  ]
+  ],
+  "formal_coverage_checked_at": "2026-10-20T01:06:25.085675+00:00"
 }

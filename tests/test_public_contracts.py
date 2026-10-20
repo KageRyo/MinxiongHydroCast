@@ -1,5 +1,6 @@
 import hashlib
 import json
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -106,3 +107,54 @@ def test_public_manifest_rejects_schema_drift(tmp_path: Path):
             manifest_path=manifest_path,
             checksum_path=checksum_path,
         )
+
+
+def test_formal_events_have_explicit_evidence_status():
+    """Missing evidence must remain visible for every current formal event."""
+    manifest = validate_public_manifest()
+    for name in ("event_weather_context.json", "qpe_gauge_validation_status.json"):
+        payload = json.loads((Path("data/samples") / name).read_text())
+        by_id = {event["event_id"]: event for event in payload["events"]}
+        assert all(event.event_id in by_id for event in manifest.events)
+
+
+def test_public_frame_inventory_matches_fixed_split_and_checksum():
+    """CI checks the published metadata without needing official raw files."""
+    manifest = validate_public_manifest()
+    path = Path("data/samples/formal_event_inventory.json")
+    checksum = path.with_suffix(".json.sha256").read_text().split()
+    assert checksum == [hashlib.sha256(path.read_bytes()).hexdigest(), path.name]
+    payload = json.loads(path.read_text())
+    assert payload["schema_version"] == "1.0"
+    assert payload["dataset_release_ready"] is False
+    assert payload["forecast_publication_ready"] is False
+    assert payload["split_manifest_sha256"] == hashlib.sha256(
+        Path("data/samples/event_split_manifest.json").read_bytes()
+    ).hexdigest()
+    events = payload["events"]
+    assert [event["event_id"] for event in events] == [e.event_id for e in manifest.events]
+    for event, formal in zip(events, manifest.events):
+        assert event["split"] == manifest.split_for(formal.event_id)
+        assert event["weather_context_status"] == "official_context_pending"
+        assert event["human_review_status"] == "pending"
+        assert event["source_data_id"] == manifest.dataset.data_id
+        start = datetime.fromisoformat(formal.start_time)
+        end = datetime.fromisoformat(formal.end_time)
+        step = timedelta(minutes=manifest.dataset.cadence_minutes)
+        frames = event["frames"]
+        assert len(frames) == (end - start) // step + 1
+        assert event["expected_frame_count"] == event["verified_frame_count"] == len(frames)
+        assert event["grid"]["crs"] == manifest.dataset.crs
+        assert event["grid"]["units"] == manifest.dataset.units
+        assert event["grid"]["bounds_kind"] == "outermost_grid_point_centers"
+        assert len(event["grid"]["bbox"]) == 4
+        for index, frame in enumerate(frames):
+            assert set(frame) == {"data_time", "bytes", "sha256", "source_url"}
+            assert datetime.fromisoformat(frame["data_time"]) == start + index * step
+            assert type(frame["bytes"]) is int and frame["bytes"] > 0
+            assert len(frame["sha256"]) == 64
+            assert all(c in "0123456789abcdef" for c in frame["sha256"])
+            assert frame["source_url"].startswith(
+                "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/"
+            )
+            assert "?" not in frame["source_url"]

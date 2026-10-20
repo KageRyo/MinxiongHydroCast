@@ -1,0 +1,1514 @@
+{
+  "schema_version": "1.0",
+  "verified_at": "2026-10-20T01:06:25.085675+00:00",
+  "purpose": "Public metadata inventory of preserved formal radar frames; not a reviewed weather or flood-label dataset.",
+  "split_manifest_sha256": "953b8b0d85b0269adcc7468288332e039d01512a0ac626090efbf56b12a6a6e1",
+  "source_catalog_sha256": "aa5126b4115958d6c7f2645f15db8b5469d717e6227bd3f19a8f879eb6582e25",
+  "verification_method": "All dataset catalog artifacts checked for existence, byte size and SHA-256; each frame header checked against collection time and shared grid.",
+  "dataset_release_ready": false,
+  "forecast_publication_ready": false,
+  "redistribution": "Metadata and checksums only. Raw observations, generated tensors, private paths and reviewer records are excluded; source-specific rights review remains pending.",
+  "events": [
+    {
+      "event_id": "cwa_o_a0059_taiwan_candidate_20260707_morning",
+      "split": "train",
+      "source_data_id": "O-A0059-001",
+      "start_time": "2026-07-07T04:00:00+08:00",
+      "end_time": "2026-07-07T12:00:00+08:00",
+      "cadence_minutes": 10,
+      "expected_frame_count": 49,
+      "verified_frame_count": 49,
+      "grid": {
+        "crs": "TWD67",
+        "units": "dBZ",
+        "shape_yx": [
+          881,
+          921
+        ],
+        "resolution_degrees": 0.0125,
+        "bbox": [
+          115.0,
+          18.0,
+          126.5,
+          29.0
+        ],
+        "bbox_order": "west,south,east,north",
+        "bounds_kind": "outermost_grid_point_centers",
+        "nodata_values": [
+          -99.0,
+          -999.0
+        ]
+      },
+      "weather_context_status": "official_context_pending",
+      "human_review_status": "pending",
+      "frames": [
+        {
+          "data_time": "2026-07-07T04:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "10c678b96b70f0be3753c97852c71b1b927fefb4ad27279dfc605917499f6cde",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070400compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T04:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "789439b284f66de324494dbc71e19c8680aba1ee3f3dd6e4fb430e07cb404018",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070410compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T04:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "971e5a6ae3da504c29d0de421034fba8390c4b030dd1c6dd6a1c4042f7dec884",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070420compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T04:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "ecaa9c3d27866becfba45119a75eb514e1b111fdc00174fbc29d0d11b604c666",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070430compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T04:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "b35a1b12505b6e69a98c936bad080cc18db3bae45ed9da5bc1eb4e0d34351969",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070440compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T04:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "fcc137aea7738017bf0a83186c2e0197d0303f0f56442457ce2bdd6899f2a988",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070450compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T05:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "3d4ebd78f7076a0b704d698f30631d81943190f14e491d09fa93a7bf137f7420",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070500compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T05:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "c7a1fe2336a09a3db85a85727098eb46071ee64e572771d18b9e02defe6d05d5",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070510compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T05:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "f592bb115dd4b2bc1d2e2f4efe57b3dae4e5fac1a629344c5c5309f8482627cf",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070520compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T05:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "c16224835056cf9daaf15e4d7abd490669799fa1b979ca921ed94d45427c422b",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070530compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T05:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "6f16a880955c76d23ac2558bccac7a660fbaeb977af369b141951b001fb8ffa7",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070540compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T05:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "c5e7cf9e8bf31d5d809cbaeff430b0f135efe019655b0ca1752feb7a2bb3fc6b",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070550compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T06:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "ccd7f67202434c4846f30cbc44ff8b00a3d2e0d66fdac4a552a40b146d00edda",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070600compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T06:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "c3127349d9a0815a2328dc8ad8932a76861cadac5072232fd6addc8bacb7a88f",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070610compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T06:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "299713813cb0d1eb9bd3f46d3b0b4dd9d0348ef1c1e93eb08a92191308891f53",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070620compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T06:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "81b91b121de1ec1a323480a708d1bc926aa99d01baaa16ca000ad4ee488d3a8b",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070630compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T06:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "e6aea21742c529666fca7fb6acba845215e065755e2c08dccda07cf9bc314567",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070640compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T06:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "9e068e26e686e8797249b5a63806824c006be1c6e9172902832e01e8df49acea",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070650compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T07:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "957bf9c53a9a5d4b9a6aeb6f66b17c909b17290acbe5aa390c6932b2f39f1201",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070700compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T07:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "44e0a33c52d48a38611ad2ef9925205f77e3823cfb26905c17221eb343d074ce",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070710compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T07:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "4de5f1827b15b717c6e3059e7437a1805d2f442ea034f2d3a24d3c7e6806dc64",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070720compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T07:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "e4810bb6f54d04791b4c19649a50cad7fb7c005f3ff06cb7e4d12139d7652067",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070730compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T07:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "f1a757ebac645fe464db19448e5ff262c9bce649d49c26194b5c32c13ad7836e",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070740compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T07:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "d2b1b9dd6f3bf1f7b715cfbd75d5b5bdd84e4da34ac537fc6d581ac1a9865f0b",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070750compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T08:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "acf16bcbd3b2a6fc5fb56fc9bf21574c48aada642c4ff7d759c9e1c1c7b89a8f",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070800compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T08:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "fcd8cbf5d75f7b62891968e68cf3a10cdd5dad958dc9265e31b3445ccab9695f",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070810compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T08:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "f909ebfc932236d4ee3c1d5dc6711149f5c08aa85ed23ab0bb718161e1ade8e7",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070820compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T08:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "19dd8b39d11de3ce4a363e23f841ae12cf257867d2a6784b6b7d26161d709e4a",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070830compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T08:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "ec27bc7ecfec462e59239792262db9c399c3f03eeeeaa0446d5c55e0111cd4d8",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070840compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T08:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "670c553edfbf22e409230ddd8b5eba41524ba28c38a2eb5f6b56c6335ab2503a",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070850compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T09:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "2cc06e8d66965ed0c25a5707ea0a93605283c04f32de36698c4b62d28b746017",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070900compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T09:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "6ba8f63c7017da121b60890de433ad51b5f836f64870467382cd9e1fe15584d5",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070910compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T09:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "2762d74d8da57ffc87ff57bb7d84019ff32b51b140e36ff859a7f6d616cb3d20",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070920compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T09:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "a7fc85b19e9cb6bff888ba2e761ee2f1b1547654539859f01e12d8438c53742a",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070930compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T09:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "359def2881316c77ea9974c0dd319d7472311ac7df0e8a6d3d9291bc859a0983",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070940compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T09:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "0153b59219c4bf033464f85ec12a2dafecf1d80724765804d67d126ee522a979",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607070950compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T10:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "4d49175494e1d9f43194361a456fc9a772bb3c24b4f4259ff6aff2702da7e719",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607071000compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T10:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "9d024d539ae03f945fea05833eea4ed067d105bdf544d718d402f345e5018302",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607071010compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T10:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "db4af1b87b7d68385d1d07665c3e82c4d63b91b95528fdbcad78ad7f8abb720c",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607071020compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T10:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "53423ae6c389eb32e2325dddb69a01c93394de0954d65f878459c2ec18353af4",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607071030compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T10:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "7156dc8b459ee0ef697df02a454bb3fcd0a13b2a326cd773754952bdfc759ba1",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607071040compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T10:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "05c6aece1d36601a4520c547ac9f8544c77d6548c05ec8aa3480029d9aa7c513",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607071050compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T11:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "1f1ce50282714ef6629bc4adc27a52e5ff5a311609d89d1a927dff617adb39e5",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607071100compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T11:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "59ad2c642cc586871b17916e2383c31337623fed7e6e76ad0ca74d1b26317b1f",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607071110compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T11:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "c73efeffd880b2c2ae65f1b1560144cb875aaae45266f22aac1f431abb80143d",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607071120compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T11:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "c46a4692ea72767d37e867b6aa4583b3f8181d5e0d0ea9d74654d9129fea04bc",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607071130compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T11:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "015e20efb5526636d5a5f4a5802b995d15b2091cbe4839264163d0febb1ab98b",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607071140compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T11:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "72a1bd0127e73c1b9b8d0baa90106408cb5eee6bd6c369369265d67b2ff3c7d1",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607071150compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-07T12:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "fa02d723ee39ca4ae54e3a537e6a9b646e0d656ae2191be792dcf425b7a1ab9b",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607071200compref_mosaic.xml"
+        }
+      ]
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260710_daytime",
+      "split": "train",
+      "source_data_id": "O-A0059-001",
+      "start_time": "2026-07-10T10:00:00+08:00",
+      "end_time": "2026-07-10T20:00:00+08:00",
+      "cadence_minutes": 10,
+      "expected_frame_count": 61,
+      "verified_frame_count": 61,
+      "grid": {
+        "crs": "TWD67",
+        "units": "dBZ",
+        "shape_yx": [
+          881,
+          921
+        ],
+        "resolution_degrees": 0.0125,
+        "bbox": [
+          115.0,
+          18.0,
+          126.5,
+          29.0
+        ],
+        "bbox_order": "west,south,east,north",
+        "bounds_kind": "outermost_grid_point_centers",
+        "nodata_values": [
+          -99.0,
+          -999.0
+        ]
+      },
+      "weather_context_status": "official_context_pending",
+      "human_review_status": "pending",
+      "frames": [
+        {
+          "data_time": "2026-07-10T10:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "160cab596520eebb7e1b8679120587017e315ed50a44569ba185119cc68deb3f",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101000compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T10:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "e8a7e5e855e3fb5ba7c011d5bc5673c19f348b9e52962b9288f95d66cea20d05",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101010compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T10:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "21f9c143b7999b841ddc835dd1d947edc799284ffaa0f3303308c02ccce7b0b4",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101020compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T10:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "b9d56d52c704e18cd25ccad56ad82ce6ea5d32e8dbabb587a70698a7ab9a3bd5",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101030compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T10:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "b8777d5460140c38b09a4ee46bd12523622e03a7186f33cfd6fc94707c9cd53a",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101040compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T10:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "537271105a7398e2110736802ebd061f18cf7ce3175afe510bee2580f03f1302",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101050compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T11:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "db23b4dceb4160aa2c99439e573f406379edc4a2d76001cb44e56f712cd853e9",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101100compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T11:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "dfa920e2915f282c8630c8c45638426186081fdb493646fb33dd6ec8f56181d3",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101110compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T11:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "3f5bf2798e703cea47dc3a2ba1e2dd4553000580b6175e4a765ddf6e8048f950",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101120compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T11:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "0088e5d61fd0f6cf7fc86fa4c41c67fdd5a6395f3c885bd1dc31593bf3b78af5",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101130compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T11:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "7f79fbce7b11cc7676536d368dff49fcefb07f30b95b84c0a5206adc8b54e459",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101140compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T11:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "b5bad6c598ffd3e24598b19a4515e4336e4793971586f472ea7eea59cbda38be",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101150compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T12:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "bc272b2d2aed3b469c093c42e78df5f63fe697154ffb0c69ea10c6b4edd14301",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101200compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T12:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "2d0e9552b6902fa322d50871774961740a4da22456b312ceaee5d8991bacf7d1",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101210compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T12:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "3750b962ca35b1301149805a4de0110edb52461ac87eb0fa0ca8522cb0ea652a",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101220compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T12:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "90ca7c446bff0a3140f196e4fa9b93ae37a8e80c2b1c386f74d4b8f8cbffd13c",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101230compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T12:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "bf46410c70912a02d14f14d6f9fffaadc3cac3bd37bf2b9ec05a83fdec0fdff7",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101240compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T12:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "4a6ef6942536fdc2fc1b09eb365f4da37f7bf593a04ac10affbc8b3ae0937016",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101250compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T13:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "c2d2021d1e65fc25bb322ceabb8c324ce1b3e44e3ead75f287025e7d980c3d90",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101300compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T13:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "85a46e4aa382785073031ef84b25f193fabba8e9275c03844e6f5be8a5c8a160",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101310compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T13:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "30f7e80eb8cb8ea1ca2799a35dea9506a14353712962b256748a057b9e21d26e",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101320compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T13:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "a2d6fdf1f576334b4fe1b9ad97f022a3cd7113a4b9266f6d279168dec800dc0a",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101330compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T13:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "90f31592e3c6175af7aff84547fc3785b699584d77203a3b6623d56bc2ce6361",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101340compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T13:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "878d503b6d968d686c3782e0420aa488147db2096fedca1247c6ac815d95d3a8",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101350compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T14:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "427df87961f0506a5566ffbc9cf35be94e1c1e91bc3b623e8b716267893804b0",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101400compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T14:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "b95e729f28a055c8da3a771333600ef2b543d28dabb58930e142dd9054b9515d",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101410compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T14:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "15e89cd51c3db11da0d10a996f63d079a96634465bcd42a41f8f7ce3b320b68b",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101420compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T14:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "3f3854fbf2a906dfa1dce36392104827b3d0bcce3e4955f5f2f093300df4ad14",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101430compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T14:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "516c7647872e4b8666d86151730ced4fe2f8bb93a6a69f6bddc3ca3bc1d6db40",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101440compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T14:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "4a907e66c4b48775d3d51f591d67fed436676c1720ebddfe5c3cada5f9e5485c",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101450compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T15:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "054f645fb301aec33f7023c9084a0115f756f88e11c6de29c95c529ac23b6f1b",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101500compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T15:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "a45682cb5ac0d00a13db7af718ca7a8f7ba8e84e833ba0ebb037d6c9fcf87da9",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101510compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T15:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "0f7ba006a2228a79a2eb73e3c1a4ba5d94d64e20c4022968e6760d6041a8b2fd",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101520compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T15:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "e17aeb4aff075a183588a8a613fba271e6e15cca7b0c04211f59a118728008b1",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101530compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T15:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "25c16c3011498e21a8dda710e46cb4b883569ed15ee0ad83c1d2884511d759cf",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101540compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T15:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "c2e39b521ccf9ad6b1c2986f98b5b27a1ae0699e79184b962a9c3eca97e0167c",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101550compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T16:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "fd12b2db05940428c9b4cb2a4c8f93f6371671b0950742e8af584eb95c8f8f04",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101600compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T16:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "545dd277c902a967223efb2f4fb99407887591d4a9ad36b204592ab28523da90",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101610compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T16:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "68c6f56b4506fdede49a1c550504280e1c6ba2afbd9678d8f3ba7377a901e12f",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101620compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T16:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "394150217c4862eb997da1d969e7433e3710e1a6dd287d97252248c6db9f77bf",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101630compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T16:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "ee1f8b6040294a68dd1ea1697e6569bd0ad34ea8d678486e67c6136f87832288",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101640compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T16:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "20a7f8c67b9e1cecc9ce09be9686a3a1959140e44ebb2dbdbae3c5eb7b0ec816",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101650compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T17:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "e01920760a8d9d8ec1c80f4fd4097f9b32f6210ce8ba91641f83bb615887739b",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101700compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T17:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "3f02381d034039fc5b80acc3ffbb67ad7fffce3cb7ef2d78ea2be93d0771fcdc",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101710compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T17:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "1542e8d540ecfd56382ca0ede30c52e363c3c48029c2f252a5033b07c7eef8d2",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101720compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T17:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "75f702c3a7bdf4a523b325178638278b456736325b574ecb72e97e47534257e4",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101730compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T17:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "a30b862fc36e58ed3a3d47de323c0455801689204bb428390c8090d6e5cf94f6",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101740compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T17:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "761e4b9a4af75fd9175764555c3bf6d9aba1af3c599b5b70c2b43497738303c1",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101750compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T18:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "bde8d982d52ea380627283e9366d2d1e02d76378cf8f51ec0858e2b5cd0c16e8",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101800compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T18:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "7b75d3ee66000882c177c1bef742cbdd70d659d7fca213746c8a2a0940fb65e9",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101810compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T18:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "018bef72311be30f20b58500fcfab4512e31ad68df11b560960ee3474ca3dba9",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101820compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T18:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "de239e973f395405e73f09529d4c997f11514c9b1ad47e97a9255467e50302ab",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101830compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T18:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "7347d9c4d778a4d064557629d632efef98d745a17035a297f93bf02c1e149bec",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101840compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T18:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "ca48c577285503ba88719e6c4ab40e2c19bbe913b340debd709c843750d7b941",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101850compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T19:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "90a52ac05cb1fc912c762b9c156ba6afe5e9800f4f7d663db87c08c2423f99f4",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101900compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T19:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "563660b3a01bca3004abca5c4a46279c938719d8265a312f9a358ef4528f6612",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101910compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T19:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "35e82a48de3f2e8aaf9adfbcd7a4578a227ad89449e7d736010b218a2b61e48c",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101920compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T19:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "4d2bc491e3d48bca629766ed4ad50b1d01f3e587e9a4b95d4acfd10c87d8aea6",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101930compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T19:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "caabe0fcbc1d356a9c3f9998bcdc3487ef5486717a576b030dff8f581d94dbf3",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101940compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T19:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "4a65c36447ceb4c5c93f422e09778cdf44b83f27ba4035c7fd5fbb9f39c16467",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607101950compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-10T20:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "56bb2fbbc7e5a63f6baa77dd8fe63ede5c7b2a83bde58f6314f1dce6fb6513eb",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607102000compref_mosaic.xml"
+        }
+      ]
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260709_evening",
+      "split": "validation",
+      "source_data_id": "O-A0059-001",
+      "start_time": "2026-07-09T16:00:00+08:00",
+      "end_time": "2026-07-09T22:00:00+08:00",
+      "cadence_minutes": 10,
+      "expected_frame_count": 37,
+      "verified_frame_count": 37,
+      "grid": {
+        "crs": "TWD67",
+        "units": "dBZ",
+        "shape_yx": [
+          881,
+          921
+        ],
+        "resolution_degrees": 0.0125,
+        "bbox": [
+          115.0,
+          18.0,
+          126.5,
+          29.0
+        ],
+        "bbox_order": "west,south,east,north",
+        "bounds_kind": "outermost_grid_point_centers",
+        "nodata_values": [
+          -99.0,
+          -999.0
+        ]
+      },
+      "weather_context_status": "official_context_pending",
+      "human_review_status": "pending",
+      "frames": [
+        {
+          "data_time": "2026-07-09T16:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "5627244c1e878bb1a9a2febfa0fca942d84a337e338f627199b8b89b5db09757",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091600compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T16:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "8922a97bf59c150af0356281d1ccbad12795756b8feba8e108cf569f0a3ba469",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091610compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T16:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "da9a8f269785c3ae470b7d5a403fa29f9053cc08e6b87238302eb01d02cfd220",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091620compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T16:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "0dac2686373bd728bf580cdffbc69e21d32c144f36fca73ec9eb3a7cf9dd8cb2",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091630compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T16:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "6f6e16b099f292347aee9a4884e5e5036793a05da3d67bf59af3b1b7734029c9",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091640compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T16:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "a8e2d1d68f22b542e0539bda1b4678a417e8dbdc1c07d4259bbd60f77882b2b9",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091650compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T17:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "9dd4f4fa61461f26330ebb613fe5649345890d251acfec039cd9289be61ceca7",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091700compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T17:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "abd22762e38b4ba12f864be3290cf3483adcf595fbce6f9dfca66731e0845c23",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091710compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T17:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "02588e573e1ca13733bc12dc75dd3190533d9cbba7e5c53afc9ea55af0e2a21f",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091720compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T17:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "73bdf326a193a7ac0c8f7d01fe43f944a24dd082de11d8768c00fd7a9144ec20",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091730compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T17:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "e469e2e68d1d0acf1a78d51f3d2a789e72cbbf4dd4a13da020b8eaa52f342f62",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091740compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T17:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "9cf3ab6b294a2a9f5a446182b9d8943faccbe89add4740b94880d3ea0141cd30",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091750compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T18:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "538509e15a875c2e36e8c95ed331c8ec6c3a0c6e3f820c3f249bf4fee382e024",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091800compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T18:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "eb7beaa69bf938f67f7bfe3d0f7b41abf6f4e8b603f2a7d2e203b31dcd26633e",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091810compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T18:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "5867561d957c4b8cf5b605b10ff4b40bd43466a312b62ef6a6e82f89faef831b",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091820compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T18:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "c46b446846854f1cde273f0f6a629be98a0bfe5eff289e745ea2eba121f8cbe3",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091830compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T18:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "e41293356dbd5e8e738b43784adf82f58e3d2444dd3d5d04eac6d4dd8e9637ad",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091840compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T18:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "f77040d81703a47b7e51c5df25fa2d3770ee916441c382a714f2871506210255",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091850compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T19:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "0a212cc3195042cd173db894d24290d30b1753d9de2f197ae5d8e61aa6ceeafa",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091900compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T19:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "c7be3e10eae5d4bd740d0c9abc41e5017837b708fbc6296b5a022a6d7759ea5f",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091910compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T19:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "b310919e8b91858e58b6f5fee87625cadfeb726cca3f6dc72bb5add0e05e8dda",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091920compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T19:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "73a8593cad192d31fa283e701c18cc3eea2d9b0f556ffd4a8a457ff0d55c0832",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091930compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T19:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "57ef8d3714f5d26c20711a033044f6eb21339f1b5319bf815d6c6dffafcfd990",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091940compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T19:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "1a8ee1a6a83eddc71a02407320f83e6b5e103ba7bdaa0b121c698dd374dc0326",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607091950compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T20:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "cdfd6eec818d1b8e3a0faf09999d4c9d0ae85980fde119aef1809ca88752ff0c",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607092000compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T20:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "d269d04e61f5822093757f251b5f6124b552eb3375cda31bc54a67a52b5acfa6",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607092010compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T20:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "3c67806967ae027c7d1a9881eab7dfee98a0febcc6123595576f1bb8b7893911",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607092020compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T20:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "ad2686008ff5804dfc6895ed04a3b99c96e6ec02a00e548aa62acb46dba937dc",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607092030compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T20:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "7aefdb71f1044f82ba579c4b1f410d4ad2e7a4ba0ff1fcf030ce41d6dfebfdf0",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607092040compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T20:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "09eaf5419a4f2acfd99185e17d2f8c903371de4fd81e5f89b0e493f554ca73d6",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607092050compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T21:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "60df5b03c2332228480fc588ea904ddaedc3ef60bee2c37a896546b96441091c",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607092100compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T21:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "0f181b87647750c515066d5269fb81521e0844c0187d3ca35b4e6b0e3cad7fbe",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607092110compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T21:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "5c828b980f20fa1df936fc921f1ade69628e8ea1453d5feb9502e8c349f34774",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607092120compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T21:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "f9ba90b4667720958f238631519c53695a6d81dc6d6b26ec15090cfda5c2e601",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607092130compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T21:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "ab6c6e9e83e2bb3b5a2d2e01917cd005b927111528ee7df4ad566cb0968b1b1d",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607092140compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T21:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "c3d3fff936f7426428a523592d97bdf7637e04d5f5e8f5e76ef3c2c60eb2c5ef",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607092150compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-09T22:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "0453e568b17ee294af0907455b282f0ba851d1f7aa6098e54ba9d5412b568982",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607092200compref_mosaic.xml"
+        }
+      ]
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260703_afternoon",
+      "split": "test",
+      "source_data_id": "O-A0059-001",
+      "start_time": "2026-07-03T13:00:00+08:00",
+      "end_time": "2026-07-03T19:00:00+08:00",
+      "cadence_minutes": 10,
+      "expected_frame_count": 37,
+      "verified_frame_count": 37,
+      "grid": {
+        "crs": "TWD67",
+        "units": "dBZ",
+        "shape_yx": [
+          881,
+          921
+        ],
+        "resolution_degrees": 0.0125,
+        "bbox": [
+          115.0,
+          18.0,
+          126.5,
+          29.0
+        ],
+        "bbox_order": "west,south,east,north",
+        "bounds_kind": "outermost_grid_point_centers",
+        "nodata_values": [
+          -99.0,
+          -999.0
+        ]
+      },
+      "weather_context_status": "official_context_pending",
+      "human_review_status": "pending",
+      "frames": [
+        {
+          "data_time": "2026-07-03T13:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "b5bb7df56dcfce2175ee08a11a3fbdb0f87b5dfcd8a6813bff19b0be8b4102bf",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031300compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T13:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "d44678d4c2eb0a6473078f7847eba04216f92c4695b4563233e6ed40d514bc7a",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031310compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T13:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "07b0c5e10cb24d9d71a168ad052acaf5e87d6859018465f17ff86adf552911ae",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031320compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T13:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "7bd83404c000fc0fa35d9efe7f4fd38dfa4d9a987e17d51ba789a1c2981fc034",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031330compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T13:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "61f89fc307b8bfefad621ef22bf117cd0f52110caa16ee4631f5589928048d5d",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031340compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T13:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "73184aaa7009df45407773c48197122ac8a3f18d9c59df6e272aa284e5f879ec",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031350compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T14:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "43ee9a699e4cd0921564e98fada6c6c2847e16197dd484d0c63e7ebfcae5ed74",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031400compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T14:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "e68130fb33c2ef077c8c23348ed0ccb6b40b1c9cc42c42fb3b82d58226ab51b5",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031410compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T14:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "a14d7bc589156e8d5123c69fb903224d360bfec6460edd43f8fbb4985c9780ac",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031420compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T14:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "4ff2cb7e1b8d30fd998399dc83dc1ace413341005fb8922465d8bd8333a4d450",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031430compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T14:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "583e0745eb3aceb3ddbbc5b29a30df0feda26e9b621d98febd1b30a312119a27",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031440compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T14:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "ced7d8badee2d911ff7bdd427b95a3f20d33b099d19cf08c8e448cabb6a01dc4",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031450compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T15:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "d09a499ad5d2582b25b0979c7ba9b9977a622060951ad90050e35017acc0ebda",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031500compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T15:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "b21466ea661409fca9318c1319ebb5d172446b63257a34c6abd1208ae1f80116",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031510compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T15:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "1787525306557a73e51de66e5f8a28714a772b7f80fa9f3db3806f1fd632fe1b",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031520compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T15:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "0ef1396a62db4fecdf4ca7159a0b88358549551750d327921644fd6aee0775f3",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031530compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T15:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "a2bfb8daa23d9ab445135aa0037fe908de3092e2997439a9e0f5c7a49e072cd7",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031540compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T15:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "ecb002ba3afbe0e8137e2134a6d01cc9e977bd188f66041e8756d7b52df4a518",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031550compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T16:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "728c489df7c396510138b79a41478ca310b6e0251c2758a543ed5c95ee81b2be",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031600compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T16:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "516926baeecc1c54b0388194158bd669859e88a81a2140ebbbdf7bafa5c20ae1",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031610compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T16:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "387c56533d4344dc6befbb2cb65f6736290fafe56d349513b6d3f04148919888",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031620compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T16:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "34ad08b9c5697887a0902f7b1535ffa85bc0670f1cce160307e5e3c8f0d5a512",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031630compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T16:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "e45248d9b25aa2fa0c15c586804f663a8cbb7f73b0c45c750b6b2d34ac3aaf13",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031640compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T16:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "061e9a961e1d398aa47b3bcda0ea7a28c3f7e8259f491334f079c547dc7753c4",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031650compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T17:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "74cdcb12bc25893de9e25378d618484a8ac205685868c91c93f318b4733f8e9a",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031700compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T17:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "efc6bd48db1221239a900701578ade8751f88fef15b028881ceaa1598db67687",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031710compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T17:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "91b87046149d7a1cf70134a47d5f185c9eed8d0c70fe9f99faaad985d266e091",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031720compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T17:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "13405e7208c5e732394edb7ba5f93d7282b171f40d8f7182a79ea0331c180874",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031730compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T17:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "eae6b562670a605e165956e0829091e4f706465bd441c1305c95b520ec7f356c",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031740compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T17:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "27a9e4633061de0ededdfea45a8a7b04fee827274fea5eb4ad240c744a7e1f3c",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031750compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T18:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "5528dac195a1b4c06a2131c0dd9dbf11dbdac00f7a74f4d9bc3f170b244a44ac",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031800compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T18:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "76d61fc08e903ee3e5dc8271376de570b6508acca0e9a74f6065ca95075ed5bd",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031810compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T18:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "cb84053266a25a92681ea763d23aacf966c13248c1d8f36613a6f35dbf67f3c1",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031820compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T18:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "f28720c39e80376ddd933647a18f918b105388f2810829712750e69a8c0d1cc1",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031830compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T18:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "4e57578b6ae2eaaa87fb686765cb7bceed06ea7c2e64ab0d234466948ab3899f",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031840compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T18:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "7c200953ce628e5dd26e38aaa2f39b64d7ace03deba69cf0d21637520ea06ed9",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031850compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-03T19:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "0cc14c9ef514d8adf4e1011f9b5ff539a5d02f8214ad7c99dc0fe36a8e4b4afd",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607031900compref_mosaic.xml"
+        }
+      ]
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260711_early_morning",
+      "split": "test",
+      "source_data_id": "O-A0059-001",
+      "start_time": "2026-07-11T00:00:00+08:00",
+      "end_time": "2026-07-11T06:00:00+08:00",
+      "cadence_minutes": 10,
+      "expected_frame_count": 37,
+      "verified_frame_count": 37,
+      "grid": {
+        "crs": "TWD67",
+        "units": "dBZ",
+        "shape_yx": [
+          881,
+          921
+        ],
+        "resolution_degrees": 0.0125,
+        "bbox": [
+          115.0,
+          18.0,
+          126.5,
+          29.0
+        ],
+        "bbox_order": "west,south,east,north",
+        "bounds_kind": "outermost_grid_point_centers",
+        "nodata_values": [
+          -99.0,
+          -999.0
+        ]
+      },
+      "weather_context_status": "official_context_pending",
+      "human_review_status": "pending",
+      "frames": [
+        {
+          "data_time": "2026-07-11T00:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "8b406207045f03e28955731ed6576cf03ddccf23173a2b78aafbdcadfd57fcef",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110000compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T00:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "4bb9e7b4875daea94ec2bc261c94187a78ab789e11878f8d15be4d8968205bfe",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110010compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T00:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "b182d3c6ea8cad3de454fd30c78835227780368ba8210f6bc3aa79b3aa10f25a",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110020compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T00:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "971335f5e2954b005926ecbf22672cd8b02d8cd6e38a4ad19889e7e9bbeacb76",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110030compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T00:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "0532756fe062fc07922e4440f97f316e946f8bdab5c8697bdd24922910edbdff",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110040compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T00:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "44a19a9069eb5b41bdfd778f5ef74c0ca9c4e34fd0d61b723cc04f4ee7dd463a",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110050compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T01:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "e4f458e8952ef77b0e3fc8195583bea63b3b944ab17b9429bb311b2183fb7115",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110100compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T01:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "c2401f5b63c96994936469e11d9776d91d5a38cdf8b0d89312252bdda7a68a06",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110110compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T01:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "097e6396d9002db0cd9b5ee0422bea16e9b1d8d18a68b31410322bdc1854781a",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110120compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T01:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "cc6050b7c96656a954e54fa53781ac13cf1eefbd740c9034022429b7045a568d",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110130compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T01:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "ef04fa8dcbe675cfcaea0cda97207a10e7ea55834bc5fb18e1c2557b6695e39a",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110140compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T01:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "d8c781eb1f73ef9ba0c5442bd8a03d04d4e1c96047d84de3e9a09253c6bba812",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110150compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T02:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "1f9be8de1963b8eb1f53d84727a4ced3f64387654906666f1c7718bc91e4ad1b",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110200compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T02:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "f0786f1fd7b25d83d17434779806989a30ffeacd8e9ac9df637eff31eee5fa97",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110210compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T02:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "df43b9e8cdb0be2ed11f30639e7f96f0d2b2d05dd5f022eb8ef2a80b1d40f206",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110220compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T02:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "337df894503a2da48352d7e4a60d825a2d94ec22724fdbabadc8799ecdac5b0b",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110230compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T02:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "4df7a29ae4e763065662f647def27b5483da6878e4c3f78f12df9b7ee9b636eb",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110240compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T02:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "23e781c7f720e47f70a974ac9d84d4de3769f57be3aa70c2b0a9bb10758eed4f",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110250compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T03:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "5ddea1589befb08750b71a4ad2d0f7c74a4c9e30ebc0a7d4f69cb761736b50d3",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110300compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T03:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "092d28ac2766f6e2d80194a6c7630478b58f8a96f4a84ae438e716464a70a7cb",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110310compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T03:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "34c063653970681608d7844e987502cc1c8f501353bb5ed32044d83958aea0f1",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110320compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T03:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "9a40e579996ef0b31f744944550982807d6b4f7feb2cc25501f303d245111e8f",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110330compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T03:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "629b4832d681af7a06008b54738a33ace81d3834583100d1bc44bcbe09300374",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110340compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T03:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "bc484d1ddae8810db7704ab840bf21fd08b64966347f036926d78b42430e131e",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110350compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T04:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "cbe5ba30d37bfe9703c36022ce11b1dcf9095f87882a06b2a24bf387e2695d28",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110400compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T04:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "6acb6b538e6f3f93dbca3d600320d226c64204f73dc8b6826ec52d37ae2eab95",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110410compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T04:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "771d280db94ffa0bbb2f5cee786b36af260406f8a9e3a52a321c248f6df4ac94",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110420compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T04:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "3375af28ec1b99fa6b1c9be5e39d877d8789f24c74c81c77ebb96618bcfcffb6",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110430compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T04:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "0021a1e200706c97cad4812271742a68a670ee57f7ae27fb5d08373a805a4708",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110440compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T04:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "9e7d9587e30212da981ee75149a01b80e9fefbbcc01ee7942fda8aefff2fc2c8",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110450compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T05:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "700e93b2f84fb98f266ea3acf50a22ca23df603cd50acd68d62d80da78b8b9a4",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110500compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T05:10:00+08:00",
+          "bytes": 8927029,
+          "sha256": "9d821942194225370e312e241e04f7298a420106c69321385b6a60462da0dacb",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110510compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T05:20:00+08:00",
+          "bytes": 8927029,
+          "sha256": "de1c899429e05fd88c4a63c104897f968bb2627b8cac9c32443ee48e5cd53afe",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110520compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T05:30:00+08:00",
+          "bytes": 8927029,
+          "sha256": "e242770a086dc849087fc7d8822466103e787b3479ac56fe07fdf9d455fedca4",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110530compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T05:40:00+08:00",
+          "bytes": 8927029,
+          "sha256": "555683b49252472df22b9c7667fe848d36f28fb5b7b7d3562282ae82906cc9e0",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110540compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T05:50:00+08:00",
+          "bytes": 8927029,
+          "sha256": "5be8230bb7dd35500ed550b62411b0009ac5f498104d770a60776825a5e9b06f",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110550compref_mosaic.xml"
+        },
+        {
+          "data_time": "2026-07-11T06:00:00+08:00",
+          "bytes": 8927029,
+          "sha256": "688caa1075b85e7c478c246ce2c7d097abf285b4ff480f42ff0243c60beae53d",
+          "source_url": "https://cwaopendata.s3.ap-northeast-1.amazonaws.com/history/Observation/202607110600compref_mosaic.xml"
+        }
+      ]
+    }
+  ]
+}
