@@ -291,13 +291,34 @@ def test_wrong_timestamp_type_has_fixed_report_diagnostic(tmp_path):
 
 def test_export_only_authorizes_exact_embedded_scripts_and_styles(tmp_path):
     import base64
-    import re
+    from html.parser import HTMLParser
     from minxionghydrocast.research.replay_export import write_replay
+
+    class EmbeddedCode(HTMLParser):
+        def __init__(self):
+            super().__init__(convert_charrefs=False)
+            self.active = False
+            self.blocks = []
+
+        def handle_starttag(self, tag, attrs):
+            if tag in ('script', 'style'):
+                self.active = True
+
+        def handle_endtag(self, tag):
+            if tag in ('script', 'style'):
+                self.active = False
+
+        def handle_data(self, value):
+            if self.active:
+                self.blocks.append(value)
+
     path = tmp_path / 'hashed.html'
     write_replay({'events': []}, path, root=tmp_path)
     html = path.read_text()
     assert "'unsafe-inline'" not in html
-    for content in re.findall(r'<script[^>]*>(.*?)</script>|<style>(.*?)</style>', html, re.S):
-        block = content[0] or content[1]
+    parser = EmbeddedCode()
+    parser.feed(html)
+    assert len(parser.blocks) == 3
+    for block in parser.blocks:
         checksum = base64.b64encode(hashlib.sha256(block.encode()).digest()).decode()
         assert "'sha256-" + checksum + "'" in html
