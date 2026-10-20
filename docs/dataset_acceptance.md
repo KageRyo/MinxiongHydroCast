@@ -13,14 +13,24 @@ it does not certify a released official dataset or forecast readiness.
 | Release documentation names redistributed content | Protocol distinguishes contracts and synthetic fixtures from official captures and model weights | Version-specific release notes and exact artifact inventory |
 | Artifact is archival and citable without implying forecast readiness | Software citation and protocol-source checksums are separate from a released official dataset | Final dataset release identifier, dataset citation, and reviewed limitations |
 
-The tracked weather-context and QPE/gauge availability tables each cover only one of the current
-five formal event IDs. That entry is still awaiting official context or blocked by missing
-event-time QPE. Missing entries are missing status evidence, not proof that no private artifact
-exists. Reconcile the tables against all five events before claiming full validation.
+The 2026-10-20 reconciliation gives every formal event an explicit weather-context and QPE/gauge
+status entry. Four newly recorded gaps remain unverified; the older July 3 entry still awaits
+official context and is blocked by missing event-time QPE. This is complete status coverage, not
+completed validation. Older HTTP 404 probes are not attributed to the four unprobed windows.
 
-Remaining manifest evidence includes reviewed weather regime, machine-readable spatial bounds,
-per-event frame availability and checksums, and versioned build provenance. Radar threshold
-crossings do not establish a weather mechanism. QPE remains an estimate requiring gauge checks.
+`data/samples/formal_event_inventory.json` now records all five events' 221 preserved radar frames,
+their source times, credential-free acquisition URLs, sizes, SHA-256 values, split membership,
+and machine-readable radar-grid bounds. All 251 external dataset artifacts passed a new size and
+checksum verification on 2026-10-20. Each frame header also matched its collection time and the
+shared grid. The inventory has its own checksum companion and CI consistency checks against the
+unchanged formal split. Bounds describe the outermost TWD67 radar grid-point centers, not a flood
+footprint or a WGS84 township boundary. `dataset_release_ready=false` remains explicit.
+
+Remaining manifest evidence includes reviewed weather regime, human decisions and evidence links,
+and versioned build-command provenance. Radar threshold crossings do not establish a weather
+mechanism. QPE remains an estimate requiring gauge checks. See the
+[external evidence assessment](external_disaster_evidence.md) for historical disaster sources and
+their limits for the 2026 formal events.
 
 The wheel and sdist are software distributions: they omit the dataset protocol, event
 manifest, public-contract validator, and test fixtures. A dataset-protocol source archive must

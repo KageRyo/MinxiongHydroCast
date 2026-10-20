@@ -138,11 +138,48 @@
       "qpe_probe_summary": "data/processed/run_summaries/cwa_history_data_o_b0045_202607031620.json",
       "qpe_redacted_endpoint": "https://opendata.cwa.gov.tw/historyapi/v1/getData/O-B0045-001/2026/07/03/16/20/00?Authorization=REDACTED",
       "report_status": "blocked_missing_event_time_qpe_grid"
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_candidate_20260707_morning",
+      "window_start": "2026-07-07T04:00:00+08:00",
+      "window_end": "2026-07-07T12:00:00+08:00",
+      "gauge_status": "not_verified_for_formal_event",
+      "qpe_status": "not_verified_for_formal_event",
+      "report_status": "pending_event_time_source_audit",
+      "notes": "No corresponding event-time verification record in this tracked table. Older HTTP 404 probes belong to other events and are not evidence for this window; private artifact availability is not inferred."
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260710_daytime",
+      "window_start": "2026-07-10T10:00:00+08:00",
+      "window_end": "2026-07-10T20:00:00+08:00",
+      "gauge_status": "not_verified_for_formal_event",
+      "qpe_status": "not_verified_for_formal_event",
+      "report_status": "pending_event_time_source_audit",
+      "notes": "No corresponding event-time verification record in this tracked table. Older HTTP 404 probes belong to other events and are not evidence for this window; private artifact availability is not inferred."
+    },
+    {
+      "event_id": "cwa_o_a0059_taiwan_widespread_20260709_evening",
+      "window_start": "2026-07-09T16:00:00+08:00",
+      "window_end": "2026-07-09T22:00:00+08:00",
+      "gauge_status": "not_verified_for_formal_event",
+      "qpe_status": "not_verified_for_formal_event",
+      "report_status": "pending_event_time_source_audit",
+      "notes": "No corresponding event-time verification record in this tracked table. Older HTTP 404 probes belong to other events and are not evidence for this window; private artifact availability is not inferred."
+    },
+    {
+      "event_id": "cwa_o_a0059_chiayi_minxiong_heavyrain_20260711_early_morning",
+      "window_start": "2026-07-11T00:00:00+08:00",
+      "window_end": "2026-07-11T06:00:00+08:00",
+      "gauge_status": "not_verified_for_formal_event",
+      "qpe_status": "not_verified_for_formal_event",
+      "report_status": "pending_event_time_source_audit",
+      "notes": "No corresponding event-time verification record in this tracked table. Older HTTP 404 probes belong to other events and are not evidence for this window; private artifact availability is not inferred."
     }
   ],
   "next_actions": [
     "Start storing O-B0045-001 QPE snapshots at event collection time, or locate an official CWA/WRA historical QPE archive that supports these timestamps.",
     "Once event-time QPE grids exist locally, run mhc dataset qpe-gauge-validate for each event and replace the blocked report_status values with report artifact paths.",
     "Keep O-A0002-001 gauge files under ignored data/external paths and commit only aggregate validation summaries."
-  ]
+  ],
+  "formal_coverage_checked_at": "2026-10-20T01:06:25.085675+00:00"
 }
