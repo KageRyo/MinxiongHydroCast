@@ -274,7 +274,8 @@ inventory and dataset-building citation.
 
 | Version | Milestone | State |
 | --- | --- | --- |
-| [`v0.1.7`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.7) | Protocol archive tooling, strict QPE/gauge alignment, public documentation and source provenance | Current software version |
+| [`v0.1.8`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.8) | Rolling backtests, offline event replay and archive coverage reports | Current software version |
+| [`v0.1.7`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.7) | Protocol archive tooling, strict QPE/gauge alignment, public documentation and source provenance | Previous software release |
 | [`v0.1.6`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.6) | Complete retirement of AIWeatherForecast legacy documentation | Previous software release |
 | [`v0.1.5`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.5) | Verified data-root relocation command and metadata integrity repair | Previous release |
 | [`v0.1.0`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.0) | Observation Service | Previous release |
@@ -287,21 +288,21 @@ inventory and dataset-building citation.
 
 ### Research feature roadmap
 
-Rolling backtests and offline replay are implemented in development source; software v0.1.7
-predates both commands. Archive coverage remains planned. None requires manual weather or flood annotations.
+All three research workflows are available in software v0.1.8. None requires manual weather
+or flood annotations.
 
 | Priority | Feature | Useful result |
 | --- | --- | --- |
-| 1 | [Rolling backtests](docs/rolling_backtests.md), [#58](https://github.com/KageRyo/MinxiongHydroCast/issues/58) | In source: persist Persistence/Optical Flow forecasts, score arriving radar targets, retain per-lead metrics and resume without changing saved predictions |
-| 2 | [Offline event replay](docs/event_replay.md), [#59](https://github.com/KageRyo/MinxiongHydroCast/issues/59) | In source: replay stored radar and available QPE/gauges with source time, units, datum, missing data and model errors |
-| 3 | [Archive coverage #60](https://github.com/KageRyo/MinxiongHydroCast/issues/60) | Planned: summarize expected/captured/valid frames and source gaps, separating unavailable URLs from unknown retention |
+| 1 | [Rolling backtests](docs/rolling_backtests.md), [#58](https://github.com/KageRyo/MinxiongHydroCast/issues/58) | Available: persist Persistence/Optical Flow forecasts, score arriving radar targets, retain per-lead metrics and resume without changing saved predictions |
+| 2 | [Offline event replay](docs/event_replay.md), [#59](https://github.com/KageRyo/MinxiongHydroCast/issues/59) | Available: replay stored radar and available QPE/gauges with source time, units, datum, missing data and model errors |
+| 3 | [Archive coverage](docs/archive_coverage.md), [#60](https://github.com/KageRyo/MinxiongHydroCast/issues/60) | Available: summarize expected/captured/valid frames and source gaps, separating unavailable URLs from unknown retention |
 
 Rolling backtests come first: they turn the current one-off event evaluations into repeatable
 evidence as new observations arrive. Proposed research windows remain separate from the fixed
 benchmark; normalization uses training data only. See the [feature scope](docs/roadmap.md#next-features-without-manual-annotations).
 
 See [CHANGELOG.md](https://github.com/KageRyo/MinxiongHydroCast/blob/main/CHANGELOG.md), the
-[v0.1.7 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.7.md),
+[v0.1.8 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.8.md),
 [v0.1.6 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.6.md),
 [v0.1.5 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.5.md),
 [v0.1.4 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.4.md),

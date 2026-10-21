@@ -64,6 +64,14 @@ def main() -> None:
     subprocess.run(["mhc", "--help"], check=True)
     with tempfile.TemporaryDirectory(prefix="mhc-wheel-smoke-") as temporary:
         root = Path(temporary)
+        subprocess.run(["mhc", "event", "replay", "--demo", "--output", str(root / "replay.html")], check=True)
+        coverage = root / "coverage.json"
+        subprocess.run(["mhc", "data", "archive-coverage", "--demo", "--output", str(coverage)], check=True)
+        coverage_report = json.loads(coverage.read_text())
+        if coverage_report["totals"]["expected"] != 6 or coverage_report["totals"]["usable"] != 1:
+            raise RuntimeError("installed archive coverage demo produced unexpected counts")
+        if coverage_report["network_requests_performed"] != 0:
+            raise RuntimeError("offline coverage demo must not make network requests")
         store = root / "operations"
         subprocess.run(
             [

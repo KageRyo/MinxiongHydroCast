@@ -2,9 +2,9 @@
 
 `mhc model rolling-backtest` saves input-only Persistence and deterministic CPU Optical Flow
 forecasts, then scores them when later observations are available. It runs without manual weather
-or flood annotations. This command is available from the development source containing
-[issue #58](https://github.com/KageRyo/MinxiongHydroCast/issues/58); software v0.1.7 predates it.
-Install that source revision with `python -m pip install -e .` before using the examples.
+or flood annotations. This command is available in software v0.1.8 and later
+([issue #58](https://github.com/KageRyo/MinxiongHydroCast/issues/58)). Install it with
+`python -m pip install --upgrade minxiong-hydrocast` before using the examples.
 
 ## Input and storage contract
 

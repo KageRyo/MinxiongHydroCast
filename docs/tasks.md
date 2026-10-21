@@ -11,11 +11,11 @@ record below and in closed issues.
 
 ## Public backlog
 
-- [#59 — Offline event replay explorer](https://github.com/KageRyo/MinxiongHydroCast/issues/59): implemented in development source; [offline export and demo](event_replay.md).
-- [#60 — Historical archive coverage](https://github.com/KageRyo/MinxiongHydroCast/issues/60): planned.
+- [#59 — Offline event replay explorer](https://github.com/KageRyo/MinxiongHydroCast/issues/59): available in v0.1.8; [offline export and demo](event_replay.md).
+- [#60 — Historical archive coverage](https://github.com/KageRyo/MinxiongHydroCast/issues/60): available in v0.1.8; [reports and offline view](archive_coverage.md).
 
 The feature issues use enhancement, area and priority labels. The initial #58 rolling-backtest
-engine is implemented in this change; see the [CLI and storage contract](rolling_backtests.md).
+engine is available in v0.1.8; see the [CLI and storage contract](rolling_backtests.md).
 Issues #30 and #31 are closed. Historical curated-review items below remain a separate track and do not
 make unavailable human labels a prerequisite for label-free research.
 

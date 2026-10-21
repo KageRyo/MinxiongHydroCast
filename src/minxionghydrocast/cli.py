@@ -26,6 +26,7 @@ COMMANDS: dict[CommandPath, str] = {
         "minxionghydrocast.pipelines.radar_tensor_conversion:main"
     ),
     ("dataset", "split-check"): "minxionghydrocast.pipelines.event_split_check:main",
+    ("data", "archive-coverage"): "minxionghydrocast.pipelines.archive_coverage:main",
     ("data", "relocate-root"): (
         "minxionghydrocast.operations.data_root_relocation:main"
     ),
