@@ -5,6 +5,8 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 
 ## [Unreleased]
 
+## [0.1.8] - 2026-10-21
+
 ### Added
 
 - `mhc event replay`: export a standalone offline radar/forecast/error viewer with verified saved
@@ -14,10 +16,10 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
   arriving radar observations per origin/lead, with immutable checksummed records, bounded new
   work, shared validity masks, source/code provenance and opt-in scheduling templates.
 
-### Planned
+- `mhc data archive-coverage`: read-only scheduled-slot coverage, integrity and native-grid quality
+  reports in JSON/table/offline HTML, with bounded checks and explicit source-error categories.
 
-- An archive coverage dashboard built on the research artifact
-  contracts; no manual weather/flood annotations required.
+### Scope
 - Independent model, lead-time, label, and shadow-gate completion for `v0.3.0`.
 
 ## [0.1.7] - 2026-10-20
@@ -184,7 +186,8 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 - Radar candidates cannot automatically enter formal train/validation/test splits.
 - Forecast publication and automated notification remain disabled until all gates pass.
 
-[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.6...HEAD
+[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.8...HEAD
+[0.1.8]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.7...v0.1.8
 [0.1.6]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.3...v0.1.4

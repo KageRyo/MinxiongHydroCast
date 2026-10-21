@@ -19,21 +19,22 @@
 Files: models/archive_coverage.py, research/archive_inventory.py, research/archive_coverage.py,
 tests/test_archive_coverage.py.
 Interface: build_coverage(root, catalog_path, max_checks=250, max_entries=10, timezone='Asia/Taipei').
-- [ ] Write failing gap/corruption/duplicate/drift/day-boundary/budget/root-escape/source-attempt tests.
-- [ ] Implement strict inventory, adapters for dataset/discovery catalogs, native grid verification,
+- [x] Write failing gap/corruption/duplicate/drift/day-boundary/budget/root-escape/source-attempt tests.
+- [x] Implement strict inventory, adapters for dataset/discovery catalogs, native grid verification,
   deterministic slot/day/event counts, intervals and safe provenance/failure categories.
-- [ ] Verify focused and full tests, commit.
+- [x] Verify focused and full tests, commit.
 
 ## Task 2: CLI/local view and release preparation
 
 Files: pipelines/archive_coverage.py, research/coverage_view.py, cli.py, scripts/package_smoke.py,
 tests/test_archive_coverage.py, docs/archive_coverage.md, docs/releases/v0.1.8.md, README,
 CHANGELOG, CITATION, pyproject, __init__, navigation/roadmap/tasks/research docs.
-- [ ] Add failing CLI/demo/export cases; implement JSON/table/semantic offline HTML with safe,
+- [x] Add failing CLI/demo/export cases; implement JSON/table/semantic offline HTML with safe,
   exclusive output and synthetic native frame fixtures.
-- [ ] Browser-check local view/keyboard/mobile/offline; bounded real dataset/discovery cases.
-- [ ] Update v0.1.8 metadata/docs and installed-package smoke workflows.
-- [ ] Run full/lint/types/docs/wheel/protocol checks; one fresh final review and regression fixes.
+- [x] Browser-check local view/keyboard/mobile/offline; bounded real dataset/discovery cases.
+- [x] Update v0.1.8 metadata/docs and installed-package smoke workflows.
+- [x] Run full/lint/types/docs/wheel checks; one fresh final review and regression fixes.
+- [ ] Verify committed protocol reconstruction and CI.
 - [ ] Create English labeled PR, pass CI, merge; check #60 closure.
 
 ## Task 3: publish and verify
@@ -48,3 +49,14 @@ CHANGELOG, CITATION, pyproject, __init__, navigation/roadmap/tasks/research docs
   worktree on feat/archive-coverage-release; no repeated authorization round.
 - v0.1.8 continues the established software release line. Independent dataset-protocol-v0.2.0
   and future operational/model milestones remain separate.
+
+- Core and view delivery: 25 coverage integration cases and 470 full tests pass; Ruff and targeted
+  Pyright pass, strict docs/link checks pass. Installed v0.1.8 wheel demos and localhost service
+  smoke pass when its bin directory is explicitly selected in PATH.
+- Final review fixes: conflicting catalog pins -> metadata failure; contained symlink retains
+  recorded pin; duplicate missing records also count as missing. Three regressions RED→GREEN.
+- Real preserved probes: dataset 110 expected/present slots, 12 structurally usable checks and
+  98 unchecked; discovery 134 expected/present, 12 usable and 122 unchecked. Two entries per
+  catalog; remaining entries explicitly omitted. Catalog/formal-manifest hashes unchanged.
+- Legacy dataset input preparation: exact recorded public manifest hash/bytes verified before
+  copying to its referenced external relative path. Reporter still reads only inside the root.

@@ -2,15 +2,14 @@
 
 `mhc event replay` exports a self-contained HTML snapshot of preserved radar observations,
 verified baseline forecasts and saved scores. Open the file directly in a browser. No server,
-credentials, tiles, external fonts or network connection are needed. This command is in the
-current development source; published software v0.1.7 predates it.
+credentials, tiles, external fonts or network connection are needed. This command is available in software v0.1.8 and later.
 
 ## Try the synthetic event
 
-Install the development source and generate a new destination:
+Install the package and generate a new destination:
 
 ```bash
-python -m pip install -e .
+python -m pip install --upgrade minxiong-hydrocast
 mhc event replay --demo --output /tmp/hydrocast-replay.html
 ```
 
@@ -101,4 +100,4 @@ and gauge tables retain their own datum and end time. Different known datums are
 matched or compared numerically, and hourly rainfall is never treated as instantaneous dBZ.
 
 No human weather/flood annotations, formal split changes or operational publication gates are
-part of this viewer. Archive coverage remains [#60](https://github.com/KageRyo/MinxiongHydroCast/issues/60).
+part of this viewer. See the separate [archive coverage report](archive_coverage.md) for expected/captured/verified/usable slot counts.

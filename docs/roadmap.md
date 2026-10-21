@@ -13,18 +13,19 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 | `v0.1.4` | Storage and Deployment Governance | Canonical data root, explicit Git/runtime/data boundaries, and verified deployment metadata |
 | `v0.1.5` | Safe Data-root Relocation | No-write-first catalog, collection-path, checksum, and verification metadata migration |
 | `v0.1.6` | Legacy Retirement | Remove retired AIWeatherForecast documentation after the retained host archive is confirmed |
+| `v0.1.8` | Label-free Research Workflows | Rolling backtests, offline replay and archive coverage reports |
 | `v0.1.7` | Protocol and Validation Tooling | Source archive reconstruction, QPE observation-time/native-datum checks and public evidence/provenance records |
 | `dataset-protocol-v0.2.0` | Label-free Radar Dataset-building Protocol | Published 2026-10-20: fixed source/frame inventory, unknown weather regimes, synthetic reconstruction, exact archive inventory and independent citation |
 | `v0.3.0` | Baseline Nowcasting | Learned model consistently beats Persistence on independent aggregate and lead-time gates; local label and shadow gates pass |
 
 ## Next features without manual annotations
 
-The protocol milestone is complete. The rolling-backtest engine is implemented in development
-source ([CLI contract](rolling_backtests.md), [#58](https://github.com/KageRyo/MinxiongHydroCast/issues/58));
-offline event replay is also implemented ([usage](event_replay.md),
-[#59](https://github.com/KageRyo/MinxiongHydroCast/issues/59)). Archive coverage
-([#60](https://github.com/KageRyo/MinxiongHydroCast/issues/60)) remains planned. Software v0.1.7
-predates both commands. These research workflows use subsequent observations as targets and do not wait for
+The protocol milestone is complete. Software v0.1.8 delivers [rolling backtests](rolling_backtests.md),
+[offline event replay](event_replay.md) and [archive coverage](archive_coverage.md), tracked in
+[#58](https://github.com/KageRyo/MinxiongHydroCast/issues/58),
+[#59](https://github.com/KageRyo/MinxiongHydroCast/issues/59) and
+[#60](https://github.com/KageRyo/MinxiongHydroCast/issues/60).
+These research workflows use subsequent observations as targets and do not wait for
 human weather/flood labels. Manual review remains an optional curated-corpus track; it is not
 a dependency of this research backlog. Existing operational publication gates are unchanged.
 
