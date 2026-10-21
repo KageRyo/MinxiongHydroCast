@@ -174,6 +174,14 @@ The operator view at `/` presents official-source alerts, observations, and expe
 forecast availability in separate sections. The server binds to `127.0.0.1` by default. Put it
 behind an authenticated reverse proxy before exposing it to another host or network.
 
+The browser interface uses Traditional Chinese labels and Taipei time (UTC+08:00). Common
+measurement columns appear first; expand a row's `詳細` to inspect every original field, or
+`來源與資料檢查` for source classification, collection time and freshness checks. The top snapshot
+time is the collection completion time, separate from each station's observation time. Warning
+feeds with no active alerts use collection time for their freshness assessment; the section's
+data timestamp does not imply a station observation. `尚未評估` is neutral and never implies
+that shadow checks or notification permissions passed. The JSON API contracts remain unchanged.
+
 ## Region Feature Contract
 
 Every successful snapshot derives one feature row for the selected region profile from the same

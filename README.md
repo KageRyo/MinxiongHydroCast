@@ -20,10 +20,10 @@ localhost-only deployment. The [label-free radar dataset-building protocol](http
 is published: future observed radar frames provide targets, and weather regimes remain unknown.
 Forecast publication and automated risk notifications retain their existing acceptance gates.
 
-![MinxiongHydroCast operator dashboard showing a healthy live snapshot and a blocked shadow gate](https://raw.githubusercontent.com/KageRyo/MinxiongHydroCast/main/docs/assets/screenshots/operator-dashboard.png)
+![MinxiongHydroCast observation workbench showing synthetic data, curated measurements and a neutral unevaluated shadow state](docs/assets/screenshots/operator-dashboard.png)
 
-_Real localhost operator view captured on 2026-07-29. It uses live official observations; values
-change over time. The blocked shadow gate is intentional._
+_Local workbench with synthetic demonstration data. Common measurements appear first; full
+records and source checks remain expandable. Demo readiness and forecast publication stay blocked._
 
 ## What problem does this solve?
 
@@ -274,7 +274,8 @@ inventory and dataset-building citation.
 
 | Version | Milestone | State |
 | --- | --- | --- |
-| [`v0.1.8`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.8) | Rolling backtests, offline event replay and archive coverage reports | Current software version |
+| [`v0.1.9`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.9) | Observation and research workbench refinement, mobile replay and clearer verification states | Current software version |
+| [`v0.1.8`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.8) | Rolling backtests, offline event replay and archive coverage reports | Previous software release |
 | [`v0.1.7`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.7) | Protocol archive tooling, strict QPE/gauge alignment, public documentation and source provenance | Previous software release |
 | [`v0.1.6`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.6) | Complete retirement of AIWeatherForecast legacy documentation | Previous software release |
 | [`v0.1.5`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.5) | Verified data-root relocation command and metadata integrity repair | Previous release |
@@ -288,7 +289,7 @@ inventory and dataset-building citation.
 
 ### Research feature roadmap
 
-All three research workflows are available in software v0.1.8. None requires manual weather
+All three research workflows are available since software v0.1.8. None requires manual weather
 or flood annotations.
 
 | Priority | Feature | Useful result |
@@ -302,6 +303,7 @@ evidence as new observations arrive. Proposed research windows remain separate f
 benchmark; normalization uses training data only. See the [feature scope](docs/roadmap.md#next-features-without-manual-annotations).
 
 See [CHANGELOG.md](https://github.com/KageRyo/MinxiongHydroCast/blob/main/CHANGELOG.md), the
+[v0.1.9 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.9.md),
 [v0.1.8 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.8.md),
 [v0.1.6 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.6.md),
 [v0.1.5 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.5.md),

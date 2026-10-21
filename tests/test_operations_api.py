@@ -304,8 +304,8 @@ def test_api_serves_status_classified_data_and_operator_view(tmp_path):
         with urlopen(f"{base_url}/", timeout=3) as response:
             page = response.read().decode("utf-8")
         assert "MinxiongHydroCast Operations" in page
-        assert "Source classification:" in page
-        assert "Not an official warning" in page
+        assert "來源與資料檢查" in page
+        assert "不發布或取代官方警報" in page
     finally:
         server.shutdown()
         server.server_close()

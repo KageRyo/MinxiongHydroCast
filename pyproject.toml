@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "minxiong-hydrocast"
-version = "0.1.8"
+version = "0.1.9"
 description = "Official-source hydrometeorological data quality and reproducibility platform."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -67,6 +67,7 @@ minxionghydrocast = [
   "profiles/*.yaml",
   "profiles/boundaries/*.geojson",
   "research/*.html",
+  "operations/*.html",
 ]
 
 [tool.pytest.ini_options]

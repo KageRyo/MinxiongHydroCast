@@ -5,6 +5,25 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 
 ## [Unreleased]
 
+## [0.1.9] - 2026-10-21
+
+### Changed
+
+- Refine the operator dashboard, offline replay and archive coverage views with Traditional
+  Chinese labels, a consistent observation-focused layout and accessible status colors.
+- Show common observation columns first and retain full records and provenance in expandable
+  details. Keep unevaluated shadow checks neutral and snapshot/observation times distinct.
+- Bring replay plots into the mobile first screen, disclose gaps between stored frames and
+  separate verified, pending and invalid results. Prioritize usable/missing/unchecked coverage
+  counts without treating unchecked data as failed verification.
+
+### Fixed
+
+- Keep deferred integrity checks pending for duplicate archive slots, while preserving their
+  unusable status and any checks that already passed.
+- Recover the refresh control after an API failure and identify observation publishers separately
+  from product classifications.
+
 ## [0.1.8] - 2026-10-21
 
 ### Added
@@ -186,7 +205,8 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 - Radar candidates cannot automatically enter formal train/validation/test splits.
 - Forecast publication and automated notification remain disabled until all gates pass.
 
-[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.8...HEAD
+[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.9...HEAD
+[0.1.9]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.8...v0.1.9
 [0.1.8]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.7...v0.1.8
 [0.1.6]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.4...v0.1.5

@@ -18,6 +18,12 @@ is required. Tables scroll within their container on narrow screens; summaries s
 operation. The demo contains an uncaptured time, a corrupt artifact, duplicate timestamps, a changed
 grid, all-nodata pixels and recorded 404/authentication/rate-limit/transport failures.
 
+HTML labels use Traditional Chinese. The primary summary shows expected, usable, confirmed
+missing and unchecked slots; file-size/checksum totals remain in `完整性檢查明細`. The number of
+file checks performed is reported separately from slot counts. Unchecked slots are never
+presented as failed checks or folded into confirmed missing data. Human-readable failure labels
+retain their original diagnostic codes, while JSON and plain-text report contracts stay unchanged.
+
 ## What the counts mean
 
 Every count is a **scheduled timestamp slot** within an event/product, not a file-list length.

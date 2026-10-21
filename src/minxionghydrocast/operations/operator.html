@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MinxiongHydroCast Operations</title>
+<style>
+:root{color-scheme:light;font:16px/1.6 "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:#203340;background:#f1f5f7;--line:#cbd8df;--blue:#17658b;--muted:#506575}
+*{box-sizing:border-box}body{margin:0;min-width:320px}header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px max(20px,calc((100vw - 1320px)/2));color:white;background:#163e54}h1,h2,p{margin:0}h1{font-size:22px;font-weight:650}h1 span{margin-left:8px}h2{font-size:18px}header p{font-size:14px;color:#d4e5ee}button{flex-shrink:0;white-space:nowrap;min-height:44px;padding:8px 16px;color:#203340;background:white;border:1px solid #8b9faa;border-radius:4px;font:inherit;cursor:pointer}button:disabled{opacity:.6;cursor:wait}button:hover{background:#eaf1f5}:focus-visible{outline:3px solid var(--blue);outline-offset:3px}header :focus-visible{outline-color:#b4e0f5}main{max-width:1360px;margin:auto;padding:20px 20px 48px}.intro{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;font-size:14px;color:var(--muted)}.status{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:white;border-block:1px solid var(--line);margin-bottom:16px}.status>div{padding:14px 18px}.label{font-size:14px;color:var(--muted);margin-bottom:3px}.value{font-size:19px;font-weight:650;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.healthy{color:#1d6b52}.demo,.neutral,.not_evaluated,.uninitialized{color:var(--muted)}.stale,.degraded,.coverage_missing,.blocked{color:#875300}.unhealthy,.collector_error,.storage_error,.invalid,.unavailable,.upstream_unhealthy{color:#b02b26}.notice{font-size:14px;color:var(--muted);max-width:85ch;margin-bottom:14px}.notice.demo-note{border-left:3px solid #8b9faa;padding-left:12px}.system-details{border-bottom:1px solid var(--line);margin-bottom:24px}summary{cursor:pointer;min-height:44px;align-content:center;font-size:14px;font-weight:600}.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 0 10px}.section-head p{font-size:14px;color:var(--muted)}section{margin-top:24px;min-width:0}.table-wrap{overflow:auto;background:white;border:1px solid var(--line)}table{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}th,td{padding:12px 14px;text-align:left;border-bottom:1px solid #dfe7ec;vertical-align:top}thead th{background:#eaf1f5;font-size:14px;color:var(--muted);font-weight:600;white-space:nowrap}tbody th{font-weight:600;min-width:8em}tbody th,tbody td{white-space:nowrap}.record-detail dl{white-space:normal}tbody tr:last-child>*{border-bottom:0}.numeric{text-align:right;white-space:nowrap}.time{white-space:nowrap}.record-detail{min-width:4em}.record-detail[open]{width:min(75vw,480px)}dl{display:grid;grid-template-columns:minmax(100px,auto) minmax(0,1fr);gap:6px 18px;font-size:14px;margin:10px 0 18px;max-width:900px}dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}.source-details{border-bottom:1px solid var(--line);padding:0 12px}.empty{padding:18px;color:var(--muted)}.experimental{border-top:1px solid var(--line);padding-top:16px}.experimental h2{margin-bottom:6px}.experimental p{font-size:14px;color:var(--muted);max-width:80ch}footer{margin-top:28px;font-size:13px;color:var(--muted)}
+@media(max-width:650px){header{padding:14px 16px}h1{font-size:19px}h1 span{display:block;margin:0;font-size:14px;font-weight:400;color:#d4e5ee}main{padding:16px 12px 32px}.status{grid-template-columns:1fr 1fr}.status>div{padding:10px 14px}.status>div:nth-child(2){grid-column:1/-1;grid-row:2;border-top:1px solid #dfe7ec}.value{font-size:18px}.section-head{gap:2px}th,td{padding:10px 12px}dl{grid-template-columns:1fr;gap:2px}dd{margin-bottom:8px}}
+</style>
+</head>
+<body>
+<header><div><h1>MinxiongHydroCast<span>水情觀測</span></h1><p id="checked">正在讀取快照</p></div><button id="refresh" type="button">重新整理</button></header>
+<main id="workbench">
+<div class="intro"><span>官方警戒與水情觀測</span><span>時間皆為臺北時間 (UTC+08:00)；每 30 秒更新</span></div>
+<div class="status" aria-label="資料與研究狀態">
+<div><div class="label">資料狀態</div><div class="value" id="state" aria-live="polite">讀取中</div></div>
+<div><div class="label">快照產生時間</div><div class="value" id="snapshot-time">未提供</div></div>
+<div><div class="label">影子部署評估</div><div class="value" id="shadow">讀取中</div></div>
+</div>
+<p id="notice" class="notice"></p>
+<details class="system-details"><summary>快照與收集紀錄</summary><dl id="system-meta"></dl></details>
+<section aria-labelledby="alerts-title"><div class="section-head"><h2 id="alerts-title">降雨警戒</h2><p id="alerts-type">讀取中</p></div><div class="table-wrap" id="alerts"></div><details class="source-details"><summary>來源與資料檢查</summary><dl id="alerts-source"></dl></details></section>
+<section aria-labelledby="gauges-title"><div class="section-head"><h2 id="gauges-title">雨量站</h2><p id="gauges-type">讀取中</p></div><div class="table-wrap" id="gauges"></div><details class="source-details"><summary>來源與資料檢查</summary><dl id="gauges-source"></dl></details></section>
+<section aria-labelledby="sensors-title"><div class="section-head"><h2 id="sensors-title">淹水感測器</h2><p id="sensors-type">讀取中</p></div><div class="table-wrap" id="sensors"></div><details class="source-details"><summary>來源與資料檢查</summary><dl id="sensors-source"></dl></details></section>
+<section aria-labelledby="features-title"><div class="section-head"><h2 id="features-title">區域摘要</h2><p id="features-type">讀取中</p></div><div class="table-wrap" id="features"></div><details class="source-details"><summary>來源與資料檢查</summary><dl id="features-source"></dl></details></section>
+<section aria-labelledby="locations-title"><div class="section-head"><h2 id="locations-title">測站與位置</h2><p id="locations-type">讀取中</p></div><div class="table-wrap" id="locations"></div><details class="source-details"><summary>來源與資料檢查</summary><dl id="locations-source"></dl></details></section>
+<section class="experimental"><h2>實驗預報</h2><p>本平台不發布或取代官方警報。研究評估與通知許可各自判定。</p><p id="forecast">讀取中</p></section>
+<footer>主表呈現常用觀測欄位；展開每筆「詳細」可查看完整原始欄位。</footer>
+</main>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const endpoints = {
+  alerts: '/api/v1/official-alerts/rainfall', gauges: '/api/v1/observations/rain-gauges',
+  sensors: '/api/v1/observations/flood-sensors', features: '/api/v1/features/region', locations: '/api/v1/locations'
+};
+const labels = {
+  healthy:'資料正常', stale:'觀測已過期', demo:'示範資料', degraded:'資料品質降低',
+  unhealthy:'資料未達使用條件', collector_error:'收集失敗', storage_error:'儲存資料異常',
+  invalid:'資料無效', unavailable:'資料無法取得', uninitialized:'尚無快照',
+  upstream_unhealthy:'上游資料異常', coverage_missing:'觀測涵蓋不足',
+  passed:'評估通過', blocked:'尚未通過', not_evaluated:'尚未評估',
+  ok:'完成', error:'失敗', live:'正式收集', demo_fixture:'合成示範資料',
+  official_alert:'官方警戒', official_observation:'官方觀測',
+  derived_feature:'觀測衍生摘要', derived_reference:'測站位置參考'
+};
+const label = value => labels[value] || (value ? '未知狀態（' + value + '）' : '未提供');
+const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+  '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+})[char]);
+function time(value) {
+  if (!value) return '未提供';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return new Intl.DateTimeFormat('sv-SE', {timeZone:'Asia/Taipei', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}).format(date);
+}
+function first(row, ...keys) {
+  for (const key of keys) if (row[key] !== undefined && row[key] !== null && row[key] !== '') return row[key];
+  return '未提供';
+}
+const columns = {
+  alerts:[['地區', r=>first(r,'地區')], ['警戒', r=>first(r,'警戒')], ['觀測時間', r=>time(r['水情時間ISO']),'time'], ['近 1 小時 (mm)',r=>first(r,'1小時雨量mm'),'numeric'], ['近 24 小時 (mm)',r=>first(r,'24小時雨量mm'),'numeric']],
+  gauges:[['測站',r=>first(r,'雨量站')], ['行政區',r=>first(r,'行政區')], ['觀測時間',r=>time(r['水情時間ISO']),'time'], ['近 1 小時 (mm)',r=>first(r,'1小時累積雨量mm'),'numeric'], ['近 24 小時 (mm)',r=>first(r,'24小時累積雨量mm'),'numeric']],
+  sensors:[['測站',r=>first(r,'感測器名稱','觀測站名稱')], ['行政區',r=>[r['縣市'],r['鄉鎮']].filter(Boolean).join('') || '未提供'], ['觀測時間',r=>time(r['水情時間ISO']),'time'], ['感測值',r=>first(r,'目前感測值'),'numeric'], ['啟用狀態',r=>first(r,'啟用狀態')]],
+  features:[['區域',r=>first(r,'township','region_name')], ['資料條件',r=>r.data_ready==='true'?'已達條件':'未達條件'], ['雨量站數',r=>first(r,'rain_gauge_count'),'numeric'], ['淹水站數',r=>first(r,'flood_sensor_count'),'numeric'], ['最高時雨量 (mm)',r=>first(r,'max_rain_1h_mm'),'numeric'], ['最高水位 (cm)',r=>first(r,'max_water_level_cm'),'numeric']],
+  locations:[['測站',r=>first(r,'source_name')], ['縣市',r=>first(r,'county')], ['鄉鎮',r=>first(r,'township')], ['緯度',r=>first(r,'latitude'),'numeric'], ['經度',r=>first(r,'longitude'),'numeric'], ['座標基準',r=>first(r,'crs')]]
+};
+function definitionList(element, entries) {
+  element.replaceChildren(...entries.flatMap(([key,value])=>{
+    const dt=document.createElement('dt'), dd=document.createElement('dd');
+    dt.textContent=key; dd.textContent=value ?? '未提供'; return [dt,dd];
+  }));
+}
+function renderTable(target, payload, name) {
+  const rows = payload.records || [];
+  if (!rows.length) {
+    target.innerHTML='<p class="empty">此快照沒有紀錄；請參考上方資料狀態與來源檢查。</p>';
+    return;
+  }
+  const fields=columns[name];
+  target.innerHTML='<table><thead><tr>'+fields.map(([heading,,kind])=>'<th scope="col" class="'+(kind||'')+'">'+escapeHtml(heading)+'</th>').join('')+'<th scope="col">原始紀錄</th></tr></thead><tbody>'+
+    rows.map(row=>'<tr>'+fields.map(([,read,kind],i)=>{
+      const tag=i===0?'th':'td';
+      return '<'+tag+(i===0?' scope="row"':'')+' class="'+(kind||'')+'">'+escapeHtml(read(row))+'</'+tag+'>';
+    }).join('')+'<td><details class="record-detail"><summary>詳細</summary><dl>'+Object.entries(row).map(([key,value])=>'<dt>'+escapeHtml(key)+'</dt><dd>'+escapeHtml(value===''?'未提供':value)+'</dd>').join('')+'</dl></details></td></tr>').join('')+'</tbody></table>';
+}
+async function getJson(path) {
+  const response=await fetch(path,{cache:'no-store'});
+  if (!response.ok) throw new Error('讀取失敗（HTTP '+response.status+'）');
+  return response.json();
+}
+function state(element, value) {
+  element.textContent=label(value);
+  element.className='value '+(Object.hasOwn(labels,value)?value:'neutral');
+}
+async function dataset(name,path) {
+  try {
+    const payload=await getJson(path), health=payload.health;
+    $(name+'-type').textContent=label(health.state)+'；'+(['gauges','sensors'].includes(name)?'最新觀測 ':'資料時點 ')+time(health.observed_at);
+    definitionList($(name+'-source'), [
+      ['產品類型',label(payload.product_type)], ['發布機關',payload.source?.authority],
+      ['來源分類',payload.source?.source_kind],
+      ['來源結果',payload.source?.outcome], ['資料集',payload.source?.dataset_id],
+      ['抓取時間',time(payload.source?.fetched_at)], ['資料距今 (分鐘)',health.age_minutes],
+      ['新鮮度上限 (分鐘)',health.max_age_minutes], ['資料檢查',health.schema_errors?.join('；') || '無格式錯誤'],
+      ['品質說明',health.degradation_reasons?.join('；') || '無額外紀錄'], ['來源說明',payload.notice]
+    ]);
+    renderTable($(name),payload,name);
+  } catch (error) {
+    $(name+'-type').textContent='資料無法取得';
+    $(name).innerHTML='<p class="empty">'+escapeHtml(error.message)+'；可重新整理重試。</p>';
+    $(name+'-source').replaceChildren();
+  }
+}
+let refreshing=false;
+async function refresh() {
+  if (refreshing) return;
+  refreshing=true; $('refresh').disabled=true; $('workbench').setAttribute('aria-busy','true');
+  try {
+    const status=await getJson('/api/v1/status'), latest=status.latest_snapshot, attempt=status.latest_attempt;
+    state($('state'),status.state);
+    $('checked').textContent='介面更新 '+time(status.checked_at);
+    $('snapshot-time').textContent=time(latest?.completed_at);
+    $('notice').textContent=latest?.mode==='demo'?'目前為合成示範資料，非即時水情或官方警戒。':(status.failure_reason || '觀測時間與抓取時間分別保留；請依各資料集狀態判讀。');
+    $('notice').className='notice'+(latest?.mode==='demo'?' demo-note':'');
+    definitionList($('system-meta'), [['快照 ID',latest?.snapshot_id], ['資料模式',label(latest?.mode)], ['最近收集結果',label(attempt?.status)], ['最近收集時間',time(attempt?.completed_at)], ['收集說明',attempt?.failure_reason || '無額外紀錄']]);
+    await Promise.all([
+      ...Object.entries(endpoints).map(([name,path])=>dataset(name,path)),
+      (async()=>{
+        try { const shadow=await getJson('/api/v1/shadow-readiness'); state($('shadow'),shadow.state); }
+        catch { state($('shadow'),'unavailable'); }
+      })(),
+      (async()=>{
+        try {
+          const forecast=await getJson('/api/v1/experimental-forecasts');
+          $('forecast').textContent=forecast.available?'有研究輸出，詳見研究報告。':'尚無通過模型與影子部署評估的預報。';
+        } catch { $('forecast').textContent='目前無法取得預報評估狀態。'; }
+      })()
+    ]);
+  } catch (error) {
+    state($('state'),'unavailable');
+    $('notice').textContent=error.message+'；畫面可能保留上次讀取結果，請重新整理。';
+  } finally {
+    refreshing=false; $('refresh').disabled=false; $('workbench').setAttribute('aria-busy','false');
+  }
+}
+$('refresh').addEventListener('click',refresh);
+refresh();
+setInterval(refresh,30000);
+</script>
+</body>
+</html>
