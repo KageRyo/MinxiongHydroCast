@@ -274,7 +274,8 @@ inventory and dataset-building citation.
 
 | Version | Milestone | State |
 | --- | --- | --- |
-| [`v0.1.8`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.8) | Rolling backtests, offline event replay and archive coverage reports | Current software version |
+| [`v0.1.9`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.9) | Observation and research workbench refinement, mobile replay and clearer verification states | Current software version |
+| [`v0.1.8`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.8) | Rolling backtests, offline event replay and archive coverage reports | Previous software release |
 | [`v0.1.7`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.7) | Protocol archive tooling, strict QPE/gauge alignment, public documentation and source provenance | Previous software release |
 | [`v0.1.6`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.6) | Complete retirement of AIWeatherForecast legacy documentation | Previous software release |
 | [`v0.1.5`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.5) | Verified data-root relocation command and metadata integrity repair | Previous release |
@@ -288,7 +289,7 @@ inventory and dataset-building citation.
 
 ### Research feature roadmap
 
-All three research workflows are available in software v0.1.8. None requires manual weather
+All three research workflows are available since software v0.1.8. None requires manual weather
 or flood annotations.
 
 | Priority | Feature | Useful result |
@@ -302,6 +303,7 @@ evidence as new observations arrive. Proposed research windows remain separate f
 benchmark; normalization uses training data only. See the [feature scope](docs/roadmap.md#next-features-without-manual-annotations).
 
 See [CHANGELOG.md](https://github.com/KageRyo/MinxiongHydroCast/blob/main/CHANGELOG.md), the
+[v0.1.9 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.9.md),
 [v0.1.8 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.8.md),
 [v0.1.6 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.6.md),
 [v0.1.5 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.5.md),

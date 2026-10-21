@@ -13,6 +13,7 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 | `v0.1.4` | Storage and Deployment Governance | Canonical data root, explicit Git/runtime/data boundaries, and verified deployment metadata |
 | `v0.1.5` | Safe Data-root Relocation | No-write-first catalog, collection-path, checksum, and verification metadata migration |
 | `v0.1.6` | Legacy Retirement | Remove retired AIWeatherForecast documentation after the retained host archive is confirmed |
+| `v0.1.9` | Observation and Research Workbenches | Curated measurements, mobile replay, explicit verification states and Traditional Chinese labels |
 | `v0.1.8` | Label-free Research Workflows | Rolling backtests, offline replay and archive coverage reports |
 | `v0.1.7` | Protocol and Validation Tooling | Source archive reconstruction, QPE observation-time/native-datum checks and public evidence/provenance records |
 | `dataset-protocol-v0.2.0` | Label-free Radar Dataset-building Protocol | Published 2026-10-20: fixed source/frame inventory, unknown weather regimes, synthetic reconstruction, exact archive inventory and independent citation |

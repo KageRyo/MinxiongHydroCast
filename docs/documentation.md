@@ -64,7 +64,7 @@ governance details without duplicating changing deployment numbers.
 - [Radar source selection](radar_data_sources.md), [source adapters](radar_source_adapters.md),
   [event windows](radar_event_windows.md), and [spatial alignment](spatial_alignment.md).
 - [WRA freshness evidence](wra_freshness_evidence.md) and [NowcastNet migration](nowcastnet_migration.md).
-- [Release notes](releases/v0.1.6.md) and [migration notes](migration_notes.md).
+- [Release notes](releases/v0.1.9.md) and [migration notes](migration_notes.md).
 
 ## Release history
 
@@ -75,6 +75,9 @@ governance details without duplicating changing deployment numbers.
 - [v0.1.4](releases/v0.1.4.md): storage and deployment governance.
 - [v0.1.5](releases/v0.1.5.md): data-root relocation.
 - [v0.1.6](releases/v0.1.6.md): legacy documentation retirement.
+- [v0.1.7](releases/v0.1.7.md): protocol archive tooling and source provenance.
+- [v0.1.8](releases/v0.1.8.md): rolling backtests, offline replay and archive coverage.
+- [v0.1.9](releases/v0.1.9.md): observation and research workbench refinement.
 
 `tasks.md` is the source of truth for current work; `roadmap.md` owns longer-term direction.
 Runtime counts and gate metrics should be generated from run summaries, with only dated public-safe
