@@ -67,6 +67,7 @@ minxionghydrocast = [
   "profiles/*.yaml",
   "profiles/boundaries/*.geojson",
   "research/*.html",
+  "operations/*.html",
 ]
 
 [tool.pytest.ini_options]

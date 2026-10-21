@@ -81,6 +81,32 @@ def test_budget_marks_unchecked_and_never_calls_it_verified(tmp_path):
     assert counts['missing'] == 0
 
 
+def test_html_keeps_unchecked_slots_separate_from_missing_and_usable(tmp_path):
+    from minxionghydrocast.research.coverage_view import render_html
+
+    root = tmp_path / 'external'
+    inventory(root, [native(root, i) for i in range(4)], end=3)
+    html = render_html(report(root, max_checks=1))
+    assert '待檢查' in html
+    assert '尚未檢查的時段不代表缺漏或不合格' in html
+    assert '已執行 1 次檔案檢查' in html
+    assert '結構可用' in html
+    assert '完整性檢查明細' in html
+
+
+def test_html_explains_failure_codes_and_preserves_raw_diagnostic(tmp_path):
+    from minxionghydrocast.research.coverage_view import render_html
+
+    root = tmp_path / 'external'
+    ref = native(root, 0)
+    path = root / ref['path']
+    raw = path.read_bytes()
+    path.write_bytes(raw[:-1] + b'!')
+    inventory(root, [ref], end=0)
+    html = render_html(report(root))
+    assert '校驗碼不符 (checksum_mismatch)' in html
+
+
 def test_duplicate_outside_window_and_off_cadence_do_not_inflate_counts(tmp_path):
     root = tmp_path / 'external'
     refs = [native(root, 0), native(root, 1), native(root, 5)]
@@ -234,8 +260,8 @@ def test_demo_cli_exports_inspectable_reports_without_network(tmp_path, format_n
         assert payload['totals']['usable'] == 1
         assert payload['network_requests_performed'] == 0
     else:
-        assert 'Expected' in text
-        assert 'Usable' in text
+        assert ('預期時段' if format_name == 'html' else 'Expected') in text
+        assert ('結構可用' if format_name == 'html' else 'Usable') in text
         assert 'synthetic_archive' in text
     assert str(tmp_path) not in text
 
@@ -271,6 +297,18 @@ def test_duplicate_slot_retains_unchecked_budget_state(tmp_path):
     assert entry['counts']['duplicates'] == 1
     assert entry['counts']['unchecked'] == 1
     assert entry['counts']['usable'] == 0
+
+
+@pytest.mark.parametrize(('budget', 'integrity'), [(0, '待檢查'), (1, '是')])
+def test_html_duplicate_with_deferred_artifacts_does_not_claim_failed_integrity(tmp_path, budget, integrity):
+    from minxionghydrocast.research.coverage_view import render_html
+
+    root = tmp_path / 'external'
+    ref = native(root, 0)
+    inventory(root, [ref, ref], end=0)
+    html = render_html(report(root, max_checks=budget))
+    # Duplicate slots are unusable, but their unperformed integrity checks remain unknown.
+    assert f'時間重複 (duplicate_timestamp)</td><td>是</td><td>{integrity}</td><td>{integrity}</td><td>否</td>' in html
 
 
 def test_non_object_inventory_has_fixed_diagnostic(tmp_path):

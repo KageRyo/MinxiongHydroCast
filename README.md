@@ -20,10 +20,10 @@ localhost-only deployment. The [label-free radar dataset-building protocol](http
 is published: future observed radar frames provide targets, and weather regimes remain unknown.
 Forecast publication and automated risk notifications retain their existing acceptance gates.
 
-![MinxiongHydroCast operator dashboard showing a healthy live snapshot and a blocked shadow gate](https://raw.githubusercontent.com/KageRyo/MinxiongHydroCast/main/docs/assets/screenshots/operator-dashboard.png)
+![MinxiongHydroCast observation workbench showing synthetic data, curated measurements and a neutral unevaluated shadow state](docs/assets/screenshots/operator-dashboard.png)
 
-_Real localhost operator view captured on 2026-07-29. It uses live official observations; values
-change over time. The blocked shadow gate is intentional._
+_Local workbench with synthetic demonstration data. Common measurements appear first; full
+records and source checks remain expandable. Demo readiness and forecast publication stay blocked._
 
 ## What problem does this solve?
 

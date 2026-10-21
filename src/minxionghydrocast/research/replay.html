@@ -1,53 +1,55 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src __SCRIPT_POLICY__; style-src __STYLE_POLICY__; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
-<title>Event replay · MinxiongHydroCast</title>
+<title>事件重播 · MinxiongHydroCast</title>
 <style>
-:root{color-scheme:light;font:16px/1.5 system-ui,sans-serif;color:#202428;background:#f4f6f7;--line:#cbd3d8;--blue:#2164a5;--muted:#53616b}
-*{box-sizing:border-box}body{margin:0;min-width:320px}header{background:#202428;color:white;padding:20px max(20px,calc((100vw - 1440px)/2));border-bottom:4px solid #4a6572;display:flex;justify-content:space-between;gap:20px;align-items:center}h1{font-size:23px;margin:0}h2{font-size:18px;margin:0 0 12px}h3{font-size:16px;margin:0}p{margin:6px 0 12px}header p{margin:3px 0 0;color:#d4dce1;font-size:14px}.tag{border:1px solid #8499a8;padding:5px 12px;font-size:13px;white-space:nowrap}main{max-width:1480px;margin:auto;padding:24px 20px 48px}.notice{border-left:4px solid #9b5c00;padding:10px 14px;background:#fff8e8;margin-bottom:20px;font-size:14px}.controls{display:grid;grid-template-columns:2fr 1fr 1fr;gap:18px;padding:18px;background:white;border:1px solid var(--line)}label{display:block;font-size:14px;font-weight:600;margin-bottom:6px}select,button{font:inherit;min-height:44px;border:1px solid #8b9ba5;background:white;color:#202428;border-radius:4px;padding:8px 12px;max-width:100%}select{width:100%;cursor:pointer}button{cursor:pointer}button:hover{background:#e9f0f6}button:disabled{opacity:.45;cursor:default}:focus-visible{outline:3px solid var(--blue);outline-offset:3px}.transport{background:white;border:1px solid var(--line);border-top:0;padding:16px 18px}.transport-line{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.transport button:first-child{background:var(--blue);color:white;min-width:85px}input[type=range]{display:block;width:100%;accent-color:var(--blue);min-height:44px;margin:6px 0}output{font-variant-numeric:tabular-nums;font-weight:600}.time-note,.meta{font-size:13px;color:var(--muted);overflow-wrap:anywhere}.workbench{margin-top:24px}.workbench-head{display:flex;justify-content:space-between;gap:16px;align-items:baseline}.panels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.panel{margin:0;background:white;border:1px solid var(--line);min-width:0}.panel figcaption{padding:12px 14px;font-weight:600;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}.panel-body{padding:14px}.plot{background:repeating-conic-gradient(#dfe5e9 0% 25%,#f1f4f6 0% 50%) 50%/16px 16px;position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center}.plot img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated}.plot p{padding:20px;text-align:center;color:#35444e;max-width:30ch}.plot [hidden]{display:none}.legend{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;margin:12px 0 8px}.ramp{height:10px;flex:1;background:linear-gradient(90deg,#183c6b,#187fa2,#49b6a4,#d8d755,#e98936,#b94568)}.ramp.error{background:linear-gradient(90deg,#2166ac,#f7f7f7,#b35806)}.ramp.qpe{background:linear-gradient(90deg,#edf5fb,#2164a5,#4b1c77)}.status{display:block;color:#7b4b00;font-size:14px;min-height:21px}.metrics{margin:24px 0;background:white;border:1px solid var(--line);padding:16px 18px;overflow:auto}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:14px}th,td{padding:9px 12px;text-align:right;border-bottom:1px solid #e2e7eb;white-space:nowrap}th:first-child,td:first-child{text-align:left}th{font-weight:600;color:var(--muted)}caption{text-align:left;margin-bottom:8px}details{margin-top:20px;border:1px solid var(--line);background:white;padding:14px 18px}summary{cursor:pointer;min-height:32px;font-weight:600}.context-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:16px}.context-grid .panel{max-width:560px}.context-time{max-width:420px;margin:14px 0}.scroll{overflow:auto}dl{display:grid;grid-template-columns:170px 1fr;gap:8px;font-size:13px}dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}footer{font-size:13px;color:var(--muted);margin-top:24px}noscript{display:block;padding:24px}button,select,input{touch-action:manipulation}
-@media(max-width:850px){.panels{grid-template-columns:1fr}.plot{aspect-ratio:4/3}.controls{grid-template-columns:1fr 1fr}.controls>div:first-child{grid-column:1/-1}.context-grid{grid-template-columns:1fr}.workbench-head{display:block}header{align-items:flex-start}.tag{white-space:normal}.panel-body{padding:12px}dl{grid-template-columns:1fr;gap:3px}dd{margin-bottom:10px}}
+:root{color-scheme:light;font:16px/1.6 "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:#203340;background:#f1f5f7;--line:#cbd8df;--blue:#17658b;--muted:#506575}
+*{box-sizing:border-box}body{margin:0;min-width:320px}header{background:#163e54;color:white;padding:14px max(20px,calc((100vw - 1440px)/2));display:flex;justify-content:space-between;gap:16px;align-items:center}h1{font-size:23px;margin:0}h2{font-size:18px;margin:0 0 8px}h3{font-size:16px;margin:0}p{margin:6px 0 10px}header p{margin:0;color:#d4e5ee;font-size:14px}.tag{font-size:14px;white-space:nowrap;color:#d4e5ee}main{max-width:1480px;margin:auto;padding:16px 20px 40px}.notice{color:var(--muted);margin-bottom:12px;font-size:14px}.controls{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;padding:12px 14px;background:white;border:1px solid var(--line)}label{display:block;font-size:14px;font-weight:600;margin-bottom:4px}select,button{font:inherit;min-height:44px;border:1px solid #8b9faa;background:white;color:#203340;border-radius:4px;padding:6px 10px;max-width:100%}select{width:100%;cursor:pointer}button{cursor:pointer}button:hover{background:#eaf1f5}button:disabled{opacity:.45;cursor:default}:focus-visible{outline:3px solid var(--blue);outline-offset:3px}.transport{background:white;border:1px solid var(--line);border-top:0;padding:10px 14px}.transport-line{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.transport button:first-child{background:var(--blue);color:white;min-width:76px}input[type=range]{display:block;width:100%;accent-color:var(--blue);min-height:44px;margin:0}output{font-variant-numeric:tabular-nums;font-weight:600}.time-note,.meta{font-size:14px;color:var(--muted);overflow-wrap:anywhere}.transport label{margin-top:6px;font-size:13px;font-weight:400}.workbench{margin-top:18px}.workbench-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline}.panels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.panel{margin:0;background:white;border:1px solid var(--line);min-width:0}.panel figcaption{padding:10px 12px;font-weight:600;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}.panel-body{padding:12px}.plot{background:repeating-conic-gradient(#dfe5e9 0% 25%,#f1f4f6 0% 50%) 50%/16px 16px;position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center}.plot img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated}.plot p{padding:20px;text-align:center;color:#35444e;max-width:30ch}.plot [hidden]{display:none}.legend{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;margin:10px 0 6px}.ramp{height:10px;flex:1;background:linear-gradient(90deg,#183c6b,#187fa2,#49b6a4,#d8d755,#e98936,#b94568)}.ramp.error{background:linear-gradient(90deg,#2166ac,#f7f7f7,#b35806)}.ramp.qpe{background:linear-gradient(90deg,#edf5fb,#2164a5,#4b1c77)}.status{display:block;color:var(--muted);font-size:14px;min-height:22px}.status[data-tone=success]{color:#1d6b52}.status[data-tone=warning],.gap{color:#875300}.status[data-tone=error]{color:#b02b26}.gap{font-size:14px;margin:4px 0}.metrics{margin:24px 0;background:white;border:1px solid var(--line);padding:14px;overflow:auto}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:14px}th,td{padding:9px 12px;text-align:right;border-bottom:1px solid #dfe7ec;white-space:nowrap}th:first-child,td:first-child{text-align:left}th{font-weight:600;color:var(--muted)}caption{text-align:left;margin-bottom:8px}details{margin-top:16px;border-bottom:1px solid var(--line);padding:8px 0}summary{cursor:pointer;min-height:44px;align-content:center;font-weight:600}.context-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:16px}.context-grid .panel{max-width:560px}.context-time{max-width:420px;margin:14px 0}.scroll{overflow:auto}dl{display:grid;grid-template-columns:170px 1fr;gap:8px;font-size:14px}dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}footer{font-size:13px;color:var(--muted);margin-top:24px}noscript{display:block;padding:24px}button,select,input{touch-action:manipulation}
+@media(max-width:850px){.panels{grid-template-columns:1fr}.plot{aspect-ratio:4/3}.context-grid{grid-template-columns:1fr}.workbench-head{display:block}.workbench-head p{margin:0 0 8px}dl{grid-template-columns:1fr;gap:3px}dd{margin-bottom:10px}}
+@media(max-width:600px){header{padding:12px 14px}h1{font-size:20px}header p{font-size:13px}main{padding:12px}.controls{grid-template-columns:1fr 1fr;padding:10px;gap:8px}.controls>div:first-child{grid-column:1/-1}.controls label{font-size:13px;margin-bottom:2px}.transport{padding:10px}.transport-line{display:grid;grid-template-columns:repeat(3,1fr)}.transport-line output{grid-column:1/-1;grid-row:1;font-size:14px}.workbench{margin-top:14px}.workbench-head h2{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.panel-body{padding:10px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+
 </style>
 </head>
 <body>
-<header><div><h1>Event replay</h1><p>MinxiongHydroCast · preserved radar &amp; baseline forecasts</p></div><span class="tag">Offline research</span></header>
-<noscript>Enable JavaScript to replay this locally embedded snapshot. No network connection is needed.</noscript>
+<header><div><h1>事件重播</h1><p>MinxiongHydroCast 雷達與基準預報</p></div><span class="tag">離線研究</span></header>
+<noscript>請啟用 JavaScript 以重播內嵌快照；不需要網路連線。</noscript>
 <main>
-<div class="notice" id="notice">Retrospective replay. This view does not establish forecast publication readiness.</div>
-<section aria-label="Replay controls">
+<div class="notice" id="notice">研究重播，非作業預報；資料可用不代表已達發布條件。</div>
+<section aria-label="重播控制">
 <div class="controls">
-<div><label for="event">Event</label><select id="event"></select></div>
-<div><label for="model">Model</label><select id="model"></select></div>
-<div><label for="lead">Forecast lead</label><select id="lead"></select></div>
+<div><label for="event">事件</label><select id="event"></select></div>
+<div><label for="model">模型</label><select id="model"></select></div>
+<div><label for="lead">預報提前量</label><select id="lead"></select></div>
 </div>
 <div class="transport">
-<div class="transport-line"><button id="play" type="button" aria-pressed="false">Play</button><button id="previous" type="button">Previous</button><button id="next" type="button">Next</button><output id="time" for="timeline">No observation frames</output></div>
-<label for="timeline" class="time-note">Observation time / forecast origin (UTC)</label><input id="timeline" type="range" min="0" max="0" value="0" step="1">
-<p class="time-note" id="timing"></p><output id="state" class="status" aria-live="polite"></output>
+<div class="transport-line"><button id="play" type="button" aria-pressed="false">播放</button><button id="previous" type="button">上一筆</button><button id="next" type="button">下一筆</button><output id="time" for="timeline">沒有觀測影格</output></div>
+<label for="timeline" class="time-note">觀測／預報起算時間 (UTC)；依現存影格排序，非等時距</label><input id="timeline" type="range" min="0" max="0" value="0" step="1">
+<output id="state" class="status" aria-live="polite"></output><p id="time-gap" class="gap" hidden></p>
 </div>
 </section>
-<section class="workbench" aria-label="Radar comparison">
-<div class="workbench-head"><h2>Native radar comparison</h2><p class="meta" id="valid-time"></p></div>
+<section class="workbench" aria-label="雷達比較">
+<div class="workbench-head"><h2>原生網格比較</h2><p class="meta" id="valid-time"></p></div>
 <div class="panels">
-<figure class="panel"><figcaption><span>Observed radar</span><span>dBZ</span></figcaption><div class="panel-body"><div class="plot"><img id="observed" alt="Observed radar native-grid preview" hidden><p id="observed-empty">No observation selected.</p></div><div class="legend"><span>0</span><span class="ramp"></span><span>60 dBZ</span></div><p id="observed-meta" class="meta"></p></div></figure>
-<figure class="panel"><figcaption><span>Saved forecast</span><span>dBZ</span></figcaption><div class="panel-body"><div class="plot"><img id="forecast" alt="Saved forecast native-grid preview" hidden><p id="forecast-empty">No saved forecast.</p></div><div class="legend"><span>0</span><span class="ramp"></span><span>60 dBZ</span></div><p id="forecast-meta" class="meta"></p></div></figure>
-<figure class="panel"><figcaption><span>Forecast − observation</span><span>dBZ</span></figcaption><div class="panel-body"><div class="plot"><img id="error" alt="Signed forecast error on common valid pixels" hidden><p id="error-empty">Error unavailable.</p></div><div class="legend"><span>−30</span><span class="ramp error"></span><span>+30 dBZ</span></div><p class="meta">Blue: underprediction. Orange: overprediction. Missing pixels are transparent.</p></div></figure>
+<figure class="panel"><figcaption><span>觀測雷達</span><span>dBZ</span></figcaption><div class="panel-body"><div class="plot"><img id="observed" alt="觀測雷達原生網格預覽" hidden><p id="observed-empty">尚未選擇觀測。</p></div><div class="legend"><span>0</span><span class="ramp"></span><span>60 dBZ</span></div><p id="observed-meta" class="meta"></p></div></figure>
+<figure class="panel"><figcaption><span>已儲存預報</span><span>dBZ</span></figcaption><div class="panel-body"><div class="plot"><img id="forecast" alt="已儲存預報原生網格預覽" hidden><p id="forecast-empty">沒有已儲存預報。</p></div><div class="legend"><span>0</span><span class="ramp"></span><span>60 dBZ</span></div><p id="forecast-meta" class="meta"></p></div></figure>
+<figure class="panel"><figcaption><span>預報 − 觀測</span><span>dBZ</span></figcaption><div class="panel-body"><div class="plot"><img id="error" alt="共同有效像素上的預報誤差" hidden><p id="error-empty">無法計算誤差。</p></div><div class="legend"><span>−30</span><span class="ramp error"></span><span>+30 dBZ</span></div><p class="meta">藍色：低估；橘色：高估；缺值以透明像素表示。</p></div></figure>
 </div><p class="meta" id="grid"></p>
 </section>
-<section class="metrics" aria-labelledby="metrics-title"><h2 id="metrics-title">Saved full-resolution scores</h2><p class="meta">Both baselines use the same valid-pixel mask. Preview sampling does not change these scores.</p><table><caption id="metrics-state">No scored target selected.</caption><thead><tr><th scope="col">Model</th><th scope="col">RMSE (dBZ)</th><th scope="col">MAE (dBZ)</th><th scope="col">CSI</th><th scope="col">POD</th><th scope="col">FAR</th><th scope="col">Valid pixels</th></tr></thead><tbody id="metrics"></tbody></table></section>
-<details id="context-details"><summary>Hourly QPE &amp; gauge context</summary><p class="meta">Separate observations in mm over 60 minutes. Their declared datums are retained. These layers are never overlaid on instantaneous dBZ.</p><div class="context-time"><label for="context-time">Hourly observation end time (UTC)</label><select id="context-time"></select></div><p id="context-state" class="status"></p><div class="context-grid"><figure class="panel"><figcaption><span>QPE · O-B0045-001</span><span>mm / 60 min</span></figcaption><div class="panel-body"><div class="plot"><img id="qpe" alt="Separate hourly QPE grid preview" hidden><p id="qpe-empty">No preserved QPE.</p></div><div class="legend"><span>0</span><span class="ramp qpe"></span><span>50 mm</span></div><p id="qpe-meta" class="meta"></p></div></figure><div><h3>Gauges · O-A0002-001</h3><p id="gauge-meta" class="meta"></p><div class="scroll"><table><caption>Hourly station observations; no spatial matching</caption><thead><tr><th>Station</th><th>mm / 60 min</th><th>Datum</th></tr></thead><tbody id="gauges"></tbody></table></div></div></div></details>
-<details><summary>Provenance &amp; snapshot limits</summary><p class="meta">Native rows increase downward, columns to the right. Grid previews use nearest sampling, with no reprojection or geographic overlay. Colors clip to the displayed legend. Acquisition times absent from the source manifest remain unknown.</p><dl id="provenance"></dl></details>
-<footer>No downloads or network requests. This snapshot contains embedded research data; share it only with the appropriate access.</footer>
+<section class="metrics" aria-labelledby="metrics-title"><h2 id="metrics-title">完整解析度評分</h2><p class="meta">兩個基準模型使用相同有效像素；預覽取樣不影響評分。</p><table><caption id="metrics-state">尚未選擇已評分目標。</caption><thead><tr><th scope="col">模型</th><th scope="col">RMSE (dBZ)</th><th scope="col">MAE (dBZ)</th><th scope="col">CSI</th><th scope="col">POD</th><th scope="col">FAR</th><th scope="col">有效像素</th></tr></thead><tbody id="metrics"></tbody></table></section>
+<details id="context-details"><summary>每小時 QPE 與雨量站</summary><p class="meta">獨立顯示 60 分鐘累積雨量 (mm)，保留來源座標基準；不疊加到瞬時雷達反射率 (dBZ)。</p><div class="context-time"><label for="context-time">每小時觀測結束時間 (UTC)</label><select id="context-time"></select></div><p id="context-state" class="status"></p><div class="context-grid"><figure class="panel"><figcaption><span>QPE · O-B0045-001</span><span>mm / 60 min</span></figcaption><div class="panel-body"><div class="plot"><img id="qpe" alt="獨立每小時 QPE 網格預覽" hidden><p id="qpe-empty">未提供封存 QPE。</p></div><div class="legend"><span>0</span><span class="ramp qpe"></span><span>50 mm</span></div><p id="qpe-meta" class="meta"></p></div></figure><div><h3>雨量站 · O-A0002-001</h3><p id="gauge-meta" class="meta"></p><div class="scroll"><table><caption>每小時測站觀測；未進行空間配對</caption><thead><tr><th>測站</th><th>mm / 60 min</th><th>座標基準</th></tr></thead><tbody id="gauges"></tbody></table></div></div></div></details>
+<details><summary>來源、產出時間與快照限制</summary><p class="meta">原生網格向下為列、向右為欄。預覽使用最近鄰取樣，不進行座標轉換或地圖疊加；色彩截限於圖例範圍。來源未記錄的抓取時間維持未知。</p><p class="time-note" id="timing"></p><dl id="provenance"></dl></details>
+<footer>本快照可獨立離線使用，不下載或請求外部資料；分享前請確認研究資料存取權限。</footer>
 </main>
 <script id="replay-data" type="application/json">__REPLAY_DATA__</script>
 <script>
 'use strict';
 const data = JSON.parse(document.getElementById('replay-data').textContent);
 const $ = id => document.getElementById(id);
-const names = {persistence: 'Persistence', optical_flow: 'Optical Flow'};
+const names = {persistence: '持續性 (Persistence)', optical_flow: '光流 (Optical Flow)'};
 const palettes = {
   radar: [[24,60,107],[24,127,162],[73,182,164],[216,215,85],[233,137,54],[185,69,104]],
   error: [[33,102,172],[247,247,247],[179,88,6]],
@@ -64,14 +66,14 @@ function options(element, items) {
   }));
 }
 function utc(value) {
-  return value ? new Date(value).toISOString().replace('T', ' ').replace(/Z$/, ' UTC') : 'unknown';
+  return value ? new Date(value).toISOString().replace('T', ' ').replace(/(?:\.\d+)?Z$/, ' UTC') : '未知';
 }
 function currentEvent() { return data.events[Number($('event').value)]; }
 function currentFrame() { return currentEvent()?.frames[Number($('timeline').value)]; }
 function stop() {
   if (timer !== null) { clearInterval(timer); }
   timer = null;
-  text('play', 'Play');
+  text('play', '播放');
   $('play').setAttribute('aria-pressed', 'false');
 }
 function color(value, mode) {
@@ -101,9 +103,9 @@ function draw(id, preview, empty, mode = 'radar') {
   imageElement.src = canvas.toDataURL('image/png');
 }
 function describeGrid(grid, preview) {
-  if (!grid) { return 'Native grid unavailable.'; }
-  const sampling = preview ? ' · preview stride ' + preview.stride : '';
-  return `${grid.crs} · ${grid.grid_dimension_x} × ${grid.grid_dimension_y} native pixels · ${grid.grid_resolution}° spacing · origin ${grid.start_longitude}°E, ${grid.start_latitude}°N${sampling}`;
+  if (!grid) { return '未提供原生網格。'; }
+  const sampling = preview ? '；預覽步幅 ' + preview.stride : '';
+  return `${grid.crs} · ${grid.grid_dimension_x} × ${grid.grid_dimension_y} 原生像素；${grid.grid_resolution}° 間距；原點 ${grid.start_longitude}°E, ${grid.start_latitude}°N${sampling}`;
 }
 function metricValue(value, index) {
   if (typeof value !== 'number') { return value ?? '—'; }
@@ -112,7 +114,7 @@ function metricValue(value, index) {
 function metrics(lead) {
   const entries = Object.entries(lead?.metrics || {});
   $('metrics').replaceChildren();
-  text('metrics-state', entries.length ? 'Verified saved metrics for ' + utc(lead.target_time) : 'No verified score for this target.');
+  text('metrics-state', entries.length ? '已驗證評分，目標時間 ' + utc(lead.target_time) : '此目標沒有已驗證評分。');
   for (const [model, m] of entries) {
     const row = document.createElement('tr');
     const values = [names[model] || model, m.rmse, m.mae, m.event_metrics?.csi, m.event_metrics?.pod, m.event_metrics?.far, m.valid_pixel_count];
@@ -125,31 +127,45 @@ function metrics(lead) {
     $('metrics').append(row);
   }
 }
+function statusLabel(value) {
+  return {available:'可用', scored:'已評分', missing:'缺漏', invalid:'無效', pending:'待觀測', excluded:'已排除', omitted:'因上限省略'}[value] || '未知';
+}
+function reasonLabel(value) {
+  return {target_after_as_of:'目標時間晚於報告截止時間', target_not_captured:'目標尚未收錄', target_file_missing:'目標檔案不存在', no_common_valid_pixels:'沒有共同有效像素', invalid:'紀錄無效'}[value] || value || '未提供原因';
+}
 function statusMessage(frame, forecast, lead) {
-  if (!frame) { return 'This event has no observation frames in the snapshot.'; }
+  if (!frame) { return '快照中沒有此事件的觀測影格。'; }
   const forecastMessages = {
-    missing: 'No saved forecast at this observation time.',
-    omitted: 'Forecast omitted by the export window limit.',
-    invalid: 'Saved forecast unavailable: integrity or input contract failed.'
+    missing: '此觀測時間沒有已儲存預報。',
+    omitted: '此預報因輸出視窗上限而省略。',
+    invalid: '預報未通過完整性或輸入契約檢查。'
   };
   if (forecastMessages[forecast.status]) { return forecastMessages[forecast.status]; }
   const leadMessages = {
-    missing: 'Target observation missing; saved forecast retained.',
-    omitted: 'Target observation omitted by the frame limit.',
-    invalid: 'Target score unavailable: saved record or alignment check failed.',
-    pending: 'Target pending; saved forecast is available.',
-    excluded: 'Target excluded: ' + lead?.reason + '.'
+    missing: '目標觀測缺漏；仍保留已儲存預報。',
+    omitted: '目標觀測因影格上限而省略。',
+    invalid: '目標未通過儲存紀錄或對齊檢查，無法評分。',
+    pending: '等待目標觀測；可查看已儲存預報。',
+    excluded: '目標已排除：' + reasonLabel(lead?.reason) + '。'
   };
-  return leadMessages[lead?.status] || 'Saved forecast and target verified.';
+  return leadMessages[lead?.status] || (lead?.status === 'scored' ? '預報與目標已驗證。' : '尚無已驗證目標。');
 }
 function renderTransport(frame, forecast, lead) {
-  text('time', frame ? utc(frame.data_time) : 'No observation frames');
-  text('timing', `Acquired: ${utc(frame?.fetched_at)}. Forecast produced: ${utc(forecast?.created_at)}.`);
+  text('time', frame ? utc(frame.data_time) : '沒有觀測影格');
+  text('timing', `觀測抓取：${utc(frame?.fetched_at)}；預報產出：${utc(forecast?.created_at)}.`);
   $('previous').disabled = !frame || Number($('timeline').value) === 0;
   $('next').disabled = !frame || Number($('timeline').value) >= Number($('timeline').max);
   $('play').disabled = !frame || currentEvent().frames.length < 2;
   $('timeline').disabled = !frame;
   text('state', statusMessage(frame, forecast, lead));
+  const states = [forecast?.status, lead?.status, lead?.target?.status];
+  $('state').dataset.tone = states.includes('invalid') ? 'error' :
+    lead?.status === 'scored' ? 'success' :
+    states.some(value => ['pending', 'excluded', 'omitted', 'missing'].includes(value)) ? 'warning' : 'neutral';
+  const previous = currentEvent()?.frames[Number($('timeline').value) - 1];
+  const elapsed = previous && frame ? (new Date(frame.data_time) - new Date(previous.data_time)) / 60000 : 0;
+  $('time-gap').hidden = elapsed <= data.cadence_minutes;
+  text('time-gap', `與前一筆相隔 ${elapsed} 分鐘（預期間隔 ${data.cadence_minutes} 分鐘）；中間影格未包含在此快照。`);
 }
 function render() {
   const frame = currentFrame();
@@ -158,18 +174,18 @@ function render() {
   const model = lead?.models?.[$('model').value];
   const observation = lead?.target || frame?.observation;
   renderTransport(frame, forecast, lead);
-  text('valid-time', lead ? 'Forecast valid at ' + utc(lead.target_time) : 'Observation at ' + utc(frame?.data_time));
-  const observationEmpty = observation?.status === 'invalid' ? 'Observation invalid: integrity or grid check failed.' : 'No preserved observation for this time.';
+  text('valid-time', lead ? '預報有效時間：' + utc(lead.target_time) : '觀測時間：' + utc(frame?.data_time));
+  const observationEmpty = observation?.status === 'invalid' ? '觀測未通過完整性或網格檢查。' : '此時間沒有封存觀測。';
   draw('observed', observation?.preview, observationEmpty);
-  draw('forecast', model?.preview, 'No verified saved forecast.');
-  draw('error', model?.error, 'Error unavailable: no aligned, verified target.', 'error');
-  text('observed-meta', `${observation?.source || 'O-A0059-001'} · ${utc(observation?.data_time)} · ${observation?.status || 'missing'}`);
-  text('forecast-meta', `${names[$('model').value] || ''} · +${Number($('lead').value) * data.cadence_minutes} min · ${forecast?.status || 'missing'}`);
+  draw('forecast', model?.preview, '沒有已驗證的預報。');
+  draw('error', model?.error, '沒有已對齊且驗證的目標，無法計算誤差。', 'error');
+  text('observed-meta', `${observation?.source || 'O-A0059-001'} · ${utc(observation?.data_time)} · ${statusLabel(observation?.status)}`);
+  text('forecast-meta', `${names[$('model').value] || ''} · +${Number($('lead').value) * data.cadence_minutes} min · ${statusLabel(forecast?.status)}`);
   text('grid', describeGrid(observation?.grid || forecast?.grid, observation?.preview || model?.preview));
   metrics(lead);
 }
 function renderGauges(gauges) {
-  text('gauge-meta', gauges ? `${utc(gauges.data_time)} · acquired ${utc(gauges.fetched_at)} · ${gauges.status} · ${gauges.omitted_stations || 0} omitted stations` : 'Hourly gauges not supplied.');
+  text('gauge-meta', gauges ? `${utc(gauges.data_time)}；抓取 ${utc(gauges.fetched_at)} · ${statusLabel(gauges.status)} · ${gauges.omitted_stations || 0} 筆測站因上限省略` : '未提供每小時雨量站資料。');
   $('gauges').replaceChildren();
   for (const station of gauges?.stations || []) {
     const row = document.createElement('tr');
@@ -186,9 +202,9 @@ function renderContext() {
   const selected = items.filter(item => item.data_time === $('context-time').value);
   const qpe = selected.find(item => item.kind === 'qpe');
   const gauges = selected.find(item => item.kind === 'gauges');
-  text('context-state', items.length ? 'Separate hourly layers; check observation end time and datum before comparison.' : 'No preserved QPE or hourly gauge artifacts supplied for this event.');
-  draw('qpe', qpe?.preview, 'QPE ' + (qpe?.status || 'missing') + '.', 'qpe');
-  text('qpe-meta', qpe ? `${utc(qpe.data_time)} · acquired ${utc(qpe.fetched_at)} · ${describeGrid(qpe.grid, qpe.preview)}` : 'QPE not supplied.');
+  text('context-state', items.length ? '獨立的每小時圖層；比較前請確認觀測結束時間與座標基準。' : '此事件未提供封存 QPE 或每小時雨量站資料。');
+  draw('qpe', qpe?.preview, 'QPE ' + statusLabel(qpe?.status) + '.', 'qpe');
+  text('qpe-meta', qpe ? `${utc(qpe.data_time)}；抓取 ${utc(qpe.fetched_at)} · ${describeGrid(qpe.grid, qpe.preview)}` : '未提供 QPE。');
   renderGauges(gauges);
 }
 function selectEvent() {
@@ -212,7 +228,7 @@ function advance() {
 function togglePlayback() {
   if (timer !== null) { stop(); return; }
   if (Number($('timeline').value) >= Number($('timeline').max)) { $('timeline').value = 0; }
-  text('play', 'Pause');
+  text('play', '暫停');
   $('play').setAttribute('aria-pressed', 'true');
   render();
   timer = setInterval(advance, 1000);
@@ -238,11 +254,11 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) { sto
 document.addEventListener('keydown', event => { if (event.key === 'Escape') { stop(); } });
 document.addEventListener('focusin', event => { if (event.target.id !== 'play') { stop(); } });
 const provenance = [
-  ['Source', data.demo ? 'Synthetic demonstration' : 'Preserved external archive'],
-  ['Report cutoff', utc(data.as_of)], ['Report produced', utc(data.report_generated_at)],
-  ['Configuration SHA-256', data.configuration_id], ['Report SHA-256', data.report_sha256],
-  ['Manifest SHA-256', data.manifest_sha256],
-  ['Export limits', `${data.omitted_frames} omitted observation frames; ${data.omitted_windows} omitted forecast origins; ${data.omitted_context_artifacts || 0} omitted context artifacts`]
+  ['來源', data.demo ? '合成示範資料' : '外部封存資料'],
+  ['報告截止時間', utc(data.as_of)], ['報告產出時間', utc(data.report_generated_at)],
+  ['設定 SHA-256', data.configuration_id], ['報告 SHA-256', data.report_sha256],
+  ['清單 SHA-256', data.manifest_sha256],
+  ['輸出上限', `${data.omitted_frames} 筆觀測影格省略；${data.omitted_windows} 筆預報起算點省略；${data.omitted_context_artifacts || 0} 筆背景資料省略`]
 ];
 for (const [label, value] of provenance) {
   const dt = document.createElement('dt');
@@ -252,10 +268,10 @@ for (const [label, value] of provenance) {
   $('provenance').append(dt, dd);
 }
 if (data.demo) {
-  text('notice', 'Synthetic demonstration. Forecasts and scores were produced by the real backtest engine. This is research replay, not an operational forecast.');
+  text('notice', '合成示範資料；預報與評分由回測引擎產出，非作業預報。');
 }
 if (data.omitted_frames || data.omitted_windows) {
-  $('notice').append(` Export limit: ${data.omitted_frames} frames and ${data.omitted_windows} forecast origins omitted.`);
+  $('notice').append(` 輸出上限：${data.omitted_frames} 筆影格與 ${data.omitted_windows} 筆預報起算點已省略。`);
 }
 selectEvent();
 </script>

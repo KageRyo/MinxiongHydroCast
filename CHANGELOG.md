@@ -5,6 +5,16 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 
 ## [Unreleased]
 
+### Changed
+
+- Refine the operator dashboard, offline replay and archive coverage views with Traditional
+  Chinese labels, a consistent observation-focused layout and accessible status colors.
+- Show common observation columns first and retain full records and provenance in expandable
+  details. Keep unevaluated shadow checks neutral and snapshot/observation times distinct.
+- Bring replay plots into the mobile first screen, disclose gaps between stored frames and
+  separate verified, pending and invalid results. Prioritize usable/missing/unchecked coverage
+  counts without treating unchecked data as failed verification.
+
 ## [0.1.8] - 2026-10-21
 
 ### Added

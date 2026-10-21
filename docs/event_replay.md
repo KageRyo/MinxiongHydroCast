@@ -44,6 +44,8 @@ Checksum verification detects drift; it does not authenticate historic acquisiti
 
 - Select an event, model and forecast lead. The time slider selects an observation/forecast origin.
   Previous/Next and Play/Pause move through the stored observation times; gaps are not filled in.
+  The slider is an ordered frame selector, not a proportional time axis. A gap notice appears
+  when the selected origin is more than one cadence after the previous stored frame.
 - For a saved forecast, the three panels show the target observation at the selected lead,
   the saved prediction, and signed forecast-minus-observation error. At times with no forecast,
   only the selected observation is shown. Missing/corrupt artifacts have explicit states.
@@ -58,6 +60,9 @@ Checksum verification detects drift; it does not authenticate historic acquisiti
 
 Controls have visible focus, explicit labels and keyboard operation. Playback starts only on
 request, pauses when changing controls or leaving the tab, and stops with Escape.
+The interface uses Traditional Chinese labels, retains UTC timestamps and scientific units,
+and keeps the plots ahead of secondary provenance details on mobile screens. Verified results,
+pending targets and invalid records have distinct text and color states.
 
 Default export limits are 120 observation frames, 24 forecast origins and 160 pixels along the
 longest preview axis. `--max-frames`, `--max-windows` and `--preview-size` allow bounded changes.

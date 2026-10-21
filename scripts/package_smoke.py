@@ -107,6 +107,9 @@ def main() -> None:
         )
         try:
             wait_until_healthy(server)
+            _status, operator_body = request("/")
+            if "水情觀測" not in operator_body.decode("utf-8"):
+                raise RuntimeError("installed operator template is missing")
             _status, readiness_body = request("/readyz", expected_status=503)
             readiness = json.loads(readiness_body)
             if readiness["state"] != "demo" or readiness["ready"] is not False:
