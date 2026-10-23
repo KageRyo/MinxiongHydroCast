@@ -38,6 +38,7 @@ report = [
 dev = [
   "build>=1.2",
   "coverage>=7.6",
+  "Pillow>=10",
   "pyright>=1.1",
   "pytest>=8.0",
   "ruff>=0.6",
