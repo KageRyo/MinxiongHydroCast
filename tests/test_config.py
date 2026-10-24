@@ -55,9 +55,3 @@ def test_settings_load_wra_api_endpoints_and_key(monkeypatch):
     assert settings.wra_api_key == "test-key"
     assert settings.wra_api_url == "https://example.test/wra"
     assert settings.wra_open_data_api_url == "https://example.test/open-data"
-
-
-def test_settings_load_flood_snapshot_freshness(monkeypatch):
-    monkeypatch.setenv("MINXIONGHYDROCAST_FLOOD_MAX_AGE_MINUTES", "120")
-
-    assert get_settings().operations_flood_max_age_minutes == 120

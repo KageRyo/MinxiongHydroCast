@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -42,7 +43,7 @@ def test_deployment_metadata_records_verified_installed_identity(tmp_path: Path)
         "installed_at": "2026-08-18T02:00:00+00:00",
         "python_version": "3.13.5",
     }
-    assert output.read_text(encoding="utf-8").endswith("\n")
+    assert json.loads(output.read_text(encoding="utf-8")) == payload
 
 
 def test_deployment_metadata_rejects_version_mismatch(tmp_path: Path):
