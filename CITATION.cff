@@ -5,8 +5,8 @@ type: software
 authors:
   - family-names: Chang
     given-names: Chien-Hsun
-version: 0.1.9
-date-released: 2026-10-21
+version: 0.1.10
+date-released: 2026-11-15
 repository-code: "https://github.com/KageRyo/MinxiongHydroCast"
 url: "https://github.com/KageRyo/MinxiongHydroCast"
 license: MIT
