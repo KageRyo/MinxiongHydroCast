@@ -1,6 +1,7 @@
 """Synthetic archive health example using the native official radar schema."""
 
 import json
+import shutil
 from datetime import timedelta
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -21,9 +22,10 @@ def build_coverage_demo(**options) -> dict:
                 payload['cwaopendata']['dataset']['datasetInfo']['parameterSet']['StartPointLongitude'] = 121.0
             ref = _write(root, f'{index}.json', payload, time)
             refs.append(ref)
-        (root / refs[1]['path']).write_bytes(b'corrupt')
+        # Fixture writes use fixed local paths, independent of inventory metadata.
+        (root / '2.json').write_bytes(b'corrupt')
         duplicate = {**refs[2], 'path': 'duplicate.json'}
-        (root / duplicate['path']).write_bytes((root / refs[2]['path']).read_bytes())
+        shutil.copyfile(root / '3.json', root / 'duplicate.json')
         refs.append(duplicate)
         attempts = [{'data_time': START.isoformat(), 'attempted_at': START.isoformat(),
                      'http_status': status, 'failure_kind': kind} for status, kind in [
