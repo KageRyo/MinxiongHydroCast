@@ -274,7 +274,8 @@ inventory and dataset-building citation.
 
 | Version | Milestone | State |
 | --- | --- | --- |
-| [`v0.1.10`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.10) | Protocol verification lock security update | Current software version |
+| [`v0.1.11`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.11) | Rolling backtest manifests from event discovery, plus Traditional Chinese documentation updates | Current software version |
+| [`v0.1.10`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.10) | Protocol verification lock security update | Previous software release |
 | [`v0.1.9`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.9) | Observation and research workbench refinement, mobile replay and clearer verification states | Previous software release |
 | [`v0.1.8`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.8) | Rolling backtests, offline event replay and archive coverage reports | Previous software release |
 | [`v0.1.7`](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/v0.1.7) | Protocol archive tooling, strict QPE/gauge alignment, public documentation and source provenance | Previous software release |
@@ -305,6 +306,7 @@ benchmark; normalization uses training data only. See the
 [research workflows and next steps](docs/roadmap.md#label-free-research-workflows).
 
 See [CHANGELOG.md](https://github.com/KageRyo/MinxiongHydroCast/blob/main/CHANGELOG.md), the
+[v0.1.11 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.11.md),
 [v0.1.10 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.10.md),
 [v0.1.9 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.9.md),
 [v0.1.8 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.8.md),

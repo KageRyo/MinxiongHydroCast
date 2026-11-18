@@ -5,6 +5,20 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 
 ## [Unreleased]
 
+## [0.1.11] - 2026-11-18
+
+### Added
+
+- `mhc model backtest-manifest` updates a rolling radar backtest manifest with checksummed
+  observations from the event discovery catalog. The command preserves previously exported frame
+  identities and retries reads that overlap with a discovery update.
+
+### Changed
+
+- Document how to refresh the manifest before each scheduled backtest.
+- Add offline replay and archive coverage to the Traditional Chinese quick start and clarify
+  the homepage, API status guide and contributor instructions.
+
 ## [0.1.10] - 2026-11-15
 
 ### Security
@@ -219,7 +233,8 @@ All notable changes to MinxiongHydroCast are documented here. The project follow
 - Radar candidates cannot automatically enter formal train/validation/test splits.
 - Forecast publication and automated notification remain disabled until all gates pass.
 
-[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.10...HEAD
+[Unreleased]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.11...HEAD
+[0.1.11]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.10...v0.1.11
 [0.1.10]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.9...v0.1.10
 [0.1.9]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.8...v0.1.9
 [0.1.8]: https://github.com/KageRyo/MinxiongHydroCast/compare/v0.1.7...v0.1.8
