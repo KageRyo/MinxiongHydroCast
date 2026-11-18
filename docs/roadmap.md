@@ -19,7 +19,7 @@ exit criteria are maintained in [completion_plan.md](completion_plan.md).
 | `dataset-protocol-v0.2.0` | Label-free Radar Dataset-building Protocol | Published 2026-10-20: fixed source/frame inventory, unknown weather regimes, synthetic reconstruction, exact archive inventory and independent citation |
 | `v0.3.0` | Baseline Nowcasting | Learned model consistently beats Persistence on independent aggregate and lead-time gates; local label and shadow gates pass |
 
-## Next features without manual annotations
+## Label-free research workflows
 
 The protocol milestone is complete. Software v0.1.8 delivers [rolling backtests](rolling_backtests.md),
 [offline event replay](event_replay.md) and [archive coverage](archive_coverage.md), tracked in
@@ -30,26 +30,16 @@ These research workflows use subsequent observations as targets and do not wait 
 human weather/flood labels. Manual review remains an optional curated-corpus track; it is not
 a dependency of this research backlog. Existing operational publication gates are unchanged.
 
-1. **Automatic rolling backtests.** Extend existing per-event evaluators into a scheduled,
-   resumable comparison of saved Persistence/Optical Flow/Tiny U-Net predictions and later
-   observations. Require identical masks, units, grid and 10–60-minute timestamps; report each
-   lead time and event independently. Record missing targets explicitly. Keep research windows
-   separate from the fixed benchmark, prevent overlap/leakage, and fit normalization on training
-   data only. First deliverable: a reproducible report from archived observations; no public
-   prediction endpoint is required.
-2. **Event replay explorer.** Add an offline/local timeline to inspect saved radar, available
-   QPE/gauges, model outputs and errors. Display source provenance, quality, observation time and
-   CRS; do not overlay incompatible datums or invent a missing QPE/rainfall frame. Use preserved
-   artifacts so replay works when historical URLs disappear.
-3. **Historical archive coverage dashboard.** Summarize expected/captured/checksum-verified/usable
-   frames by day and event, with missing intervals and source errors. Reuse current collection
-   resume/retry logic while recording bounded attempts. Treat HTTP 404 as the tested URL's result,
-   not a documented retention policy. First deliverable: a read-only archive health report.
+- **Rolling backtests** save Persistence and Optical Flow predictions, then score them as radar
+  observations arrive. Reports show results by event and lead time, including missing targets.
+- **Offline event replay** displays archived radar, available QPE and gauge observations, and model
+  errors with source, time, units and quality information.
+- **Archive coverage reports** show expected, captured, checksum-verified and usable frames by
+  event and day, along with missing intervals and recorded source failures.
 
-Rolling backtests are the first priority because they continuously test the existing baselines
-against observable outcomes. Reusing archived predictions and reports then gives replay and
-coverage views a common evidence source. This section does not authorize automatic changes to
-the formal split or operational readiness.
+Next, feed newly collected radar frames into rolling backtests and use multiple independent events
+to compare the two baselines by lead time. Track which targets are missing alongside the scores.
+Keep these research windows separate from the fixed benchmark.
 
 ## Milestone 1: Stabilize Live Data Ingestion
 

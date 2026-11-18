@@ -6,18 +6,15 @@ deployment hosts, and unpublished evidence stay outside public issues. Keep task
 finish, test, and propose through a focused pull request. The end-to-end target is defined in
 [completion_plan.md](completion_plan.md).
 
-The public backlog below mirrors open GitHub Issues only; completed work remains in the historical
-record below and in closed issues.
+Completed work is recorded below and in closed issues.
 
 ## Public backlog
 
-- [#59 — Offline event replay explorer](https://github.com/KageRyo/MinxiongHydroCast/issues/59): available in v0.1.8; [offline export and demo](event_replay.md).
-- [#60 — Historical archive coverage](https://github.com/KageRyo/MinxiongHydroCast/issues/60): available in v0.1.8; [reports and offline view](archive_coverage.md).
+See the [open GitHub Issues](https://github.com/KageRyo/MinxiongHydroCast/issues?q=is%3Aissue+is%3Aopen).
 
-The feature issues use enhancement, area and priority labels. The initial #58 rolling-backtest
-engine is available in v0.1.8; see the [CLI and storage contract](rolling_backtests.md).
-Issues #30 and #31 are closed. Historical curated-review items below remain a separate track and do not
-make unavailable human labels a prerequisite for label-free research.
+The v0.1.8 research workflows are complete. Start with the guides for
+[rolling backtests](rolling_backtests.md), [offline replay](event_replay.md), or
+[archive coverage](archive_coverage.md).
 
 ## Active
 
@@ -99,6 +96,9 @@ make unavailable human labels a prerequisite for label-free research.
       external archival were confirmed.
 
 ## Next
+
+- [ ] Feed newly collected radar frames into rolling backtests and compare Persistence and Optical
+      Flow across multiple events. Record scored and missing targets by lead time.
 
 The [2026-10-15 acceptance record](dataset_acceptance.md) separates verified source reconstruction
 from remaining event review, historical validation, rights, and archival release evidence. Use
