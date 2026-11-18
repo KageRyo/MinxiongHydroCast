@@ -62,13 +62,14 @@ Windows 的虛擬環境啟用方式為 `.venv\Scripts\Activate.ps1`。
 安裝套件後，可以用合成雷達資料試看事件回放和歷史資料覆蓋率。這兩個指令都不需要 API key。
 
 ```bash
-mhc event replay --demo --output hydrocast-replay.html
-mhc data archive-coverage --demo --format html --output hydrocast-coverage.html
+demo_dir=$(python -c 'from tempfile import mkdtemp; print(mkdtemp(prefix="hydrocast-demo-"))')
+mhc event replay --demo --output "$demo_dir/hydrocast-replay.html"
+mhc data archive-coverage --demo --format html --output "$demo_dir/hydrocast-coverage.html"
+printf '%s\n' "$demo_dir"
 ```
 
-用瀏覽器直接開啟兩個 HTML 檔案。事件回放可以逐格查看雷達影像和預報誤差，
+在指令顯示的暫存目錄裡，用瀏覽器開啟兩個 HTML 檔案。事件回放可以逐格查看雷達影像和預報誤差，
 覆蓋率報表則會標出哪些時段有可用資料、哪些已確認缺測、哪些還待查。
-重跑時請換個輸出檔名。
 
 ## 下一步
 
