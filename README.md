@@ -301,7 +301,8 @@ or flood annotations.
 
 Rolling backtests come first: they turn the current one-off event evaluations into repeatable
 evidence as new observations arrive. Proposed research windows remain separate from the fixed
-benchmark; normalization uses training data only. See the [feature scope](docs/roadmap.md#next-features-without-manual-annotations).
+benchmark; normalization uses training data only. See the
+[research workflows and next steps](docs/roadmap.md#label-free-research-workflows).
 
 See [CHANGELOG.md](https://github.com/KageRyo/MinxiongHydroCast/blob/main/CHANGELOG.md), the
 [v0.1.10 release notes](https://github.com/KageRyo/MinxiongHydroCast/blob/main/docs/releases/v0.1.10.md),
