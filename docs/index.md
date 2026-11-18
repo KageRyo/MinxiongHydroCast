@@ -22,8 +22,9 @@ lang: zh-Hant
 
 ## 證據與限制
 
-[部署紀錄](deployment_status.md)保存 2026-07-29 的歷史驗證與 2026-09-12 的
-WRA 資料時效事件；這些紀錄不能代表今天的服務健康。
+2026-10-15 的[部署驗證](deployment_status.md#verification-update-2026-10-15)記錄了當時的觀測結果。
+當下的 API 健康且資料就緒，但 192 小時的觀察期內，收集成功率和資料就緒率都低於門檻，
+資料就緒的最長空檔為 20 小時。
 [五事件模型評估](baseline_results.md#reproducible-five-event-cwa-baseline)顯示
 Tiny U-Net 改善 RMSE，但部分 CSI 與預報時距退步，預報發布仍受阻擋。
 
