@@ -14,7 +14,7 @@ API 是 localhost 觀測服務的一部分，與公開靜態文件站分開。�
 | `/healthz` | 程序存活，`{"status":"ok"}` |
 | `/readyz` | 完整資料狀態；未就緒時 HTTP 503 |
 | `/metrics` | Prometheus 文字格式的狀態、時效與重試指標 |
-| `/api/v1/status` | 最近快照、最近嘗試、各來源品質與時效 |
+| `/api/v1/status` | 最新快照、最近一次收集嘗試，以及各來源的品質與時效 |
 | `/api/v1/official-alerts/rainfall` | 官方降雨警戒與來源資訊 |
 | `/api/v1/observations/rain-gauges` | 雨量站觀測 |
 | `/api/v1/observations/flood-sensors` | 淹水深度觀測 |
@@ -60,12 +60,12 @@ HTTP 200 在這裡代表成功取得「預報不可用」的狀態，並非預�
 | `/healthz` 回傳 200 | 程序存活；仍須檢查 `/readyz` |
 | `/readyz` 回傳 503 | 讀取 JSON 的 `state`、`failure_reason` 與 `datasets` 判斷原因 |
 | `mode=demo` | 合成資料；不能用於目前天氣或正式預報 |
-| 資料健康狀態 `stale` | 觀測時間超過新鮮度上限；新的抓取時間不能使舊觀測變新 |
+| 資料健康狀態 `stale` | 觀測已超過資料時效門檻。重新抓取後，仍用原本的觀測時間判斷時效。 |
 | `degraded` 或 `upstream_unhealthy` | 來源降級或上游異常；檢查來源與原因，不以舊資料滿足 readiness |
 | `coverage_missing` | 區域覆蓋不足；資料筆數多不等於民雄有可用觀測 |
 | `collector_error` | 最近蒐集失敗；即使保留舊快照也不能解讀為最新成功 |
 | `storage_error` | 指標、快照或校驗失敗；依[事件處理](incident_response.md)調查 |
-| 官方警戒 `outcome=empty` 且 `records=[]` | 已驗證的空官方警戒產品；不是缺失資料，也不保證沒有淹水 |
+| 官方警戒 `outcome=empty` 且 `records=[]` | 官方警戒清單已通過驗證，當次沒有警戒紀錄。是否淹水要另看觀測資料。 |
 | HTTP 503，`error="dataset unavailable"` | 該資料產品無法讀取；不能當成健康的空警戒 |
 | HTTP 404，`error="not found"` | 路徑不存在；確認使用 `/api/v1/` 的已列出端點 |
 
@@ -75,9 +75,9 @@ Readiness 的頂層狀態可能是 `unhealthy`，而個別資料產品的原因�
 ## 來源與時間
 
 `source` 記錄發布者、資料集 ID、抓取時間、來源型態、結果及校驗資訊。
-`health.observed_at` 是觀測時間，`health.age_minutes` 是資料年齡，
-`health.max_age_minutes` 是該來源的新鮮度門檻。`generated_at` 是產品產生時間，
-不能代替觀測時間。[WRA 時效事件](wra_freshness_evidence.md)提供實際案例。
+`health.observed_at` 是觀測時間，`health.age_minutes` 表示距觀測已過幾分鐘，
+`health.max_age_minutes` 是該來源的資料時效上限。`generated_at` 記錄產品何時產生，
+判讀觀測時效仍以 `health.observed_at` 為準。[WRA 時效事件](wra_freshness_evidence.md)提供實際案例。
 
 ## 預報與通知
 
@@ -85,5 +85,5 @@ Readiness 的頂層狀態可能是 `unhealthy`，而個別資料產品的原因�
 `shadow_gate_passed`、`notification_allowed`、模型評估與人工決策各有獨立條件。
 詳見[操作指南](operational_use.md#production-gates)與[決策權責](decision_authority.md)。
 
-服務預設綁定 `127.0.0.1`。對外提供 API 前須完成既有的身份驗證、TLS、維運與
+服務預設綁定 `127.0.0.1`。對外提供 API 前須完成既有的身分驗證、TLS、維運與
 資料使用條件；公開文件站不會改變這些條件。

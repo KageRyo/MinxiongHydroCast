@@ -4,8 +4,8 @@ lang: zh-Hant
 
 # 快速開始
 
-MinxiongHydroCast 整理民雄／嘉義的官方水文氣象觀測，並提供可重現的降雨臨近預報
-研究流程。先用合成資料示範了解介面與狀態，再決定是否設定官方資料來源。
+MinxiongHydroCast 整理民雄與嘉義的官方水文氣象觀測，提供可重現的降雨臨近預報研究流程。
+你可以先用合成資料試看本機介面，確認怎麼判讀資料是否就緒，再決定要不要設定官方資料來源。
 
 ## 使用 Docker 示範
 
@@ -55,7 +55,7 @@ mhc serve --host 127.0.0.1 --port 8080
 ```
 
 Windows 的虛擬環境啟用方式為 `.venv\Scripts\Activate.ps1`。
-預設資料會留在忽略的本機資料目錄；API 以唯讀方式讀取觀測快照。
+資料預設存在 Git 忽略的本機目錄。API 只讀取觀測快照。
 
 ## 試跑離線研究工具
 
@@ -68,12 +68,12 @@ mhc data archive-coverage --demo --format html --output "$demo_dir/hydrocast-cov
 printf '%s\n' "$demo_dir"
 ```
 
-在指令顯示的暫存目錄裡，用瀏覽器開啟兩個 HTML 檔案。事件回放可以逐格查看雷達影像和預報誤差，
-覆蓋率報表則會標出哪些時段有可用資料、哪些已確認缺測、哪些還待查。
+到終端機印出的暫存目錄，用瀏覽器開啟兩個 HTML 檔。事件回放可逐格查看雷達影像和預報誤差。
+覆蓋率報表會列出有可用資料、已確認缺測和待查的時段。
 
 ## 下一步
 
 - 使用官方觀測：[操作指南](operational_use.md)與[單機部署](single_host_operations.md)。
 - 重現模型研究：[資料資產](data_assets.md)、[事件切分](event_splits.md)與[基準結果](baseline_results.md)。
 - 修改程式或文件：[貢獻入口](contributing.md)。
-- 確認可以與不可以宣稱的能力：[專案範圍](project_scope.md)與[模型卡](model_cards/minxiong_chiayi_baseline.md)。
+- 查看專案用途和模型限制，請見[專案範圍](project_scope.md)與[模型卡](model_cards/minxiong_chiayi_baseline.md)。

@@ -7,8 +7,8 @@ lang: zh-Hant
 網站使用 MkDocs 1.6.1，把現有 Markdown 建置成靜態頁面。
 公開網站不會呼叫 localhost API，也不使用私人觀測快照。
 
-`requirements-docs.txt` 適用本機開發；CI 使用 `requirements-docs.lock` 鎖定全部依賴與
-SHA-256，並只安裝 wheels。此鎖檔對應 Python 3.13 / Linux x86_64。
+本機開發使用 `requirements-docs.txt`。CI 用 `requirements-docs.lock` 鎖定所有相依套件及 SHA-256，
+只安裝 wheel 套件。這份鎖定檔對應 Linux x86_64 上的 Python 3.13。
 
 ## 本機建置
 
@@ -44,8 +44,8 @@ python -m mkdocs serve --dev-addr 127.0.0.1:8000
 
 ## 驗證與發布
 
-PR 必須通過嚴格建置及產生後的本機連結、圖片、錨點檢查。
-檢查只讀取建置產物，不請求外部網站。
+每個 PR 都須通過嚴格建置。接著從建置結果檢查本機連結、圖片和錨點。
+這些檢查只讀取建置產物。
 新頁面應另檢查手機寬度、鍵盤操作、搜尋與日期／資料來源說明。
 
 GitHub Pages 的來源設定為 **GitHub Actions**。合併到 `main` 後，文件工作流程會

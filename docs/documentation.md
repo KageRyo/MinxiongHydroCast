@@ -3,8 +3,8 @@
 The README is the project overview. This index routes implementation, operations, data assets, and
 governance details without duplicating changing deployment numbers.
 
-從[快速開始](getting_started.md)體驗合成資料示範，或依任務選擇下方的技術文件。
-公開網站不提供即時觀測；[部署狀態](deployment_status.md)中的數字皆為註明日期的歷史證據。
+想試用，可以從[快速開始](getting_started.md)跑一次合成資料示範。技術文件按用途列在下方。
+公開網站只提供文件和示範，[部署狀態](deployment_status.md)的數字都附上當時的觀測日期。
 
 - 操作服務：[API 與狀態判讀](api_reference.md)。
 - 開發貢獻：[貢獻入口](contributing.md)與[文件站開發](site_development.md)。
