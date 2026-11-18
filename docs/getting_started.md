@@ -55,7 +55,7 @@ mhc serve --host 127.0.0.1 --port 8080
 ```
 
 Windows 的虛擬環境啟用方式為 `.venv\Scripts\Activate.ps1`。
-資料預設存在 Git 忽略的本機目錄。API 只讀取觀測快照。
+資料預設存在 Git 忽略的本機目錄。API 以唯讀方式存取觀測快照。
 
 ## 試跑離線研究工具
 
