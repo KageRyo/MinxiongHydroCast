@@ -8,8 +8,10 @@ or flood annotations. This command is available in software v0.1.8 and later
 
 ## Input and storage contract
 
-Use an external data root and a versioned manifest with this structure (replace the paths, byte
-counts and SHA-256 placeholders with the collector's recorded values):
+Use an external data root and a versioned manifest. If `mhc event discover` already populated the
+data root, [generate the manifest from its catalog](#export-from-event-discovery). To supply your
+own manifest, replace the paths, byte counts and SHA-256 placeholders below with the collector's
+recorded values.
 
 The manifest file itself must also remain inside `--root`, including after resolving symlinks.
 An absolute manifest path is accepted within that root; a relative manifest path is relative to
@@ -72,11 +74,29 @@ atomic_write_bytes(layout.root / "backtest_manifest.json",
                    canonical_json_bytes(manifest.model_dump(mode="json")))
 ```
 
-Verify the producer catalog/collection through its existing integrity workflow before exporting;
-the exporter does not authenticate historical acquisition. Do not execute this example against a
-catalog with machine paths from a different, unmigrated root. For continuous ingestion, the
-producer must update this manifest after new captures; installing the timer alone does not create
-new observations or an ingestion integration.
+Verify the dataset catalog and collections through their existing integrity workflow before using
+this example. Run it against the original data root or a root relocated with the project tooling.
+
+## Export from event discovery
+
+```bash
+mhc model backtest-manifest \
+  --root /external/hydrocast-data \
+  --since 2026-10-21T00:00:00+08:00 \
+  --output backtests/inputs/discovery.json
+```
+
+Use `--since` to select candidates by first trigger time. Add an exclusive `--until` to limit a
+historical run. When two candidate windows overlap, the earlier window takes precedence. The
+command reports how many windows overlapped or lacked captured frames. Open windows with saved
+frames are eligible, and weather or flood labels are optional for this research.
+
+The command verifies collection metadata and copies recorded radar checksums into the manifest.
+Rolling backtests verify the radar files before using them. Run the export again after new
+captures arrive. If a catalog update removes or changes a previously exported frame, the command
+reports the conflict and preserves the existing manifest. Use a new output file for a different
+event selection. If discovery is replacing collections during the export, the command waits up
+to 30 seconds for discovery to finish and retries the read.
 
 ## Run and resume
 
@@ -145,8 +165,22 @@ MINXIONGHYDROCAST_BACKTEST_MANIFEST=/external/hydrocast-data/backtest_manifest.j
 ```
 
 The timer repeats the one-shot command every 20 minutes with a small delay. The producer must
-supply the manifest and observation updates. Inspect runtime paths, workload and permissions
-before explicitly installing/enabling it; no host timers are changed by tests or a CLI run.
+supply the manifest and observation updates. For the discovery catalog, set
+`MINXIONGHYDROCAST_BACKTEST_SINCE` to the timezone-aware first-trigger cutoff in the same
+environment file and point `MINXIONGHYDROCAST_BACKTEST_MANIFEST` at
+`<root>/backtests/inputs/discovery.json`. Add this service drop-in to refresh the manifest
+immediately before each backtest:
+
+```ini
+[Service]
+ExecStartPre=%h/.local/share/minxiong-hydrocast/venv/bin/mhc model backtest-manifest \
+  --root ${MINXIONGHYDROCAST_DATA_ROOT} \
+  --since ${MINXIONGHYDROCAST_BACKTEST_SINCE} \
+  --output ${MINXIONGHYDROCAST_BACKTEST_MANIFEST}
+```
+
+The discovery timer collects the radar frames separately. If the export fails, systemd skips
+the backtest for that invocation. Check the export and data-root paths before enabling the timer.
 
 ## Verification and boundary
 

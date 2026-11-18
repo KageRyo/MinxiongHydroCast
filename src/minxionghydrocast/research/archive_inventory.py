@@ -7,13 +7,17 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from minxionghydrocast.ingestion.cwa_event_collector import CwaEventCollection
-from minxionghydrocast.io.data_store import DataLayout, sha256_file
+from minxionghydrocast.io.data_store import DataLayout
 from minxionghydrocast.models.archive_coverage import ArchiveInventory, CoverageEntry, CoverageFrame, SourceAttempt
 from minxionghydrocast.models.dataset_schemas import ArtifactRecord, DatasetCatalog, RadarDatasetManifest
 from minxionghydrocast.models.event_evidence_schemas import EventEvidenceCatalog
 from minxionghydrocast.research.replay_io import FAILURES, contained
 
 INVENTORY_ERROR = 'archive inventory unavailable or invalid'
+
+
+class MetadataIntegrityError(ValueError):
+    """A metadata file differs from the catalog's checksummed reference."""
 
 
 @dataclass
@@ -26,13 +30,20 @@ class LoadedInventory:
 
 def _metadata(layout: DataLayout, artifact: ArtifactRecord) -> bytes:
     path = layout.resolve_relative(artifact.path)
-    if path.stat().st_size != artifact.bytes or sha256_file(path) != artifact.sha256:
-        raise ValueError('metadata integrity failure')
-    return path.read_bytes()
+    try:
+        if path.stat().st_size != artifact.bytes:
+            raise MetadataIntegrityError('metadata integrity failure')
+        with path.open('rb') as handle:
+            raw = handle.read(artifact.bytes + 1)
+    except FileNotFoundError as exc:
+        raise MetadataIntegrityError('metadata file is missing') from exc
+    if len(raw) != artifact.bytes or hashlib.sha256(raw).hexdigest() != artifact.sha256:
+        raise MetadataIntegrityError('metadata integrity failure')
+    return raw
 
 
-def _frames(layout: DataLayout, collection_ref: ArtifactRecord | None,
-            artifacts: list[ArtifactRecord], event_id: str, data_id: str) -> list[CoverageFrame]:
+def collection_frames(layout: DataLayout, collection_ref: ArtifactRecord | None,
+                      artifacts: list[ArtifactRecord], event_id: str, data_id: str) -> list[CoverageFrame]:
     if collection_ref is None:
         raise ValueError('collection missing')
     collection = CwaEventCollection.model_validate_json(_metadata(layout, collection_ref))
@@ -58,7 +69,7 @@ def _entry(layout: DataLayout, *, event_id: str, data_id: str, start: str, end: 
            artifacts: list[ArtifactRecord], attempts: list[SourceAttempt]) -> tuple[CoverageEntry, str]:
     state = 'verified'
     try:
-        frames = _frames(layout, collection, artifacts, event_id, data_id)
+        frames = collection_frames(layout, collection, artifacts, event_id, data_id)
     except FAILURES:
         state, frames = 'invalid', []
     entry = CoverageEntry.model_validate({'event_id': event_id, 'data_id': data_id,
