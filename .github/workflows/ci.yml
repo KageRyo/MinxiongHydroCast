@@ -60,6 +60,7 @@ jobs:
           src/minxionghydrocast/models/archive_coverage.py
           src/minxionghydrocast/pipelines/archive_coverage.py
           src/minxionghydrocast/models/rolling_backtest.py
+          src/minxionghydrocast/pipelines/backtest_manifest.py
           src/minxionghydrocast/pipelines/backtest_store.py
           src/minxionghydrocast/pipelines/rolling_backtest.py
           src/minxionghydrocast/research

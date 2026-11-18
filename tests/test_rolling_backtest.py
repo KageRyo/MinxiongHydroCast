@@ -1,12 +1,15 @@
 import fcntl
 import hashlib
 import json
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import numpy as np
 import pytest
 
+from minxionghydrocast.cli import main as cli
+from minxionghydrocast.io.data_store import DataLayout, artifact_record
 from minxionghydrocast.models.rolling_backtest import BacktestConfig, BacktestManifest
 from minxionghydrocast.pipelines.rolling_backtest import run_backtest
 
@@ -44,6 +47,146 @@ def config(**changes) -> BacktestConfig:
 
 def run(path, root, **kwargs):
     return run_backtest(manifest_path=path, root=root, config=config(), **kwargs)
+
+
+def discovery_candidate(root, event_id, start, refs):
+    times = [(START + timedelta(minutes=10 * n)).isoformat() for n in range(start, start + 4)]
+    frames = [{
+        "data_time": ref["data_time"], "source_url": "https://example.test/radar",
+        "output_path": str(root / ref["path"]), "bytes_written": ref["bytes"],
+    } for ref in refs]
+    collection = root / f"events/{event_id}.json"
+    collection.parent.mkdir(exist_ok=True)
+    collection.write_text(json.dumps({
+        "event_id": event_id, "data_id": "O-A0059-001", "frame_count": len(frames),
+        "bytes_written": sum(frame["bytes_written"] for frame in frames), "frames": frames,
+    }))
+    layout = DataLayout(root)
+    metric = {"valid_pixel_count": 1, "pixels_ge_threshold": 1, "fraction_ge_threshold": 1.0}
+    return {
+        "candidate_id": event_id, "operational_status": "collecting",
+        "first_trigger_time": times[1], "last_trigger_time": times[1],
+        "window_start_time": times[0], "window_end_time": times[-1],
+        "candidate_labels": ["minxiong_35dbz"],
+        "triggers": [{"data_time": times[1], "source_bytes": 1, "source_sha256": "a" * 64,
+                      "threshold_dbz": 35.0, "local": metric, "taiwan": metric,
+                      "candidate_labels": ["minxiong_35dbz"]}],
+        "radar_collection": {
+            "expected_frame_count": len(times), "captured_frame_count": len(frames),
+            "missing_data_times": [t for t in times if t not in {f["data_time"] for f in frames}],
+            "collection": artifact_record(layout, collection, kind="candidate_radar_collection").model_dump(),
+            "frames": [artifact_record(layout, root / ref["path"], kind="candidate_radar_frame").model_dump()
+                       for ref in refs],
+        },
+    }
+
+
+def discovery_catalog(root, *candidates):
+    path = root / "discovery/event_evidence_catalog.json"
+    path.parent.mkdir(exist_ok=True)
+    path.write_text(json.dumps({
+        "data_root": str(root), "updated_at": START.isoformat(),
+        "config": {}, "cursor": {}, "candidates": candidates,
+    }))
+    return path
+
+
+def export_discovery(root):
+    output = "backtests/inputs/field.json"
+    cli(["model", "backtest-manifest", "--root", str(root), "--since", START.isoformat(),
+         "--output", output])
+    return root / output
+
+
+def test_discovery_export_scores_new_targets_without_replacing_predictions(tmp_path, capsys):
+    root = tmp_path / "external"
+    refs = {index: frame(root, index) for index in (0, 1, 2, 6, 7)}
+    first_candidate = discovery_candidate(root, "first_event", 0, [refs[0], refs[1]])
+    overlap = discovery_candidate(root, "overlap_event", 2, [refs[2]])
+    later = discovery_candidate(root, "later_event", 6, [refs[6], refs[7]])
+    source = discovery_catalog(root, later, overlap, first_candidate)
+    source_before = source.read_bytes()
+    output = export_discovery(root)
+    assert source.read_bytes() == source_before
+    assert "skipped_overlap=1" in capsys.readouterr().out
+    exported = BacktestManifest.model_validate_json(output.read_bytes())
+    assert [event.event_id for event in exported.events] == ["first_event", "later_event"]
+    first_run = run(output, root, max_new_windows=2)
+    assert first_run["counts"]["pending_leads"] == 4
+    forecast = root / first_run["windows"][0]["forecast_path"]
+    saved_forecast = forecast.read_bytes()
+
+    first_candidate = discovery_candidate(root, "first_event", 0, [refs[0], refs[1], refs[2]])
+    discovery_catalog(root, later, overlap, first_candidate)
+    assert export_discovery(root) == output
+    next_run = run(output, root, max_new_windows=0)
+    assert next_run["counts"]["new_scores"] == 1
+    assert next_run["counts"]["pending_leads"] == 3
+    assert forecast.read_bytes() == saved_forecast
+
+
+def test_discovery_export_preserves_previous_manifest_when_metadata_is_invalid(tmp_path):
+    root = tmp_path / "external"
+    candidate = discovery_candidate(root, "first_event", 0, [frame(root, 0), frame(root, 1)])
+    discovery_catalog(root, candidate)
+    output = export_discovery(root)
+    previous = output.read_bytes()
+    (root / "events/first_event.json").write_text("{}")
+    with pytest.raises(SystemExit) as error:
+        export_discovery(root)
+    assert error.value.code == 2
+    assert output.read_bytes() == previous
+
+
+def test_discovery_export_preserves_previous_manifest_when_frame_identity_changes(tmp_path):
+    root = tmp_path / "external"
+    first = frame(root, 0)
+    second = frame(root, 1)
+    discovery_catalog(root, discovery_candidate(root, "first_event", 0, [first, second]))
+    output = export_discovery(root)
+    previous = output.read_bytes()
+    revised = frame(root, 1, [80.0] * 4)
+    discovery_catalog(root, discovery_candidate(root, "first_event", 0, [first, revised]))
+    with pytest.raises(SystemExit) as error:
+        export_discovery(root)
+    assert error.value.code == 2
+    assert output.read_bytes() == previous
+
+
+@pytest.mark.parametrize("metadata_removed", [False, True])
+def test_discovery_export_retries_a_collection_updated_before_its_catalog(tmp_path, metadata_removed):
+    root = tmp_path / "external"
+    refs = [frame(root, index) for index in range(3)]
+    first = discovery_candidate(root, "first_event", 0, refs[:2])
+    discovery_catalog(root, first)
+    output = export_discovery(root)
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        with DataLayout(root).event_discovery_lock():
+            if metadata_removed:
+                (root / "events/first_event.json").unlink()
+            else:
+                updated = discovery_candidate(root, "first_event", 0, refs)
+            result = executor.submit(export_discovery, root)
+            with pytest.raises(TimeoutError):
+                result.result(timeout=0.15)
+            if metadata_removed:
+                updated = discovery_candidate(root, "first_event", 0, refs)
+            discovery_catalog(root, updated)
+        assert result.result(timeout=5) == output
+    manifest_after_update = BacktestManifest.model_validate_json(output.read_bytes())
+    assert len(manifest_after_update.events[0].frames) == 3
+
+
+def test_discovery_export_does_not_create_a_lock_outside_the_data_root(tmp_path):
+    root = tmp_path / "external"
+    store = root / "backtests"
+    store.mkdir(parents=True)
+    outside = tmp_path / "outside.lock"
+    (store / ".lock").symlink_to(outside)
+    with pytest.raises(SystemExit) as error:
+        export_discovery(root)
+    assert error.value.code == 2
+    assert not outside.exists()
 
 
 def test_pending_targets_arrive_without_changing_saved_predictions(tmp_path):
