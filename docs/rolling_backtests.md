@@ -79,6 +79,8 @@ this example. Run it against the original data root or a root relocated with the
 
 ## Export from event discovery
 
+The `mhc model backtest-manifest` command is available in software v0.1.11 and later.
+
 ```bash
 mhc model backtest-manifest \
   --root /external/hydrocast-data \
@@ -133,7 +135,8 @@ All outputs stay under `<root>/backtests/`:
 
 - `<configuration-id>/<event>/<origin>/forecast.npz` and `forecast.json`: prediction arrays,
   latest-input valid mask and the checksummed commit record containing code/config/input/grid
-  provenance. Models, parameters, NumPy version and source-code digests isolate configurations.
+  provenance. Models, parameters, package and NumPy versions, and source-code digests isolate
+  configurations.
 - `.../scores/<lead>.json`: immutable checksum envelopes binding the forecast hash, target
   identity and per-model RMSE/MAE/CSI/POD/FAR. Both models use the same intersection of valid
   input, target and prediction pixels. All-invalid leads are excluded, not assigned zero error.
