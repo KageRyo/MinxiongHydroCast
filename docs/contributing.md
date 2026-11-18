@@ -4,7 +4,7 @@ lang: zh-Hant
 
 # 開發與貢獻
 
-適合從合成範例、資料來源契約測試、區域設定或文件改善開始。
+第一次貢獻，可以先跑合成範例、補資料來源的契約測試、調整區域設定，或修改文件。
 完整開發設定與 PR 規範見 [CONTRIBUTING](https://github.com/KageRyo/MinxiongHydroCast/blob/main/CONTRIBUTING.md)。
 
 ## 選擇工作
@@ -21,6 +21,5 @@ lang: zh-Hant
 提交訊息遵循 [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)，
 例如 `docs: clarify observation freshness` 或 `feat(docs): add project homepage`。
 
-請使用合成 fixtures 測試；官方原始資料、API key、部署路徑、私人事件審查紀錄與
-模型權重不應加入 PR。程式授權與第三方資料的再散布權利是不同問題，請參閱
-[資料來源登錄](data_source_register.md)。
+請用合成測試資料。PR 裡請勿放入官方原始資料、API key、部署路徑、私人事件審查紀錄或模型權重。
+程式授權與第三方資料再散布各有規範，資料的再散布條件請見[資料來源登錄](data_source_register.md)。
