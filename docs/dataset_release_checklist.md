@@ -7,7 +7,6 @@ No human annotations are available. The deliverable is the label-free radar data
 protocol described in the [protocol scope](v0.2_dataset_protocol.md#label-free-scope-corrected-2026-10-20).
 Future observed radar frames provide the targets. Named human weather/flood labels and complete
 QPE coverage are not prerequisites for this protocol publication; their absence must be disclosed.
-This corrects the earlier requirement rather than claiming the missing evidence was collected.
 
 The [protocol release](https://github.com/KageRyo/MinxiongHydroCast/releases/tag/dataset-protocol-v0.2.0)
 was published on 2026-10-20. Its five assets and all 263 archive members were verified after

@@ -1,7 +1,8 @@
 # Radar Tensor Conversion
 
 MinxiongHydroCast uses a tiny tracked radar-like fixture to test model tensor I/O before real radar
-archives are confirmed. This is a dry-run format, not a claim about CWA native radar files.
+archives are confirmed. The fixture uses a dry-run format; the CWA native radar format still
+needs to be checked against real archives.
 
 ## Fixture
 
