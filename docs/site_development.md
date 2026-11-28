@@ -52,5 +52,5 @@ GitHub Pages 的來源設定為 **GitHub Actions**。合併到 `main` 後，文�
 發布建置產物；PR 不會部署。手動發布也僅允許 `main`。
 生成的 `site/`、主題來源 `docs/theme/` 與內部規劃 `docs/superpowers/` 不發布為文件內容。
 
-部署證據是歷史紀錄。更新網站內容不等於驗證私人服務現況；維運數字必須附觀測日期，
-並依[部署狀態](deployment_status.md)的記錄政策處理。
+部署證據是歷史紀錄。維運數字必須附觀測日期；描述私人服務現況前，
+先依[部署狀態](deployment_status.md)的記錄政策重新查證。

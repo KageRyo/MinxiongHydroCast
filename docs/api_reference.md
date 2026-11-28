@@ -46,7 +46,7 @@ curl --silent http://127.0.0.1:8080/api/v1/experimental-forecasts
 }
 ```
 
-HTTP 200 在這裡代表成功取得「預報不可用」的狀態，並非預報已經發布。
+HTTP 200 表示成功讀取端點狀態；預報是否可用，請看回應的 `available` 欄位。
 
 資料端點包含 `schema_version`、`snapshot_id`、`generated_at`、`mode`、`dataset`、
 `product_type`、`notice`、`health`、`source`、`row_count` 與 `records`。
@@ -62,8 +62,8 @@ HTTP 200 在這裡代表成功取得「預報不可用」的狀態，並非預�
 | `mode=demo` | 合成資料；不能用於目前天氣或正式預報 |
 | 資料健康狀態 `stale` | 觀測已超過資料時效門檻。重新抓取後，仍用原本的觀測時間判斷時效。 |
 | `degraded` 或 `upstream_unhealthy` | 來源降級或上游異常；檢查來源與原因，不以舊資料滿足 readiness |
-| `coverage_missing` | 區域覆蓋不足；資料筆數多不等於民雄有可用觀測 |
-| `collector_error` | 最近蒐集失敗；即使保留舊快照也不能解讀為最新成功 |
+| `coverage_missing` | 民雄範圍內的可用觀測不足，與總資料筆數無關 |
+| `collector_error` | 最近一次蒐集失敗；若仍讀得到快照，那是先前成功蒐集的資料 |
 | `storage_error` | 指標、快照或校驗失敗；依[事件處理](incident_response.md)調查 |
 | 官方警戒 `outcome=empty` 且 `records=[]` | 官方警戒清單已通過驗證，當次沒有警戒紀錄。是否淹水要另看觀測資料。 |
 | HTTP 503，`error="dataset unavailable"` | 該資料產品無法讀取；不能當成健康的空警戒 |

@@ -25,8 +25,8 @@ local flood-risk methods without presenting experimental output as public guidan
 - NowcastNet adapter and migration evaluation.
 - Flood-risk feature engineering and label auditing.
 
-Experimental capability does not imply operational availability. `/api/v1/experimental-forecasts`
-must remain unavailable until its data, model, shadow, and communication gates pass.
+`/api/v1/experimental-forecasts` stays unavailable until its data, model, shadow, and
+communication gates pass.
 
 ## Non-goals
 

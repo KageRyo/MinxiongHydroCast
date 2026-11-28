@@ -32,7 +32,7 @@ MHC_DEMO_PORT=18080 docker compose up --build
 | --- | --- | --- |
 | `/healthz` | HTTP 200 | API 程序可以回應 |
 | `/readyz` | HTTP 503，`ready=false` | 合成資料不能滿足正式資料就緒條件 |
-| 觀測資料 | `mode=demo` | 介面展示用，不代表目前天氣 |
+| 觀測資料 | `mode=demo` | 介面展示用的合成觀測資料 |
 | 預報端點 | `available=false` | 模型與 shadow 條件尚未全部通過 |
 
 示範的 503 是預期行為；不能因此把資料新鮮度或模型門檻調低。
